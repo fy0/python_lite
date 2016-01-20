@@ -42,25 +42,35 @@ typedef enum TokenKind {
 
 } TokenKind;
 
-
 typedef union TokenInfo {
     uint32_t i32;
     float f32;
 } TokenInfo;
 
 typedef struct Token {
-    uint32_t token;
+    uint32_t val;
     TokenInfo info;
 } Token;
+
+typedef struct IndentInfo {
+    struct IndentInfo *prev;
+    int val;
+} IndentInfo;
 
 typedef struct LexState {
     int linenumber;
     Token token; /* current token */
-    uint32_t current;
+    uint32_t current; /* current character */
     FileReader* fr;
+
+    int current_indent;
+    IndentInfo *indent; /* indent stack */
+    IndentInfo *indent_used;
 } LexState;
 
 void pyltL_init(LexState *ls, FileReader *fr);
 void pyltL_next(LexState *ls);
+
+const char* pyltL_get_token_name(uint32_t token);
 
 #endif
