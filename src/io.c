@@ -15,6 +15,14 @@ uint32_t fr_getc_u8(FileReader* fr) {
     return code;
 }
 
+uint8_t* fr_savepos(FileReader* fr) {
+    return fr->p;
+}
+
+void fr_loadpos(FileReader* fr, uint8_t *pos) {
+    fr->p = pos;
+}
+
 char* read_file(const char* fn, int *psize) {
     int size;
     char* buf;

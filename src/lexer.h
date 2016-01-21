@@ -10,6 +10,7 @@
 typedef enum TokenKind {
     // Common
     TK_END = FIRST_TOKEN,
+    TK_ERR,
     TK_COMMENTS,
     TK_NEWLINE,
     TK_INDENT,
@@ -38,7 +39,7 @@ typedef enum TokenKind {
     // &=      |=      ^=      >>=     <<=     **=
     TK_DE_RET_TYPE,
     TK_DE_PLUS_EQ, TK_DE_MINUS_EQ, TK_DE_MUL_EQ, TK_DE_DIV_EQ, TK_DE_FLOORDIV_EQ, TK_DE_MOD_EQ, TK_DE_MATMUL_EQ,
-    TK_DE_BITAND_EQ, TK_DE_BITOR_EQ, TK_DE_XOR_EQ, TK_DE_RSHIFT_EQ, TK_DE_LSHIFT_EQ, TK_DE_POW_EQ,
+    TK_DE_BITAND_EQ, TK_DE_BITOR_EQ, TK_DE_BITXOR_EQ, TK_DE_RSHIFT_EQ, TK_DE_LSHIFT_EQ, TK_DE_POW_EQ,
 
 } TokenKind;
 

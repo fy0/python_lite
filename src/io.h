@@ -18,6 +18,8 @@ typedef struct FileReader {
 
 FileReader* fr_init(uint8_t *buf, int size);
 uint32_t fr_getc_u8(FileReader* fr);
+uint8_t* fr_savepos(FileReader* fr);
+void fr_loadpos(FileReader* fr, uint8_t *pos);
 
 char* read_file(const char* fn, int *psize);
 
