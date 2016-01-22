@@ -45,7 +45,7 @@ typedef enum TokenKind {
 
 typedef union TokenInfo {
     uint32_t i32;
-    float f32;
+    double f64;
 } TokenInfo;
 
 typedef struct Token {

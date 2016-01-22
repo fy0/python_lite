@@ -20,7 +20,18 @@ int main(int argc,char* argv[])
     for (;;) {
         pyltL_next(&ls);
         if (ls.token.val < FIRST_TOKEN) printf("[%d] %c\n", ls.linenumber, ls.token.val);
-        else printf("[%d] %s\n", ls.linenumber, pyltL_get_token_name(ls.token.val));
+        else {
+            switch (ls.token.val) {
+            case TK_INT:
+                printf("[%d] %s: %d\n", ls.linenumber, pyltL_get_token_name(ls.token.val), ls.token.info.i32);
+                break;
+            case TK_FLOAT:
+                printf("[%d] %s: %f\n", ls.linenumber, pyltL_get_token_name(ls.token.val), ls.token.info.f64);
+                break;
+            default:
+                printf("[%d] %s\n", ls.linenumber, pyltL_get_token_name(ls.token.val));
+            }
+        }
         if (ls.token.val == TK_END) break;
     }
 

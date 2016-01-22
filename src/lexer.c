@@ -111,6 +111,161 @@ uint32_t get_token_2(LexState *ls, uint32_t next_eq_token) {
     return default_token;
 }
 
+_INLINE static
+uint8_t _hex(uint32_t code)
+{
+    if (code >= '0' && code <= '9')
+        return code - '0';
+    else if (code >= 'A' && code <= 'F')
+        return code - 'A' + 10;
+    else if (code >= 'a' && code <= 'f')
+        return code - 'a' + 10;
+    return 255;
+}
+
+_INLINE static
+uint8_t _oct(uint32_t code)
+{
+    if (code >= '0' && code <= '7')
+        return code - '0';
+    return 255;
+}
+
+_INLINE static
+uint8_t _bin(uint32_t code)
+{
+    if (code >= '0' && code <= '1')
+        return code - '0';
+    return 255;
+}
+
+_INLINE static
+uint8_t _dec(uint32_t code)
+{
+    if (code >= '0' && code <= '9')
+        return code - '0';
+    return 255;
+}
+
+int _read_x_int(LexState *ls, int n, uint8_t(*func)(uint32_t code)) {
+    int ret = 0;
+    int pos = -1, val, i;
+    uint8_t tmp;
+    uint8_t num[30];
+
+    while (true) {
+        tmp = (*func)(ls->current);
+        if (tmp == 255) break;
+        num[++pos] = tmp;
+        get_next_ch(ls);
+    }
+
+    if (pos == -1) {
+        return -1;
+    }
+
+    i = 0;
+    val = (int)pow(n, pos);
+    do {
+        ret += num[i++] * val;
+        val /= n;
+    } while (pos-- > 0);
+
+    return ret;
+}
+
+double _read_x_float(LexState *ls, uint8_t(*func)(uint32_t code)) {
+    int ret = 0;
+    int pos = -1, val, i, max;
+    uint8_t tmp;
+    uint8_t num[30];
+
+    while (true) {
+        tmp = (*func)(ls->current);
+        if (tmp == 255) break;
+        num[++pos] = tmp;
+        get_next_ch(ls);
+    }
+
+    if (pos == -1) {
+        return -1;
+    }
+
+    i = 0;
+    max = val = (int)pow(10, pos);
+    do {
+        ret += num[i++] * val;
+        val /= 10;
+    } while (pos-- > 0);
+
+    return ret / (double)(max * 10);
+}
+
+void read_escape_number(LexState *ls) {
+    int tmp;
+
+    switch (ls->current) {
+    case 'x': case 'X':
+        get_next_ch(ls);
+        tmp = _read_x_int(ls, 16, &_hex);
+        if (tmp == -1) ls->token.val = TK_ERR;
+        else {
+            ls->token.val = TK_INT;
+            ls->token.info.i32 = tmp;
+        }
+        break;
+    case 'b': case 'B':
+        get_next_ch(ls);
+        tmp = _read_x_int(ls, 2, &_bin);
+        if (tmp == -1) ls->token.val = TK_ERR;
+        else {
+            ls->token.val = TK_INT;
+            ls->token.info.i32 = tmp;
+        }
+        break;
+    case 'o': case 'O':
+        get_next_ch(ls);
+        tmp = _read_x_int(ls, 8, &_oct);
+        if (tmp == -1) ls->token.val = TK_ERR;
+        else {
+            ls->token.val = TK_INT;
+            ls->token.info.i32 = tmp;
+        }
+        break;
+    default:
+        ls->token.val = TK_ERR;
+        break;
+    }
+}
+
+void read_number(LexState *ls){
+    int a = _read_x_int(ls, 10, &_dec);
+    double b;
+
+    if (a != -1) {
+        if (ls->current == '.') {
+            get_next_ch(ls);
+            b = _read_x_float(ls, &_dec);
+            if (b == -1) {
+                ls->token.val = TK_ERR;
+                return;
+            }
+            ls->token.val = TK_FLOAT;
+            ls->token.info.f64 = a + b;
+            return;
+        } else {
+            ls->token.val = TK_INT;
+            ls->token.info.i32 = (int)a;
+            return;
+        }
+    }
+
+    ls->token.val = TK_ERR;
+    return;
+}
+
+#define lex_isspace(c) (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == 0)
+
 
 void pyltL_next(LexState *ls)
 {
@@ -245,10 +400,19 @@ indent_end:
         case '!':
             ls->token.val = get_token_if_match(ls, "!=", 2, TK_OP_NE);
             return;
+        case '0':
+            get_next_ch(ls);
+            if (lex_isspace(ls->current)) {
+                ls->token.val = TK_INT;
+                ls->token.info.i32 = 0;
+            } else {
+                read_escape_number(ls);
+                return;
+            }
+            break;
         case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9':
-            ls->token.val = TK_INT;
-            get_next_ch(ls);
+            read_number(ls);
             return;
         default:
             ls->token.val = TK_END;
