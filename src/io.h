@@ -10,17 +10,27 @@ typedef struct pylt_FileSystem {
     void(*fs_final);
 } pylt_FileSystem;
 
-typedef struct FileReader {
-    uint8_t *buf;
-    uint8_t *p;
-    int size;
-} FileReader;
-
-FileReader* fr_init(uint8_t *buf, int size);
-uint32_t fr_getc_u8(FileReader* fr);
-uint8_t* fr_savepos(FileReader* fr);
-void fr_loadpos(FileReader* fr, uint8_t *pos);
-
 char* read_file(const char* fn, int *psize);
+
+
+typedef struct StringStream {
+    const uint8_t *buf;
+    const uint8_t *p;
+    int size;
+} StringStream;
+
+typedef struct StringStreamSave {
+    const uint8_t *pos;
+    uint32_t current;
+} StringStreamSave;
+
+StringStream* ss_new(uint8_t *buf, int size);
+void ss_free(StringStream *ss);
+uint32_t ss_nextc(StringStream *ss);
+void ss_savepos(StringStream *ss, StringStreamSave *save, uint32_t current);
+uint32_t ss_loadpos(StringStream* ss, StringStreamSave *save);
+//void ss_moveback();
+//void ss_curpos();
+//void ss_new_from_file(uint8_t *buf);
 
 #endif

@@ -1,27 +1,6 @@
 ﻿
 #include "io.h"
 
-FileReader* fr_init(uint8_t *buf, int size) {
-    FileReader *fr = pylt_realloc(NULL, sizeof(FileReader));
-    fr->buf = buf;
-    fr->p = buf;
-    fr->size = size;
-    return fr;
-}
-
-uint32_t fr_getc_u8(FileReader* fr) {
-    uint32_t code;
-    fr->p = utf8_decode(fr->p, &code);
-    return code;
-}
-
-uint8_t* fr_savepos(FileReader* fr) {
-    return fr->p;
-}
-
-void fr_loadpos(FileReader* fr, uint8_t *pos) {
-    fr->p = pos;
-}
 
 char* read_file(const char* fn, int *psize) {
     int size;
@@ -40,4 +19,33 @@ char* read_file(const char* fn, int *psize) {
         return buf;
     }
     return NULL;
+}
+
+
+StringStream* ss_new(uint8_t *buf, int size) {
+    StringStream *ss = pylt_realloc(NULL, sizeof(StringStream));
+    ss->buf = buf;
+    ss->p = buf;
+    ss->size = size;
+    return ss;
+}
+
+void ss_free(StringStream *ss) {
+    pylt_free(ss);
+}
+
+uint32_t ss_nextc(StringStream* ss) {
+    uint32_t code;
+    ss->p = utf8_decode(ss->p, &code);
+    return code;
+}
+
+void ss_savepos(StringStream *ss, StringStreamSave *save, uint32_t current) {
+    save->pos = ss->p;
+    save->current = current;
+}
+
+uint32_t ss_loadpos(StringStream* ss, StringStreamSave *save) {
+    ss->p = save->pos;
+    return save->current;
 }

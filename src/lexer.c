@@ -27,15 +27,15 @@ const char* pyltL_get_token_name(uint32_t token) {
 }
 
 void get_next_ch(LexState *ls) {
-    ls->current = fr_getc_u8(ls->fr);
+    ls->current = ss_nextc(ls->ss);
 }
 
-void pyltL_init(LexState *ls, FileReader *fr)
+void pyltL_init(LexState *ls, StringStream *ss)
 {
     IndentInfo *idt;
 
     ls->linenumber = 1;
-    ls->fr = fr;
+    ls->ss = ss;
     ls->current_indent = -1;
     
     ls->indent = idt = pylt_realloc(NULL, sizeof(IndentInfo));
@@ -68,15 +68,14 @@ int get_token_every_match(LexState *ls, const char *s, int len, ...) {
 }
 
 uint32_t get_token_if_match(LexState *ls, const char *s, int len, uint32_t token) {
-    uint8_t *pos = fr_savepos(ls->fr);
-    uint32_t ch = ls->current;
+    StringStreamSave save;
+    ss_savepos(ls->ss, &save, ls->current);
 
     for (int i = 0; i < len; i++) {
         if (s[i] == ls->current) {
             get_next_ch(ls);
         } else {
-            fr_loadpos(ls->fr, pos);
-            ls->current = ch;
+            ls->current = ss_loadpos(ls->ss, &save);
             return TK_ERR;
         }
     }
@@ -266,6 +265,91 @@ void read_number(LexState *ls){
 
 #define lex_isspace(c) (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == 0)
 
+uint32_t read_str_or_bytes_head(LexState *ls, bool *is_raw) {
+    StringStreamSave save;
+    ss_savepos(ls->ss, &save, ls->current);
+    uint8_t state = 0; // r1 u2 b4
+
+    for (;;) {
+        switch (ls->current) {
+        case '\'': case '\"':
+            if ((state & 1) && is_raw) *is_raw = true;
+            if (state & 4) return TK_BYTES;
+            else return TK_STRING;
+        case 'r': case 'R':
+            if (state & 1) goto _not_str;
+            state |= 1;
+            get_next_ch(ls);
+            break;
+        case 'u': case 'U':
+            if (state & (2 | 4)) goto _not_str;
+            state |= 2;
+            get_next_ch(ls);
+            break;
+        case 'b': case 'B':
+            if (state & (2 | 4)) goto _not_str;
+            state |= 4;
+            get_next_ch(ls);
+            break;
+        }
+    }
+
+_not_str:
+    ls->current = ss_loadpos(ls->ss, &save);
+    return 0;
+}
+
+bool read_bytes(LexState *ls, bool is_raw) {
+    StringStreamSave save;
+    uint32_t sign = ls->current;
+    bool is_long_string_or_bytes = false;
+
+    get_next_ch(ls);
+    ss_savepos(ls->ss, &save, ls->current);
+
+    // long string/bytes check: ''' or """
+    if (ls->current == sign) {
+        get_next_ch(ls);
+        if (ls->current == sign) {
+            get_next_ch(ls);
+            is_long_string_or_bytes = true;
+        }
+    }
+
+    if (!is_long_string_or_bytes) {
+        ls->current = ss_loadpos(ls->ss, &save);
+    }
+
+    for (;;) {
+        switch (ls->current) {
+        case '\'': case '"':
+            if (ls->current == sign) {
+                if (is_long_string_or_bytes);
+                else {
+                    ls->token.val = TK_BYTES;
+                    return true;
+                }
+            }
+        case '\n': {
+            ls->linenumber++;
+            if (!is_long_string_or_bytes) ; // err
+        }
+        case '\r': {
+            ls->linenumber++;
+            if (!is_long_string_or_bytes); // err
+            break;
+        }
+        default: {
+            ;
+        }
+        }
+    }
+}
+
+bool read_string(LexState *ls, bool is_raw) {
+    ;
+}
+
 
 void pyltL_next(LexState *ls)
 {
@@ -414,6 +498,15 @@ indent_end:
         case '5': case '6': case '7': case '8': case '9':
             read_number(ls);
             return;
+        case 'r': case 'R': case 'b': case 'B': case 'u': case 'U': case '\'': case '"': {
+            bool is_raw;
+            uint32_t tok = read_str_or_bytes_head(ls, &is_raw);
+            if (!tok) {
+                if (tok == TK_BYTES) read_bytes(ls, is_raw);
+                else read_string(ls, is_raw);
+                break;
+            }
+        }
         default:
             ls->token.val = TK_END;
             return;
