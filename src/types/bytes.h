@@ -1,0 +1,5 @@
+
+#ifndef PYLITE_TYPES_BYTES_H
+#define PYLITE_TYPES_BYTES_H
+
+#endif
