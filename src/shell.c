@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "lexer.h"
 #include "io.h"
+#include "types/object.h"
 
 #ifdef SHELL
 
