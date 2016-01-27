@@ -21,5 +21,6 @@ void pylt_obj_table_insert(PyLiteTable *tab, PyLiteObject *key, PyLiteObject *va
 uint32_t pylt_obj_hash(PyLiteObject *obj) {
     switch (obj->ob_type) {
     case PYLT_OBJ_TYPE_INT: return pylt_obj_int_hash(obj);
+    case PYLT_OBJ_TYPE_BOOL: return pylt_obj_int_hash(obj);
     }
 }

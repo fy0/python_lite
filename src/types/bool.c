@@ -2,11 +2,11 @@
 #include "bool.h"
 #include "number.h"
 
-uint32_t pylt_obj_int_hash(PyLiteIntObject *obj) {
+uint32_t pylt_obj_bool_hash(PyLiteBoolObject *obj) {
     return obj->ob_val;
 }
 
-uint32_t pylt_obj_int_eq(PyLiteBoolObject *self, PyLiteObject *other) {
+uint32_t pylt_obj_bool_eq(PyLiteBoolObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
     case PYLT_OBJ_TYPE_INT:
         return self->ob_val == castint(other)->ob_val;
@@ -17,7 +17,7 @@ uint32_t pylt_obj_int_eq(PyLiteBoolObject *self, PyLiteObject *other) {
     }
 }
 
-uint32_t pylt_obj_int_cmp(PyLiteIntObject *self, PyLiteObject *other) {
+uint32_t pylt_obj_bool_cmp(PyLiteBoolObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
     case PYLT_OBJ_TYPE_INT:
         if (self->ob_val < castint(other)->ob_val) return -1;
@@ -30,16 +30,4 @@ uint32_t pylt_obj_int_cmp(PyLiteIntObject *self, PyLiteObject *other) {
     default:
         return -2;
     }
-}
-
-uint32_t pylt_obj_float_hash(PyLiteIntObject *obj) {
-    ;
-}
-
-uint32_t pylt_obj_float_eq(PyLiteObject *self, PyLiteObject *other) {
-    ;
-}
-
-uint32_t pylt_obj_float_cmp(PyLiteObject *self, PyLiteObject *other) {
-    ;
 }

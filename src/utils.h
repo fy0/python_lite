@@ -17,7 +17,6 @@
 void* pylt_realloc(void* m, size_t size);
 void pylt_free(void* m);
 
-
 typedef struct pylt_Stack {
     void* data;
     int top;

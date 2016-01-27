@@ -27,7 +27,7 @@ typedef struct PyLiteObject {
 } PyLiteObject;
 
 #define PyLiteObject_HEAD \
-    uint32_t ob_type;
+    uint32_t ob_type
 
 // Custom object
 
@@ -64,9 +64,11 @@ uint32_t pylt_obj_hash(PyLiteObject *obj);
 // Type cast
 
 struct PyLiteIntObject;
+struct PyLiteBoolObject;
 
 #define cast(t, exp)	((t)(exp))
 #define castint(i)      cast(struct PyLiteIntObject*, (i))
+#define castbool(i)     cast(struct PyLiteBoolObject*, (i))
 
 // Others
 
