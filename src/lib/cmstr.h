@@ -9,7 +9,8 @@ typedef uint16_t CM_UCS2;
 typedef uint32_t CM_UCS4;
 
 enum CMEncoding {
-    CME_UTF8 = 0,
+    CME_RAW = 0,
+    CME_UTF8,
     CME_LATIN1 = sizeof(CM_UCS1),
     CME_UCS2 = sizeof(CM_UCS2),
     CME_UCS4 = sizeof(CM_UCS4),

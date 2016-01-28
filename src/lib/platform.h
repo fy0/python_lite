@@ -7,7 +7,7 @@
 #endif
 
 #ifdef _MSC_VER
-#define _INLINE
+#define _INLINE __inline
 #pragma execution_character_set("utf-8")
 #else
 #define _INLINE inline
