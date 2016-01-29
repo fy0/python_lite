@@ -43,6 +43,7 @@ uint32_t pylt_obj_hash(PyLiteObject *obj) {
 }
 
 uint32_t pylt_obj_eq(PyLiteObject *a, PyLiteObject *b) {
+    if (a == b) return true;
     switch (a->ob_type) {
     case PYLT_OBJ_TYPE_INT: return pylt_obj_int_eq(castint(a), b);
     case PYLT_OBJ_TYPE_FLOAT: return pylt_obj_float_eq(castfloat(a), b);

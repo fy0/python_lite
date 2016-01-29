@@ -43,6 +43,12 @@ typedef enum TokenKind {
 
 } TokenKind;
 
+
+typedef struct RawString {
+    int size;
+    uint8_t *s;
+} RawString;
+
 typedef union TokenInfo {
     uint32_t i32;
     double f64;
