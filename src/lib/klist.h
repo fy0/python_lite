@@ -137,8 +137,17 @@ void* my_malloc(size_t size) {
 		return 0;														\
 	}
 
+
+#ifndef kh_inline
+#ifdef _MSC_VER
+#define kh_inline __inline
+#else
+#define kh_inline inline
+#endif
+#endif /* kh_inline */
+
 #define KLIST_INIT(name, kltype_t, kmpfree_t)							\
-	KLIST_INIT2(static inline klib_unused, name, kltype_t, kmpfree_t)
+	KLIST_INIT2(static kh_inline klib_unused, name, kltype_t, kmpfree_t)
 
 #define kliter_t(name) kl1_##name
 #define klist_t(name) kl_##name##_t

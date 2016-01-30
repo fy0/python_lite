@@ -299,10 +299,14 @@ _not_str:
     return 0;
 }
 
+
 bool read_bytes(LexState *ls, bool is_raw) {
-    StringStreamSave save;
+    StringStreamSave save, save2;
     uint32_t sign = ls->current;
     bool is_long_string_or_bytes = false;
+
+    // now : """abc"""
+    //       |          <- here
 
     get_next_ch(ls);
     ss_savepos(ls->ss, &save, ls->current);
@@ -316,6 +320,7 @@ bool read_bytes(LexState *ls, bool is_raw) {
         }
     }
 
+    // not long string, backtracking
     if (!is_long_string_or_bytes) {
         ls->current = ss_loadpos(ls->ss, &save);
     }
@@ -324,8 +329,14 @@ bool read_bytes(LexState *ls, bool is_raw) {
         switch (ls->current) {
         case '\'': case '"':
             if (ls->current == sign) {
-                if (is_long_string_or_bytes);
-                else {
+                if (is_long_string_or_bytes) {
+                    get_next_ch(ls);
+                    if (ls->current != sign) continue;
+                    get_next_ch(ls);
+                    if (ls->current != sign) continue;
+                    ls->token.val = TK_BYTES;
+                    return true;
+                } else {
                     ls->token.val = TK_BYTES;
                     return true;
                 }
@@ -339,9 +350,9 @@ bool read_bytes(LexState *ls, bool is_raw) {
             if (!is_long_string_or_bytes); // err
             break;
         }
-        default: {
-            ;
-        }
+        //case '\\': {} TODO
+        default:
+            get_next_ch(ls);
         }
     }
 }
@@ -349,6 +360,7 @@ bool read_bytes(LexState *ls, bool is_raw) {
 bool read_string(LexState *ls, bool is_raw) {
     ;
 }
+
 
 
 void pyltL_next(LexState *ls)
