@@ -17,12 +17,20 @@
 void* pylt_realloc(void* m, size_t size);
 void pylt_free(void* m);
 
+void putcode(uint32_t code);
+
+typedef struct RawString {
+    const uint8_t *s;
+    const uint8_t *e;
+} RawString;
+
+void raw_str_print(RawString *rs);
+
 typedef struct pylt_Stack {
     void* data;
     int top;
     int len;
 } pylt_Stack;
-
 
 #define stack_init(_s, _type, _len) { (_s).data = _len ? pylt_realloc(NULL, sizeof(_type) * _len) : NULL; (_s).top = -1; (_s).len = _len; }
 #define stack_get_top(_s, _type) ((_type*)(_s.data) + _s.top)

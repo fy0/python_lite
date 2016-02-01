@@ -149,11 +149,11 @@ int utf8_char_size(const char *str, int str_size, int* plength) {
 
     if (plength) *plength = length;
     switch (max_index) {
-    case -1: return -1;
-    case 0: return 1;
-    case 1: return 2;
-    case 2: return 4;
-    default: return -1;
+        case -1: return -1;
+        case 0: return 1;
+        case 1: return 2;
+        case 2: return 4;
+        default: return -1;
     }
 }
 

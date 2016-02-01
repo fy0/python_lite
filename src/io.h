@@ -16,7 +16,10 @@ char* read_file(const char* fn, int *psize);
 typedef struct StringStream {
     const uint8_t *buf;
     const uint8_t *p;
+
+    int now;
     int size;
+    uint32_t current;
 } StringStream;
 
 typedef struct StringStreamSave {
@@ -26,9 +29,12 @@ typedef struct StringStreamSave {
 
 StringStream* ss_new(uint8_t *buf, int size);
 void ss_free(StringStream *ss);
-uint32_t ss_nextc(StringStream *ss);
-void ss_savepos(StringStream *ss, StringStreamSave *save, uint32_t current);
-uint32_t ss_loadpos(StringStream* ss, StringStreamSave *save);
+void ss_nextc(StringStream *ss);
+uint32_t ss_lastc(StringStream *ss);
+const uint8_t* ss_lastpos(StringStream *ss);
+
+void ss_savepos(StringStream *ss, StringStreamSave *save);
+void ss_loadpos(StringStream* ss, StringStreamSave *save);
 //void ss_moveback();
 //void ss_curpos();
 //void ss_new_from_file(uint8_t *buf);

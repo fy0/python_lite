@@ -1,6 +1,6 @@
 ﻿
 #include "state.h"
 
-void pylt_state_err(PyliteState *state) {
+void pylt_state_err(PyLiteState *state) {
     exit(-1);
 }

@@ -4,13 +4,13 @@
 
 #include "utils.h"
 #include "io.h"
+#include "state.h"
 
 #define FIRST_TOKEN    128
 
 typedef enum TokenKind {
     // Common
     TK_END = FIRST_TOKEN,
-    TK_ERR,
     TK_COMMENTS,
     TK_NEWLINE,
     TK_INDENT,
@@ -43,20 +43,10 @@ typedef enum TokenKind {
 
 } TokenKind;
 
-
-typedef struct RawString {
-    int size;
-    uint8_t *s;
-} RawString;
-
-typedef union TokenInfo {
-    uint32_t i32;
-    double f64;
-} TokenInfo;
-
 typedef struct Token {
     uint32_t val;
-    TokenInfo info;
+    int extra;
+    RawString str;
 } Token;
 
 typedef struct IndentInfo {
@@ -67,7 +57,6 @@ typedef struct IndentInfo {
 typedef struct LexState {
     int linenumber;
     Token token; /* current token */
-    uint32_t current; /* current character */
     StringStream* ss;
 
     int current_indent;
@@ -75,9 +64,15 @@ typedef struct LexState {
     IndentInfo *indent_used;
 } LexState;
 
-void pyltL_init(LexState *ls, StringStream *ss);
-void pyltL_next(LexState *ls);
 
-const char* pyltL_get_token_name(uint32_t token);
+void pylt_lex_init(LexState *state, StringStream *ss);
+void pylt_lex_err(LexState *ls, int code);
+
+int pylt_lex_next(LexState *ls);
+const char* pylt_lex_get_token_name(uint32_t token);
+
+#define PYLT_ERR_LEX_INVALID_CHARACTER -1
+#define PYLT_ERR_LEX_INVALID_NUMBER -2
+#define PYLT_ERR_LEX_INVALID_STR_OR_BYTES -3
 
 #endif

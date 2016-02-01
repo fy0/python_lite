@@ -2,10 +2,10 @@
 #ifndef PYLITE_STATE_H
 #define PYLITE_STATE_H
 
-typedef struct PyliteState {
+typedef struct PyLiteState {
     int foo;
-} PyliteState;
+} PyLiteState;
 
-void pylt_state_err(PyliteState *state);
+void pylt_state_err(PyLiteState *state);
 
 #endif

@@ -16,21 +16,32 @@ int main(int argc,char* argv[])
     putchar('\n');
 
     LexState ls;
-    pyltL_init(&ls, ss);
+    pylt_lex_init(&ls, ss);
 
     for (;;) {
-        pyltL_next(&ls);
+        int code = pylt_lex_next(&ls);
+        if (code) {
+            printf("ERROR: %d\n", code);
+            break;
+        }
         if (ls.token.val < FIRST_TOKEN) printf("[%d] %c\n", ls.linenumber, ls.token.val);
         else {
             switch (ls.token.val) {
-            case TK_INT:
-                printf("[%d] %s: %d\n", ls.linenumber, pyltL_get_token_name(ls.token.val), ls.token.info.i32);
-                break;
-            case TK_FLOAT:
-                printf("[%d] %s: %f\n", ls.linenumber, pyltL_get_token_name(ls.token.val), ls.token.info.f64);
-                break;
-            default:
-                printf("[%d] %s\n", ls.linenumber, pyltL_get_token_name(ls.token.val));
+                case TK_INT: case TK_FLOAT:
+                    printf("[%d] %s: ", ls.linenumber, pylt_lex_get_token_name(ls.token.val));
+                    raw_str_print(&ls.token.str);
+                    putchar('\n');
+                    break;
+                case TK_BYTES: case TK_STRING: case TK_NAME:
+                    printf("[%d] %s: ", ls.linenumber, pylt_lex_get_token_name(ls.token.val));
+                    raw_str_print(&ls.token.str);
+                    putchar('\n');
+                    break;
+                case TK_INDENT: case TK_DEDENT:
+                    printf("[%d] %s: %d\n", ls.linenumber, pylt_lex_get_token_name(ls.token.val), ls.current_indent);
+                    break;
+                default:
+                    printf("[%d] %s\n", ls.linenumber, pylt_lex_get_token_name(ls.token.val));
             }
         }
         if (ls.token.val == TK_END) break;

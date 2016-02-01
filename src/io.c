@@ -26,6 +26,7 @@ StringStream* ss_new(uint8_t *buf, int size) {
     StringStream *ss = pylt_realloc(NULL, sizeof(StringStream));
     ss->buf = buf;
     ss->p = buf;
+    ss->now = 0;
     ss->size = size;
     return ss;
 }
@@ -34,18 +35,29 @@ void ss_free(StringStream *ss) {
     pylt_free(ss);
 }
 
-uint32_t ss_nextc(StringStream* ss) {
-    uint32_t code;
-    ss->p = utf8_decode(ss->p, &code);
-    return code;
+void ss_nextc(StringStream* ss) {
+    ss->now++;
+    ss->p = utf8_decode(ss->p, &(ss->current));
 }
 
-void ss_savepos(StringStream *ss, StringStreamSave *save, uint32_t current) {
+/** 不做边界检查 用户应保证边界正确 */
+uint32_t ss_lastc(StringStream *ss) {
+    // TODO: utf-8
+    const uint8_t *p = ss->p - 1;
+    return *p;
+}
+
+const uint8_t* ss_lastpos(StringStream *ss) {
+    const uint8_t *p = ss->p - 1;
+    return p;
+}
+
+void ss_savepos(StringStream *ss, StringStreamSave *save) {
     save->pos = ss->p;
-    save->current = current;
+    save->current = ss->current;
 }
 
-uint32_t ss_loadpos(StringStream* ss, StringStreamSave *save) {
+void ss_loadpos(StringStream* ss, StringStreamSave *save) {
     ss->p = save->pos;
-    return save->current;
+    ss->current = save->current;
 }
