@@ -1,8 +1,11 @@
 ﻿
 #include "utils.h"
 #include "lexer.h"
+#include "parser.h"
 #include "io.h"
+
 #include "types/object.h"
+
 
 #ifdef SHELL
 
@@ -17,6 +20,13 @@ int main(int argc,char* argv[])
 
     LexState ls;
     pylt_lex_init(&ls, ss);
+
+    ParserState ps;
+    ps.ls = &ls;
+    parse(&ps);
+
+    system("pause");
+    return 0;
 
     for (;;) {
         int code = pylt_lex_next(&ls);

@@ -481,7 +481,7 @@ indent_end:
             }
 
             ls->token.val = TK_INT;
-            ls->token.str.e = ss->p;
+            ls->token.str.e = ss->p-1;
             return 0;
         case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9':
@@ -497,7 +497,7 @@ indent_end:
                 while (lex_isdec(ss->current)) ss_nextc(ss);
             } else ls->token.val = TK_INT;
 
-            ls->token.str.e = ss->p;
+            ls->token.str.e = ss->p-1;
             return 0;
         case 'r': case 'R': case 'b': case 'B': case 'u': case 'U': case '\'': case '"': {
             bool is_raw;
