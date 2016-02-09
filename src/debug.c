@@ -17,7 +17,7 @@ void debug_print_const_vals(ParserState *ps) {
         switch (obj->ob_type) {
             case PYLT_OBJ_TYPE_INT: printf("%d", castint(obj)->ob_val); break;
             case PYLT_OBJ_TYPE_FLOAT: printf("%f", castfloat(obj)->ob_val); break;
-            case PYLT_OBJ_TYPE_BOOL: printf((castbool(obj)->ob_val == 0) ? "False" : "true"); break;
+            case PYLT_OBJ_TYPE_BOOL: printf((castbool(obj)->ob_val == 0) ? "False" : "True"); break;
             case PYLT_OBJ_TYPE_BYTES:
             case PYLT_OBJ_TYPE_STR:
             case PYLT_OBJ_TYPE_FUNCTION:
