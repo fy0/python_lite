@@ -6,7 +6,7 @@
 #include "types/number.h"
 
 const char* get_op_name(uint32_t val) {
-    return pylt_lex_get_token_name(val);
+    return pylt_vm_get_op_name(val);
 }
 
 void debug_print_const_vals(ParserState *ps) {
