@@ -28,8 +28,8 @@ _INLINE static uint8_t _dec(uint32_t code) {
 
 int _read_x_int(RawString *str, int n, uint8_t(*func)(uint32_t code), int max_size) {
     const uint8_t *p = str->s;
-    const uint8_t *e = (max_size > 0) ? str->s + max_size - 1 : str->e;
-    int ret = 0, val = (int)pow(n, e - p + 1);
+    const uint8_t *e = (max_size > 0) ? str->s + max_size : str->e;
+    int ret = 0, val = (int)pow(n, e - p - 1);
 
     do {
         ret += (*func)(*p++) * val;
@@ -47,7 +47,7 @@ double _read_float(RawString *str, int start_offset) {
 
     do {
         ret += _dec(*p++) * val;
-        val *= 10;
+        val /= 10;
     } while (p != e);
 
     return ret;
@@ -68,7 +68,7 @@ PyLiteObject* new_obj_number_from_token(Token *tk) {
             }
             return castobj(pylt_obj_int_new(iret));
         case TK_FLOAT:
-            iret = _read_x_int(&(tk->str), 10, _dec, 0);
+            iret = _read_x_int(&(tk->str), 10, _dec, tk->extra-1);
             fret = _read_float(&(tk->str), tk->extra);
             return castobj(pylt_obj_float_new(fret + iret));
     }

@@ -19,6 +19,14 @@ const char* pylt_lex_tokens[] = {
 };
 
 const char* pylt_lex_get_token_name(uint32_t token) {
+    switch (token) {
+        case '+': return "+"; case '-': return "-"; case '*': return "*"; case '/': return "/";
+        case '%': return "%"; case '@': return "@"; case '&': return "&"; case '|': return "|";
+        case '^': return "^"; case '~': return "~"; case '<': return "<"; case '>': return ">";
+        case '(': return "("; case ')': return ")"; case '[': return "["; case ']': return "]";
+        case '{': return "{"; case '}': return "}"; case ',': return ","; case ':': return ":";
+        case '.': return "."; case '=': return "=";
+    }
     if (token >= FIRST_TOKEN)
         return pylt_lex_tokens[token - FIRST_TOKEN];
     return NULL;

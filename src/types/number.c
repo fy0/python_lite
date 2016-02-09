@@ -96,7 +96,7 @@ PyLiteIntObject* pylt_obj_int_new(uint32_t val) {
 
 PyLiteFloatObject* pylt_obj_float_new(double val) {
     PyLiteFloatObject *obj = pylt_realloc(NULL, sizeof(PyLiteFloatObject*));
-    obj->ob_type = PYLT_OBJ_TYPE_INT;
+    obj->ob_type = PYLT_OBJ_TYPE_FLOAT;
     obj->ob_val = val;
     return obj;
 }

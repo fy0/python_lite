@@ -93,6 +93,7 @@ struct PyLiteDictObject;
 #define castclass(i)    cast(struct PyLiteCustomObject*, (i))
 
 // Others
+const char* pylt_obj_type_name(int ob_type);
 
 void(*PyLiteCFunction)(PyLiteObject *args);
 void(*PyLiteCMethod)(PyLiteObject *self, PyLiteObject *args);

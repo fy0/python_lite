@@ -118,8 +118,17 @@ void parse_t(ParserState *ps) {
             break;
         case TK_KW_NOT:
             next(ps);
-            parse_expr(ps);
+            parse_expr10(ps);
+            parse_expr9(ps);
+            parse_expr8(ps);
+            parse_expr7(ps);
+            parse_expr6(ps);
+            parse_expr5(ps);
+            parse_expr4(ps);
+            parse_expr3(ps);
             print_tk_val(TK_KW_NOT);
+            kv_pushbc(ps->opcodes, BC_OPERATOR);
+            kv_pushbc(ps->opcodes, TK_KW_NOT);
             break;
         default:
             parse_basetype(ps);
