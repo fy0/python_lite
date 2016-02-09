@@ -37,3 +37,10 @@ uint32_t pylt_obj_bool_cmp(PyLiteBoolObject *self, PyLiteObject *other) {
         return -2;
     }
 }
+
+PyLiteBoolObject* pylt_obj_bool_new(bool val) {
+    PyLiteBoolObject *obj = pylt_realloc(NULL, sizeof(PyLiteBoolObject*));
+    obj->ob_type = PYLT_OBJ_TYPE_BOOL;
+    obj->ob_val = val;
+    return obj;
+}

@@ -86,3 +86,17 @@ uint32_t pylt_obj_float_cmp(PyLiteFloatObject *self, PyLiteObject *other) {
 PyLiteObject* pylt_obj_number_from_stream(StringStream *ss) {
     return NULL;
 }
+
+PyLiteIntObject* pylt_obj_int_new(uint32_t val) {
+    PyLiteIntObject *obj = pylt_realloc(NULL, sizeof(PyLiteIntObject*));
+    obj->ob_type = PYLT_OBJ_TYPE_INT;
+    obj->ob_val = val;
+    return obj;
+}
+
+PyLiteFloatObject* pylt_obj_float_new(double val) {
+    PyLiteFloatObject *obj = pylt_realloc(NULL, sizeof(PyLiteFloatObject*));
+    obj->ob_type = PYLT_OBJ_TYPE_INT;
+    obj->ob_val = val;
+    return obj;
+}

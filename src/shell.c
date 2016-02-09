@@ -3,6 +3,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "io.h"
+#include "debug.h"
 
 #include "types/object.h"
 
@@ -24,6 +25,9 @@ int main(int argc,char* argv[])
     ParserState ps;
     ps.ls = &ls;
     parse(&ps);
+
+    debug_print_const_vals(&ps);
+    debug_print_opcodes(&ps);
 
     system("pause");
     return 0;

@@ -26,4 +26,7 @@ uint32_t pylt_obj_float_cmp(PyLiteFloatObject *self, PyLiteObject *other);
 
 PyLiteObject* pylt_obj_number_from_stream(StringStream *ss);
 
+PyLiteIntObject* pylt_obj_int_new(uint32_t val);
+PyLiteFloatObject* pylt_obj_float_new(double val);
+
 #endif

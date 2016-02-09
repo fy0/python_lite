@@ -13,4 +13,6 @@ uint32_t pylt_obj_bool_hash(PyLiteBoolObject *obj);
 uint32_t pylt_obj_bool_eq(PyLiteBoolObject *self, PyLiteObject *other);
 uint32_t pylt_obj_bool_cmp(PyLiteBoolObject *self, PyLiteObject *other);
 
+PyLiteBoolObject* pylt_obj_bool_new(bool val);
+
 #endif

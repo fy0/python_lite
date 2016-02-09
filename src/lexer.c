@@ -492,6 +492,7 @@ indent_end:
             while (lex_isdec(ss->current)) ss_nextc(ss);
 
             if (ss->current == '.') {
+                ls->token.extra = ss->p - ls->token.str.s;
                 ls->token.val = TK_FLOAT;
                 ss_nextc(ss);
                 while (lex_isdec(ss->current)) ss_nextc(ss);
