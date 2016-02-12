@@ -3,7 +3,6 @@
 #define PYLITE_VM_H
 
 #include "utils.h"
-#include "lexer.h"
 #include "lib/kvec.h"
 
 enum {
@@ -29,11 +28,15 @@ enum {
 } OperatorValue;
 
 
-typedef struct {
+typedef struct PyLiteVM{
     kvec_t(size_t) stack;
 } PyLiteVM;
 
+struct PyLiteState;
+
 const char* pylt_vm_get_op_name(int op);
 int token_to_op_val(uint32_t tk);
+void pylt_vm_init(PyLiteVM* vm);
+void pylt_vm_run(struct PyLiteState* state);
 
 #endif

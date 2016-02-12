@@ -4,7 +4,6 @@
 
 #include "utils.h"
 #include "io.h"
-#include "state.h"
 
 #define FIRST_TOKEN    128
 

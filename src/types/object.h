@@ -48,15 +48,15 @@ enum PyLiteObjectTypeCode {
 // Object methods
 
 uint32_t pylt_obj_hash(PyLiteObject *obj);
-uint32_t pylt_obj_eq(PyLiteObject *a, PyLiteObject *b);
+uint32_t pylt_obj_op_eq(PyLiteObject *a, PyLiteObject *b);
+uint32_t pylt_obj_op_plus(PyLiteObject *a, PyLiteObject *b);
 
 void pylt_obj_free(PyLiteObject *obj);
 bool pylt_obj_hashable(PyLiteObject *obj);
 //comparable
 
 // Pylite table
-
-KHASH_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_hash, pylt_obj_eq);
+KHASH_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_hash, pylt_obj_op_eq);
 typedef khash_t(table) PyLiteTable;
 
 #define pylt_obj_table_new() kh_init(table);
@@ -65,6 +65,7 @@ PyLiteObject* pylt_obj_table_get(PyLiteTable *tab, PyLiteObject *key);
 bool pylt_obj_table_exists(PyLiteTable *tab, PyLiteObject *key);
 bool pylt_obj_table_remove(PyLiteTable *tab, PyLiteObject *key);
 int pylt_obj_table_len(PyLiteTable *tab);
+
 
 // Type cast
 

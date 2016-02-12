@@ -1,5 +1,7 @@
 ﻿
 #include "vm.h"
+#include "state.h"
+#include "lib/kvec.h"
 #include "types/number.h"
 
 const char* op_vals[] = {
@@ -38,4 +40,28 @@ int token_to_op_val(uint32_t tk) {
         case TK_OP_POW: return OP_POW;
     }
     return 0;
+}
+
+void pylt_vm_init(PyLiteVM* vm) {
+    kv_init(vm->stack);
+}
+
+void pylt_vm_run(PyLiteState* state) {
+    ParserState *ps = &state->ps;
+    for (int i = 0; i < kv_size(ps->opcodes); i++) {
+        switch (kv_A(ps->opcodes, i)) {
+            case BC_LOADCONST:
+                //printf("   %-15s %d\n", "LOADCONST", );
+                kv_push(size_t, state->vm.stack, kv_A(ps->const_val, kv_A(ps->opcodes, ++i)));
+                break;
+            case BC_OPERATOR:
+                //printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(ps->opcodes, ++i)));
+                switch (kv_A(ps->opcodes, ++i)) {
+                    //case OP_OR:
+                    case OP_PLUS:;
+                        //kv_pop()
+                }
+                break;
+        }
+    }
 }
