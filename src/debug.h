@@ -6,5 +6,6 @@
 
 void debug_print_const_vals(ParserState *ps);
 void debug_print_opcodes(ParserState *ps);
+void debug_print_obj(PyLiteObject *obj);
 
 #endif

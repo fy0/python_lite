@@ -371,4 +371,5 @@ void parse(ParserState *ps) {
     kv_init(ps->opcodes);
     next(ps);
     parse_expr(ps);
+    kv_pushbc(ps->opcodes, BC_PRINT);
 }

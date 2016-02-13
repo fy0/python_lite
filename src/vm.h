@@ -10,6 +10,7 @@ enum {
     BC_LOAD,
     BC_SET,
     BC_LOADCONST,
+    BC_PRINT,
 };
 
 enum {

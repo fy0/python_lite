@@ -57,15 +57,26 @@ uint32_t pylt_obj_op_eq(PyLiteObject *a, PyLiteObject *b) {
     return false;
 }
 
-uint32_t pylt_obj_op_plus(PyLiteObject *a, PyLiteObject *b) {
+PyLiteObject* pylt_obj_op_plus(PyLiteObject *a, PyLiteObject *b) {
     if (a == b) return true;
     switch (a->ob_type) {
         case PYLT_OBJ_TYPE_INT: return pylt_obj_int_plus(castint(a), b);
         case PYLT_OBJ_TYPE_FLOAT: return pylt_obj_float_plus(castfloat(a), b);
-        case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_eq(castbool(a), b);
-        case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_eq(castbytes(a), b);
+        //case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_eq(castbool(a), b);
+        //case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_eq(castbytes(a), b);
     }
-    return false;
+    return NULL;
+}
+
+PyLiteObject* pylt_obj_op_plus(PyLiteObject *a, PyLiteObject *b) {
+    if (a == b) return true;
+    switch (a->ob_type) {
+        case PYLT_OBJ_TYPE_INT: return pylt_obj_int_plus(castint(a), b);
+        case PYLT_OBJ_TYPE_FLOAT: return pylt_obj_float_plus(castfloat(a), b);
+            //case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_eq(castbool(a), b);
+            //case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_eq(castbytes(a), b);
+    }
+    return NULL;
 }
 
 void pylt_obj_free(PyLiteObject *obj) {

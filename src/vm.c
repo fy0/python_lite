@@ -1,6 +1,7 @@
 ﻿
 #include "vm.h"
 #include "state.h"
+#include "debug.h"
 #include "lib/kvec.h"
 #include "types/number.h"
 
@@ -48,20 +49,28 @@ void pylt_vm_init(PyLiteVM* vm) {
 
 void pylt_vm_run(PyLiteState* state) {
     ParserState *ps = &state->ps;
+    PyLiteObject *a, *b, *ret;
+
     for (int i = 0; i < kv_size(ps->opcodes); i++) {
         switch (kv_A(ps->opcodes, i)) {
             case BC_LOADCONST:
                 //printf("   %-15s %d\n", "LOADCONST", );
-                kv_push(size_t, state->vm.stack, kv_A(ps->const_val, kv_A(ps->opcodes, ++i)));
+                //printf("%d\n", kv_A(ps->opcodes, ++i));
+                kv_push(size_t, state->vm.stack, kv_A(ps->const_val, kv_A(ps->opcodes, ++i)-1));
                 break;
             case BC_OPERATOR:
                 //printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(ps->opcodes, ++i)));
                 switch (kv_A(ps->opcodes, ++i)) {
                     //case OP_OR:
-                    case OP_PLUS:;
-                        //kv_pop()
+                    case OP_PLUS:
+                        b = kv_pop(state->vm.stack);
+                        a = kv_pop(state->vm.stack);
+                        kv_push(size_t, state->vm.stack, pylt_obj_op_plus(a, b));
                 }
                 break;
+            case BC_PRINT:
+                debug_print_obj(kv_A(state->vm.stack, kv_size(state->vm.stack)-1));
+                putchar('\n');
         }
     }
 }

@@ -19,15 +19,18 @@ typedef struct PyLiteObject {
 
 typedef struct PyLiteCustomObject {
     uint32_t ob_type;
+    uint32_t ob_base;
     struct PyLiteTable *ob_attrs;
 } PyLiteCustomObject;
 
 #define PyLiteCustomObject_HEAD \
     uint32_t ob_type; \
+    uint32_t ob_base; \
     struct PyLiteTable *ob_attrs
 
 enum PyLiteObjectTypeCode {
-    PYLT_OBJ_TYPE_INT = 1,
+    PTLT_OBJ_TYPE_OBJ = 1,
+    PYLT_OBJ_TYPE_INT,
     PYLT_OBJ_TYPE_FLOAT,
     PYLT_OBJ_TYPE_BOOL,
 
@@ -45,11 +48,17 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_CLASS,
 };
 
+#define PYLT_OBJ_TYPE_NUM PYLT_OBJ_TYPE_CLASS
+
 // Object methods
 
 uint32_t pylt_obj_hash(PyLiteObject *obj);
 uint32_t pylt_obj_op_eq(PyLiteObject *a, PyLiteObject *b);
-uint32_t pylt_obj_op_plus(PyLiteObject *a, PyLiteObject *b);
+PyLiteObject* pylt_obj_op_plus(PyLiteObject *a, PyLiteObject *b);
+/*PyLiteObject* pylt_obj_op_minus(PyLiteObject *a, PyLiteObject *b);
+PyLiteObject* pylt_obj_op_mul(PyLiteObject *a, PyLiteObject *b);
+PyLiteObject* pylt_obj_op_div(PyLiteObject *a, PyLiteObject *b);
+PyLiteObject* pylt_obj_op_div(PyLiteObject *a, PyLiteObject *b);*/
 
 void pylt_obj_free(PyLiteObject *obj);
 bool pylt_obj_hashable(PyLiteObject *obj);
@@ -92,6 +101,10 @@ struct PyLiteDictObject;
 #define castdict(i)     cast(struct PyLiteDictObject*, (i))
 
 #define castclass(i)    cast(struct PyLiteCustomObject*, (i))
+
+// build-in functions
+//pylt_buildin_isinstance(PyLiteState *state, PyLiteObject *obj, PyLiteTypeObject *type);
+
 
 // Others
 const char* pylt_obj_type_name(int ob_type);
