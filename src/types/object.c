@@ -4,8 +4,35 @@
 #include "bytes.h"
 #include "bool.h"
 
-void* basetype_op_func_table[][5] = {
-    { &pylt_obj_op_eq },
+void* basetype_op_func_table[][23] = {
+    /* { LT, LE, GT, GE, NE, EQ, 
+     BITOR, BITXOR, BITAND, BITLS, BITRS, BITAND, 
+     PLUS, MINUS, MUL, MATMUL, DIV, FLOORDIV, MOD, 
+     POS, NEG, BITNOT, 
+     POW }
+    */
+    { // object
+        NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL,
+        NULL
+    },
+    { // int
+        NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL,
+        &pylt_obj_int_plus, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL,
+        NULL
+    },
+    { // float
+        NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL,
+        &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL,
+        NULL
+    },
+    
 };
 
 void pylt_obj_table_set(PyLiteTable *tab, PyLiteObject *key, PyLiteObject *val) {
@@ -66,6 +93,10 @@ PyLiteObject* pylt_obj_op_plus(PyLiteObject *a, PyLiteObject *b) {
         //case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_eq(castbytes(a), b);
     }
     return NULL;
+}
+
+PyLiteObject* pylt_obj_op_binary(PyLiteState* state, int op, PyLiteObject *a, PyLiteObject *b) {
+    ;
 }
 
 PyLiteObject* pylt_obj_op_plus(PyLiteObject *a, PyLiteObject *b) {

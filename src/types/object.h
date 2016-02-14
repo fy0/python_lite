@@ -6,6 +6,8 @@
 #include "../io.h"
 #include "../lib/khash.h"
 
+typedef struct PyLiteState PyLiteState;
+
 // Immutable object
 
 typedef struct PyLiteObject {
@@ -50,20 +52,6 @@ enum PyLiteObjectTypeCode {
 
 #define PYLT_OBJ_TYPE_NUM PYLT_OBJ_TYPE_CLASS
 
-// Object methods
-
-uint32_t pylt_obj_hash(PyLiteObject *obj);
-uint32_t pylt_obj_op_eq(PyLiteObject *a, PyLiteObject *b);
-PyLiteObject* pylt_obj_op_plus(PyLiteObject *a, PyLiteObject *b);
-/*PyLiteObject* pylt_obj_op_minus(PyLiteObject *a, PyLiteObject *b);
-PyLiteObject* pylt_obj_op_mul(PyLiteObject *a, PyLiteObject *b);
-PyLiteObject* pylt_obj_op_div(PyLiteObject *a, PyLiteObject *b);
-PyLiteObject* pylt_obj_op_div(PyLiteObject *a, PyLiteObject *b);*/
-
-void pylt_obj_free(PyLiteObject *obj);
-bool pylt_obj_hashable(PyLiteObject *obj);
-//comparable
-
 // Pylite table
 KHASH_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_hash, pylt_obj_op_eq);
 typedef khash_t(table) PyLiteTable;
@@ -102,8 +90,20 @@ struct PyLiteDictObject;
 
 #define castclass(i)    cast(struct PyLiteCustomObject*, (i))
 
-// build-in functions
+// Object methods
+uint32_t pylt_obj_hash(PyLiteObject *obj);
+uint32_t pylt_obj_op_eq(PyLiteObject *a, PyLiteObject *b);
+PyLiteObject* pylt_obj_op_unary(PyLiteState* state, int op, PyLiteObject *obj);
+PyLiteObject* pylt_obj_op_binary(PyLiteState* state, int op, PyLiteObject *a, PyLiteObject *b);
+/*PyLiteObject* pylt_obj_op_minus(PyLiteObject *a, PyLiteObject *b);
+PyLiteObject* pylt_obj_op_mul(PyLiteObject *a, PyLiteObject *b);
+PyLiteObject* pylt_obj_op_div(PyLiteObject *a, PyLiteObject *b);
+PyLiteObject* pylt_obj_op_div(PyLiteObject *a, PyLiteObject *b);*/
 //pylt_buildin_isinstance(PyLiteState *state, PyLiteObject *obj, PyLiteTypeObject *type);
+
+void pylt_obj_free(PyLiteObject *obj);
+bool pylt_obj_hashable(PyLiteObject *obj);
+//comparable
 
 
 // Others
