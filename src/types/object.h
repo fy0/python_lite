@@ -36,7 +36,7 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_FLOAT,
     PYLT_OBJ_TYPE_BOOL,
 
-    PYLT_OBJ_TYPE_STR,
+    PYLT_OBJ_TYPE_STR,  
     PYLT_OBJ_TYPE_BYTES,
     PYLT_OBJ_TYPE_SET,
     PYLT_OBJ_TYPE_LIST,
@@ -52,8 +52,19 @@ enum PyLiteObjectTypeCode {
 
 #define PYLT_OBJ_TYPE_NUM PYLT_OBJ_TYPE_CLASS
 
+// Object methods
+
+bool pylt_obj_eq(PyLiteObject *a, PyLiteObject *b);
+uint32_t pylt_obj_hash(PyLiteObject *obj);
+uint32_t pylt_obj_hashable(PyLiteObject *obj);
+uint32_t pylt_obj_istrue(PyLiteObject *obj);
+PyLiteObject* pylt_obj_op_unary(int op, PyLiteObject *obj);
+PyLiteObject* pylt_obj_op_binary(int op, PyLiteObject *a, PyLiteObject *b);
+//pylt_buildin_isinstance(PyLiteState *state, PyLiteObject *obj, PyLiteTypeObject *type);
+
+
 // Pylite table
-KHASH_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_hash, pylt_obj_op_eq);
+KHASH_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_hash, pylt_obj_eq);
 typedef khash_t(table) PyLiteTable;
 
 #define pylt_obj_table_new() kh_init(table);
@@ -90,26 +101,16 @@ struct PyLiteDictObject;
 
 #define castclass(i)    cast(struct PyLiteCustomObject*, (i))
 
-// Object methods
-uint32_t pylt_obj_hash(PyLiteObject *obj);
-uint32_t pylt_obj_op_eq(PyLiteObject *a, PyLiteObject *b);
-PyLiteObject* pylt_obj_op_unary(PyLiteState* state, int op, PyLiteObject *obj);
-PyLiteObject* pylt_obj_op_binary(PyLiteState* state, int op, PyLiteObject *a, PyLiteObject *b);
-/*PyLiteObject* pylt_obj_op_minus(PyLiteObject *a, PyLiteObject *b);
-PyLiteObject* pylt_obj_op_mul(PyLiteObject *a, PyLiteObject *b);
-PyLiteObject* pylt_obj_op_div(PyLiteObject *a, PyLiteObject *b);
-PyLiteObject* pylt_obj_op_div(PyLiteObject *a, PyLiteObject *b);*/
-//pylt_buildin_isinstance(PyLiteState *state, PyLiteObject *obj, PyLiteTypeObject *type);
-
 void pylt_obj_free(PyLiteObject *obj);
-bool pylt_obj_hashable(PyLiteObject *obj);
 //comparable
 
 
 // Others
 const char* pylt_obj_type_name(int ob_type);
 
-void(*PyLiteCFunction)(PyLiteObject *args);
-void(*PyLiteCMethod)(PyLiteObject *self, PyLiteObject *args);
+typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteObject *a, PyLiteObject *b);
+
+typedef void(*PyLiteCFunction)(PyLiteObject *args);
+typedef void(*PyLiteCMethod)(PyLiteObject *self, PyLiteObject *args);
 
 #endif

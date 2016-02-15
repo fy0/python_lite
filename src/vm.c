@@ -50,6 +50,7 @@ void pylt_vm_init(PyLiteVM* vm) {
 void pylt_vm_run(PyLiteState* state) {
     ParserState *ps = &state->ps;
     PyLiteObject *a, *b, *ret;
+    size_t op;
 
     for (int i = 0; i < kv_size(ps->opcodes); i++) {
         switch (kv_A(ps->opcodes, i)) {
@@ -60,12 +61,21 @@ void pylt_vm_run(PyLiteState* state) {
                 break;
             case BC_OPERATOR:
                 //printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(ps->opcodes, ++i)));
-                switch (kv_A(ps->opcodes, ++i)) {
-                    //case OP_OR:
-                    case OP_PLUS:
+                op = kv_A(ps->opcodes, ++i);
+                switch (op) {
+                    case OP_LT: case OP_LE: case OP_GT: case OP_GE: case OP_NE: case OP_EQ:
+                    case OP_BITOR: case OP_BITXOR: case OP_BITAND: case OP_LSHIFT: case OP_RSHIFT:
+                    case OP_PLUS: case OP_MINUS: OP_MUL : case OP_MATMUL: case OP_DIV: case OP_FLOORDIV: case OP_MOD: OP_POW :
                         b = kv_pop(state->vm.stack);
                         a = kv_pop(state->vm.stack);
-                        kv_push(size_t, state->vm.stack, pylt_obj_op_plus(a, b));
+                        ret = pylt_obj_op_binary(op, a, b);
+                        if (!ret) {
+                            printf("TypeError: unsupported operand type(s) for %s: 'int' and 'str'", pylt_vm_get_op_name(op));
+                        }
+                        kv_push(size_t, state->vm.stack, ret);
+                        break;
+                    default:
+                        ;
                 }
                 break;
             case BC_PRINT:

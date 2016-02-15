@@ -2,6 +2,9 @@
 #include "bool.h"
 #include "number.h"
 
+PyLiteBoolObject PyLiteTrue = { PYLT_OBJ_TYPE_BOOL, -1 };
+PyLiteBoolObject PyLiteFalse = { PYLT_OBJ_TYPE_BOOL, 0 };
+
 uint32_t pylt_obj_bool_hash(PyLiteBoolObject *obj) {
     return obj->ob_val;
 }
@@ -39,8 +42,5 @@ uint32_t pylt_obj_bool_cmp(PyLiteBoolObject *self, PyLiteObject *other) {
 }
 
 PyLiteBoolObject* pylt_obj_bool_new(bool val) {
-    PyLiteBoolObject *obj = pylt_realloc(NULL, sizeof(PyLiteBoolObject*));
-    obj->ob_type = PYLT_OBJ_TYPE_BOOL;
-    obj->ob_val = (val == false) ? 0 : -1;
-    return obj;
+    return (val == false) ? &PyLiteTrue : &PyLiteFalse;
 }

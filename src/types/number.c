@@ -30,8 +30,8 @@ uint32_t pylt_obj_int_cmp(PyLiteIntObject *self, PyLiteObject *other) {
             if (self->ob_val > castfloat(other)->ob_val) return 1;
             else return 0;
         case PYLT_OBJ_TYPE_BOOL:
-            if (self->ob_val < castbool(other)->ob_val) return -1;
-            if (self->ob_val > castbool(other)->ob_val) return 1;
+            if (self->ob_val < (size_t)castbool(other)->ob_val) return -1;
+            if (self->ob_val >(size_t)castbool(other)->ob_val) return 1;
             else return 0;
         default:
             return -2;
@@ -41,9 +41,9 @@ uint32_t pylt_obj_int_cmp(PyLiteIntObject *self, PyLiteObject *other) {
 PyLiteObject* pylt_obj_int_plus(PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return pylt_obj_int_new(self->ob_val + castint(other)->ob_val);
+            return castobj(pylt_obj_int_new(self->ob_val + castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return pylt_obj_float_new(self->ob_val + castfloat(other)->ob_val);
+            return castobj(pylt_obj_float_new(self->ob_val + castfloat(other)->ob_val));
         default:
             return NULL;
     }
@@ -97,9 +97,9 @@ uint32_t pylt_obj_float_cmp(PyLiteFloatObject *self, PyLiteObject *other) {
 PyLiteObject* pylt_obj_float_plus(PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return pylt_obj_int_new(self->ob_val + castint(other)->ob_val);
+            return castobj(pylt_obj_float_new(self->ob_val + castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return pylt_obj_float_new(self->ob_val + castfloat(other)->ob_val);
+            return castobj(pylt_obj_float_new(self->ob_val + castfloat(other)->ob_val));
         default:
             return NULL;
     }

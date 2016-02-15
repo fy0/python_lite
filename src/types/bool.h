@@ -15,4 +15,7 @@ uint32_t pylt_obj_bool_cmp(PyLiteBoolObject *self, PyLiteObject *other);
 
 PyLiteBoolObject* pylt_obj_bool_new(bool val);
 
+PyLiteBoolObject PyLiteTrue;
+PyLiteBoolObject PyLiteFalse;
+
 #endif
