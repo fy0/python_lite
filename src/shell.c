@@ -24,14 +24,14 @@ int main(int argc,char* argv[])
     LexState ls;
     pylt_lex_init(&ls, ss);
 
+    PyLiteState state;
     ParserState ps;
-    ps.ls = &ls;
+    pylt_parser_init(&ps, &state, &ls);
     parse(&ps);
 
     debug_print_const_vals(&ps);
     debug_print_opcodes(&ps);
 
-    PyLiteState state;
     state.ps = ps;
     pylt_vm_init(&state.vm);
     pylt_vm_run(&state);

@@ -1,4 +1,5 @@
 ﻿
+#include "state.h"
 #include "parser.h"
 #include "assert.h"
 #include "vm.h"
@@ -16,7 +17,7 @@ void parse_expr8(ParserState *ps);
 void parse_expr9(ParserState *ps);
 void parse_expr10(ParserState *ps);
 
-PyLiteObject* new_obj_number_from_token(Token *tk);
+PyLiteObject* new_obj_number_from_token(PyLiteState *state, Token *tk);
 
 
 void next(ParserState *ps) {
@@ -75,16 +76,16 @@ void parse_basetype(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     switch (tk->val) {
         case TK_KW_TRUE:
-            kv_pushobj(ps->const_val, pylt_obj_bool_new(true));
+            kv_pushobj(ps->const_val, castobj(pylt_obj_bool_new(true)));
             next(ps);
             break;
         case TK_KW_FALSE: 
-            kv_pushobj(ps->const_val, pylt_obj_bool_new(false));
+            kv_pushobj(ps->const_val, castobj(pylt_obj_bool_new(false)));
             next(ps);
             break;
         case TK_INT: case TK_FLOAT:
             raw_str_print(&(tk->str));
-            kv_pushobj(ps->const_val, new_obj_number_from_token(tk));
+            kv_pushobj(ps->const_val, castobj(new_obj_number_from_token(ps->state, tk)));
             next(ps);
             break;
         case TK_BYTES:
@@ -367,9 +368,14 @@ _INLINE void parse_expr10(ParserState *ps) {
 }
 
 void parse(ParserState *ps) {
-    kv_init(ps->const_val);
-    kv_init(ps->opcodes);
     next(ps);
     parse_expr(ps);
     kv_pushbc(ps->opcodes, BC_PRINT);
+}
+
+void pylt_parser_init(ParserState *ps, PyLiteState* state, LexState *ls) {
+    ps->state = state;
+    ps->ls = ls;
+    kv_init(ps->const_val);
+    kv_init(ps->opcodes);
 }

@@ -16,19 +16,17 @@ typedef struct PyLiteFloatObject {
 } PyLiteFloatObject;
 
 
-uint32_t pylt_obj_int_hash(PyLiteIntObject *obj);
-uint32_t pylt_obj_int_eq(PyLiteIntObject *self, PyLiteObject *other);
-uint32_t pylt_obj_int_cmp(PyLiteIntObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_int_plus(PyLiteIntObject *self, PyLiteObject *other);
+uint32_t pylt_obj_int_hash(PyLiteState *state, PyLiteIntObject *obj);
+uint32_t pylt_obj_int_eq(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
+uint32_t pylt_obj_int_cmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
+PyLiteObject* pylt_obj_int_plus(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
 
-uint32_t pylt_obj_float_hash(PyLiteFloatObject *obj);
-uint32_t pylt_obj_float_eq(PyLiteFloatObject *self, PyLiteObject *other);
-uint32_t pylt_obj_float_cmp(PyLiteFloatObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_float_plus(PyLiteFloatObject *self, PyLiteObject *other);
+uint32_t pylt_obj_float_hash(PyLiteState *state, PyLiteFloatObject *obj);
+uint32_t pylt_obj_float_eq(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
+uint32_t pylt_obj_float_cmp(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
+PyLiteObject* pylt_obj_float_plus(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
 
-PyLiteObject* pylt_obj_number_from_stream(StringStream *ss);
-
-PyLiteIntObject* pylt_obj_int_new(uint32_t val);
-PyLiteFloatObject* pylt_obj_float_new(double val);
+PyLiteIntObject* pylt_obj_int_new(PyLiteState *state, uint32_t val);
+PyLiteFloatObject* pylt_obj_float_new(PyLiteState *state, double val);
 
 #endif

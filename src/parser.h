@@ -8,6 +8,7 @@
 
 typedef struct ParserState {
     LexState *ls;
+    PyLiteState* state;
     kvec_t(PyLiteObject*) const_val;
     kvec_t(size_t) opcodes;
 } ParserState;
@@ -16,5 +17,6 @@ typedef struct ParserState {
 #define kv_pushbc(v, x) kv_push(size_t, (v), (x))
 
 void parse(ParserState *ps);
+void pylt_parser_init(ParserState *ps, PyLiteState* state, LexState *ls);
 
 #endif

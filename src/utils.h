@@ -41,5 +41,7 @@ typedef struct pylt_Stack {
 #define stack_free(_s) pylt_free((_s).data);
 #define stack_copy(_s, _dest, _type) { (_dest).data = pylt_realloc(NULL, sizeof(_type) * _len); memcpy((_dest).data, (_s).data, sizeof(_type) * (_s).len); }
 
+typedef struct PyLiteState PyLiteState;
+
 #endif
 

@@ -52,12 +52,12 @@ void pylt_vm_run(PyLiteState* state) {
     PyLiteObject *a, *b, *ret;
     size_t op;
 
-    for (int i = 0; i < kv_size(ps->opcodes); i++) {
+    for (unsigned int i = 0; i < kv_size(ps->opcodes); i++) {
         switch (kv_A(ps->opcodes, i)) {
             case BC_LOADCONST:
                 //printf("   %-15s %d\n", "LOADCONST", );
                 //printf("%d\n", kv_A(ps->opcodes, ++i));
-                kv_push(size_t, state->vm.stack, kv_A(ps->const_val, kv_A(ps->opcodes, ++i)-1));
+                kv_push(size_t, state->vm.stack, (size_t)kv_A(ps->const_val, kv_A(ps->opcodes, ++i)-1));
                 break;
             case BC_OPERATOR:
                 //printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(ps->opcodes, ++i)));
@@ -65,21 +65,22 @@ void pylt_vm_run(PyLiteState* state) {
                 switch (op) {
                     case OP_LT: case OP_LE: case OP_GT: case OP_GE: case OP_NE: case OP_EQ:
                     case OP_BITOR: case OP_BITXOR: case OP_BITAND: case OP_LSHIFT: case OP_RSHIFT:
-                    case OP_PLUS: case OP_MINUS: OP_MUL : case OP_MATMUL: case OP_DIV: case OP_FLOORDIV: case OP_MOD: OP_POW :
-                        b = kv_pop(state->vm.stack);
-                        a = kv_pop(state->vm.stack);
-                        ret = pylt_obj_op_binary(op, a, b);
+                    case OP_PLUS: case OP_MINUS: case OP_MUL : case OP_MATMUL: case OP_DIV: case OP_FLOORDIV: case OP_MOD: case OP_POW :
+                        b = castobj(kv_pop(state->vm.stack));
+                        a = castobj(kv_pop(state->vm.stack));
+                        ret = pylt_obj_op_binary(state, op, a, b);
                         if (!ret) {
                             printf("TypeError: unsupported operand type(s) for %s: 'int' and 'str'", pylt_vm_get_op_name(op));
+                            exit(-1);
                         }
-                        kv_push(size_t, state->vm.stack, ret);
+                        kv_push(size_t, state->vm.stack, (size_t)ret);
                         break;
                     default:
                         ;
                 }
                 break;
             case BC_PRINT:
-                debug_print_obj(kv_A(state->vm.stack, kv_size(state->vm.stack)-1));
+                debug_print_obj(castobj(kv_A(state->vm.stack, kv_size(state->vm.stack)-1)));
                 putchar('\n');
         }
     }

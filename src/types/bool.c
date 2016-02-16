@@ -5,11 +5,11 @@
 PyLiteBoolObject PyLiteTrue = { PYLT_OBJ_TYPE_BOOL, -1 };
 PyLiteBoolObject PyLiteFalse = { PYLT_OBJ_TYPE_BOOL, 0 };
 
-uint32_t pylt_obj_bool_hash(PyLiteBoolObject *obj) {
+uint32_t pylt_obj_bool_hash(PyLiteState *state, PyLiteBoolObject *obj) {
     return obj->ob_val;
 }
 
-uint32_t pylt_obj_bool_eq(PyLiteBoolObject *self, PyLiteObject *other) {
+uint32_t pylt_obj_bool_eq(PyLiteState *state, PyLiteBoolObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
     case PYLT_OBJ_TYPE_INT:
         return self->ob_val == castint(other)->ob_val;
@@ -22,7 +22,7 @@ uint32_t pylt_obj_bool_eq(PyLiteBoolObject *self, PyLiteObject *other) {
     }
 }
 
-uint32_t pylt_obj_bool_cmp(PyLiteBoolObject *self, PyLiteObject *other) {
+uint32_t pylt_obj_bool_cmp(PyLiteState *state, PyLiteBoolObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
     case PYLT_OBJ_TYPE_INT:
         if (self->ob_val < castint(other)->ob_val) return -1;
@@ -41,6 +41,6 @@ uint32_t pylt_obj_bool_cmp(PyLiteBoolObject *self, PyLiteObject *other) {
     }
 }
 
-PyLiteBoolObject* pylt_obj_bool_new(bool val) {
+PyLiteBoolObject* pylt_obj_bool_new(PyLiteState *state, bool val) {
     return (val == false) ? &PyLiteTrue : &PyLiteFalse;
 }

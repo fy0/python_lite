@@ -1,4 +1,5 @@
 ﻿
+#include "state.h"
 #include "lexer.h"
 #include "types/number.h"
 
@@ -54,7 +55,7 @@ double _read_float(RawString *str, int start_offset) {
 }
 
 
-PyLiteObject* new_obj_number_from_token(Token *tk) {
+PyLiteObject* new_obj_number_from_token(PyLiteState *state, Token *tk) {
     double fret;
     uint32_t iret; 
 
@@ -66,11 +67,11 @@ PyLiteObject* new_obj_number_from_token(Token *tk) {
                 case 2: iret = _read_x_int(&(tk->str),  2, _bin, 0); break;
                 case 3: iret = _read_x_int(&(tk->str),  8, _oct, 0); break;
             }
-            return castobj(pylt_obj_int_new(iret));
+            return castobj(pylt_obj_int_new(state, iret));
         case TK_FLOAT:
             iret = _read_x_int(&(tk->str), 10, _dec, tk->extra-1);
             fret = _read_float(&(tk->str), tk->extra);
-            return castobj(pylt_obj_float_new(fret + iret));
+            return castobj(pylt_obj_float_new(state, fret + iret));
     }
     return NULL;
 }

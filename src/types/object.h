@@ -4,9 +4,7 @@
 
 #include "../utils.h"
 #include "../io.h"
-#include "../lib/khash.h"
-
-typedef struct PyLiteState PyLiteState;
+#include "../lib/khash_obj.h"
 
 // Immutable object
 
@@ -54,20 +52,20 @@ enum PyLiteObjectTypeCode {
 
 // Object methods
 
-bool pylt_obj_eq(PyLiteObject *a, PyLiteObject *b);
-uint32_t pylt_obj_hash(PyLiteObject *obj);
-uint32_t pylt_obj_hashable(PyLiteObject *obj);
-uint32_t pylt_obj_istrue(PyLiteObject *obj);
-PyLiteObject* pylt_obj_op_unary(int op, PyLiteObject *obj);
-PyLiteObject* pylt_obj_op_binary(int op, PyLiteObject *a, PyLiteObject *b);
+bool pylt_obj_eq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
+uint32_t pylt_obj_hash(PyLiteState *state, PyLiteObject *obj);
+uint32_t pylt_obj_hashable(PyLiteState *state, PyLiteObject *obj);
+uint32_t pylt_obj_istrue(PyLiteState *state, PyLiteObject *obj);
+PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj);
+PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, PyLiteObject *b);
 //pylt_buildin_isinstance(PyLiteState *state, PyLiteObject *obj, PyLiteTypeObject *type);
 
 
 // Pylite table
-KHASH_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_hash, pylt_obj_eq);
-typedef khash_t(table) PyLiteTable;
+KHASHO_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_hash, pylt_obj_eq);
+typedef khasho_t(table) PyLiteTable;
 
-#define pylt_obj_table_new() kh_init(table);
+#define pylt_obj_table_new(state) kh_init(table);
 void pylt_obj_table_set(PyLiteTable *tab, PyLiteObject *key, PyLiteObject *val);
 PyLiteObject* pylt_obj_table_get(PyLiteTable *tab, PyLiteObject *key);
 bool pylt_obj_table_exists(PyLiteTable *tab, PyLiteObject *key);
@@ -108,7 +106,7 @@ void pylt_obj_free(PyLiteObject *obj);
 // Others
 const char* pylt_obj_type_name(int ob_type);
 
-typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteObject *a, PyLiteObject *b);
+typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
 
 typedef void(*PyLiteCFunction)(PyLiteObject *args);
 typedef void(*PyLiteCMethod)(PyLiteObject *self, PyLiteObject *args);
