@@ -76,11 +76,11 @@ void parse_basetype(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     switch (tk->val) {
         case TK_KW_TRUE:
-            kv_pushobj(ps->const_val, castobj(pylt_obj_bool_new(true)));
+            kv_pushobj(ps->const_val, castobj(pylt_obj_bool_new(ps->state, true)));
             next(ps);
             break;
         case TK_KW_FALSE: 
-            kv_pushobj(ps->const_val, castobj(pylt_obj_bool_new(false)));
+            kv_pushobj(ps->const_val, castobj(pylt_obj_bool_new(ps->state, false)));
             next(ps);
             break;
         case TK_INT: case TK_FLOAT:
@@ -106,7 +106,8 @@ T ->    ( EXPR ) |
         BASETYPE |
         IDENT
 */
-void parse_t(ParserState *ps) { 
+void parse_t(ParserState *ps) {
+    int tk_val;
     Token *tk = &(ps->ls->token);
     switch (tk->val) {
         case TK_NAME:
@@ -116,6 +117,21 @@ void parse_t(ParserState *ps) {
             next(ps);
             parse_expr(ps);
             ACCEPT(ps, ')');
+            break;
+        case '+': case '-':
+            tk_val = tk->val;
+            next(ps);
+            parse_expr10(ps);
+            print_tk_val(tk_val);
+            kv_pushbc(ps->opcodes, BC_OPERATOR);
+            kv_pushbc(ps->opcodes, tk_val == '+' ? OP_POS : OP_NEG);
+            break;
+        case '~':
+            next(ps);
+            parse_expr10(ps);
+            print_tk_val('~');
+            kv_pushbc(ps->opcodes, BC_OPERATOR);
+            kv_pushbc(ps->opcodes, token_to_op_val('~'));
             break;
         case TK_KW_NOT:
             next(ps);
@@ -165,10 +181,10 @@ _INLINE void parse_expr1(ParserState *ps) {
             parse_expr4(ps);
             parse_expr3(ps);
             parse_expr2(ps);
-            parse_expr1(ps);
             print_tk_val(TK_KW_OR);
             kv_pushbc(ps->opcodes, BC_OPERATOR);
             kv_pushbc(ps->opcodes, OP_OR);
+            parse_expr1(ps);
             break;
     }
 }
@@ -187,10 +203,10 @@ _INLINE void parse_expr2(ParserState *ps) {
             parse_expr5(ps);
             parse_expr4(ps);
             parse_expr3(ps);
-            parse_expr2(ps);
             print_tk_val(TK_KW_AND);
             kv_pushbc(ps->opcodes, BC_OPERATOR);
             kv_pushbc(ps->opcodes, OP_AND);
+            parse_expr2(ps);
             break;
     }
 }
@@ -228,10 +244,10 @@ success:
     parse_expr6(ps);
     parse_expr5(ps);
     parse_expr4(ps);
-    parse_expr3(ps);
     printf("%s\n", pylt_vm_get_op_name(op_val));
     kv_pushbc(ps->opcodes, BC_OPERATOR);
     kv_pushbc(ps->opcodes, op_val);
+    parse_expr3(ps);
 }
 
 
@@ -247,10 +263,10 @@ _INLINE void parse_expr4(ParserState *ps) {
             parse_expr7(ps);
             parse_expr6(ps);
             parse_expr5(ps);
-            parse_expr4(ps);
             print_tk_val('|');
             kv_pushbc(ps->opcodes, BC_OPERATOR);
             kv_pushbc(ps->opcodes, OP_BITOR);
+            parse_expr4(ps);
             break;
     }
 }
@@ -267,10 +283,10 @@ _INLINE void parse_expr5(ParserState *ps) {
             parse_expr8(ps);
             parse_expr7(ps);
             parse_expr6(ps);
-            parse_expr5(ps);
             print_tk_val('^');
             kv_pushbc(ps->opcodes, BC_OPERATOR);
             kv_pushbc(ps->opcodes, OP_BITXOR);
+            parse_expr5(ps);
             break;
     }
 }
@@ -287,10 +303,10 @@ _INLINE void parse_expr6(ParserState *ps) {
             parse_expr9(ps);
             parse_expr8(ps);
             parse_expr7(ps);
-            parse_expr6(ps);
             print_tk_val('&');
             kv_pushbc(ps->opcodes, BC_OPERATOR);
             kv_pushbc(ps->opcodes, OP_BITAND);
+            parse_expr6(ps);
             break;
     }
 }
@@ -307,10 +323,10 @@ _INLINE void parse_expr7(ParserState *ps) {
             parse_expr10(ps);
             parse_expr9(ps);
             parse_expr8(ps);
-            parse_expr7(ps);
             print_tk_val(tk_val);
             kv_pushbc(ps->opcodes, BC_OPERATOR);
             kv_pushbc(ps->opcodes, token_to_op_val(tk_val));
+            parse_expr7(ps);
             break;
     }
 }
@@ -326,10 +342,10 @@ _INLINE void parse_expr8(ParserState *ps) {
             next(ps);
             parse_expr10(ps);
             parse_expr9(ps);
-            parse_expr8(ps);
             print_tk_val(tk_val);
             kv_pushbc(ps->opcodes, BC_OPERATOR);
             kv_pushbc(ps->opcodes, token_to_op_val(tk_val));
+            parse_expr8(ps);
             break;
     }
 }
@@ -344,10 +360,10 @@ _INLINE void parse_expr9(ParserState *ps) {
             tk_val = tk->val;
             next(ps);
             parse_expr10(ps);
-            parse_expr9(ps);
             print_tk_val(tk_val);
             kv_pushbc(ps->opcodes, BC_OPERATOR);
             kv_pushbc(ps->opcodes, token_to_op_val(tk_val));
+            parse_expr9(ps);
             break;
     }
 }

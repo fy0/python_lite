@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "lexer.h"
 #include "vm.h"
+#include "types/object.h"
 #include "types/bool.h"
 #include "types/number.h"
 
@@ -30,9 +31,9 @@ void debug_print_obj(PyLiteObject *obj) {
 
 void debug_print_const_vals(ParserState *ps) {
     printf("CONST VALS:\n");
-    for (int i = 0; i < kv_size(ps->const_val); i++) {
+    for (unsigned int i = 0; i < kv_size(ps->const_val); i++) {
         PyLiteObject *obj = kv_A(ps->const_val, i);
-        printf("   %-4d %-8s ", i + 1, pylt_obj_type_name(obj->ob_type));
+        printf("   %-4d %-8s ", i + 1, pylt_type_name(obj->ob_type));
         debug_print_obj(obj);
         putchar('\n');
     }
@@ -40,7 +41,7 @@ void debug_print_const_vals(ParserState *ps) {
 
 void debug_print_opcodes(ParserState *ps) {
     printf("OPCODES:\n");
-    for (int i = 0; i < kv_size(ps->opcodes); i++) {
+    for (unsigned int i = 0; i < kv_size(ps->opcodes); i++) {
         switch (kv_A(ps->opcodes, i)) {
             case BC_LOADCONST:
                 printf("   %-15s %d\n", "LOADCONST", kv_A(ps->opcodes, ++i));
