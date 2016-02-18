@@ -5,10 +5,12 @@
 #include "lexer.h"
 #include "lib/kvec.h"
 #include "types/object.h"
+#include "types/func.h"
 
 typedef struct ParserState {
     LexState *ls;
     PyLiteState* state;
+    kvec_t(PyLiteFunctionObject*) func_stack;
     kvec_t(PyLiteObject*) const_val;
     kvec_t(size_t) opcodes;
 } ParserState;
