@@ -11,8 +11,7 @@ typedef struct ParserState {
     LexState *ls;
     PyLiteState* state;
     kvec_t(PyLiteFunctionObject*) func_stack;
-    kvec_t(PyLiteObject*) const_val;
-    kvec_t(size_t) opcodes;
+    PyLiteFunctionObject* func;
 } ParserState;
 
 #define kv_pushobj(v, x) kv_push(PyLiteObject*, (v), (x))

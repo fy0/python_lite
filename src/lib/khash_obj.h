@@ -392,7 +392,7 @@ static const double __ac_HASH_UPPER = 0.77;
 @param  name  Name of the hash table [symbol]
 @return       Pointer to the hash table [khash_t(name)*]
 */
-#define kho_init(name) kho_init_##name()
+#define kho_init(name, state) kho_init_##name(state)
 
 /*! @function
 @abstract     Destroy a hash table.

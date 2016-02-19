@@ -66,7 +66,7 @@ const char* pylt_obj_type_name_cstr(PyLiteState *state, PyLiteObject *obj);
 KHASHO_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_hash, pylt_obj_eq);
 typedef khasho_t(table) PyLiteTable;
 
-#define pylt_obj_table_new(state) kh_init(table);
+#define pylt_obj_table_new(state) kho_init(table, state);
 void pylt_obj_table_set(PyLiteTable *tab, PyLiteObject *key, PyLiteObject *val);
 PyLiteObject* pylt_obj_table_get(PyLiteTable *tab, PyLiteObject *key);
 bool pylt_obj_table_exists(PyLiteTable *tab, PyLiteObject *key);

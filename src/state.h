@@ -7,9 +7,9 @@
 #include "lib/kvec.h"
 
 typedef struct PyLiteState {
-    ParserState ps;
     PyLiteVM vm;
     kvec_t(uint32_t) cls_base;
+    PyLiteFunctionObject *func;
 } PyLiteState;
 
 void pylt_state_init(PyLiteState *state);

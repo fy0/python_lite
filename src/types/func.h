@@ -9,8 +9,10 @@ typedef struct PyLiteFunctionObject {
     PyLiteObject_HEAD;
     kvec_t(PyLiteObject*) const_val;
     kvec_t(size_t) opcodes;
-    // locals
+    PyLiteTable *locals;
     // upvalue
 } PyLiteFunctionObject;
+
+PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state);
 
 #endif

@@ -32,7 +32,6 @@ int main(int argc,char* argv[])
     debug_print_const_vals(&ps);
     debug_print_opcodes(&ps);
 
-    state.ps = ps;
     pylt_vm_init(&state.vm);
     pylt_vm_run(&state);
 

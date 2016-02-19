@@ -48,20 +48,20 @@ void pylt_vm_init(PyLiteVM* vm) {
 }
 
 void pylt_vm_run(PyLiteState* state) {
-    ParserState *ps = &state->ps;
+    PyLiteFunctionObject *func = state->func;
     PyLiteObject *a, *b, *ret;
     size_t op;
 
-    for (unsigned int i = 0; i < kv_size(ps->opcodes); i++) {
-        switch (kv_A(ps->opcodes, i)) {
+    for (unsigned int i = 0; i < kv_size(func->opcodes); i++) {
+        switch (kv_A(func->opcodes, i)) {
             case BC_LOADCONST:
                 //printf("   %-15s %d\n", "LOADCONST", );
-                //printf("%d\n", kv_A(ps->opcodes, ++i));
-                kv_push(size_t, state->vm.stack, (size_t)kv_A(ps->const_val, kv_A(ps->opcodes, ++i)-1));
+                //printf("%d\n", kv_A(func->opcodes, ++i));
+                kv_push(size_t, state->vm.stack, (size_t)kv_A(func->const_val, kv_A(func->opcodes, ++i)-1));
                 break;
             case BC_OPERATOR:
-                //printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(ps->opcodes, ++i)));
-                op = kv_A(ps->opcodes, ++i);
+                //printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(func->opcodes, ++i)));
+                op = kv_A(func->opcodes, ++i);
                 switch (op) {
                     case OP_LT: case OP_LE: case OP_GT: case OP_GE: case OP_NE: case OP_EQ:
                     case OP_BITOR: case OP_BITXOR: case OP_BITAND: case OP_LSHIFT: case OP_RSHIFT:
