@@ -12,7 +12,10 @@ typedef struct PyLiteBytesObject {
 } PyLiteBytesObject;
 
 uint32_t pylt_obj_bytes_hash(PyLiteState *state, PyLiteBytesObject *obj);
+uint32_t pylt_obj_bytes_forcehash(PyLiteState *state, PyLiteBytesObject *obj);
 uint32_t pylt_obj_bytes_eq(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other);
 uint32_t pylt_obj_bytes_cmp(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other);
+
+PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int size, bool is_raw);
 
 #endif
