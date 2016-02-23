@@ -21,13 +21,14 @@ void parse_expr9(ParserState *ps);
 void parse_expr10(ParserState *ps);
 
 PyLiteObject* new_obj_number_from_token(PyLiteState *state, Token *tk);
+PyLiteObject* new_obj_bytes_from_token(PyLiteState *state, Token *tk);
 
 
 void next(ParserState *ps) {
     pylt_lex_next(ps->ls);
 }
 
-void error(ParserState *ps) {
+void error(ParserState *ps, int code) {
     Token *tk = &(ps->ls->token);
     printf("ERROR %d\n", ps->ls->linenumber);
     //if (tk->val == TK_INT) raw_str_print(&(tk->str));
@@ -35,6 +36,14 @@ void error(ParserState *ps) {
     if (name) printf("%s", name);
     else putchar(tk->val);
     putchar('\n');
+    switch (code) {
+        case PYLT_ERR_PARSER_INVALID_SYNTAX:
+            printf("SyntaxError: invalid syntax\n");
+            break;
+        case PYLT_ERR_PARSER_BYTES_INVALID_ESCAPE:
+            printf("SyntaxError: (value error) invalid escape\n");
+            break;
+    }
     system("pause");
     exit(-1);
 }
@@ -55,7 +64,7 @@ void print_tk_val(int tk_val) {
 
 static _INLINE
 void ACCEPT(ParserState *ps, int token) {
-    if (ps->ls->token.val != token) error(ps);
+    if (ps->ls->token.val != token) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
     next(ps);
 }
 
@@ -77,6 +86,8 @@ void parse_op(ParserState *ps) {
 
 void parse_basetype(ParserState *ps) {
     Token *tk = &(ps->ls->token);
+    PyLiteObject *obj;
+
     switch (tk->val) {
         case TK_KW_TRUE:
             kv_pushobj(ps->func->const_val, castobj(pylt_obj_bool_new(ps->state, true)));
@@ -92,10 +103,17 @@ void parse_basetype(ParserState *ps) {
             next(ps);
             break;
         case TK_BYTES:
+            raw_str_print(&(tk->str));
+            obj = castobj(new_obj_bytes_from_token(ps->state, tk));
+            if (!obj) {
+                error(ps, PYLT_ERR_PARSER_BYTES_INVALID_ESCAPE);
+                return;
+            }
+            kv_pushobj(ps->func->const_val, obj);
             next(ps);
             break;
         default:
-            error(ps);
+            error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
             return;
     }
     kv_pushbc(ps->func->opcodes, BC_LOADCONST);

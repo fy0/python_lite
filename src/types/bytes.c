@@ -76,6 +76,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int s
     obj->ob_val = pylt_realloc(NULL, sizeof(uint8_t)*size + 1);
     if (is_raw) {
         obj->ob_val[size] = '\0';
+        obj->ob_size = size;
         memcpy(obj->ob_val, str, size);
     } else {
         int pos = 0, num;
@@ -101,7 +102,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int s
                                 obj->ob_val[pos++] = _hex(str[i]) * 16 + _hex(str[i + 1]);
                             } else {
                                 pylt_free(obj->ob_val);
-                                pylt_free(obj);
+                                //pylt_free(obj); // 报错？为何？
                                 return NULL;
                             }
                             i += 2;
@@ -115,6 +116,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int s
                     obj->ob_val[pos++] = str[i++];
             }
         }
+        obj->ob_size = pos;
         obj->ob_val[pos] = '\0';
         pylt_realloc(obj->ob_val, sizeof(uint8_t)*pos + 1);
     }

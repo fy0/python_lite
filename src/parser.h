@@ -20,4 +20,9 @@ typedef struct ParserState {
 void parse(ParserState *ps);
 void pylt_parser_init(ParserState *ps, PyLiteState* state, LexState *ls);
 
+// SyntaxError: invalid syntax
+#define PYLT_ERR_PARSER_INVALID_SYNTAX -1
+// SyntaxError: (value error) invalid escape
+#define PYLT_ERR_PARSER_BYTES_INVALID_ESCAPE -2
+
 #endif

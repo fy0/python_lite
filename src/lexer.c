@@ -91,6 +91,7 @@ uint32_t read_str_or_bytes_head(StringStream *ss, bool *is_raw) {
     StringStreamSave save;
     ss_savepos(ss, &save);
     uint8_t state = 0; // r1 u2 b4
+    *is_raw = false;
 
     for (;;) {
         switch (ss->current) {

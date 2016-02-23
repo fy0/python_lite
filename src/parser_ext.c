@@ -2,6 +2,7 @@
 #include "state.h"
 #include "lexer.h"
 #include "types/number.h"
+#include "types/bytes.h"
 
 
 _INLINE static uint8_t _hex(uint32_t code) {
@@ -27,6 +28,7 @@ _INLINE static uint8_t _dec(uint32_t code) {
 }
 
 
+_INLINE static
 int _read_x_int(RawString *str, int n, uint8_t(*func)(uint32_t code), int max_size) {
     const uint8_t *p = str->s;
     const uint8_t *e = (max_size > 0) ? str->s + max_size : str->e;
@@ -41,6 +43,7 @@ int _read_x_int(RawString *str, int n, uint8_t(*func)(uint32_t code), int max_si
 }
 
 
+_INLINE static
 double _read_float(RawString *str, int start_offset) {
     const uint8_t *p = str->s + start_offset;
     const uint8_t *e = str->e;
@@ -77,5 +80,5 @@ PyLiteObject* new_obj_number_from_token(PyLiteState *state, Token *tk) {
 }
 
 PyLiteObject* new_obj_bytes_from_token(PyLiteState *state, Token *tk) {
-    ;
+    return (PyLiteObject*)pylt_obj_bytes_new(state, tk->str.s, tk->str.e - tk->str.s, tk->extra);
 }
