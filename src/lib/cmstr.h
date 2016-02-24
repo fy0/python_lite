@@ -37,6 +37,6 @@ int cmstr_free(CMString* str);
 
 uint32_t cms_at(CMString* str, int index);
 
-const char* utf8_decode(const char *o, int *val);
+//const char* utf8_decode(const char *o, int *val);
 
 #endif

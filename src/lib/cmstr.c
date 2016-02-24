@@ -97,7 +97,7 @@ uint32_t cms_at(CMString* str, int index) {
 /*
 ** Decode one UTF-8 sequence, returning NULL if byte sequence is invalid.
 */
-const char *utf8_decode(const char *o, int *val) {
+static const char *utf8_decode(const char *o, int *val) {
     static const unsigned int limits[] = { 0xFF, 0x7F, 0x7FF, 0xFFFF };
     const unsigned char *s = (const unsigned char *)o;
     unsigned int c = s[0];
@@ -126,7 +126,7 @@ const char *utf8_decode(const char *o, int *val) {
 int utf8_char_size(const char *str, int str_size, int* plength) {
     uint8_t c;
     uint8_t size_limits[] = { 0x80, 0xF0, 0xFE };
-    const uint8_t *s;
+    const char *s;
     int i, max_index = -1;
     int length = 0;
 
@@ -189,7 +189,7 @@ void* utf8_convert(const uint8_t* u8str, int size, int* pchar_size, int* plength
 }
 
 
-char* ucs4_to_utf8(int code) {
+static char* ucs4_to_utf8(int code) {
     const char  abPrefix[] = { 0, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
     const int adwCodeUp[] = {
         0x80,           // U+00000000 ～ U+0000007F

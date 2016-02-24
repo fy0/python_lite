@@ -181,12 +181,7 @@ typedef khint_t khiter_t;
 #include "../utils.h"
 
 #ifndef kcalloc
-kho_inline
-void* my_malloc(size_t size) {
-    void* ret = pylt_realloc(NULL, size);
-    memset(ret, 0, size);
-    return ret;
-}
+void* my_malloc(size_t size);
 
 #define kcalloc(N,Z) my_malloc((N)*(Z))
 #endif

@@ -5,7 +5,8 @@
 #include "object.h"
 #include "../lib/klist.h"
 
-KLIST_INIT(list_obj, PyLiteObject*, pylt_obj_free)
+#define __the_free(x)
+KLIST_INIT(list_obj, PyLiteObject, __the_free)
 
 typedef struct PyLiteTupleObject {
     PyLiteObject_HEAD;

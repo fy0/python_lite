@@ -1,6 +1,8 @@
 ﻿
 #include "lexer.h"
 
+uint32_t get_token_1(StringStream *ss, uint32_t next1_eq_token, uint32_t next1_token, uint32_t next2_token);
+
 const char* pylt_lex_tokens[] = {
     "<END>", "<COMMENTS>", "<NEWLINE>", "<INDENT>", "<DEDENT>",
     "<NAME>", "<INT>", "<FLOAT>", "<STRING>", "<BYTES>",

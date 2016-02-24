@@ -39,7 +39,7 @@ _INLINE static uint8_t _hex(uint32_t code) {
     return 255;
 }
 
-_INLINE static int8_t _oct(uint32_t code) {
+_INLINE static uint8_t _oct(uint32_t code) {
     if (code >= '0' && code <= '7') return code - '0';
     return 255;
 }
@@ -56,7 +56,7 @@ int try_get_escape(int code) {
 
 _INLINE static
 int _read_x_int(const char *p, int *pnum, uint8_t(*func)(uint32_t code), int max_size) {
-    const uint8_t *e = p + max_size;
+    const char *e = p + max_size;
     int ret = 0, num = 0, val = (int)pow(10, e - p - 1);
 
     do {
@@ -71,7 +71,7 @@ int _read_x_int(const char *p, int *pnum, uint8_t(*func)(uint32_t code), int max
 
 
 PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int size, bool is_raw) {
-    PyLiteBytesObject *obj = pylt_realloc(NULL, sizeof(PyLiteBytesObject*));
+    PyLiteBytesObject *obj = pylt_realloc(NULL, sizeof(PyLiteBytesObject));
     obj->ob_type = PYLT_OBJ_TYPE_BYTES;
     obj->ob_val = pylt_realloc(NULL, sizeof(uint8_t)*size + 1);
     if (is_raw) {
@@ -119,7 +119,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int s
         }
         obj->ob_size = pos;
         obj->ob_val[pos] = '\0';
-        pylt_realloc(obj->ob_val, sizeof(uint8_t)*pos + 1);
+        obj->ob_val = pylt_realloc(obj->ob_val, sizeof(uint8_t)*pos + 1);
     }
     obj->ob_hash = pylt_obj_bytes_forcehash(state, obj);
     return obj;

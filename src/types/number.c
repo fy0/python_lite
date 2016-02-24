@@ -346,14 +346,14 @@ PyLiteObject* pylt_obj_float_pow(PyLiteState *state, PyLiteFloatObject *self, Py
 
 
 PyLiteIntObject* pylt_obj_int_new(PyLiteState *state, int32_t val) {
-    PyLiteIntObject *obj = pylt_realloc(NULL, sizeof(PyLiteIntObject*));
+    PyLiteIntObject *obj = pylt_realloc(NULL, sizeof(PyLiteIntObject));
     obj->ob_type = PYLT_OBJ_TYPE_INT;
     obj->ob_val = val;
     return obj;
 }
 
 PyLiteFloatObject* pylt_obj_float_new(PyLiteState *state, double val) {
-    PyLiteFloatObject *obj = pylt_realloc(NULL, sizeof(PyLiteFloatObject*));
+    PyLiteFloatObject *obj = pylt_realloc(NULL, sizeof(PyLiteFloatObject));
     obj->ob_type = PYLT_OBJ_TYPE_FLOAT;
     obj->ob_val = val;
     return obj;

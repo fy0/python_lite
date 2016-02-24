@@ -16,6 +16,7 @@ int main(int argc,char* argv[])
 {
     int size;
     char *buf = read_file("test.py", &size);
+    if (!buf) return 0;
 
     StringStream *ss = ss_new(buf, size);
     printf(buf);

@@ -12,7 +12,7 @@ _INLINE static uint8_t _hex(uint32_t code) {
     return 255;
 }
 
-_INLINE static int8_t _oct(uint32_t code) {
+_INLINE static uint8_t _oct(uint32_t code) {
     if (code >= '0' && code <= '7') return code - '0';
     return 255;
 }

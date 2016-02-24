@@ -26,6 +26,9 @@ typedef struct RawString {
 
 void raw_str_print(RawString *rs);
 
+#define max(a,b)    (((a) > (b)) ? (a) : (b))
+#define min(a,b)    (((a) < (b)) ? (a) : (b))
+
 typedef struct pylt_Stack {
     void* data;
     int top;

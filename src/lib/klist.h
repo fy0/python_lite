@@ -67,7 +67,7 @@ void* my_malloc(size_t size) {
 	SCOPE void kmp_destroy_##name(kmp_##name##_t *mp) {					\
 		size_t k;														\
 		for (k = 0; k < mp->n; ++k) {									\
-			kmpfree_f(mp->buf[k]); kfree(mp->buf[k]);					\
+		    kmpfree_f(mp->buf[k]); kfree(mp->buf[k]);					\
 		}																\
 		free(mp->buf); kfree(mp);										\
 	}																	\
