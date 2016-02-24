@@ -92,6 +92,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int s
                         case 'r': obj->ob_val[pos++] = 13; i++; break;
                         case 't': obj->ob_val[pos++] = 9; i++; break;
                         case 'v': obj->ob_val[pos++] = 11; break;
+                        case '\\': obj->ob_val[pos++] = '\\'; break;
                         case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
                             obj->ob_val[pos++] = _read_x_int(str + i, &num, _oct, min(size - i, 3));
                             i += num;
