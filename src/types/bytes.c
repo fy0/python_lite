@@ -103,7 +103,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int s
                                 obj->ob_val[pos++] = _hex(str[i]) * 16 + _hex(str[i + 1]);
                             } else {
                                 pylt_free(obj->ob_val);
-                                //pylt_free(obj); // 报错？为何？
+                                pylt_free(obj);
                                 return NULL;
                             }
                             i += 2;
