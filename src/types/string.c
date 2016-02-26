@@ -45,16 +45,6 @@ _INLINE static uint8_t _oct(uint32_t code) {
 }
 
 _INLINE static
-int try_get_escape(int code) {
-    const char other_tokens[] = "abfnrtv";
-    const int other_codes[] = { 7, 8, 12, 10, 13, 9, 11 };
-    for (const char *p = other_tokens; *p; p++) {
-        if (code == *p) return other_codes[p - other_tokens];
-    }
-    return code;
-}
-
-_INLINE static
 int _read_x_int(const char *p, int *pnum, uint8_t(*func)(uint32_t code), int max_size) {
     const char *e = p + max_size;
     int ret = 0, num = 0, val = (int)pow(10, e - p - 1);
@@ -85,7 +75,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, const char* str, int size,
         for (int i = 0; i < size;) {
             switch (str[i]) {
                 case '\\':
-                    i++;
+                    if (++i >= size) goto _def;
                     switch (str[i]) {
                         case 'a': obj->ob_val[pos++] = 7; i++; break;
                         case 'b': obj->ob_val[pos++] = 8; i++; break;
@@ -105,7 +95,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, const char* str, int size,
                                 obj->ob_val[pos++] = _hex(str[i]) * 16 + _hex(str[i + 1]);
                             } else {
                                 pylt_free(obj->ob_val);
-                                //pylt_free(obj); // 报错？为何？
+                                pylt_free(obj);
                                 return NULL;
                             }
                             i += 2;
@@ -115,7 +105,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, const char* str, int size,
                             obj->ob_val[pos++] = str[++i];
                             break;
                     }
-                default:
+                default: _def :
                     obj->ob_val[pos++] = str[i++];
             }
         }

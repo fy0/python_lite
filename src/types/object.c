@@ -43,7 +43,7 @@ void* basetype_op_func_table[][23] = {
         NULL, NULL, NULL, NULL
     },
     { // bytes
-        NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
+        NULL, NULL, NULL, NULL, NULL, &pylt_obj_bytes_eq,
         NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
