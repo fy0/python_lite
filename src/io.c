@@ -28,6 +28,7 @@ StringStream* ss_new(uint8_t *buf, int size) {
     ss->p = buf;
     ss->now = 0;
     ss->size = size;
+    ss->page = 0;
     return ss;
 }
 

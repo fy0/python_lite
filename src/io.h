@@ -19,6 +19,7 @@ typedef struct StringStream {
 
     int now;
     int size;
+    int page;
     uint32_t current;
 } StringStream;
 

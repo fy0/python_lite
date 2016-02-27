@@ -42,10 +42,13 @@ typedef enum TokenKind {
 
 } TokenKind;
 
+typedef struct PyLiteObject PyLiteObject;
+
 typedef struct Token {
     uint32_t val;
     int extra;
     RawString str;
+    PyLiteObject *obj;
 } Token;
 
 typedef struct IndentInfo {
@@ -53,9 +56,25 @@ typedef struct IndentInfo {
     int val;
 } IndentInfo;
 
+typedef struct LexExtraData {
+    /* for bytes/str */
+    struct {
+        char *buf;
+        int pos;
+        int size;
+    } bytes;
+
+    struct {
+        uint32_t *buf;
+        int pos;
+        int size;
+    } str;
+} LexExtraData;
+
 typedef struct LexState {
     int linenumber;
     Token token; /* current token */
+    LexExtraData le;
     StringStream* ss;
 
     int current_indent;

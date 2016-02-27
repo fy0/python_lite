@@ -52,6 +52,12 @@ void pylt_lex_init(LexState *ls, StringStream *ss)
         idt = idt->prev;
     }
     idt->prev = NULL;
+
+    ls->le.bytes.buf = pylt_realloc(NULL, PYLT_LEX_STR_DEFAULT_BUFFER_SIZE);
+    ls->le.bytes.size = PYLT_LEX_STR_DEFAULT_BUFFER_SIZE;
+
+    ls->le.str.buf = pylt_realloc(NULL, PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE);
+    ls->le.str.size = PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE;
 }
 
 
@@ -126,11 +132,32 @@ _not_str:
     return 0;
 }
 
+_INLINE static bool bytes_next(LexState *ls, uint32_t chr) {
+    if (ls->le.bytes.pos+1 == ls->le.bytes.size) {
+        ls->le.bytes.buf = pylt_realloc(ls->le.bytes.buf, ls->le.bytes.size += PYLT_LEX_BYTES_DEFAULT_BUFFER_INC_STEP);
+    }
+    ls->le.bytes.buf[ls->le.bytes.pos++] = (char)chr;
+    return true;
+}
+
+_INLINE static bool str_next(LexState *ls, uint32_t chr) {
+    if (ls->le.str.pos + 1 == ls->le.str.size) {
+        ls->le.str.buf = pylt_realloc(ls->le.str.buf, ls->le.str.size += PYLT_LEX_STR_DEFAULT_BUFFER_INC_STEP);
+    }
+    ls->le.str.buf[ls->le.str.pos++] = chr;
+    return true;
+}
+
+_INLINE static bool bs_next(LexState *ls, uint32_t chr, bool is_str) {
+    return (is_str) ? str_next(ls, chr) : bytes_next(ls, chr);
+}
+
 
 bool read_str_or_bytes(LexState *ls, bool is_raw) {
     StringStream *ss = ls->ss;
     uint32_t sign = ss->current;
     StringStreamSave save;
+    bool is_str_type = ls->token.val == TK_STRING;
     bool is_long_string_or_bytes = false;
 
     // now : """abc"""
@@ -153,7 +180,8 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
         ss_loadpos(ss, &save);
     }
 
-    ls->token.str.s = ss_lastpos(ss);
+    if (is_str_type) ls->le.str.pos = 0;
+    else ls->le.bytes.pos = 0;
 
     for (;;) {
         switch (ss->current) {
@@ -162,25 +190,34 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
                 ls->token.str.e = ss_lastpos(ss);
                 if (is_long_string_or_bytes) {
                     ss_nextc(ss);
-                    if (ss->current != sign) continue;
+                    if (ss->current != sign) {
+                        bs_next(ls, sign, is_str_type);
+                        continue;
+                    }
                     ss_nextc(ss);
-                    if (ss->current != sign) continue;
+                    if (ss->current != sign) {
+                        bs_next(ls, sign, is_str_type);
+                        bs_next(ls, sign, is_str_type);
+                        continue;
+                    }
                     ss_nextc(ss);
-                    return true;
+                    goto the_end;
                 } else {
                     ss_nextc(ss);
-                    return true;
+                    goto the_end;
                 }
             }
         case '\n': {
             ls->linenumber++;
             if (!is_long_string_or_bytes) return false;
+            bs_next(ls, ss->current, is_str_type);
             ss_nextc(ss);
             break;
         }
         case '\r': {
             ls->linenumber++;
             if (!is_long_string_or_bytes) return false;
+            bs_next(ls, '\n', is_str_type);
             ss_nextc(ss);
             if (ss->current == '\n') ss_nextc(ss);
             break;
@@ -189,9 +226,21 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
         case '\0':
             return false;
         default:
+            bs_next(ls, ss->current, is_str_type);
             ss_nextc(ss);
         }
     }
+    return false;
+
+the_end:
+    if (is_str_type) {
+        ls->token.str.s = ls->le.str.buf;
+        ls->token.str.e = ls->le.str.buf + ls->le.bytes.pos;
+    } else {
+        ls->token.str.s = ls->le.bytes.buf;
+        ls->token.str.e = ls->le.bytes.buf + ls->le.bytes.pos;
+    }
+    return true;
 }
 
 uint32_t read_kw_or_id(LexState *ls) {

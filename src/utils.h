@@ -46,5 +46,9 @@ typedef struct pylt_Stack {
 
 typedef struct PyLiteState PyLiteState;
 
-#endif
+#define PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE 64
+#define PYLT_LEX_BYTES_DEFAULT_BUFFER_INC_STEP 32
+#define PYLT_LEX_STR_DEFAULT_BUFFER_SIZE 24
+#define PYLT_LEX_STR_DEFAULT_BUFFER_INC_STEP 24
 
+#endif
