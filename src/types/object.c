@@ -6,6 +6,8 @@
 #include "bool.h"
 #include "string.h"
 #include "bytes.h"
+#include "set.h"
+
 
 void* basetype_op_func_table[][23] = {
     /* { //LT, LE, GT, GE, NE, EQ, 
@@ -135,8 +137,9 @@ pl_int_t pylt_obj_ccmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b) {
         case PYLT_OBJ_TYPE_INT: return pylt_obj_int_ccmp(state, castint(a), b);
         case PYLT_OBJ_TYPE_FLOAT: return pylt_obj_float_ccmp(state, castfloat(a), b);
         case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_ccmp(state, castbool(a), b);
-        case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_ccmp(state, castbytes(a), b);
         case PYLT_OBJ_TYPE_STR: return pylt_obj_str_ccmp(state, caststr(a), b);
+        case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_ccmp(state, castbytes(a), b);
+        case PYLT_OBJ_TYPE_SET: return pylt_obj_set_ccmp(state, castset(a), b);
     }
     return 2;
 }
@@ -147,8 +150,9 @@ pl_bool_t pylt_obj_ceq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b) {
         case PYLT_OBJ_TYPE_INT: return pylt_obj_int_ceq(state, castint(a), b);
         case PYLT_OBJ_TYPE_FLOAT: return pylt_obj_float_ceq(state, castfloat(a), b);
         case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_ceq(state, castbool(a), b);
-        case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_ceq(state, castbytes(a), b);
         case PYLT_OBJ_TYPE_STR: return pylt_obj_str_ceq(state, caststr(a), b);
+        case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_ceq(state, castbytes(a), b);
+        case PYLT_OBJ_TYPE_SET: return pylt_obj_set_ceq(state, castset(a), b);
     }
     return false;
 }
@@ -222,6 +226,7 @@ PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, Py
                 case -1: return castobj((op == OP_LT || op == OP_LE) ? &PyLiteTrue : &PyLiteFalse);
                 case  0: return castobj((op == OP_LE || op == OP_GE) ? &PyLiteTrue : &PyLiteFalse);
                 case  1: return castobj((op == OP_GT || op == OP_GE) ? &PyLiteTrue : &PyLiteFalse);
+                case  3: return castobj(&PyLiteFalse);
                 default: return NULL;
             }
         case OP_NE:

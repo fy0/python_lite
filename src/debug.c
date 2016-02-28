@@ -19,7 +19,7 @@ void debug_print_obj(PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_BOOL: printf((castbool(obj)->ob_val == 0) ? "False" : "True"); break;
         case PYLT_OBJ_TYPE_BYTES: printf("%.*s", castbytes(obj)->ob_size, castbytes(obj)->ob_val); break;
         case PYLT_OBJ_TYPE_STR:
-            for (int i = 0; i < caststr(obj)->ob_size; i++) {
+            for (size_t i = 0; i < caststr(obj)->ob_size; i++) {
                 putcode(caststr(obj)->ob_val[i]);
             }
         case PYLT_OBJ_TYPE_FUNCTION:

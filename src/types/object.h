@@ -86,8 +86,9 @@ struct PyLiteBoolObject;
 
 struct PyLiteBytesObject;
 struct PyLiteStrObject;
-struct PyLiteTupleObject;
+struct PyLiteSetObject;
 struct PyLiteListObject;
+struct PyLiteTupleObject;
 struct PyLiteDictObject;
 
 #define cast(t, exp)	((t)(exp))
@@ -98,8 +99,9 @@ struct PyLiteDictObject;
 
 #define castbytes(i)    cast(struct PyLiteBytesObject*, (i))
 #define caststr(i)      cast(struct PyLiteStrObject*, (i))
-#define casttuple(i)    cast(struct PyLiteTupleObject*, (i))
+#define castset(i)    cast(struct PyLiteSetObject*, (i))
 #define castlist(i)     cast(struct PyLiteListObject*, (i))
+#define casttuple(i)    cast(struct PyLiteTupleObject*, (i))
 #define castdict(i)     cast(struct PyLiteDictObject*, (i))
 
 #define castclass(i)    cast(struct PyLiteCustomObject*, (i))
