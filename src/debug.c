@@ -5,6 +5,7 @@
 #include "types/object.h"
 #include "types/bool.h"
 #include "types/bytes.h"
+#include "types/string.h"
 #include "types/number.h"
 
 const char* get_op_name(uint32_t val) {
@@ -18,6 +19,9 @@ void debug_print_obj(PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_BOOL: printf((castbool(obj)->ob_val == 0) ? "False" : "True"); break;
         case PYLT_OBJ_TYPE_BYTES: printf("%.*s", castbytes(obj)->ob_size, castbytes(obj)->ob_val); break;
         case PYLT_OBJ_TYPE_STR:
+            for (int i = 0; i < caststr(obj)->ob_size; i++) {
+                putcode(caststr(obj)->ob_val[i]);
+            }
         case PYLT_OBJ_TYPE_FUNCTION:
         case PYLT_OBJ_TYPE_MODULE:
         case PYLT_OBJ_TYPE_TYPE:
