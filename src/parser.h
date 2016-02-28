@@ -18,7 +18,7 @@ typedef struct ParserState {
 #define kv_pushbc(v, x) kv_push(size_t, (v), (x))
 
 void parse(ParserState *ps);
-void pylt_parser_init(ParserState *ps, PyLiteState* state, LexState *ls);
+void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls);
 
 // SyntaxError: invalid syntax
 #define PYLT_ERR_PARSER_INVALID_SYNTAX -1

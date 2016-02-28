@@ -16,9 +16,9 @@ typedef struct PyLiteFloatObject {
 } PyLiteFloatObject;
 
 
-uint32_t pylt_obj_int_chash(PyLiteState *state, PyLiteIntObject *obj);
-uint32_t pylt_obj_int_ceq(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
-int32_t pylt_obj_int_ccmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
+pl_int_t pylt_obj_int_ccmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
+pl_bool_t pylt_obj_int_ceq(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
+pl_uint32_t pylt_obj_int_chash(PyLiteState *state, PyLiteIntObject *obj);
 
 PyLiteObject* pylt_obj_int_bitor(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
 PyLiteObject* pylt_obj_int_bitxor(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
@@ -26,14 +26,6 @@ PyLiteObject* pylt_obj_int_bitand(PyLiteState *state, PyLiteIntObject *self, PyL
 PyLiteObject* pylt_obj_int_bitls(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
 PyLiteObject* pylt_obj_int_bitrs(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
 
-PyLiteObject* pylt_obj_int_lt(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_int_le(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_int_gt(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_int_ge(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_int_ne(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_int_eq(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
-
-PyLiteObject* pylt_obj_int_eq(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
 PyLiteObject* pylt_obj_int_plus(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
 PyLiteObject* pylt_obj_int_minus(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
 PyLiteObject* pylt_obj_int_mul(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
@@ -47,18 +39,10 @@ PyLiteObject* pylt_obj_int_bitnot(PyLiteState *state, PyLiteIntObject *self);
 PyLiteObject* pylt_obj_int_pow(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
 
 
-uint32_t pylt_obj_float_chash(PyLiteState *state, PyLiteFloatObject *obj);
-uint32_t pylt_obj_float_ceq(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
-int32_t pylt_obj_float_ccmp(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
+pl_int_t pylt_obj_float_ccmp(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
+pl_bool_t pylt_obj_float_ceq(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
+pl_uint32_t pylt_obj_float_chash(PyLiteState *state, PyLiteFloatObject *obj);
 
-PyLiteObject* pylt_obj_float_lt(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_float_le(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_float_gt(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_float_ge(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_float_ne(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_float_eq(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
-
-PyLiteObject* pylt_obj_float_eq(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
 PyLiteObject* pylt_obj_float_plus(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
 PyLiteObject* pylt_obj_float_minus(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
 PyLiteObject* pylt_obj_float_mul(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);

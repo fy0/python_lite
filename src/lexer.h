@@ -76,6 +76,7 @@ typedef struct LexState {
     Token token; /* current token */
     LexExtraData le;
     StringStream* ss;
+    PyLiteState *state;
 
     int current_indent;
     IndentInfo *indent; /* indent stack */
@@ -83,7 +84,7 @@ typedef struct LexState {
 } LexState;
 
 
-void pylt_lex_init(LexState *state, StringStream *ss);
+void pylt_lex_init(PyLiteState* state, LexState *ls, StringStream *ss);
 void pylt_lex_err(LexState *ls, int code);
 
 int pylt_lex_next(LexState *ls);

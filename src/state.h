@@ -5,10 +5,13 @@
 #include "parser.h"
 #include "vm.h"
 #include "lib/kvec.h"
+#include "types/set.h"
 
 typedef struct PyLiteState {
     PyLiteVM vm;
     kvec_t(uint32_t) cls_base;
+    PyLiteSetObject *cache_str;
+    PyLiteSetObject *cache_bytes;
     PyLiteFunctionObject *func;
 } PyLiteState;
 

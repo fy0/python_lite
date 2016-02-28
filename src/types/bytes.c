@@ -1,12 +1,36 @@
 ﻿
+#include "bool.h"
 #include "bytes.h"
+#include "set.h"
+#include "../state.h"
 
-uint32_t pylt_obj_bytes_hash(PyLiteState *state, PyLiteBytesObject *obj) {
+pl_int_t pylt_obj_bytes_ccmp(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
+    return false;
+}
+
+pl_bool_t pylt_obj_bytes_ceq(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
+    unsigned int i;
+    switch (other->ob_type) {
+        case PYLT_OBJ_TYPE_BYTES:
+            if (self->ob_hash != castbytes(other)->ob_hash)
+                return false;
+            if (self->ob_size != castbytes(other)->ob_size)
+                return false;
+            for (i = 0; i < self->ob_size; i++) {
+                if (self->ob_val[i] != castbytes(other)->ob_val[i]) return false;
+            }
+            return true;
+        default:
+            return false;
+    }
+}
+
+pl_uint32_t pylt_obj_bytes_chash(PyLiteState *state, PyLiteBytesObject *obj) {
     return castbytes(obj)->ob_hash;
 }
 
 // BKDR Hash
-uint32_t pylt_obj_bytes_forcehash(PyLiteState *state, PyLiteBytesObject *obj) {
+pl_uint32_t pylt_obj_bytes_cforcehash(PyLiteState *state, PyLiteBytesObject *obj) {
     register size_t hash = 0;
     for (unsigned int i = 0; i < obj->ob_size; i++) {
         hash = hash * 131 + obj->ob_val[i];
@@ -14,20 +38,6 @@ uint32_t pylt_obj_bytes_forcehash(PyLiteState *state, PyLiteBytesObject *obj) {
     return (hash & 0x7FFFFFFF);
 }
 
-uint32_t pylt_obj_bytes_eq(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
-    switch (other->ob_type) {
-    case PYLT_OBJ_TYPE_BYTES:
-        if (self->ob_hash != castbytes(other)->ob_hash)
-            return false;
-    default:
-        return 0;
-    }
-}
-
-
-uint32_t pylt_obj_bytes_cmp(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
-    return false;
-}
 
 #define _isnumber(c) (c >= '0' && c <= '9')
 #define _ishex(c) (_isnumber(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))
@@ -61,7 +71,7 @@ int _read_x_int(const char *p, int *pnum, uint8_t(*func)(uint32_t code), int max
 
 
 PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int size, bool is_raw) {
-    PyLiteBytesObject *obj = pylt_realloc(NULL, sizeof(PyLiteBytesObject));
+    PyLiteBytesObject *obj = pylt_realloc(NULL, sizeof(PyLiteBytesObject)), *obj2;
     obj->ob_type = PYLT_OBJ_TYPE_BYTES;
     obj->ob_val = pylt_realloc(NULL, sizeof(uint8_t)*size + 1);
     if (is_raw) {
@@ -92,8 +102,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int s
                             if ((size - i >= 2) && (_ishex(str[i]) && _ishex(str[i + 1]))) {
                                 obj->ob_val[pos++] = _hex(str[i]) * 16 + _hex(str[i + 1]);
                             } else {
-                                pylt_free(obj->ob_val);
-                                pylt_free(obj);
+                                pylt_obj_bytes_free(state, obj);
                                 return NULL;
                             }
                             i += 2;
@@ -111,6 +120,18 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int s
         obj->ob_val[pos] = '\0';
         obj->ob_val = pylt_realloc(obj->ob_val, sizeof(uint8_t)*pos + 1);
     }
-    obj->ob_hash = pylt_obj_bytes_forcehash(state, obj);
+    obj->ob_hash = pylt_obj_bytes_cforcehash(state, obj);
+    obj2 = castbytes(pylt_obj_set_has(state, state->cache_bytes, castobj(obj)));
+    if (obj2) {
+        pylt_obj_bytes_free(state, obj);
+        return obj2;
+    } else {
+        pylt_obj_set_add(state, state->cache_bytes, castobj(obj));
+    }
     return obj;
+}
+
+void pylt_obj_bytes_free(PyLiteState *state, PyLiteBytesObject *self) {
+    pylt_free(self->ob_val);
+    pylt_free(self);
 }

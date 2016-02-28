@@ -11,11 +11,12 @@ typedef struct PyLiteBytesObject {
     uint8_t *ob_val;
 } PyLiteBytesObject;
 
-uint32_t pylt_obj_bytes_hash(PyLiteState *state, PyLiteBytesObject *obj);
-uint32_t pylt_obj_bytes_forcehash(PyLiteState *state, PyLiteBytesObject *obj);
-uint32_t pylt_obj_bytes_eq(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other);
-uint32_t pylt_obj_bytes_cmp(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other);
+pl_int_t pylt_obj_bytes_ccmp(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other);
+pl_bool_t pylt_obj_bytes_ceq(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other);
+pl_uint32_t pylt_obj_bytes_chash(PyLiteState *state, PyLiteBytesObject *obj);
+pl_uint32_t pylt_obj_bytes_cforcehash(PyLiteState *state, PyLiteBytesObject *obj);
 
 PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int size, bool is_raw);
+void pylt_obj_bytes_free(PyLiteState *state, PyLiteBytesObject *self);
 
 #endif

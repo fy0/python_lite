@@ -1,5 +1,7 @@
 ﻿
 #include "lexer.h"
+#include "types/string.h"
+#include "types/bytes.h"
 
 uint32_t get_token_1(StringStream *ss, uint32_t next1_eq_token, uint32_t next1_token, uint32_t next2_token);
 
@@ -34,10 +36,10 @@ const char* pylt_lex_get_token_name(uint32_t token) {
     return NULL;
 }
 
-void pylt_lex_init(LexState *ls, StringStream *ss)
+void pylt_lex_init(PyLiteState* state, LexState *ls, StringStream *ss)
 {
     IndentInfo *idt;
-
+    ls->state = state;
     ls->linenumber = 1;
     ls->ss = ss;
     ls->current_indent = -1;
@@ -223,9 +225,11 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
             break;
         }
         //case '\\': {} TODO
-        case '\0':
-            return false;
         default:
+            if (ss->current >= 0x80) {
+                //SyntaxError: bytes can only contain ASCII literal characters.
+                return false;
+            }
             bs_next(ls, ss->current, is_str_type);
             ss_nextc(ss);
         }
@@ -233,13 +237,9 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
     return false;
 
 the_end:
-    if (is_str_type) {
-        ls->token.str.s = ls->le.str.buf;
-        ls->token.str.e = ls->le.str.buf + ls->le.bytes.pos;
-    } else {
-        ls->token.str.s = ls->le.bytes.buf;
-        ls->token.str.e = ls->le.bytes.buf + ls->le.bytes.pos;
-    }
+    ls->token.obj = (is_str_type) ? castobj(pylt_obj_str_new(ls->state, ls->le.str.buf, ls->le.str.pos, is_raw)) :
+                                    castobj(pylt_obj_bytes_new(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, is_raw));
+    if (!ls->token.obj) return false;
     return true;
 }
 

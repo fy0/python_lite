@@ -79,7 +79,7 @@ void pylt_vm_run(PyLiteState* state) {
                         a = castobj(kv_pop(state->vm.stack));
                         ret = pylt_obj_op_unary(state, op, a);
                         if (!ret) {
-                            printf("TTypeError: bad operand type for unary %s: '%s'\n", pylt_vm_get_op_name(op), pylt_obj_type_name_cstr(state, a));
+                            printf("TypeError: bad operand type for unary %s: '%s'\n", pylt_vm_get_op_name(op), pylt_obj_type_name_cstr(state, a));
                             return;
                         }
                         kv_push(size_t, state->vm.stack, (size_t)ret);
@@ -87,7 +87,7 @@ void pylt_vm_run(PyLiteState* state) {
                 }
                 break;
             case BC_PRINT:
-                debug_print_obj(castobj(kv_A(state->vm.stack, kv_size(state->vm.stack)-1)));
+                debug_print_obj(castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - 1)));
                 putchar('\n');
         }
     }

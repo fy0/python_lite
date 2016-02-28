@@ -86,7 +86,6 @@ void parse_op(ParserState *ps) {
 
 void parse_basetype(ParserState *ps) {
     Token *tk = &(ps->ls->token);
-    PyLiteObject *obj;
 
     switch (tk->val) {
         case TK_KW_TRUE:
@@ -102,14 +101,8 @@ void parse_basetype(ParserState *ps) {
             kv_pushobj(ps->func->const_val, castobj(new_obj_number_from_token(ps->state, tk)));
             next(ps);
             break;
-        case TK_BYTES:
-            raw_str_print(&(tk->str));
-            obj = castobj(new_obj_bytes_from_token(ps->state, tk));
-            if (!obj) {
-                error(ps, PYLT_ERR_PARSER_BYTES_INVALID_ESCAPE);
-                return;
-            }
-            kv_pushobj(ps->func->const_val, obj);
+        case TK_STRING: case TK_BYTES:
+            kv_pushobj(ps->func->const_val, tk->obj);
             next(ps);
             break;
         default:
@@ -419,7 +412,7 @@ void func_pop(ParserState *ps) {
     ps->func = kv_pop(ps->func_stack);
 }
 
-void pylt_parser_init(ParserState *ps, PyLiteState* state, LexState *ls) {
+void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
     ps->state = state;
     ps->ls = ls;
     ps->func = pylt_obj_func_new(ps->state);

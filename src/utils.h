@@ -26,6 +26,11 @@ typedef struct RawString {
 
 void raw_str_print(RawString *rs);
 
+typedef intptr_t pl_int_t;
+typedef uintptr_t pl_uint_t;
+typedef uint32_t pl_uint32_t;
+typedef bool pl_bool_t;
+
 #define max(a,b)    (((a) > (b)) ? (a) : (b))
 #define min(a,b)    (((a) < (b)) ? (a) : (b))
 

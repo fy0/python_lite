@@ -78,7 +78,3 @@ PyLiteObject* new_obj_number_from_token(PyLiteState *state, Token *tk) {
     }
     return NULL;
 }
-
-PyLiteObject* new_obj_bytes_from_token(PyLiteState *state, Token *tk) {
-    return (PyLiteObject*)pylt_obj_bytes_new(state, tk->str.s, tk->str.e - tk->str.s, tk->extra);
-}

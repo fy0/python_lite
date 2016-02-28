@@ -52,10 +52,14 @@ enum PyLiteObjectTypeCode {
 
 // Object methods
 
-bool pylt_obj_eq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
-uint32_t pylt_obj_hash(PyLiteState *state, PyLiteObject *obj);
-uint32_t pylt_obj_hashable(PyLiteState *state, PyLiteObject *obj);
-uint32_t pylt_obj_istrue(PyLiteState *state, PyLiteObject *obj);
+pl_int_t pylt_obj_ccmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
+pl_bool_t pylt_obj_ceq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
+pl_uint32_t pylt_obj_chash(PyLiteState *state, PyLiteObject *obj);
+
+pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj);
+pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj);
+
+
 PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj);
 PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, PyLiteObject *b);
 const char* pylt_obj_type_name_cstr(PyLiteState *state, PyLiteObject *obj);
@@ -63,7 +67,7 @@ const char* pylt_obj_type_name_cstr(PyLiteState *state, PyLiteObject *obj);
 
 
 // Pylite table
-KHASHO_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_hash, pylt_obj_eq);
+KHASHO_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_chash, pylt_obj_ceq);
 typedef khasho_t(table) PyLiteTable;
 
 #define pylt_obj_table_new(state) kho_init(table, state);

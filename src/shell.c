@@ -18,16 +18,18 @@ int main(int argc,char* argv[])
     char *buf = read_file("test.py", &size);
     if (!buf) return 0;
 
+    PyLiteState state;
+    LexState ls;
+    ParserState ps;
+    pylt_state_init(&state);
+
     StringStream *ss = ss_new(buf, size);
     printf(buf);
     putchar('\n');
 
-    LexState ls;
-    pylt_lex_init(&ls, ss);
+    pylt_lex_init(&state, &ls, ss);
 
-    PyLiteState state;
-    ParserState ps;
-    pylt_parser_init(&ps, &state, &ls);
+    pylt_parser_init(&state, &ps, &ls);
     parse(&ps);
 
     debug_print_const_vals(&ps);
