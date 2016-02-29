@@ -52,12 +52,14 @@ int main(int argc,char* argv[])
             switch (ls.token.val) {
                 case TK_INT: case TK_FLOAT:
                     printf("[%d] %s: ", ls.linenumber, pylt_lex_get_token_name(ls.token.val));
-                    raw_str_print(&ls.token.str);
+                    debug_print_obj(ls.token.obj);
+                    //raw_str_print(&ls.token.str);
                     putchar('\n');
                     break;
                 case TK_BYTES: case TK_STRING: case TK_NAME:
                     printf("[%d] %s: ", ls.linenumber, pylt_lex_get_token_name(ls.token.val));
-                    raw_str_print(&ls.token.str);
+                    //raw_str_print(&ls.token.str);
+                    debug_print_obj(ls.token.obj);
                     putchar('\n');
                     break;
                 case TK_INDENT: case TK_DEDENT:

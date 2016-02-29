@@ -190,7 +190,6 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
         switch (ss->current) {
         case '\'': case '"':
             if (ss->current == sign) {
-                ls->token.str.e = ss_lastpos(ss);
                 if (is_long_string_or_bytes) {
                     ss_nextc(ss);
                     if (ss->current != sign) {
@@ -245,8 +244,8 @@ the_end:
 }
 
 uint32_t read_kw_or_id(LexState *ls) {
-    const uint8_t *p = ls->token.str.s;
-    int size = ls->token.str.e - ls->token.str.s;
+    const uint32_t *p = ls->le.str.buf;
+    int size = ls->le.str.pos;
 
 #define KW_NEXT(c, e) if (c != e) return TK_NAME;
 
@@ -590,11 +589,11 @@ indent_end:
         default:
             if (lex_isidentfirst(ss->current)) {
             read_kw_or_id:
-                ls->token.str.s = ss_lastpos(ss);
-                do { ss_nextc(ss); }
+                ls->le.str.pos = 0;
+                do { str_next(ls, ss->current); ss_nextc(ss); }
                 while (lex_isidentletter(ss->current));
-                ls->token.str.e = ss_lastpos(ss);
                 ls->token.val = read_kw_or_id(ls);
+                ls->token.obj = castobj(pylt_obj_str_new(ls->state, ls->le.str.buf, ls->le.str.pos, true));
                 return 0;
             }
             return PYLT_ERR_LEX_INVALID_CHARACTER;

@@ -46,8 +46,6 @@ typedef struct PyLiteObject PyLiteObject;
 
 typedef struct Token {
     uint32_t val;
-    int extra;
-    RawString str;
     PyLiteObject *obj;
 } Token;
 
