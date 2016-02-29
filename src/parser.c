@@ -97,8 +97,7 @@ void parse_basetype(ParserState *ps) {
             next(ps);
             break;
         case TK_INT: case TK_FLOAT:
-            raw_str_print(&(tk->str));
-            kv_pushobj(ps->func->const_val, castobj(new_obj_number_from_token(ps->state, tk)));
+            kv_pushobj(ps->func->const_val, tk->obj);
             next(ps);
             break;
         case TK_STRING: case TK_BYTES:

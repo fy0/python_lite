@@ -2,6 +2,7 @@
 #include "lexer.h"
 #include "types/string.h"
 #include "types/bytes.h"
+#include "types/number.h"
 
 uint32_t get_token_1(StringStream *ss, uint32_t next1_eq_token, uint32_t next1_token, uint32_t next2_token);
 
@@ -250,122 +251,122 @@ uint32_t read_kw_or_id(LexState *ls) {
 #define KW_NEXT(c, e) if (c != e) return TK_NAME;
 
     switch (*p) {
-    case 'a': // and as assert
-        switch (size) {
-            case 2: KW_NEXT(*++p, 's'); return TK_KW_AS;
-            case 3: KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 'd'); return TK_KW_AND;
-            case 6: KW_NEXT(*++p, 's'); KW_NEXT(*++p, 's'); KW_NEXT(*++p, 'e'); KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 't'); return TK_KW_ASSERT;
-            default: return TK_NAME;
-        }
-    case 'b': // break
-        if (size != 5) return TK_NAME;
-        KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 'e'); KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'k');
-        return TK_KW_BREAK;
-    case 'c': // class continue
-        if (size == 5) {
-            KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 's'); KW_NEXT(*++p, 's');
-            return TK_KW_CLASS;
-        } else if (size == 8) {
-            KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 't'); KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 'u'); KW_NEXT(*++p, 'e');
-            return TK_KW_CONTINUE;
-        }
-        return TK_NAME;
-    case 'd': // def del
-        if (size == 3) {
-            KW_NEXT(*++p, 'e');
-            switch (*++p) {
-            case 'f': return TK_KW_DEF;
-            case 'l': return TK_KW_DEL;
+        case 'a': // and as assert
+            switch (size) {
+                case 2: KW_NEXT(*++p, 's'); return TK_KW_AS;
+                case 3: KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 'd'); return TK_KW_AND;
+                case 6: KW_NEXT(*++p, 's'); KW_NEXT(*++p, 's'); KW_NEXT(*++p, 'e'); KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 't'); return TK_KW_ASSERT;
+                default: return TK_NAME;
             }
-        }
-        return TK_NAME;
-    case 'e': // else elif except
-        if (size == 4) {
-            KW_NEXT(*++p, 'l');
-            switch (*++p) {
-                case 's': KW_NEXT(*++p, 'e'); return TK_KW_ELSE;
-                case 'i': KW_NEXT(*++p, 'f'); return TK_KW_ELIF;
+        case 'b': // break
+            if (size != 5) return TK_NAME;
+            KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 'e'); KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'k');
+            return TK_KW_BREAK;
+        case 'c': // class continue
+            if (size == 5) {
+                KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 's'); KW_NEXT(*++p, 's');
+                return TK_KW_CLASS;
+            } else if (size == 8) {
+                KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 't'); KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 'u'); KW_NEXT(*++p, 'e');
+                return TK_KW_CONTINUE;
             }
-        } else if (size == 6) {
-            KW_NEXT(*++p, 'x'); KW_NEXT(*++p, 'c'); KW_NEXT(*++p, 'e'); KW_NEXT(*++p, 'p'); KW_NEXT(*++p, 't');
-            return TK_KW_EXCEPT;
-        }
-        return TK_NAME;
-    case 'f': // for from finally
-        switch (size) {
-            case 3: KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'r'); return TK_KW_FOR;
-            case 4: KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'm'); return TK_KW_FROM;
-            case 7: KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'y'); return TK_KW_FINALLY;
-            default: return TK_NAME;
-        }
-    case 'g': // global
-        if (size != 6) return TK_NAME;
-        KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'b'); KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'l');
-        return TK_KW_GLOBAL;
-    case 'i': // if in is import
-        if (size == 2) {
-            switch (*++p) {
-                case 'f': return TK_KW_IF;
-                case 'n': return TK_KW_IN;
-                case 's': return TK_KW_IS;
+            return TK_NAME;
+        case 'd': // def del
+            if (size == 3) {
+                KW_NEXT(*++p, 'e');
+                switch (*++p) {
+                    case 'f': return TK_KW_DEF;
+                    case 'l': return TK_KW_DEL;
+                }
             }
-        } else if (size == 6) {
-            KW_NEXT(*++p, 'm'); KW_NEXT(*++p, 'p'); KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 't');
-            return TK_KW_IMPORT;
-        }
-        return TK_NAME;
-    case 'l': // lambda
-        if (size != 6) return TK_NAME;
-        KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'm'); KW_NEXT(*++p, 'b'); KW_NEXT(*++p, 'd'); KW_NEXT(*++p, 'a');
-        return TK_KW_LAMBDA;
-    case 'n': // not nonlocal
-        switch (size) {
-            case 3: KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 't'); return TK_KW_NOT;
-            case 8: KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'c'); KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'l'); return TK_KW_NONLOCAL;
-            default: return TK_NAME;
-        }
-    case 'o': // or
-        if (size != 2) return TK_NAME;
-        KW_NEXT(*++p, 'r');
-        return TK_KW_OR;
-    case 'p': // pass
-        if (size != 4) return TK_NAME;
-        KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 's'); KW_NEXT(*++p, 's');
-        return TK_KW_PASS;
-    case 'r': // return raise
-        switch (size) {
-            case 5: KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 's'); KW_NEXT(*++p, 'e'); return TK_KW_RAISE;
-            case 6: KW_NEXT(*++p, 'e'); KW_NEXT(*++p, 't'); KW_NEXT(*++p, 'u'); KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 'n'); return TK_KW_RETURN;
-            default: return TK_NAME;
-        }
-    case 't': // try
-        if (size != 3) return TK_NAME;
-        KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 'y');
-        return TK_KW_TRY;
-    case 'w': // while with
-        switch (size) {
-            case 4: KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 't'); KW_NEXT(*++p, 'h'); return TK_KW_WITH;
-            case 5: KW_NEXT(*++p, 'h'); KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'e'); return TK_KW_WHILE;
-            default: return TK_NAME;
-        }
-    case 'y': // yield
-        if (size != 5) return TK_NAME;
-        KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 'e'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'd');
-        return TK_KW_YIELD;
-    case 'F': // False
-        if (size != 5) return TK_NAME;
-        KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 's'); KW_NEXT(*++p, 'e');
-        return TK_KW_FALSE;
-    case 'N': // None
-        if (size != 4) return TK_NAME;
-        KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 'e');
-        return TK_KW_NONE;
-    case 'T': // True
-        if (size != 4) return TK_NAME;
-        KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 'u'); KW_NEXT(*++p, 'e');
-        return TK_KW_TRUE;
-    default:
-        return TK_NAME;
+            return TK_NAME;
+        case 'e': // else elif except
+            if (size == 4) {
+                KW_NEXT(*++p, 'l');
+                switch (*++p) {
+                    case 's': KW_NEXT(*++p, 'e'); return TK_KW_ELSE;
+                    case 'i': KW_NEXT(*++p, 'f'); return TK_KW_ELIF;
+                }
+            } else if (size == 6) {
+                KW_NEXT(*++p, 'x'); KW_NEXT(*++p, 'c'); KW_NEXT(*++p, 'e'); KW_NEXT(*++p, 'p'); KW_NEXT(*++p, 't');
+                return TK_KW_EXCEPT;
+            }
+            return TK_NAME;
+        case 'f': // for from finally
+            switch (size) {
+                case 3: KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'r'); return TK_KW_FOR;
+                case 4: KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'm'); return TK_KW_FROM;
+                case 7: KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'y'); return TK_KW_FINALLY;
+                default: return TK_NAME;
+            }
+        case 'g': // global
+            if (size != 6) return TK_NAME;
+            KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'b'); KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'l');
+            return TK_KW_GLOBAL;
+        case 'i': // if in is import
+            if (size == 2) {
+                switch (*++p) {
+                    case 'f': return TK_KW_IF;
+                    case 'n': return TK_KW_IN;
+                    case 's': return TK_KW_IS;
+                }
+            } else if (size == 6) {
+                KW_NEXT(*++p, 'm'); KW_NEXT(*++p, 'p'); KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 't');
+                return TK_KW_IMPORT;
+            }
+            return TK_NAME;
+        case 'l': // lambda
+            if (size != 6) return TK_NAME;
+            KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'm'); KW_NEXT(*++p, 'b'); KW_NEXT(*++p, 'd'); KW_NEXT(*++p, 'a');
+            return TK_KW_LAMBDA;
+        case 'n': // not nonlocal
+            switch (size) {
+                case 3: KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 't'); return TK_KW_NOT;
+                case 8: KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'c'); KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'l'); return TK_KW_NONLOCAL;
+                default: return TK_NAME;
+            }
+        case 'o': // or
+            if (size != 2) return TK_NAME;
+            KW_NEXT(*++p, 'r');
+            return TK_KW_OR;
+        case 'p': // pass
+            if (size != 4) return TK_NAME;
+            KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 's'); KW_NEXT(*++p, 's');
+            return TK_KW_PASS;
+        case 'r': // return raise
+            switch (size) {
+                case 5: KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 's'); KW_NEXT(*++p, 'e'); return TK_KW_RAISE;
+                case 6: KW_NEXT(*++p, 'e'); KW_NEXT(*++p, 't'); KW_NEXT(*++p, 'u'); KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 'n'); return TK_KW_RETURN;
+                default: return TK_NAME;
+            }
+        case 't': // try
+            if (size != 3) return TK_NAME;
+            KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 'y');
+            return TK_KW_TRY;
+        case 'w': // while with
+            switch (size) {
+                case 4: KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 't'); KW_NEXT(*++p, 'h'); return TK_KW_WITH;
+                case 5: KW_NEXT(*++p, 'h'); KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'e'); return TK_KW_WHILE;
+                default: return TK_NAME;
+            }
+        case 'y': // yield
+            if (size != 5) return TK_NAME;
+            KW_NEXT(*++p, 'i'); KW_NEXT(*++p, 'e'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 'd');
+            return TK_KW_YIELD;
+        case 'F': // False
+            if (size != 5) return TK_NAME;
+            KW_NEXT(*++p, 'a'); KW_NEXT(*++p, 'l'); KW_NEXT(*++p, 's'); KW_NEXT(*++p, 'e');
+            return TK_KW_FALSE;
+        case 'N': // None
+            if (size != 4) return TK_NAME;
+            KW_NEXT(*++p, 'o'); KW_NEXT(*++p, 'n'); KW_NEXT(*++p, 'e');
+            return TK_KW_NONE;
+        case 'T': // True
+            if (size != 4) return TK_NAME;
+            KW_NEXT(*++p, 'r'); KW_NEXT(*++p, 'u'); KW_NEXT(*++p, 'e');
+            return TK_KW_TRUE;
+        default:
+            return TK_NAME;
     }
 }
 
@@ -384,6 +385,7 @@ int pylt_lex_next(LexState *ls)
     // read indent
     int cur_indent = ls->current_indent;
     StringStream *ss = ls->ss;
+    int tmp, tmp2;
 
     if (cur_indent == -1) {
         cur_indent = 0;
@@ -510,62 +512,70 @@ indent_end:
             ls->token.val = TK_OP_NE;
             return 0;
         case '0':
-            ls->token.str.s = ss_lastpos(ls->ss);
+            ls->le.bytes.pos = 0;
+            bytes_next(ls, '0');
             ss_nextc(ss);
             switch (ss->current) {
-            case 'x': case 'X':
-                ss_nextc(ss);
-                if (!lex_ishex(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
-                ls->token.extra = 1;
-                while (lex_ishex(ss->current)) ss_nextc(ss);
-                break;
-            case 'b': case 'B':
-                ss_nextc(ss);
-                if (!lex_isbin(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
-                ls->token.extra = 2;
-                while (lex_isbin(ss->current)) ss_nextc(ss);
-                break;
-            case 'o': case 'O':
-                ss_nextc(ss);
-                if (!lex_isoct(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
-                ls->token.extra = 3;
-                while (lex_isoct(ss->current)) ss_nextc(ss);
-                break;
-            case '.':
-                goto read_dec_float;
-            case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-                ss_nextc(ss);
-                goto read_dec_float;
-            default:
-                ls->token.extra = 0;
+                case 'x': case 'X':
+                    ss_nextc(ss);
+                    if (!lex_ishex(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
+                    tmp = 1; // hex
+                    ls->le.bytes.pos = 0;
+                    while (lex_ishex(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
+                    break;
+                case 'b': case 'B':
+                    ss_nextc(ss);
+                    if (!lex_isbin(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
+                    tmp = 2; // bin
+                    ls->le.bytes.pos = 0;
+                    while (lex_isbin(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
+                    break;
+                case 'o': case 'O':
+                    ss_nextc(ss);
+                    if (!lex_isoct(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
+                    tmp = 3; // oct
+                    ls->le.bytes.pos = 0;
+                    while (lex_isoct(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
+                    break;
+                case '.':
+                    goto read_dec_float;
+                case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+                    bytes_next(ls, ss->current);
+                    ss_nextc(ss);
+                    goto read_dec_float;
+                default:
+                    tmp = 0;
             }
 
             ls->token.val = TK_INT;
-            ls->token.str.e = ss->p-1;
+            ls->token.obj = castobj(pylt_obj_int_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, tmp));
             return 0;
         case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9':
-            ls->token.str.s = ss_lastpos(ls->ss);
+            ls->le.bytes.pos = 0;
+            bytes_next(ls, ss->current);
             ss_nextc(ss);
         read_dec_float:
-            ls->token.extra = 0;
-            while (lex_isdec(ss->current)) ss_nextc(ss);
+            while (lex_isdec(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
 
             if (ss->current == '.') {
-                ls->token.extra = ss->p - ls->token.str.s;
-                ls->token.val = TK_FLOAT;
+                tmp2 = ls->le.bytes.pos;
+                bytes_next(ls, '.');
                 ss_nextc(ss);
-                while (lex_isdec(ss->current)) ss_nextc(ss);
-            } else ls->token.val = TK_INT;
+                while (lex_isdec(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
+                ls->token.val = TK_FLOAT;
+                ls->token.obj = castobj(pylt_obj_float_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, tmp2));
+            } else {
+                ls->token.val = TK_INT;
+                ls->token.obj = castobj(pylt_obj_int_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, 0));
+            }
 
-            ls->token.str.e = ss->p-1;
             return 0;
         case 'r': case 'R': case 'b': case 'B': case 'u': case 'U': case '\'': case '"': {
             bool is_raw;
             uint32_t tok = read_str_or_bytes_head(ss, &is_raw);
             if (tok) {
                 ls->token.val = tok;
-                ls->token.extra = is_raw;
                 if (!read_str_or_bytes(ls, is_raw)) return PYLT_ERR_LEX_INVALID_STR_OR_BYTES;
             } else {
                 if (ss->current != '\'' || ss->current != '\"') {

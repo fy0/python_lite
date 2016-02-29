@@ -280,7 +280,7 @@ PyLiteObject* pylt_obj_float_pow(PyLiteState *state, PyLiteFloatObject *self, Py
 }
 
 
-PyLiteIntObject* pylt_obj_int_new(PyLiteState *state, int32_t val) {
+PyLiteIntObject* pylt_obj_int_new(PyLiteState *state, pl_int_t val) {
     PyLiteIntObject *obj = pylt_realloc(NULL, sizeof(PyLiteIntObject));
     obj->ob_type = PYLT_OBJ_TYPE_INT;
     obj->ob_val = val;
@@ -292,4 +292,83 @@ PyLiteFloatObject* pylt_obj_float_new(PyLiteState *state, double val) {
     obj->ob_type = PYLT_OBJ_TYPE_FLOAT;
     obj->ob_val = val;
     return obj;
+}
+
+
+
+_INLINE static uint8_t _hex(uint32_t code) {
+    if (code >= '0' && code <= '9') return code - '0';
+    else if (code >= 'A' && code <= 'F') return code - 'A' + 10;
+    else if (code >= 'a' && code <= 'f') return code - 'a' + 10;
+    return 255;
+}
+
+_INLINE static uint8_t _oct(uint32_t code) {
+    if (code >= '0' && code <= '7') return code - '0';
+    return 255;
+}
+
+_INLINE static uint8_t _bin(uint32_t code) {
+    if (code >= '0' && code <= '1') return code - '0';
+    return 255;
+}
+
+_INLINE static uint8_t _dec(uint32_t code) {
+    if (code >= '0' && code <= '9') return code - '0';
+    return 255;
+}
+
+
+_INLINE static
+pl_int_t _read_x_int(RawString *str, int n, uint8_t(*func)(uint32_t code), int max_size) {
+    const uint8_t *p = str->s;
+    const uint8_t *e = (max_size > 0) ? str->s + max_size : str->e;
+    int ret = 0, val = (int)pow(n, e - p - 1);
+
+    do {
+        ret += (*func)(*p++) * val;
+        val /= n;
+    } while (p != e);
+
+    return ret;
+}
+
+
+_INLINE static
+double _read_float(RawString *str, int start_offset) {
+    const uint8_t *p = str->s + start_offset;
+    const uint8_t *e = str->e;
+    double ret = 0, val = 0.1;
+
+    do {
+        ret += _dec(*p++) * val;
+        val /= 10;
+    } while (p != e);
+
+    return ret;
+}
+
+
+PyLiteIntObject* pylt_obj_int_new_from_cstr_full(PyLiteState *state, const char *str, pl_int_t size, pl_int_t base_n) {
+    pl_int_t iret;
+    RawString rs = { str, str + size };
+
+    switch (base_n) {
+        case 0: iret = _read_x_int(&rs, 10, _dec, 0); break;
+        case 1: iret = _read_x_int(&rs, 16, _hex, 0); break;
+        case 2: iret = _read_x_int(&rs, 2, _bin, 0); break;
+        case 3: iret = _read_x_int(&rs, 8, _oct, 0); break;
+    }
+    return pylt_obj_int_new(state, iret);
+}
+
+
+PyLiteFloatObject* pylt_obj_float_new_from_cstr_full(PyLiteState *state, const char *str, pl_int_t size, pl_int_t point_pos) {
+    double fret;
+    pl_int_t iret;
+    RawString rs = { str, str + size };
+
+    iret = _read_x_int(&rs, 10, _dec, point_pos);
+    fret = _read_float(&rs, point_pos + 1);
+    return pylt_obj_float_new(state, fret + iret);
 }

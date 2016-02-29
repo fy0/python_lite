@@ -6,7 +6,7 @@
 
 typedef struct PyLiteIntObject {
     PyLiteObject_HEAD;
-    int32_t ob_val;
+    pl_int_t ob_val;
 } PyLiteIntObject;
 
 
@@ -54,7 +54,10 @@ PyLiteObject* pylt_obj_float_positive(PyLiteState *state, PyLiteFloatObject *sel
 PyLiteObject* pylt_obj_float_negative(PyLiteState *state, PyLiteFloatObject *self);
 PyLiteObject* pylt_obj_float_pow(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
 
-PyLiteIntObject* pylt_obj_int_new(PyLiteState *state, int32_t val);
+PyLiteIntObject* pylt_obj_int_new(PyLiteState *state, pl_int_t val);
 PyLiteFloatObject* pylt_obj_float_new(PyLiteState *state, double val);
+
+PyLiteIntObject* pylt_obj_int_new_from_cstr_full(PyLiteState *state, const char *str, pl_int_t size, pl_int_t base_n);
+PyLiteFloatObject* pylt_obj_float_new_from_cstr_full(PyLiteState *state, const char *str, pl_int_t size, pl_int_t point_pos);
 
 #endif
