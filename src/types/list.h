@@ -8,10 +8,10 @@
 #define __the_free(x)
 KLIST_INIT(list_obj, PyLiteObject, __the_free)
 
-typedef struct PyLiteTupleObject {
+typedef struct PyLiteListObject {
     PyLiteObject_HEAD;
     klist_t(list_obj) ob_val;
-} PyLiteSetObject;
+} PyLiteListObject;
 
 
 #endif

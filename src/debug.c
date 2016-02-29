@@ -2,11 +2,7 @@
 #include "debug.h"
 #include "lexer.h"
 #include "vm.h"
-#include "types/object.h"
-#include "types/bool.h"
-#include "types/bytes.h"
-#include "types/string.h"
-#include "types/number.h"
+#include "types/all.h"
 
 const char* get_op_name(uint32_t val) {
     return pylt_vm_get_op_name(val);
@@ -17,16 +13,27 @@ void debug_print_obj(PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_INT: printf("%d", castint(obj)->ob_val); break;
         case PYLT_OBJ_TYPE_FLOAT: printf("%f", castfloat(obj)->ob_val); break;
         case PYLT_OBJ_TYPE_BOOL: printf((castbool(obj)->ob_val == 0) ? "False" : "True"); break;
-        case PYLT_OBJ_TYPE_BYTES: printf("%.*s", castbytes(obj)->ob_size, castbytes(obj)->ob_val); break;
+        case PYLT_OBJ_TYPE_BYTES: printf("b'%.*s'", castbytes(obj)->ob_size, castbytes(obj)->ob_val); break;
         case PYLT_OBJ_TYPE_STR:
+            putchar('\'');
             for (size_t i = 0; i < caststr(obj)->ob_size; i++) {
                 putcode(caststr(obj)->ob_val[i]);
             }
+            putchar('\'');
+            break;
         case PYLT_OBJ_TYPE_FUNCTION:
         case PYLT_OBJ_TYPE_MODULE:
         case PYLT_OBJ_TYPE_TYPE:
         case PYLT_OBJ_TYPE_TUPLE:
         case PYLT_OBJ_TYPE_SET:
+            printf("{");
+            for (khiter_t it = kho_begin(castset(obj)->ob_val); it < kho_end(castset(obj)->ob_val); ++it) {
+                if (!kho_exist(castset(obj)->ob_val, it)) continue;
+                debug_print_obj(kho_key(castset(obj)->ob_val, it));
+                if (it < pylt_obj_set_len(NULL, castset(obj))) printf(", ");
+            }
+            printf("}");
+            break;
         case PYLT_OBJ_TYPE_DICT:
         default:
             if (obj->ob_type >= PYLT_OBJ_TYPE_CLASS) {

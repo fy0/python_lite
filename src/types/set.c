@@ -4,8 +4,8 @@
 pl_int_t pylt_obj_set_ccmp(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *other) {
     if (other->ob_type == PYLT_OBJ_TYPE_SET) {
         if (pylt_obj_set_ceq(state, self, other)) return 0;
-        if (pylt_obj_set_contains(state, self, castset(other))) return -1;
-        if (pylt_obj_set_contains(state, castset(other), self)) return 1;
+        if (pylt_obj_set_contains(state, self, castset(other))) return  1;
+        if (pylt_obj_set_contains(state, castset(other), self)) return -1;
         return 3;
     }
     return 2;
@@ -18,7 +18,7 @@ pl_bool_t pylt_obj_set_ceq(PyLiteState *state, PyLiteSetObject *self, PyLiteObje
             return false;
 
         for (khiter_t it = kho_begin(other->ob_val); it < kho_end(castset(other)->ob_val); ++it) {
-            if (!kho_exist(self->ob_val, it)) continue;
+            if (!kho_exist(castset(other)->ob_val, it)) continue;
             if (pylt_obj_set_has(state, self, kho_key(castset(other)->ob_val, it)) == NULL) return false;
         }
         return true;
@@ -35,7 +35,7 @@ pl_bool_t pylt_obj_set_contains(PyLiteState *state, PyLiteSetObject *self, PyLit
         return false;
 
     for (khiter_t it = kho_begin(other->ob_val); it < kho_end(other->ob_val); ++it) {
-        if (!kho_exist(self->ob_val, it)) continue;
+        if (!kho_exist(other->ob_val, it)) continue;
         if (pylt_obj_set_has(state, self, kho_key(other->ob_val, it)) == NULL) return false;
     }
     return true;

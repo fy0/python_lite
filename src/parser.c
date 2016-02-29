@@ -1,9 +1,9 @@
 ﻿
 #include "state.h"
 #include "parser.h"
-#include "assert.h"
+#include "debug.h"
 #include "vm.h"
-#include "types/bool.h"
+#include "types/all.h"
 
 void func_save(ParserState *ps);
 void func_pop(ParserState *ps);
@@ -19,9 +19,6 @@ void parse_expr7(ParserState *ps);
 void parse_expr8(ParserState *ps);
 void parse_expr9(ParserState *ps);
 void parse_expr10(ParserState *ps);
-
-PyLiteObject* new_obj_number_from_token(PyLiteState *state, Token *tk);
-PyLiteObject* new_obj_bytes_from_token(PyLiteState *state, Token *tk);
 
 
 void next(ParserState *ps) {
@@ -84,32 +81,73 @@ void parse_op(ParserState *ps) {
     }
 }
 
-void parse_basetype(ParserState *ps) {
+PyLiteObject* parse_get_basetype(ParserState *ps) {
     Token *tk = &(ps->ls->token);
+    PyLiteObject *obj, *obj2;
 
     switch (tk->val) {
         case TK_KW_TRUE:
-            kv_pushobj(ps->func->const_val, castobj(pylt_obj_bool_new(ps->state, true)));
             next(ps);
-            break;
-        case TK_KW_FALSE: 
-            kv_pushobj(ps->func->const_val, castobj(pylt_obj_bool_new(ps->state, false)));
+            return castobj(pylt_obj_bool_new(ps->state, true));
+        case TK_KW_FALSE:
             next(ps);
-            break;
-        case TK_INT: case TK_FLOAT:
-            kv_pushobj(ps->func->const_val, tk->obj);
+            return castobj(pylt_obj_bool_new(ps->state, false));
+        case TK_INT: case TK_FLOAT: case TK_STRING: case TK_BYTES:
+            obj = tk->obj;
             next(ps);
-            break;
-        case TK_STRING: case TK_BYTES:
-            kv_pushobj(ps->func->const_val, tk->obj);
+            return obj;
+        case '{':
             next(ps);
-            break;
+            if (tk->val == '}') {
+                obj = castobj(pylt_obj_dict_new(ps->state));
+                kv_pushobj(ps->func->const_val, obj);
+            } else {
+                obj = parse_get_basetype(ps);
+                switch (tk->val) {
+                    case '}': 
+                        obj2 = castobj(pylt_obj_set_new(ps->state)); 
+                        goto _set_end;
+                    case ',': // set
+                        next(ps);
+                        obj2 = castobj(pylt_obj_set_new(ps->state));
+                        do {
+                            pylt_obj_set_add(ps->state, castset(obj2), obj);
+                            obj = parse_get_basetype(ps);
+                            if (tk->val != ',') {
+                                if (tk->val != '}') {
+                                    // free
+                                    return NULL;
+                                }
+                            _set_end:
+                                next(ps);
+                                pylt_obj_set_add(ps->state, castset(obj2), obj);
+                                break;
+                            }
+                            next(ps);
+                        } while (obj);
+                        return obj2;
+                    case ':': // dict
+                        break;
+                    default:
+                        error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+                }
+            }
+            return NULL;
         default:
-            error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-            return;
+            return NULL;
     }
+}
+
+void parse_basetype(ParserState *ps) {
+    PyLiteObject *obj = parse_get_basetype(ps);
+    if (!obj) {
+        error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+        return;
+    }
+    kv_pushobj(ps->func->const_val, obj);
     kv_pushbc(ps->func->opcodes, BC_LOADCONST);
     kv_pushbc(ps->func->opcodes, kv_size(ps->func->const_val));
+    debug_print_obj(obj);
     putchar('\n');
 }
 

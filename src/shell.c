@@ -32,6 +32,7 @@ int main(int argc,char* argv[])
     pylt_parser_init(&state, &ps, &ls);
     parse(&ps);
 
+    putchar('\n');
     debug_print_const_vals(&ps);
     debug_print_opcodes(&ps);
 

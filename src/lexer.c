@@ -37,8 +37,7 @@ const char* pylt_lex_get_token_name(uint32_t token) {
     return NULL;
 }
 
-void pylt_lex_init(PyLiteState* state, LexState *ls, StringStream *ss)
-{
+void pylt_lex_init(PyLiteState* state, LexState *ls, StringStream *ss) {
     IndentInfo *idt;
     ls->state = state;
     ls->linenumber = 1;
