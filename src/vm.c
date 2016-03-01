@@ -3,7 +3,7 @@
 #include "state.h"
 #include "debug.h"
 #include "lib/kvec.h"
-#include "types/number.h"
+#include "types/all.h"
 
 const char* op_vals[] = {
     "or",
@@ -51,6 +51,7 @@ void pylt_vm_run(PyLiteState* state) {
     PyLiteFunctionObject *func = state->func;
     PyLiteObject *a, *b, *ret;
     uintptr_t op;
+    int tmp;
 
     for (unsigned int i = 0; i < kv_size(func->opcodes); i++) {
         switch (kv_A(func->opcodes, i)) {
@@ -61,6 +62,16 @@ void pylt_vm_run(PyLiteState* state) {
                 break;
             case BC_SET_VAL:
                 pylt_obj_table_set(state->func->locals, castobj(kv_A(func->opcodes, ++i)), castobj(kv_pop(state->vm.stack)));
+                break;
+            case BC_LOAD_VAL:
+                ret = pylt_obj_table_get(state->func->locals, castobj(kv_A(func->opcodes, ++i)));
+                if (!ret) {
+                    printf("NameError: name '");
+                    debug_print_obj(castobj(kv_A(func->opcodes, i)));
+                    printf("' is not defined\n");
+                    return;
+                }
+                kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                 break;
             case BC_OPERATOR:
                 //printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(func->opcodes, ++i)));
@@ -89,10 +100,27 @@ void pylt_vm_run(PyLiteState* state) {
                         break;
                 }
                 break;
+            case BC_NEW_OBJ:
+                switch (kv_A(func->opcodes, ++i)) {
+                    case PYLT_OBJ_TYPE_SET:
+                        ret = castobj(pylt_obj_set_new(state));
+                        tmp = kv_A(func->opcodes, ++i);
+                        for (int j = 0; j < tmp; j++) {
+                            pylt_obj_set_add(state, castset(ret), castobj(kv_pop(state->vm.stack)));
+                        }
+                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
+                        break;
+                    case PYLT_OBJ_TYPE_DICT:
+                        ret = castobj(pylt_obj_dict_new(state));
+                        break;
+                }
+                break;
             case BC_PRINT:
-                if (kv_size(state->vm.stack) != 0)
+                if (kv_size(state->vm.stack) != 0) {
                     debug_print_obj(castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - 1)));
-                printf("{");
+                    putchar('\n');
+                }
+                printf("locals: {");
                 for (khiter_t it = kho_begin(state->func->locals); it < kho_end(state->func->locals); ++it) {
                     if (!kho_exist(state->func->locals, it)) continue;
                     debug_print_obj(kho_key(state->func->locals, it));

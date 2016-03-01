@@ -376,7 +376,7 @@ uint32_t read_kw_or_id(LexState *ls) {
 #define lex_isdec(c) (c >= '0' && c <= '9')
 //#define lex_isescapenumflag(c) (c == 'x' || c == 'X' || c == 'b'  || c == 'B' || c == 'o' || c == 'O')
 #define lex_isidentfirst(c) ((c >= 'A' && c<= 'Z') || (c >= 'a' && c<= 'z') || (c >= '_'))
-#define lex_isidentletter(c) ((c >= 'A' && c<= 'Z') || (c >= 'a' && c<= 'z') || (c >= '0' && c<= '9') || (c >= '_'))
+#define lex_isidentletter(c) ((c >= 'A' && c<= 'Z') || (c >= 'a' && c<= 'z') || (c >= '0' && c<= '9') || (c == '_'))
 
 int pylt_lex_next(LexState *ls)
 {
@@ -589,7 +589,8 @@ indent_end:
                 if (lex_isidentfirst(ss->current)) {
                 read_kw_or_id:
                     ls->le.str.pos = 0;
-                    do { str_next(ls, ss->current); ss_nextc(ss); } while (lex_isidentletter(ss->current));
+                    do { str_next(ls, ss->current); ss_nextc(ss); }
+                    while (lex_isidentletter(ss->current));
                     ls->token.val = read_kw_or_id(ls);
                     ls->token.obj = castobj(pylt_obj_str_new(ls->state, ls->le.str.buf, ls->le.str.pos, true));
                     return 0;

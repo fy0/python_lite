@@ -30,11 +30,12 @@ void debug_print_obj(PyLiteObject *obj) {
             for (khiter_t it = kho_begin(castset(obj)->ob_val); it < kho_end(castset(obj)->ob_val); ++it) {
                 if (!kho_exist(castset(obj)->ob_val, it)) continue;
                 debug_print_obj(kho_key(castset(obj)->ob_val, it));
-                if (it < pylt_obj_set_len(NULL, castset(obj))) printf(", ");
+                printf(", ");
             }
             printf("}");
             break;
         case PYLT_OBJ_TYPE_DICT:
+            break;
         default:
             if (obj->ob_type >= PYLT_OBJ_TYPE_CLASS) {
             }

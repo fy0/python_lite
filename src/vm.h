@@ -10,6 +10,7 @@ enum {
     BC_SET_VAL,
     BC_LOAD_VAL,
     BC_LOADCONST,
+    BC_NEW_OBJ,
     BC_PRINT,
 };
 
