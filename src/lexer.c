@@ -583,7 +583,7 @@ indent_end:
                 return 0;
             }
             case '\0':
-                ls->token.val = TK_END;
+                ls->token.val = (ls->token.val == TK_NEWLINE) ? TK_END : TK_NEWLINE;
                 return 0;
             default:
                 if (lex_isidentfirst(ss->current)) {
