@@ -8,8 +8,7 @@
 void func_save(ParserState *ps);
 void func_pop(ParserState *ps);
 
-bool parse_t(ParserState *ps);
-void parse_t_exist(ParserState *ps);
+void parse_t(ParserState *ps);
 
 void parse_expr(ParserState *ps);
 void parse_expr1(ParserState *ps);
@@ -23,6 +22,9 @@ void parse_expr8(ParserState *ps);
 void parse_expr9(ParserState *ps);
 void parse_expr10(ParserState *ps);
 
+bool parse_try_t(ParserState *ps);
+bool parse_try_expr(ParserState *ps);
+bool parse_try_expr10(ParserState *ps);
 
 void next(ParserState *ps) {
     pylt_lex_next(ps->ls);
@@ -124,13 +126,13 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
                 return PYLT_OBJ_TYPE_DICT;
             }
 
-            parse_t_exist(ps);
+            parse_expr(ps);
             tmp = 1;
             switch (tk->val) {
                 case ',': // set
                     next(ps);
                     while (true) {
-                        if (!parse_t(ps)) break;
+                        if (!parse_try_expr(ps)) break;
                         tmp++;
                         if (tk->val != ',') break;
                         else next(ps);
@@ -174,7 +176,7 @@ T ->    ( EXPR ) |
         BASETYPE |
         IDENT
 */
-bool parse_t(ParserState *ps) {
+bool parse_try_t(ParserState *ps) {
     int tk_val;
     Token *tk = &(ps->ls->token);
     switch (tk->val) {
@@ -223,13 +225,13 @@ bool parse_t(ParserState *ps) {
     return true;
 }
 
-static _INLINE void parse_t_exist(ParserState *ps) {
-    if (!parse_t(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+static _INLINE void parse_t(ParserState *ps) {
+    if (!parse_try_t(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 }
 
 /* EXPR -> EXPR10 ... EXPR1 */
-void parse_expr(ParserState *ps) {
-    parse_expr10(ps);
+static _INLINE bool parse_try_expr(ParserState *ps) {
+    if (!parse_try_expr10(ps)) return false;
     parse_expr9(ps);
     parse_expr8(ps);
     parse_expr7(ps);
@@ -239,6 +241,11 @@ void parse_expr(ParserState *ps) {
     parse_expr3(ps);
     parse_expr2(ps);
     parse_expr1(ps);
+    return true;
+}
+
+void parse_expr(ParserState *ps) {
+    if (!parse_try_expr(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 }
 
 /* OR EXPR10 ... EXPR1 | ε */
@@ -444,18 +451,23 @@ _INLINE void parse_expr9(ParserState *ps) {
 }
 
 /* T (** T | ε) */
-_INLINE void parse_expr10(ParserState *ps) {
-    parse_t_exist(ps);
+_INLINE bool parse_try_expr10(ParserState *ps) {
+    if (!parse_try_t(ps)) return false;
     Token *tk = &(ps->ls->token);
     switch (tk->val) {
         case TK_OP_POW:
             next(ps);
-            parse_t_exist(ps);
+            parse_t(ps);
             print_tk_val(TK_OP_POW);
             kv_pushbc(ps->func->opcodes, BC_OPERATOR);
             kv_pushbc(ps->func->opcodes, OP_POW);
             break;
     }
+    return true;
+}
+
+_INLINE void parse_expr10(ParserState *ps) {
+    if (!parse_try_expr10(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 }
 
 void parse_names(ParserState *ps) {
@@ -484,6 +496,10 @@ void parse_stmt(ParserState *ps) {
                     parse_expr(ps);
                     kv_pushbc(ps->func->opcodes, BC_SET_VAL);
                     kv_pushbc(ps->func->opcodes, (uintptr_t)obj);
+                    break;
+                case '(':
+                    next(ps);
+                    ACCEPT(ps, ')');
                     break;
             }
             break;
