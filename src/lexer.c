@@ -450,152 +450,151 @@ indent_end:
     // read tokens
     for (;;) {
         switch (ss->current) {
-        case '\n': case '\r':
-            ls->current_indent = -1;
-            ls->token.val = TK_NEWLINE;
-            return 0;
-        case ' ': case '\t':
-            ss_nextc(ss);
-            break;
-        case '(': case ')': case '[': case ']': case '{': case '}':
-        case ',': case ':': case '.': case '~':
-            ls->token.val = ss->current;
-            ss_nextc(ss);
-            return 0;
-        case '<': // < << <= <<=
-            ls->token.val = get_token_1(ss, TK_OP_LE, TK_OP_LSHIFT, TK_DE_LSHIFT_EQ);
-            return 0;
-        case '>': // > >> >= >>=
-            ls->token.val = get_token_1(ss, TK_OP_GE, TK_OP_RSHIFT, TK_DE_RSHIFT_EQ);
-            return 0;
-        case '/': // / // //=
-            ls->token.val = get_token_1(ss, TK_DE_DIV_EQ, TK_OP_FLOORDIV, TK_DE_FLOORDIV_EQ);
-            return 0;
-        case '*': // * ** **=
-            ls->token.val = get_token_1(ss, TK_DE_MUL_EQ, TK_OP_POW, TK_DE_POW_EQ);
-            return 0;
-        case '=': // = ==
-            ls->token.val = get_token_2(ss, TK_OP_EQ);
-            return 0;
-        case '+': // + +=
-            ls->token.val = get_token_2(ss, TK_DE_PLUS_EQ);
-            return 0;
-        case '-': // - -= ->
-            ss_nextc(ss);
-            switch (ss->current) {
-            case '=': ss_nextc(ss); ls->token.val = TK_DE_MINUS_EQ; break;
-            case '>': ss_nextc(ss); ls->token.val = TK_DE_RET_TYPE; break;
-            default: ls->token.val = '-';
-            }
-            return 0;
-        case '%': // % %=
-            ls->token.val = get_token_2(ss, TK_DE_MOD_EQ);
-            return 0;
-        case '@': // # #=
-            ls->token.val = get_token_2(ss, TK_DE_MATMUL_EQ);
-            return 0;
-        case '&': // & &=
-            ls->token.val = get_token_2(ss, TK_DE_BITAND_EQ);
-            return 0;
-        case '|': // | |=
-            ls->token.val = get_token_2(ss, TK_DE_BITOR_EQ);
-            return 0;
-        case '^': // ^ ^=
-            ls->token.val = get_token_2(ss, TK_DE_BITXOR_EQ);
-            return 0;
-        case '!': // !=
-            ss_nextc(ss);
-            if (ss->current != '=') return PYLT_ERR_LEX_INVALID_CHARACTER;
-            ss_nextc(ss);
-            ls->token.val = TK_OP_NE;
-            return 0;
-        case '0':
-            ls->le.bytes.pos = 0;
-            bytes_next(ls, '0');
-            ss_nextc(ss);
-            switch (ss->current) {
-                case 'x': case 'X':
-                    ss_nextc(ss);
-                    if (!lex_ishex(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
-                    tmp = 1; // hex
-                    ls->le.bytes.pos = 0;
-                    while (lex_ishex(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
-                    break;
-                case 'b': case 'B':
-                    ss_nextc(ss);
-                    if (!lex_isbin(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
-                    tmp = 2; // bin
-                    ls->le.bytes.pos = 0;
-                    while (lex_isbin(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
-                    break;
-                case 'o': case 'O':
-                    ss_nextc(ss);
-                    if (!lex_isoct(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
-                    tmp = 3; // oct
-                    ls->le.bytes.pos = 0;
-                    while (lex_isoct(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
-                    break;
-                case '.':
-                    goto read_dec_float;
-                case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-                    bytes_next(ls, ss->current);
-                    ss_nextc(ss);
-                    goto read_dec_float;
-                default:
-                    tmp = 0;
-            }
-
-            ls->token.val = TK_INT;
-            ls->token.obj = castobj(pylt_obj_int_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, tmp));
-            return 0;
-        case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
-            ls->le.bytes.pos = 0;
-            bytes_next(ls, ss->current);
-            ss_nextc(ss);
-        read_dec_float:
-            while (lex_isdec(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
-
-            if (ss->current == '.') {
-                tmp2 = ls->le.bytes.pos;
-                bytes_next(ls, '.');
+            case '\n': case '\r':
+                ls->current_indent = -1;
+                ls->token.val = TK_NEWLINE;
+                return 0;
+            case ' ': case '\t':
                 ss_nextc(ss);
-                while (lex_isdec(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
-                ls->token.val = TK_FLOAT;
-                ls->token.obj = castobj(pylt_obj_float_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, tmp2));
-            } else {
-                ls->token.val = TK_INT;
-                ls->token.obj = castobj(pylt_obj_int_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, 0));
-            }
-
-            return 0;
-        case 'r': case 'R': case 'b': case 'B': case 'u': case 'U': case '\'': case '"': {
-            bool is_raw;
-            uint32_t tok = read_str_or_bytes_head(ss, &is_raw);
-            if (tok) {
-                ls->token.val = tok;
-                if (!read_str_or_bytes(ls, is_raw)) return PYLT_ERR_LEX_INVALID_STR_OR_BYTES;
-            } else {
-                if (ss->current != '\'' || ss->current != '\"') {
-                    goto read_kw_or_id;
+                break;
+            case '(': case ')': case '[': case ']': case '{': case '}':
+            case ',': case ':': case '.': case '~':
+                ls->token.val = ss->current;
+                ss_nextc(ss);
+                return 0;
+            case '<': // < << <= <<=
+                ls->token.val = get_token_1(ss, TK_OP_LE, TK_OP_LSHIFT, TK_DE_LSHIFT_EQ);
+                return 0;
+            case '>': // > >> >= >>=
+                ls->token.val = get_token_1(ss, TK_OP_GE, TK_OP_RSHIFT, TK_DE_RSHIFT_EQ);
+                return 0;
+            case '/': // / // //=
+                ls->token.val = get_token_1(ss, TK_DE_DIV_EQ, TK_OP_FLOORDIV, TK_DE_FLOORDIV_EQ);
+                return 0;
+            case '*': // * ** **=
+                ls->token.val = get_token_1(ss, TK_DE_MUL_EQ, TK_OP_POW, TK_DE_POW_EQ);
+                return 0;
+            case '=': // = ==
+                ls->token.val = get_token_2(ss, TK_OP_EQ);
+                return 0;
+            case '+': // + +=
+                ls->token.val = get_token_2(ss, TK_DE_PLUS_EQ);
+                return 0;
+            case '-': // - -= ->
+                ss_nextc(ss);
+                switch (ss->current) {
+                    case '=': ss_nextc(ss); ls->token.val = TK_DE_MINUS_EQ; break;
+                    case '>': ss_nextc(ss); ls->token.val = TK_DE_RET_TYPE; break;
+                    default: ls->token.val = '-';
                 }
-            }
-            return 0;
-        }
-        case '\0':
-            ls->token.val = TK_END;
-            return 0;
-        default:
-            if (lex_isidentfirst(ss->current)) {
-            read_kw_or_id:
-                ls->le.str.pos = 0;
-                do { str_next(ls, ss->current); ss_nextc(ss); }
-                while (lex_isidentletter(ss->current));
-                ls->token.val = read_kw_or_id(ls);
-                ls->token.obj = castobj(pylt_obj_str_new(ls->state, ls->le.str.buf, ls->le.str.pos, true));
+                return 0;
+            case '%': // % %=
+                ls->token.val = get_token_2(ss, TK_DE_MOD_EQ);
+                return 0;
+            case '@': // # #=
+                ls->token.val = get_token_2(ss, TK_DE_MATMUL_EQ);
+                return 0;
+            case '&': // & &=
+                ls->token.val = get_token_2(ss, TK_DE_BITAND_EQ);
+                return 0;
+            case '|': // | |=
+                ls->token.val = get_token_2(ss, TK_DE_BITOR_EQ);
+                return 0;
+            case '^': // ^ ^=
+                ls->token.val = get_token_2(ss, TK_DE_BITXOR_EQ);
+                return 0;
+            case '!': // !=
+                ss_nextc(ss);
+                if (ss->current != '=') return PYLT_ERR_LEX_INVALID_CHARACTER;
+                ss_nextc(ss);
+                ls->token.val = TK_OP_NE;
+                return 0;
+            case '0':
+                ls->le.bytes.pos = 0;
+                bytes_next(ls, '0');
+                ss_nextc(ss);
+                switch (ss->current) {
+                    case 'x': case 'X':
+                        ss_nextc(ss);
+                        if (!lex_ishex(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
+                        tmp = 1; // hex
+                        ls->le.bytes.pos = 0;
+                        while (lex_ishex(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
+                        break;
+                    case 'b': case 'B':
+                        ss_nextc(ss);
+                        if (!lex_isbin(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
+                        tmp = 2; // bin
+                        ls->le.bytes.pos = 0;
+                        while (lex_isbin(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
+                        break;
+                    case 'o': case 'O':
+                        ss_nextc(ss);
+                        if (!lex_isoct(ss->current)) return PYLT_ERR_LEX_INVALID_NUMBER;
+                        tmp = 3; // oct
+                        ls->le.bytes.pos = 0;
+                        while (lex_isoct(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
+                        break;
+                    case '.':
+                        goto read_dec_float;
+                    case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+                        bytes_next(ls, ss->current);
+                        ss_nextc(ss);
+                        goto read_dec_float;
+                    default:
+                        tmp = 0;
+                }
+
+                ls->token.val = TK_INT;
+                ls->token.obj = castobj(pylt_obj_int_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, tmp));
+                return 0;
+            case '1': case '2': case '3': case '4':
+            case '5': case '6': case '7': case '8': case '9':
+                ls->le.bytes.pos = 0;
+                bytes_next(ls, ss->current);
+                ss_nextc(ss);
+            read_dec_float:
+                while (lex_isdec(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
+
+                if (ss->current == '.') {
+                    tmp2 = ls->le.bytes.pos;
+                    bytes_next(ls, '.');
+                    ss_nextc(ss);
+                    while (lex_isdec(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
+                    ls->token.val = TK_FLOAT;
+                    ls->token.obj = castobj(pylt_obj_float_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, tmp2));
+                } else {
+                    ls->token.val = TK_INT;
+                    ls->token.obj = castobj(pylt_obj_int_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, 0));
+                }
+
+                return 0;
+            case 'r': case 'R': case 'b': case 'B': case 'u': case 'U': case '\'': case '"': {
+                bool is_raw;
+                uint32_t tok = read_str_or_bytes_head(ss, &is_raw);
+                if (tok) {
+                    ls->token.val = tok;
+                    if (!read_str_or_bytes(ls, is_raw)) return PYLT_ERR_LEX_INVALID_STR_OR_BYTES;
+                } else {
+                    if (ss->current != '\'' || ss->current != '\"') {
+                        goto read_kw_or_id;
+                    }
+                }
                 return 0;
             }
-            return PYLT_ERR_LEX_INVALID_CHARACTER;
+            case '\0':
+                ls->token.val = TK_END;
+                return 0;
+            default:
+                if (lex_isidentfirst(ss->current)) {
+                read_kw_or_id:
+                    ls->le.str.pos = 0;
+                    do { str_next(ls, ss->current); ss_nextc(ss); } while (lex_isidentletter(ss->current));
+                    ls->token.val = read_kw_or_id(ls);
+                    ls->token.obj = castobj(pylt_obj_str_new(ls->state, ls->le.str.buf, ls->le.str.pos, true));
+                    return 0;
+                }
+                return PYLT_ERR_LEX_INVALID_CHARACTER;
         }
     }
 }
