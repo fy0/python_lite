@@ -96,6 +96,13 @@ PyLiteObject* parse_get_basetype(ParserState *ps) {
             obj = tk->obj;
             next(ps);
             return obj;
+        case '[':
+            if (tk->val == ']') {
+                ;
+            } else {
+                ;
+            }
+            break;
         case '{':
             next(ps);
             if (tk->val == '}') {
@@ -162,6 +169,8 @@ void parse_t(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     switch (tk->val) {
         case TK_NAME:
+            kv_pushbc(ps->func->opcodes, BC_LOAD_VAL);
+            kv_pushbc(ps->func->opcodes, (uintptr_t)tk->obj);
             next(ps);
             break;
         case '(':
@@ -434,9 +443,47 @@ _INLINE void parse_expr10(ParserState *ps) {
     }
 }
 
+void parse_names(ParserState *ps) {
+    Token *tk = &(ps->ls->token);
+    while (true) {
+        if (tk->val == TK_NAME) {
+            ;
+        }
+        if (tk->val == ',') {
+            ;
+        }
+    }
+}
+
+void parse_stmt(ParserState *ps) {
+    Token *tk = &(ps->ls->token);
+    PyLiteObject *obj;
+
+    switch (tk->val) {
+        case TK_NAME:
+            obj = tk->obj;
+            next(ps);
+            switch (tk->val) {
+                case '=':
+                    next(ps);
+                    parse_expr(ps);
+                    kv_pushbc(ps->func->opcodes, BC_SET_VAL);
+                    kv_pushbc(ps->func->opcodes, (uintptr_t)obj);
+                    break;
+            }
+            break;
+        default:
+            parse_expr(ps);
+            //ACCEPT(ps, TK_)
+    }
+}
+
 void parse(ParserState *ps) {
     next(ps);
-    parse_expr(ps);
+    //parse_expr(ps);
+    parse_stmt(ps);
+    next(ps);
+    parse_stmt(ps);
     kv_pushbc(ps->func->opcodes, BC_PRINT);
 }
 

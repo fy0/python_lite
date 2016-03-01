@@ -50,14 +50,17 @@ void pylt_vm_init(PyLiteVM* vm) {
 void pylt_vm_run(PyLiteState* state) {
     PyLiteFunctionObject *func = state->func;
     PyLiteObject *a, *b, *ret;
-    size_t op;
+    uintptr_t op;
 
     for (unsigned int i = 0; i < kv_size(func->opcodes); i++) {
         switch (kv_A(func->opcodes, i)) {
             case BC_LOADCONST:
                 //printf("   %-15s %d\n", "LOADCONST", );
                 //printf("%d\n", kv_A(func->opcodes, ++i));
-                kv_push(size_t, state->vm.stack, (size_t)kv_A(func->const_val, kv_A(func->opcodes, ++i)-1));
+                kv_push(uintptr_t, state->vm.stack, (uintptr_t)kv_A(func->const_val, kv_A(func->opcodes, ++i)-1));
+                break;
+            case BC_SET_VAL:
+                pylt_obj_table_set(state->func->locals, castobj(kv_A(func->opcodes, ++i)), castobj(kv_pop(state->vm.stack)));
                 break;
             case BC_OPERATOR:
                 //printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(func->opcodes, ++i)));
@@ -73,7 +76,7 @@ void pylt_vm_run(PyLiteState* state) {
                             printf("TypeError: unsupported operand type(s) for %s: '%s' and '%s'\n", pylt_vm_get_op_name(op), pylt_obj_type_name_cstr(state, a), pylt_obj_type_name_cstr(state, b));
                             return;
                         }
-                        kv_push(size_t, state->vm.stack, (size_t)ret);
+                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                         break;
                     default:
                         a = castobj(kv_pop(state->vm.stack));
@@ -82,12 +85,22 @@ void pylt_vm_run(PyLiteState* state) {
                             printf("TypeError: bad operand type for unary %s: '%s'\n", pylt_vm_get_op_name(op), pylt_obj_type_name_cstr(state, a));
                             return;
                         }
-                        kv_push(size_t, state->vm.stack, (size_t)ret);
+                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                         break;
                 }
                 break;
             case BC_PRINT:
-                debug_print_obj(castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - 1)));
+                if (kv_size(state->vm.stack) != 0)
+                    debug_print_obj(castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - 1)));
+                printf("{");
+                for (khiter_t it = kho_begin(state->func->locals); it < kho_end(state->func->locals); ++it) {
+                    if (!kho_exist(state->func->locals, it)) continue;
+                    debug_print_obj(kho_key(state->func->locals, it));
+                    printf(": ");
+                    debug_print_obj(kho_value(state->func->locals, it));
+                    printf(", ");
+                }
+                printf("}");
                 putchar('\n');
         }
     }

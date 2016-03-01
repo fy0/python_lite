@@ -28,7 +28,7 @@ int main(int argc,char* argv[])
     putchar('\n');
 
     pylt_lex_init(&state, &ls, ss);
-
+    /*
     pylt_parser_init(&state, &ps, &ls);
     parse(&ps);
 
@@ -40,7 +40,7 @@ int main(int argc,char* argv[])
     pylt_vm_run(&state);
 
     system("pause");
-    return 0;
+    return 0;*/ 
 
     for (;;) {
         int code = pylt_lex_next(&ls);

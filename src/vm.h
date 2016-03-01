@@ -7,8 +7,8 @@
 
 enum {
     BC_OPERATOR,
-    BC_LOAD,
-    BC_SET,
+    BC_SET_VAL,
+    BC_LOAD_VAL,
     BC_LOADCONST,
     BC_PRINT,
 };
@@ -30,7 +30,7 @@ enum {
 
 
 typedef struct PyLiteVM{
-    kvec_t(size_t) stack;
+    kvec_t(uintptr_t) stack;
 } PyLiteVM;
 
 struct PyLiteState;
