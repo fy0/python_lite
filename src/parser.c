@@ -485,6 +485,7 @@ void parse_names(ParserState *ps) {
 void parse_stmt(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     PyLiteObject *obj;
+    int tmp;
 
     switch (tk->val) {
         case TK_NAME:
@@ -499,6 +500,15 @@ void parse_stmt(ParserState *ps) {
                     break;
                 case '(':
                     next(ps);
+                    tmp = 0;
+                    while (true) {
+                        if (!parse_try_expr(ps)) break;
+                        tmp++;
+                        if (tk->val != ',') break;
+                        else next(ps);
+                    }
+                    kv_pushbc(ps->func->opcodes, BC_CALL);
+                    kv_pushbc(ps->func->opcodes, (uintptr_t)tmp);
                     ACCEPT(ps, ')');
                     break;
             }

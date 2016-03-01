@@ -115,6 +115,9 @@ void pylt_vm_run(PyLiteState* state) {
                         break;
                 }
                 break;
+            case BC_CALL:
+                ++i;
+                break;
             case BC_PRINT:
                 if (kv_size(state->vm.stack) != 0) {
                     debug_print_obj(castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - 1)));

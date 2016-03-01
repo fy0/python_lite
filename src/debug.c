@@ -53,14 +53,33 @@ void debug_print_const_vals(ParserState *ps) {
 }
 
 void debug_print_opcodes(ParserState *ps) {
+    int a, b;
     printf("OPCODES:\n");
     for (unsigned int i = 0; i < kv_size(ps->func->opcodes); i++) {
         switch (kv_A(ps->func->opcodes, i)) {
+            case BC_OPERATOR:
+                printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(ps->func->opcodes, ++i)));
+                break;
+            case BC_SET_VAL:
+                printf("   %-15s ", "SET_VAL");
+                debug_print_obj(castobj(kv_A(ps->func->opcodes, ++i)));
+                putchar('\n');
+                break;
+            case BC_LOAD_VAL:
+                printf("   %-15s ", "LOAD_VAL");
+                debug_print_obj(castobj(kv_A(ps->func->opcodes, ++i)));
+                putchar('\n');
+                break;
             case BC_LOADCONST:
                 printf("   %-15s %d\n", "LOADCONST", kv_A(ps->func->opcodes, ++i));
                 break;
-            case BC_OPERATOR:
-                printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(ps->func->opcodes, ++i)));
+            case BC_NEW_OBJ:
+                a = kv_A(ps->func->opcodes, ++i);
+                b = kv_A(ps->func->opcodes, ++i);
+                printf("   %-15s %s %d\n", "NEW_OBJ", pylt_type_name(a), b);
+                break;
+            case BC_CALL:
+                printf("   %-15s %d\n", "CALL", kv_A(ps->func->opcodes, ++i));
                 break;
             case BC_PRINT:
                 printf("   %-15s\n", "PRINT");

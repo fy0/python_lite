@@ -6,12 +6,13 @@
 #include "lib/kvec.h"
 
 enum {
-    BC_OPERATOR,
-    BC_SET_VAL,
-    BC_LOAD_VAL,
-    BC_LOADCONST,
-    BC_NEW_OBJ,
-    BC_PRINT,
+    BC_OPERATOR,   // 运算符
+    BC_SET_VAL,    // 赋值
+    BC_LOAD_VAL,   // 载入变量（入栈）
+    BC_LOADCONST,  // 载入常量
+    BC_NEW_OBJ,    // 新建对象
+    BC_CALL,       // 函数调用
+    BC_PRINT,      // 测试输出
 };
 
 enum {
