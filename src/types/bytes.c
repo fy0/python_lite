@@ -73,7 +73,7 @@ int _read_x_int(const char *p, int *pnum, uint8_t(*func)(uint32_t code), int max
 PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int size, bool is_raw) {
     PyLiteBytesObject *obj = pylt_realloc(NULL, sizeof(PyLiteBytesObject)), *obj2;
     obj->ob_type = PYLT_OBJ_TYPE_BYTES;
-    obj->ob_val = pylt_realloc(NULL, sizeof(uint8_t)*size + 1);
+    obj->ob_val = pylt_realloc(NULL, sizeof(uint8_t) * (size + 1));
     if (is_raw) {
         obj->ob_val[size] = '\0';
         obj->ob_size = size;

@@ -71,7 +71,7 @@ int _read_x_int(uint32_t *p, int *pnum, uint8_t(*func)(uint32_t code), int max_s
 PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, uint32_t *str, int size, bool is_raw) {
     PyLiteStrObject *obj = pylt_realloc(NULL, sizeof(PyLiteStrObject)), *obj2;
     obj->ob_type = PYLT_OBJ_TYPE_STR;
-    obj->ob_val = pylt_realloc(NULL, sizeof(uint32_t)*size + 1);
+    obj->ob_val = pylt_realloc(NULL, sizeof(uint32_t) * (size + 1));
     if (is_raw) {
         obj->ob_size = size;
         for (int i = 0; i < size; i++) {
