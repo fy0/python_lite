@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "lib/kvec.h"
 #include "types/all.h"
+#include "mods/builtin.h"
 
 const char* op_vals[] = {
     "or",
@@ -116,7 +117,8 @@ void pylt_vm_run(PyLiteState* state) {
                 }
                 break;
             case BC_CALL:
-                ++i;
+                pylt_mods_builtins_print(state, kv_A(func->opcodes, ++i));
+                ++i; 
                 break;
             case BC_PRINT:
                 if (kv_size(state->vm.stack) != 0) {

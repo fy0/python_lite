@@ -509,6 +509,7 @@ void parse_stmt(ParserState *ps) {
                     }
                     kv_pushbc(ps->func->opcodes, BC_CALL);
                     kv_pushbc(ps->func->opcodes, (uintptr_t)tmp);
+                    kv_pushbc(ps->func->opcodes, (uintptr_t)obj);
                     ACCEPT(ps, ')');
                     break;
             }
