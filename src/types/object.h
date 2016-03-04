@@ -116,7 +116,7 @@ const char* pylt_type_name(int ob_type);
 typedef PyLiteObject* (*PyLiteObjUnaryOpFunc)(PyLiteState *state, PyLiteObject *obj);
 typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
 
-typedef void(*PyLiteCFunction)(PyLiteObject *args);
+typedef void(*PyLiteCFunctionPtr)(int argc, PyLiteObject *args);
 typedef void(*PyLiteCMethod)(PyLiteObject *self, PyLiteObject *args);
 
 #endif

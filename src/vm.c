@@ -117,7 +117,7 @@ void pylt_vm_run(PyLiteState* state) {
                 }
                 break;
             case BC_CALL:
-                pylt_mods_builtins_print(state, kv_A(func->opcodes, ++i));
+                //pylt_mods_builtins_print(state, kv_A(func->opcodes, ++i));
                 ++i; 
                 break;
             case BC_PRINT:
