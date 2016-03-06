@@ -1,5 +1,5 @@
 ﻿
-#include "func.h"
+#include "function.h"
 
 PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state) {
     PyLiteFunctionObject *obj = pylt_realloc(NULL, sizeof(PyLiteFunctionObject));

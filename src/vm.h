@@ -31,15 +31,17 @@ enum {
 } OperatorValue;
 
 
-typedef struct PyLiteVM{
+typedef struct PyLiteVM {
     kvec_t(uintptr_t) stack;
+    struct PyLiteDictObject *globals;
+    struct PyLiteDictObject *locals;
 } PyLiteVM;
 
 struct PyLiteState;
 
 const char* pylt_vm_get_op_name(int op);
 int token_to_op_val(uint32_t tk);
-void pylt_vm_init(PyLiteVM* vm);
-void pylt_vm_run(struct PyLiteState* state);
+void pylt_vm_init(struct PyLiteState *state, PyLiteVM *vm);
+void pylt_vm_run(struct PyLiteState *state);
 
 #endif

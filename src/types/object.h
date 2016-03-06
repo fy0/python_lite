@@ -41,8 +41,9 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_TUPLE,
     PYLT_OBJ_TYPE_DICT,
 
-    PYLT_OBJ_TYPE_FUNCTION,
     PYLT_OBJ_TYPE_MODULE,
+    PYLT_OBJ_TYPE_FUNCTION,
+    PYLT_OBJ_TYPE_CFUNCTION,
 
     PYLT_OBJ_TYPE_TYPE,
     PYLT_OBJ_TYPE_CLASS,
@@ -91,6 +92,10 @@ struct PyLiteListObject;
 struct PyLiteTupleObject;
 struct PyLiteDictObject;
 
+struct PyLiteModuleObject;
+struct PyLiteFunctionObject;
+struct PyLiteCFunctionObject;
+
 #define cast(t, exp)	((t)(exp))
 #define castobj(i)      cast(struct PyLiteObject*, (i))
 #define castint(i)      cast(struct PyLiteIntObject*, (i))
@@ -104,6 +109,10 @@ struct PyLiteDictObject;
 #define casttuple(i)    cast(struct PyLiteTupleObject*, (i))
 #define castdict(i)     cast(struct PyLiteDictObject*, (i))
 
+#define castmod(i)    cast(struct PyLiteModuleObject*, (i))
+#define castfunc(i)    cast(struct PyLiteFunctionObject*, (i))
+#define castcfunc(i)    cast(struct PyLiteCFunctionObject*, (i))
+
 #define castclass(i)    cast(struct PyLiteCustomObject*, (i))
 
 void pylt_obj_free(PyLiteObject *obj);
@@ -116,7 +125,7 @@ const char* pylt_type_name(int ob_type);
 typedef PyLiteObject* (*PyLiteObjUnaryOpFunc)(PyLiteState *state, PyLiteObject *obj);
 typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
 
-typedef void(*PyLiteCFunctionPtr)(PyLiteState *state, int argc, PyLiteObject *args);
-typedef void(*PyLiteCMethod)(PyLiteObject *self, PyLiteObject *args);
+typedef void(*PyLiteCFunctionPtr)(PyLiteState *state, int argc, PyLiteObject **args);
+typedef void(*PyLiteCMethod)(PyLiteObject *self, PyLiteObject **args);
 
 #endif

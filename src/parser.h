@@ -4,8 +4,7 @@
 
 #include "lexer.h"
 #include "lib/kvec.h"
-#include "types/object.h"
-#include "types/func.h"
+#include "types/all.h"
 
 typedef struct ParserState {
     LexState *ls;

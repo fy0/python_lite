@@ -12,6 +12,7 @@ typedef struct PyLiteState {
     kvec_t(uint32_t) cls_base;
     PyLiteSetObject *cache_str;
     PyLiteSetObject *cache_bytes;
+    PyLiteTable *modules;
     PyLiteFunctionObject *func;
 } PyLiteState;
 

@@ -13,7 +13,8 @@
 #include "tuple.h"
 #include "dict.h"
 
-#include "func.h"
+#include "function.h"
+#include "module.h"
 
 #include "type.h"
 

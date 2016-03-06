@@ -44,8 +44,10 @@ int token_to_op_val(uint32_t tk) {
     return 0;
 }
 
-void pylt_vm_init(PyLiteVM* vm) {
+void pylt_vm_init(struct PyLiteState* state, PyLiteVM* vm) {
     kv_init(vm->stack);
+    vm->globals = pylt_obj_dict_new(state);
+    vm->locals = pylt_obj_dict_new(state);
 }
 
 void pylt_vm_run(PyLiteState* state) {

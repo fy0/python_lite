@@ -31,13 +31,28 @@ PyLiteTupleObject* _NST(PyLiteState *state, int n, ...) {
     return obj;
 }
 
-PyLiteCFunction* pylt_func_bind(PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, PyLiteTupleObject *types, PyLiteCFunctionPtr cfunc) {
-    PyLiteCFunction *func = pylt_realloc(NULL, sizeof(PyLiteCFunction));
+int* _INTS(int n, ...) {
+    va_list args;
+    int *ret = pylt_realloc(NULL, sizeof(int) * n);
+
+    va_start(args, n);
+    for (int i = 0; i < n; ++i) {
+        ret[i] = va_arg(args, int);
+    }
+    va_end(args);
+    return ret;
+}
+
+PyLiteCFunctionObject* pylt_cfunc_bind(PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc) {
+    PyLiteCFunctionObject *func = pylt_realloc(NULL, sizeof(PyLiteCFunctionObject));
+    func->ob_type = PYLT_OBJ_TYPE_CFUNCTION;
     func->length = param_names ? param_names->ob_size : 0;
     func->minimal = func->length - (defaults ? defaults->ob_size : 0);
-    func->names = param_names ? param_names->ob_val : NULL;
+    func->names = param_names ? (PyLiteStrObject**)param_names->ob_val : NULL;
     func->defaults = defaults ? defaults->ob_val : NULL;
+    func->type_codes = types;
     func->func = cfunc;
+    pylt_obj_table_set(mod->attrs, castobj(name), castobj(func));
 
     pylt_free(param_names);
     pylt_free(defaults);
