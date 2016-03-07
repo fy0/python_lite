@@ -43,7 +43,7 @@ void* basetype_op_func_table[][23] = {
     { // str
         //NULL, NULL, NULL, NULL, &pylt_obj_str_ne, &pylt_obj_str_eq,
         NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
+        &pylt_obj_str_plus, NULL, &pylt_obj_str_mul, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // bytes
@@ -55,7 +55,7 @@ void* basetype_op_func_table[][23] = {
     { // set
         //NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
         NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
+        &pylt_obj_bytes_plus, NULL, &pylt_obj_bytes_plus, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // list

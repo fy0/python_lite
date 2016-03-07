@@ -65,7 +65,7 @@ void pylt_vm_run(PyLiteState* state) {
                 break;
             case BC_SET_VAL:
                 pylt_obj_table_set(state->func->locals, castobj(kv_A(func->opcodes, ++i)), castobj(kv_pop(state->vm.stack)));
-                break;
+                break; 
             case BC_LOAD_VAL:
                 ret = pylt_obj_table_get(state->func->locals, castobj(kv_A(func->opcodes, ++i)));
                 if (!ret) {

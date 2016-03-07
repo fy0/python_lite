@@ -4,6 +4,19 @@
 #include "set.h"
 #include "../state.h"
 
+static PyLiteBytesObject* hash_and_check_cache(PyLiteState *state, PyLiteBytesObject *obj) {
+    PyLiteBytesObject *obj2;
+    obj->ob_hash = pylt_obj_bytes_cforcehash(state, obj);
+    obj2 = castbytes(pylt_obj_set_has(state, state->cache_bytes, castobj(obj)));
+    if (obj2) {
+        pylt_obj_bytes_free(state, obj);
+        return obj2;
+    } else {
+        pylt_obj_set_add(state, state->cache_bytes, castobj(obj));
+    }
+    return obj;
+}
+
 pl_int_t pylt_obj_bytes_ccmp(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
     return false;
 }
@@ -38,6 +51,40 @@ pl_uint32_t pylt_obj_bytes_cforcehash(PyLiteState *state, PyLiteBytesObject *obj
     return (hash & 0x7FFFFFFF);
 }
 
+PyLiteObject* pylt_obj_bytes_mul(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
+    PyLiteBytesObject *obj;
+    if (other->ob_type != PYLT_OBJ_TYPE_INT) return NULL;
+
+    obj = pylt_realloc(NULL, sizeof(PyLiteBytesObject));
+    obj->ob_type = PYLT_OBJ_TYPE_BYTES;
+    obj->ob_size = self->ob_size * castint(other)->ob_val;
+    obj->ob_val = pylt_realloc(NULL, sizeof(uint8_t) * (obj->ob_size + 1));
+    if (!obj->ob_val); // Memory Error
+
+    for (int i = 0; i < castint(other)->ob_val; ++i) {
+        memcpy(obj->ob_val + i * self->ob_size, self->ob_val, self->ob_size * sizeof(uint8_t));
+    }
+
+    obj->ob_val[obj->ob_size] = '\0';
+    return castobj(hash_and_check_cache(state, obj));
+}
+
+PyLiteObject* pylt_obj_bytes_plus(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
+    PyLiteBytesObject *obj;
+    if (other->ob_type != PYLT_OBJ_TYPE_BYTES) return NULL;
+
+    obj = pylt_realloc(NULL, sizeof(PyLiteBytesObject));
+    obj->ob_type = PYLT_OBJ_TYPE_BYTES;
+    obj->ob_size = self->ob_size + castbytes(other)->ob_size;
+    obj->ob_val = pylt_realloc(NULL, sizeof(uint8_t) * (obj->ob_size + 1));
+    if (!obj->ob_val); // Memory Error
+
+    memcpy(obj->ob_val, self->ob_val, self->ob_size * sizeof(uint8_t));
+    memcpy(obj->ob_val + self->ob_size, caststr(other)->ob_val, caststr(other)->ob_size * sizeof(uint8_t));
+
+    obj->ob_val[obj->ob_size] = '\0';
+    return castobj(hash_and_check_cache(state, obj));
+}
 
 #define _isnumber(c) (c >= '0' && c <= '9')
 #define _ishex(c) (_isnumber(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))
@@ -71,7 +118,7 @@ int _read_x_int(const char *p, int *pnum, uint8_t(*func)(uint32_t code), int max
 
 
 PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int size, bool is_raw) {
-    PyLiteBytesObject *obj = pylt_realloc(NULL, sizeof(PyLiteBytesObject)), *obj2;
+    PyLiteBytesObject *obj = pylt_realloc(NULL, sizeof(PyLiteBytesObject));
     obj->ob_type = PYLT_OBJ_TYPE_BYTES;
     obj->ob_val = pylt_realloc(NULL, sizeof(uint8_t) * (size + 1));
     if (is_raw) {
@@ -120,15 +167,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int s
         obj->ob_val[pos] = '\0';
         obj->ob_val = pylt_realloc(obj->ob_val, sizeof(uint8_t)*pos + 1);
     }
-    obj->ob_hash = pylt_obj_bytes_cforcehash(state, obj);
-    obj2 = castbytes(pylt_obj_set_has(state, state->cache_bytes, castobj(obj)));
-    if (obj2) {
-        pylt_obj_bytes_free(state, obj);
-        return obj2;
-    } else {
-        pylt_obj_set_add(state, state->cache_bytes, castobj(obj));
-    }
-    return obj;
+    return hash_and_check_cache(state, obj);
 }
 
 void pylt_obj_bytes_free(PyLiteState *state, PyLiteBytesObject *self) {
