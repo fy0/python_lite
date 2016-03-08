@@ -64,6 +64,7 @@ int main() {
 #define kv_init(v) ((v).n = (v).m = 0, (v).a = 0)
 #define kv_destroy(v) kfree((v).a)
 #define kv_A(v, i) ((v).a[(i)])
+#define kv_top(v) ((v).a[(v).n-1])
 #define kv_pop(v) ((v).a[--(v).n])
 #define kv_size(v) ((v).n)
 #define kv_max(v) ((v).m)
@@ -75,6 +76,12 @@ int main() {
         (v1).n = (v0).n;                                    \
         memcpy((v1).a, (v0).a, sizeof(type) * (v0).n);        \
     } while (0)                                                \
+
+#define kv_copy1(type, v1, v0) do {                            \
+        if ((v1).m < (v0).n) kv_resize(type, v1, (v0).n+1);    \
+        (v1).n = (v0).n;                                    \
+        memcpy((v1).a, (v0).a, sizeof(type) * (v0).n);        \
+        } while (0)                                                \
 
 #define kv_push(type, v, x) do {                                    \
         if ((v).n == (v).m) {                                        \

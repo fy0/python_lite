@@ -36,7 +36,7 @@ void pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObject **arg
 void pylt_mods_builtins_register(PyLiteState *state) {
     PyLiteModuleObject *mod = pylt_obj_module_new(state, NULL);
 
-    pylt_cfunc_bind(
+    pylt_cfunc_register(
         mod,
         _NS(state, "print"),
         _NST(state, 3, "values", "sep", "end"),
@@ -45,7 +45,7 @@ void pylt_mods_builtins_register(PyLiteState *state) {
         &pylt_mods_builtins_print
     );
 
-    pylt_cfunc_bind(
+    pylt_cfunc_register(
         mod,
         _NS(state, "__import__"),
         _NST(state, 1, "name", "globals", "locals"),
@@ -54,7 +54,7 @@ void pylt_mods_builtins_register(PyLiteState *state) {
         &pylt_mods_builtins_import
     );
 
-    pylt_cfunc_bind(
+    pylt_cfunc_register(
         mod,
         _NS(state, "setattr"),
         _NST(state, 3, "object", "name", "value"),

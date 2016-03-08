@@ -546,6 +546,5 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
     ps->state = state;
     ps->ls = ls;
     ps->func = pylt_obj_func_new(ps->state);
-    state->func = ps->func;
     kv_init(ps->func_stack);
 }

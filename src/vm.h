@@ -4,6 +4,7 @@
 
 #include "utils.h"
 #include "lib/kvec.h"
+#include "types/all.h"
 
 enum {
     BC_OPERATOR,   // 运算符
@@ -12,6 +13,7 @@ enum {
     BC_LOADCONST,  // 载入常量
     BC_NEW_OBJ,    // 新建对象
     BC_CALL,       // 函数调用
+    BC_CALL_END,   // 函数结束
     BC_PRINT,      // 测试输出
 };
 
@@ -31,17 +33,23 @@ enum {
 } OperatorValue;
 
 
+typedef struct PyLiteFuncCall {
+    PyLiteFunctionObject *func;
+    kvec_t(PyLiteTable*) var_tables;
+} PyLiteFuncCall;
+
 typedef struct PyLiteVM {
     kvec_t(uintptr_t) stack;
-    struct PyLiteDictObject *globals;
-    struct PyLiteDictObject *locals;
+    kvec_t(PyLiteFuncCall) calls;
 } PyLiteVM;
 
 struct PyLiteState;
 
+void pylt_vm_call_func(PyLiteState* state, PyLiteFunctionObject *func);
+
 const char* pylt_vm_get_op_name(int op);
 int token_to_op_val(uint32_t tk);
 void pylt_vm_init(struct PyLiteState *state, PyLiteVM *vm);
-void pylt_vm_run(struct PyLiteState *state);
+void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func);
 
 #endif

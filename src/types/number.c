@@ -170,7 +170,7 @@ pl_int_t pylt_obj_float_ccmp(PyLiteState *state, PyLiteFloatObject *self, PyLite
             if (self->ob_val > castbool(other)->ob_val) return 1;
             else return 0;
         default:
-            return -2;
+            return 2;
     }
 }
 

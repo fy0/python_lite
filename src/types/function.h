@@ -15,8 +15,6 @@ typedef struct PyLiteFunctionObject {
     PyLiteObject **defaults;           /* default values of option parameters */
     kvec_t(PyLiteObject*) const_val;
     kvec_t(uintptr_t) opcodes;
-    PyLiteTable *locals;
-    // upvalue
     PyLiteStrObject *doc;
 } PyLiteFunctionObject;
 

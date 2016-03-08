@@ -43,7 +43,7 @@ int* _INTS(int n, ...) {
     return ret;
 }
 
-PyLiteCFunctionObject* pylt_cfunc_bind(PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc) {
+PyLiteCFunctionObject* pylt_cfunc_register(PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_realloc(NULL, sizeof(PyLiteCFunctionObject));
     func->ob_type = PYLT_OBJ_TYPE_CFUNCTION;
     func->length = param_names ? param_names->ob_size : 0;

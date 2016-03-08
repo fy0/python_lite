@@ -5,7 +5,7 @@
 #include "../types/all.h"
 #include "mods.h"
 
-PyLiteCFunctionObject* pylt_cfunc_bind(PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc);
+PyLiteCFunctionObject* pylt_cfunc_register(PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc);
 
 #define _NS(state, str) pylt_obj_str_new_from_c_str(state, str, true)
 
