@@ -583,7 +583,19 @@ indent_end:
                 return 0;
             }
             case '\0':
-                ls->token.val = (ls->token.val == TK_NEWLINE) ? TK_END : TK_NEWLINE;
+                if (ls->token.val != TK_NEWLINE && ls->token.val != TK_DEDENT) {
+                    ls->token.val = TK_NEWLINE;
+                    return 0;
+                }
+                if (ls->indent->val > 0) {
+                    IndentInfo *idt = ls->indent;
+                    ls->indent = ls->indent->prev;
+                    ls->current_indent = ls->indent->val;
+                    pylt_free(idt);
+                    ls->token.val = TK_DEDENT;
+                    return 0;
+                }
+                ls->token.val = TK_END;
                 return 0;
             default:
                 if (lex_isidentfirst(ss->current)) {

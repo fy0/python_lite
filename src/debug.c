@@ -38,6 +38,7 @@ void debug_print_obj(PyLiteObject *obj) {
             break;
         default:
             if (obj->ob_type >= PYLT_OBJ_TYPE_CLASS) {
+                ;
             }
     }
 }
@@ -81,6 +82,10 @@ void debug_print_opcodes(ParserState *ps) {
             case BC_CALL:
                 printf("   %-15s %-3d  ", "CALL", kv_A(ps->func->opcodes, ++i));
                 debug_print_obj(castobj(kv_A(ps->func->opcodes, ++i)));
+                putchar('\n');
+                break;
+            case BC_TEST:
+                printf("   %-15s %-3d  ", "TEST", kv_A(ps->func->opcodes, ++i));
                 putchar('\n');
                 break;
             case BC_PRINT:

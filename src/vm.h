@@ -15,6 +15,8 @@ enum {
     BC_CALL,       // 函数调用
     BC_CALL_END,   // 函数结束
     BC_PRINT,      // 测试输出
+    BC_TEST,       // 真值测试
+    BC_JMP,        // 跳转
 };
 
 enum {
@@ -35,6 +37,7 @@ enum {
 
 typedef struct PyLiteFuncCall {
     PyLiteFunctionObject *func;
+    pl_uint_t code_pointer;
     kvec_t(PyLiteTable*) var_tables;
 } PyLiteFuncCall;
 

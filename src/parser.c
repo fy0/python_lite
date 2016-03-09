@@ -10,6 +10,9 @@ void func_pop(ParserState *ps);
 
 void parse_t(ParserState *ps);
 
+void parse_stmts(ParserState *ps);
+void parse_block(ParserState *ps);
+
 void parse_expr(ParserState *ps);
 void parse_expr1(ParserState *ps);
 void parse_expr2(ParserState *ps);
@@ -482,6 +485,13 @@ void parse_names(ParserState *ps) {
     }
 }
 
+void parse_block(ParserState *ps) {
+    Token *tk = &(ps->ls->token);
+    ACCEPT(ps, TK_INDENT);
+    parse_stmts(ps);
+    ACCEPT(ps, TK_DEDENT);
+}
+
 void parse_stmt(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     PyLiteObject *obj;
@@ -514,6 +524,37 @@ void parse_stmt(ParserState *ps) {
                     break;
             }
             break;
+        case TK_KW_IF:
+            next(ps);
+            parse_expr(ps);
+            ACCEPT(ps, ':');
+            kv_pushbc(ps->func->opcodes, BC_TEST);
+            kv_pushbc(ps->func->opcodes, 0);
+            tmp = kv_size(ps->func->opcodes);
+            if (tk->val == TK_NEWLINE) {
+                next(ps);
+                parse_block(ps);
+            } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+            // TODO: stmt
+
+            kv_A(ps->func->opcodes, tmp - 1) = kv_size(ps->func->opcodes) - tmp;
+
+            if (tk->val == TK_KW_ELSE) {
+                next(ps);
+                ACCEPT(ps, ':');
+                kv_A(ps->func->opcodes, tmp - 1) += 2;
+                kv_pushbc(ps->func->opcodes, BC_JMP);
+                kv_pushbc(ps->func->opcodes, 0);
+                tmp = kv_size(ps->func->opcodes);
+
+                if (tk->val == TK_NEWLINE) {
+                    next(ps);
+                    parse_block(ps);
+                } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+
+                kv_A(ps->func->opcodes, tmp - 1) = kv_size(ps->func->opcodes) - tmp;
+            }
+            return;
         default:
             parse_expr(ps);
     }
@@ -521,7 +562,7 @@ void parse_stmt(ParserState *ps) {
 }
 
 void parse_stmts(ParserState *ps) {
-    while (ps->ls->token.val != TK_END) {
+    while (ps->ls->token.val != TK_END && ps->ls->token.val != TK_DEDENT) {
         parse_stmt(ps);
     }
 }

@@ -197,7 +197,7 @@ pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_INT: return castint(obj)->ob_val != 0;
         case PYLT_OBJ_TYPE_FLOAT: return castfloat(obj)->ob_val != 0;
-        case PYLT_OBJ_TYPE_BOOL: return castbool(obj)->ob_val != false;
+        case PYLT_OBJ_TYPE_BOOL: return castbool(obj)->ob_val != 0;
         case PYLT_OBJ_TYPE_STR: return castbytes(obj)->ob_size != 0;
         default: return true;
     }
