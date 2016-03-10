@@ -9,6 +9,7 @@
 typedef struct ParserState {
     LexState *ls;
     PyLiteState* state;
+    int block_depth;
     kvec_t(PyLiteFunctionObject*) func_stack;
     PyLiteFunctionObject* func;
 } ParserState;
@@ -23,5 +24,9 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls);
 #define PYLT_ERR_PARSER_INVALID_SYNTAX -1
 // SyntaxError: (value error) invalid escape
 #define PYLT_ERR_PARSER_BYTES_INVALID_ESCAPE -2
+// SyntaxError: 'break' outside loop
+#define PYLT_ERR_PARSER_BREAK_OUTSIDE_LOOP -3
+// SyntaxError: 'continue' not properly in loop
+#define PYLT_ERR_PARSER_CONTINUE_OUTSIDE_LOOP -4
 
 #endif
