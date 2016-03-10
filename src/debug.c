@@ -57,6 +57,7 @@ void debug_print_opcodes(ParserState *ps) {
     int a, b;
     printf("OPCODES:\n");
     for (unsigned int i = 0; i < kv_size(ps->func->opcodes); i++) {
+        printf("   L%05d: ", i);
         switch (kv_A(ps->func->opcodes, i)) {
             case BC_OPERATOR:
                 printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(ps->func->opcodes, ++i)));
@@ -86,6 +87,10 @@ void debug_print_opcodes(ParserState *ps) {
                 break;
             case BC_TEST:
                 printf("   %-15s %-3d  ", "TEST", kv_A(ps->func->opcodes, ++i));
+                putchar('\n');
+                break;
+            case BC_JMP:
+                printf("   %-15s %-3d  ", "JMP", kv_A(ps->func->opcodes, ++i));
                 putchar('\n');
                 break;
             case BC_PRINT:

@@ -495,7 +495,8 @@ void parse_block(ParserState *ps) {
 void parse_stmt(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     PyLiteObject *obj;
-    int tmp;
+    int tmp, tmp2, tmp3;
+    int final_pos;
 
     switch (tk->val) {
         case TK_NAME:
@@ -530,7 +531,7 @@ void parse_stmt(ParserState *ps) {
             ACCEPT(ps, ':');
             kv_pushbc(ps->func->opcodes, BC_TEST);
             kv_pushbc(ps->func->opcodes, 0);
-            tmp = kv_size(ps->func->opcodes);
+            tmp = tmp3 = kv_size(ps->func->opcodes);
             if (tk->val == TK_NEWLINE) {
                 next(ps);
                 parse_block(ps);
@@ -539,10 +540,39 @@ void parse_stmt(ParserState *ps) {
 
             kv_A(ps->func->opcodes, tmp - 1) = kv_size(ps->func->opcodes) - tmp;
 
+            tmp2 = 0;
+            while (tk->val == TK_KW_ELIF) {
+                next(ps);
+
+                // jmp X
+                kv_A(ps->func->opcodes, tmp - 1) += 2;
+                kv_pushbc(ps->func->opcodes, BC_JMP);
+                kv_pushbc(ps->func->opcodes, 0);
+                tmp2 = kv_size(ps->func->opcodes);
+
+                parse_expr(ps);
+                ACCEPT(ps, ':');
+                // test X
+                kv_pushbc(ps->func->opcodes, BC_TEST);
+                kv_pushbc(ps->func->opcodes, 0);
+                tmp = kv_size(ps->func->opcodes);
+
+                if (tk->val == TK_NEWLINE) {
+                    next(ps);
+                    parse_block(ps);
+                } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+
+                // write X for jmp X
+                kv_A(ps->func->opcodes, tmp2 - 1) = kv_size(ps->func->opcodes) - tmp2 + 2;
+                // write X for test X
+                kv_A(ps->func->opcodes, tmp - 1) = kv_size(ps->func->opcodes) - tmp;
+            }
+
             if (tk->val == TK_KW_ELSE) {
                 next(ps);
                 ACCEPT(ps, ':');
                 kv_A(ps->func->opcodes, tmp - 1) += 2;
+                // jmp X
                 kv_pushbc(ps->func->opcodes, BC_JMP);
                 kv_pushbc(ps->func->opcodes, 0);
                 tmp = kv_size(ps->func->opcodes);
@@ -552,7 +582,26 @@ void parse_stmt(ParserState *ps) {
                     parse_block(ps);
                 } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 
+                // write X for jmp X
                 kv_A(ps->func->opcodes, tmp - 1) = kv_size(ps->func->opcodes) - tmp;
+            } else {
+                // fix for last elif
+                if (tmp2) {
+                    kv_A(ps->func->opcodes, tmp - 1) = kv_size(ps->func->opcodes) - tmp;
+                }
+            }
+
+            // new code pos
+            final_pos = kv_size(ps->func->opcodes);
+            // tmp3 <- pos of first jmp (if exists)
+            tmp3 += kv_A(ps->func->opcodes, tmp3 - 1);
+
+            // change every jmp point
+            while (tmp3 != final_pos) {
+                // tmp2 <- pos of next jmp (if exists) or block end
+                tmp2 = tmp3 + kv_A(ps->func->opcodes, tmp3 - 1);
+                kv_A(ps->func->opcodes, tmp3 - 1) = final_pos - tmp3;
+                tmp3 = tmp2;
             }
             return;
         default:
