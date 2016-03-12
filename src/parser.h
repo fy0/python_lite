@@ -9,7 +9,7 @@
 typedef struct ParserState {
     LexState *ls;
     PyLiteState* state;
-    int block_depth;
+    int loop_depth;
     kvec_t(PyLiteFunctionObject*) func_stack;
     PyLiteFunctionObject* func;
 } ParserState;

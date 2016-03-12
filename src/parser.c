@@ -494,10 +494,8 @@ void parse_names(ParserState *ps) {
 void parse_block(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     ACCEPT(ps, TK_INDENT);
-    ++ps->block_depth;
     parse_stmts(ps);
     ACCEPT(ps, TK_DEDENT);
-    --ps->block_depth;
 }
 
 void parse_stmt(ParserState *ps) {
@@ -624,7 +622,9 @@ void parse_stmt(ParserState *ps) {
 
             if (tk->val == TK_NEWLINE) {
                 next(ps);
+                ++ps->loop_depth;
                 parse_block(ps);
+                --ps->loop_depth;
             } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 
             for (unsigned int i = tmp2; i < kv_size(ps->func->opcodes);) {
@@ -632,13 +632,13 @@ void parse_stmt(ParserState *ps) {
                     case BC_NEW_OBJ:i += 3; break;
                     case BC_PRINT:i += 1; break;
                     case BC_FAKE_BREAK:
-                        if (kv_A(ps->func->opcodes, i + 1) == ps->block_depth + 1) {
+                        if (kv_A(ps->func->opcodes, i + 1) == ps->loop_depth + 1) {
                             kv_A(ps->func->opcodes, i) = BC_JMP;
                             kv_A(ps->func->opcodes, i + 1) = kv_size(ps->func->opcodes) - i;
                         }
                         break;
                     case BC_FAKE_CONTINUE:
-                        if (kv_A(ps->func->opcodes, i + 1) == ps->block_depth + 1) {
+                        if (kv_A(ps->func->opcodes, i + 1) == ps->loop_depth + 1) {
                             kv_A(ps->func->opcodes, i) = BC_JMP;
                             kv_A(ps->func->opcodes, i + 1) = kv_size(ps->func->opcodes) - i - 2;
                         }
@@ -653,18 +653,18 @@ void parse_stmt(ParserState *ps) {
             return;
         case TK_KW_BREAK:
             next(ps);
-            if (ps->block_depth == 0) error(ps, PYLT_ERR_PARSER_BREAK_OUTSIDE_LOOP);
+            if (ps->loop_depth == 0) error(ps, PYLT_ERR_PARSER_BREAK_OUTSIDE_LOOP);
             else {
                 kv_pushbc(ps->func->opcodes, BC_FAKE_BREAK);
-                kv_pushbc(ps->func->opcodes, ps->block_depth);
+                kv_pushbc(ps->func->opcodes, ps->loop_depth);
             }
             break;
         case TK_KW_CONTINUE:
             next(ps);
-            if (ps->block_depth == 0) error(ps, PYLT_ERR_PARSER_CONTINUE_OUTSIDE_LOOP);
+            if (ps->loop_depth == 0) error(ps, PYLT_ERR_PARSER_CONTINUE_OUTSIDE_LOOP);
             else {
                 kv_pushbc(ps->func->opcodes, BC_FAKE_CONTINUE);
-                kv_pushbc(ps->func->opcodes, ps->block_depth);
+                kv_pushbc(ps->func->opcodes, ps->loop_depth);
             }
             break;
         case TK_KW_PASS:
@@ -701,7 +701,7 @@ void func_pop(ParserState *ps) {
 void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
     ps->state = state;
     ps->ls = ls;
-    ps->block_depth = 0;
+    ps->loop_depth = 0;
     ps->func = pylt_obj_func_new(ps->state);
     kv_init(ps->func_stack);
 }
