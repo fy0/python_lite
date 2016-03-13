@@ -515,6 +515,20 @@ void parse_stmt(ParserState *ps) {
                     kv_pushbc(ps->func->opcodes, BC_SET_VAL);
                     kv_pushbc(ps->func->opcodes, (uintptr_t)obj);
                     break;
+                case TK_DE_PLUS_EQ: case TK_DE_MINUS_EQ:  case TK_DE_MUL_EQ: case TK_DE_DIV_EQ:
+                case TK_DE_FLOORDIV_EQ: case TK_DE_MOD_EQ: case TK_DE_MATMUL_EQ:
+                case TK_DE_BITAND_EQ: case TK_DE_BITOR_EQ: case TK_DE_BITXOR_EQ:
+                case TK_DE_RSHIFT_EQ: case TK_DE_LSHIFT_EQ: case TK_DE_POW_EQ:
+                    kv_pushbc(ps->func->opcodes, BC_LOAD_VAL);
+                    kv_pushbc(ps->func->opcodes, (uintptr_t)obj);
+                    tmp = token_de_to_op_val(tk->val);
+                    next(ps);
+                    parse_expr(ps);
+                    kv_pushbc(ps->func->opcodes, BC_OPERATOR);
+                    kv_pushbc(ps->func->opcodes, tmp);
+                    kv_pushbc(ps->func->opcodes, BC_SET_VAL);
+                    kv_pushbc(ps->func->opcodes, (uintptr_t)obj);
+                    break;
                 case '(':
                     next(ps);
                     tmp = 0;

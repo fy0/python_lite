@@ -44,6 +44,25 @@ int token_to_op_val(uint32_t tk) {
     return 0;
 }
 
+int token_de_to_op_val(uint32_t tk) {
+    switch (tk) {
+        case TK_DE_PLUS_EQ: return OP_PLUS;
+        case TK_DE_MINUS_EQ: return OP_MINUS;
+        case TK_DE_MUL_EQ: return OP_MUL;
+        case TK_DE_DIV_EQ: return OP_DIV;
+        case TK_DE_FLOORDIV_EQ: return OP_FLOORDIV;
+        case TK_DE_MOD_EQ: return OP_MOD;
+        case TK_DE_MATMUL_EQ: return OP_MATMUL;
+        case TK_DE_BITAND_EQ: return OP_BITAND;
+        case TK_DE_BITOR_EQ: return OP_BITOR;
+        case TK_DE_BITXOR_EQ: return OP_BITXOR;
+        case TK_DE_RSHIFT_EQ: return OP_RSHIFT;
+        case TK_DE_LSHIFT_EQ: return OP_LSHIFT;
+        case TK_DE_POW_EQ: return OP_POW;
+    }
+    return 0;
+}
+
 void pylt_vm_init(struct PyLiteState *state, PyLiteVM* vm) {
     kv_init(vm->stack);
     kv_init(vm->calls);

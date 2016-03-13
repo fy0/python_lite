@@ -55,6 +55,8 @@ void pylt_vm_call_func(PyLiteState* state, PyLiteFunctionObject *func);
 
 const char* pylt_vm_get_op_name(int op);
 int token_to_op_val(uint32_t tk);
+int token_de_to_op_val(uint32_t tk);
+
 void pylt_vm_init(struct PyLiteState *state, PyLiteVM *vm);
 void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func);
 
