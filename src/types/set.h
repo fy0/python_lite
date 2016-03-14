@@ -22,6 +22,12 @@ PyLiteObject* pylt_obj_set_has(PyLiteState *state, PyLiteSetObject *self, PyLite
 pl_int_t pylt_obj_set_remove(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *obj);
 PyLiteObject* pylt_obj_set_pop(PyLiteState *state, PyLiteSetObject *self);
 
+pl_int_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self);
+pl_int_t pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t k);
+pl_int_t pylt_obj_set_end(PyLiteState *state, PyLiteSetObject *self);
+
+PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int_t k);
+
 PyLiteSetObject* pylt_obj_set_new(PyLiteState *state);
 
 #endif

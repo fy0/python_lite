@@ -70,6 +70,31 @@ PyLiteObject* pylt_obj_set_pop(PyLiteState *state, PyLiteSetObject *self) {
     return NULL;
 }
 
+pl_int_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self) {
+    pl_int_t k = kho_begin(self->ob_val);
+    while (k != kho_end(self->ob_val)) {
+        if (kho_exist(self->ob_val, k)) return k;
+        ++k;
+    }
+    return kho_end(self->ob_val);
+}
+
+pl_int_t pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t k) {
+    while (k != kho_end(self->ob_val)) {
+        if (kho_exist(self->ob_val, k)) return k;
+        ++k;
+    }
+    return kho_end(self->ob_val);
+}
+
+pl_int_t pylt_obj_set_end(PyLiteState *state, PyLiteSetObject *self) {
+    return kho_end(self->ob_val);
+}
+
+PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int_t k) {
+    return (kho_exist(self->ob_val, k)) ? kho_value(self->ob_val, k) : NULL;
+}
+
 PyLiteSetObject* pylt_obj_set_new(PyLiteState *state) {
     PyLiteSetObject *obj = pylt_realloc(NULL, sizeof(PyLiteSetObject));
     obj->ob_type = PYLT_OBJ_TYPE_SET;

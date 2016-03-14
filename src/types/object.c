@@ -193,6 +193,24 @@ pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj) {
     return false;
 }
 
+
+pl_bool_t pylt_obj_citerable(PyLiteState *state, PyLiteObject *obj) {
+    switch (obj->ob_type) {
+        case PYLT_OBJ_TYPE_BYTES:
+        case PYLT_OBJ_TYPE_STR:
+        case PYLT_OBJ_TYPE_TUPLE:
+        case PYLT_OBJ_TYPE_SET:
+        case PYLT_OBJ_TYPE_DICT:
+            return true;
+        default:
+            if (obj->ob_type > PYLT_OBJ_TYPE_NUM) {
+                ;
+            }
+    }
+    return false;
+}
+
+
 pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_INT: return castint(obj)->ob_val != 0;

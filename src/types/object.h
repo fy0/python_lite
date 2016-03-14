@@ -46,6 +46,7 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_CFUNCTION,
 
     PYLT_OBJ_TYPE_TYPE,
+    PYLT_OBJ_TYPE_ITERATOR,
     PYLT_OBJ_TYPE_CLASS,
 };
 
@@ -58,6 +59,7 @@ pl_bool_t pylt_obj_ceq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
 pl_uint32_t pylt_obj_chash(PyLiteState *state, PyLiteObject *obj);
 
 pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj);
+pl_bool_t pylt_obj_citerable(PyLiteState *state, PyLiteObject *obj);
 pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj);
 
 
@@ -96,6 +98,8 @@ struct PyLiteModuleObject;
 struct PyLiteFunctionObject;
 struct PyLiteCFunctionObject;
 
+struct PyLiteIterObject;
+
 #define cast(t, exp)	((t)(exp))
 #define castobj(i)      cast(struct PyLiteObject*, (i))
 #define castint(i)      cast(struct PyLiteIntObject*, (i))
@@ -127,5 +131,7 @@ typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteState *state, PyLiteObject 
 
 typedef void(*PyLiteCFunctionPtr)(PyLiteState *state, int argc, PyLiteObject **args);
 typedef void(*PyLiteCMethod)(PyLiteObject *self, PyLiteObject **args);
+
+typedef PyLiteObject* (*PyLiteIterFunc)(PyLiteState *state, struct PyLiteIterObject *iter);
 
 #endif
