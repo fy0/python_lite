@@ -681,6 +681,15 @@ void parse_stmt(ParserState *ps) {
                 kv_pushbc(ps->func->opcodes, ps->loop_depth);
             }
             break;
+        case TK_KW_FOR:
+            next(ps);
+            if (tk->val == TK_NAME) {
+                obj = tk->obj;
+                next(ps);
+                ACCEPT(ps, TK_KW_IN);
+                parse_expr(ps);
+            }
+            break;
         case TK_KW_PASS:
             next(ps);
             break;
