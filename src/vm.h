@@ -17,6 +17,7 @@ enum {
     BC_PRINT,      // 测试输出
     BC_TEST,       // 真值测试
     BC_JMP,        // 跳转
+    BC_POP,        // 弹出一个值
 
     BC_FAKE_BREAK,         // 伪指令，break
     BC_FAKE_CONTINUE,      // 伪指令，continue

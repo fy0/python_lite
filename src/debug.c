@@ -93,6 +93,9 @@ void debug_print_opcodes(ParserState *ps) {
                 printf("   %-15s %-3d  ", "JMP", kv_A(ps->func->opcodes, ++i));
                 putchar('\n');
                 break;
+            case BC_POP:
+                printf("   %-15s\n", "POP");
+                break;
             case BC_PRINT:
                 printf("   %-15s\n", "PRINT");
                 break;

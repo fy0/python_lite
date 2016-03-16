@@ -201,6 +201,9 @@ void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
             case BC_JMP:
                 i += kv_A(func->opcodes, ++i);
                 break;
+            case BC_POP:
+                kv_pop(state->vm.stack);
+                break;
             case BC_PRINT:
                 if (kv_size(state->vm.stack) != 0) {
                     debug_print_obj(castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - 1)));

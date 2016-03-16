@@ -644,7 +644,9 @@ void parse_stmt(ParserState *ps) {
             for (unsigned int i = tmp2; i < kv_size(ps->func->opcodes);) {
                 switch (kv_A(ps->func->opcodes, i)) {
                     case BC_NEW_OBJ:i += 3; break;
-                    case BC_PRINT:i += 1; break;
+                    case BC_POP:
+                    case BC_PRINT:
+                        i += 1; break;
                     case BC_FAKE_BREAK:
                         if (kv_A(ps->func->opcodes, i + 1) == ps->loop_depth + 1) {
                             kv_A(ps->func->opcodes, i) = BC_JMP;
@@ -695,6 +697,7 @@ void parse_stmt(ParserState *ps) {
             break;
         default:
             parse_expr(ps);
+            kv_pushbc(ps->func->opcodes, BC_POP);
     }
     ACCEPT(ps, TK_NEWLINE);
 }
