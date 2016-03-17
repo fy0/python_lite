@@ -21,6 +21,7 @@ typedef struct PyLiteIterObject {
 } PyLiteIterObject;
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj);
+PyLiteObject* pylt_obj_iter_next(PyLiteState *state, PyLiteIterObject *iter);
 
 PyLiteObject* pylt_obj_bytes_iternext(PyLiteState *state, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_str_iternext(PyLiteState *state, PyLiteIterObject *iter);

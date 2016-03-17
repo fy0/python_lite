@@ -171,7 +171,8 @@ bool parse_basetype(ParserState *ps) {
     } else {
         ret = parse_mutabletype(ps, &times);
         if (ret) {
-            kv_pushbc(ps->func->opcodes, BC_NEW_OBJ);
+            // NEW_OBJ TYPE EXTRA
+            kv_pushbc(ps->func->opcodes, BC_NEW_OBJ_EXTRA);
             kv_pushbc(ps->func->opcodes, ret);
             kv_pushbc(ps->func->opcodes, times);
         }
@@ -498,6 +499,31 @@ void parse_block(ParserState *ps) {
     ACCEPT(ps, TK_DEDENT);
 }
 
+void loop_control_replace(ParserState *ps, int start_pos) {
+    for (unsigned int i = start_pos; i < kv_size(ps->func->opcodes);) {
+        switch (kv_A(ps->func->opcodes, i)) {
+            case BC_NEW_OBJ_EXTRA:i += 3; break;
+            case BC_POP:
+            case BC_PRINT:
+            case BC_DEL_FORCE:
+                i += 1; break;
+            case BC_FAKE_BREAK:
+                if (kv_A(ps->func->opcodes, i + 1) == ps->loop_depth + 1) {
+                    kv_A(ps->func->opcodes, i) = BC_JMP;
+                    kv_A(ps->func->opcodes, i + 1) = kv_size(ps->func->opcodes) - i;
+                }
+                break;
+            case BC_FAKE_CONTINUE:
+                if (kv_A(ps->func->opcodes, i + 1) == ps->loop_depth + 1) {
+                    kv_A(ps->func->opcodes, i) = BC_JMP;
+                    kv_A(ps->func->opcodes, i + 1) = kv_size(ps->func->opcodes) - i - 2;
+                }
+                break;
+            default: i += 2; break;
+        }
+    }
+}
+
 void parse_stmt(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     PyLiteObject *obj;
@@ -640,31 +666,10 @@ void parse_stmt(ParserState *ps) {
                 parse_block(ps);
                 --ps->loop_depth;
             } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+            loop_control_replace(ps, tmp2);
 
-            for (unsigned int i = tmp2; i < kv_size(ps->func->opcodes);) {
-                switch (kv_A(ps->func->opcodes, i)) {
-                    case BC_NEW_OBJ:i += 3; break;
-                    case BC_POP:
-                    case BC_PRINT:
-                        i += 1; break;
-                    case BC_FAKE_BREAK:
-                        if (kv_A(ps->func->opcodes, i + 1) == ps->loop_depth + 1) {
-                            kv_A(ps->func->opcodes, i) = BC_JMP;
-                            kv_A(ps->func->opcodes, i + 1) = kv_size(ps->func->opcodes) - i;
-                        }
-                        break;
-                    case BC_FAKE_CONTINUE:
-                        if (kv_A(ps->func->opcodes, i + 1) == ps->loop_depth + 1) {
-                            kv_A(ps->func->opcodes, i) = BC_JMP;
-                            kv_A(ps->func->opcodes, i + 1) = kv_size(ps->func->opcodes) - i - 2;
-                        }
-                        break;
-                    default: i += 2; break;
-                }
-            }
-
-            kv_pushbc(ps->func->opcodes, BC_JMP);
-            kv_pushbc(ps->func->opcodes, - (kv_size(ps->func->opcodes) - tmp + 1));
+            kv_pushbc(ps->func->opcodes, BC_JMP_BACK);
+            kv_pushbc(ps->func->opcodes, (kv_size(ps->func->opcodes) - tmp + 1));
             kv_A(ps->func->opcodes, tmp2 - 1) = kv_size(ps->func->opcodes) - tmp2;
             return;
         case TK_KW_BREAK:
@@ -690,8 +695,28 @@ void parse_stmt(ParserState *ps) {
                 next(ps);
                 ACCEPT(ps, TK_KW_IN);
                 parse_expr(ps);
-            }
-            break;
+                ACCEPT(ps, ':');
+                kv_pushbc(ps->func->opcodes, BC_NEW_OBJ);
+                kv_pushbc(ps->func->opcodes, PYLT_OBJ_TYPE_ITER);
+                tmp = kv_size(ps->func->opcodes);
+                kv_pushbc(ps->func->opcodes, BC_FORITER);
+                kv_pushbc(ps->func->opcodes, 0);
+                kv_pushbc(ps->func->opcodes, BC_SET_VAL);
+                kv_pushbc(ps->func->opcodes, (uintptr_t)obj);
+
+                ++ps->loop_depth;
+                ACCEPT(ps, TK_NEWLINE);
+                parse_block(ps);
+                --ps->loop_depth;
+                loop_control_replace(ps, tmp);
+
+                kv_A(ps->func->opcodes, tmp + 1) = kv_size(ps->func->opcodes) - tmp + 1;
+                kv_pushbc(ps->func->opcodes, BC_JMP_BACK);
+                kv_pushbc(ps->func->opcodes, (kv_size(ps->func->opcodes) - tmp + 1));
+
+                kv_pushbc(ps->func->opcodes, BC_DEL_FORCE);
+            } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+            return;
         case TK_KW_PASS:
             next(ps);
             break;

@@ -1,5 +1,6 @@
 ﻿
 #include "set.h"
+#include "../debug.h"
 
 pl_int_t pylt_obj_set_ccmp(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *other) {
     if (other->ob_type == PYLT_OBJ_TYPE_SET) {
@@ -80,7 +81,7 @@ pl_int_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self) {
 }
 
 pl_int_t pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t k) {
-    while (k != kho_end(self->ob_val)) {
+    while (++k != kho_end(self->ob_val)) {
         if (kho_exist(self->ob_val, k)) return k;
         ++k;
     }
@@ -92,7 +93,7 @@ pl_int_t pylt_obj_set_end(PyLiteState *state, PyLiteSetObject *self) {
 }
 
 PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int_t k) {
-    return (kho_exist(self->ob_val, k)) ? kho_value(self->ob_val, k) : NULL;
+    return (kho_exist(self->ob_val, k)) ? castobj(kho_key(self->ob_val, k)) : NULL;
 }
 
 PyLiteSetObject* pylt_obj_set_new(PyLiteState *state) {

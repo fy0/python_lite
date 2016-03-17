@@ -4,34 +4,38 @@
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
     PyLiteIterObject *iter = pylt_realloc(NULL, sizeof(PyLiteIterObject));
-    iter->ob_type = PYLT_OBJ_TYPE_ITERATOR;
+    iter->ob_type = PYLT_OBJ_TYPE_ITER;
     iter->base = obj;
 
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_BYTES:
             iter->array.index = 0;
             iter->iter_func = &pylt_obj_bytes_iternext;
-            break;
+            return iter;
         case PYLT_OBJ_TYPE_STR:
             iter->array.index = 0;
             iter->iter_func = &pylt_obj_str_iternext;
-            break;
+            return iter;
         case PYLT_OBJ_TYPE_TUPLE:
             iter->array.index = 0;
             iter->iter_func = &pylt_obj_tuple_iternext;
-            break;
+            return iter;
         case PYLT_OBJ_TYPE_LIST:
             iter->array.index = 0;
-            break;
+            return iter;
         case PYLT_OBJ_TYPE_SET:
             iter->hashmap.count = pylt_obj_set_len(state, castset(obj));
             iter->hashmap.k = pylt_obj_set_begin(state, castset(obj));
             iter->iter_func = &pylt_obj_set_iternext;
-            break;
+            return iter;
         case PYLT_OBJ_TYPE_DICT:
             break;
     }
     return NULL;
+}
+
+PyLiteObject* pylt_obj_iter_next(PyLiteState *state, PyLiteIterObject *iter) {
+    return (*iter->iter_func)(state, iter);
 }
 
 PyLiteObject* pylt_obj_bytes_iternext(PyLiteState *state, PyLiteIterObject *iter) {

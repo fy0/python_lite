@@ -7,20 +7,24 @@
 #include "types/all.h"
 
 enum {
-    BC_OPERATOR,   // 运算符
-    BC_SET_VAL,    // 赋值
-    BC_LOAD_VAL,   // 载入变量（入栈）
-    BC_LOADCONST,  // 载入常量
-    BC_NEW_OBJ,    // 新建对象
-    BC_CALL,       // 函数调用
-    BC_CALL_END,   // 函数结束
-    BC_PRINT,      // 测试输出
-    BC_TEST,       // 真值测试
-    BC_JMP,        // 跳转
-    BC_POP,        // 弹出一个值
+    BC_OPERATOR,       // 运算符
+    BC_SET_VAL,        // 赋值
+    BC_LOAD_VAL,       // 载入变量（入栈）
+    BC_LOADCONST,      // 载入常量
+    BC_NEW_OBJ,        // 新建对象
+    BC_NEW_OBJ_EXTRA,  // 新建对象（带1额外参数）
+    BC_CALL,           // 函数调用
+    BC_CALL_END,       // 函数结束
+    BC_PRINT,          // 测试输出
+    BC_TEST,           // 真值测试
+    BC_JMP,            // 跳转
+    BC_JMP_BACK,       // 前向跳转
+    BC_POP,            // 弹出一个值
+    BC_FORITER,        // For循环
+    BC_DEL_FORCE,      // 强制释放
 
-    BC_FAKE_BREAK,         // 伪指令，break
-    BC_FAKE_CONTINUE,      // 伪指令，continue
+    BC_FAKE_BREAK,     // 伪指令，break
+    BC_FAKE_CONTINUE,  // 伪指令，continue
 };
 
 enum {

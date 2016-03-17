@@ -77,8 +77,12 @@ void debug_print_opcodes(ParserState *ps) {
                 break;
             case BC_NEW_OBJ:
                 a = kv_A(ps->func->opcodes, ++i);
+                printf("   %-15s %s\n", "NEW_OBJ", pylt_type_name(a));
+                break;
+            case BC_NEW_OBJ_EXTRA:
+                a = kv_A(ps->func->opcodes, ++i);
                 b = kv_A(ps->func->opcodes, ++i);
-                printf("   %-15s %s %d\n", "NEW_OBJ", pylt_type_name(a), b);
+                printf("   %-15s %s %d\n", "NEW_OBJ_EX", pylt_type_name(a), b);
                 break;
             case BC_CALL:
                 printf("   %-15s %-3d  ", "CALL", kv_A(ps->func->opcodes, ++i));
@@ -92,6 +96,17 @@ void debug_print_opcodes(ParserState *ps) {
             case BC_JMP:
                 printf("   %-15s %-3d  ", "JMP", kv_A(ps->func->opcodes, ++i));
                 putchar('\n');
+                break;
+            case BC_JMP_BACK:
+                printf("   %-15s %-3d  ", "JMP_BACK", kv_A(ps->func->opcodes, ++i));
+                putchar('\n');
+                break;
+            case BC_FORITER:
+                printf("   %-15s %-3d  ", "FORITER", kv_A(ps->func->opcodes, ++i));
+                putchar('\n');
+                break;
+            case BC_DEL_FORCE:
+                printf("   %-15s\n", "DEL_FORCE");
                 break;
             case BC_POP:
                 printf("   %-15s\n", "POP");

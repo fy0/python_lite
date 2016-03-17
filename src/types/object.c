@@ -270,15 +270,20 @@ const char* pylt_obj_basetypes[] = {
     "int",
     "float",
     "bool",
+
     "str",
     "bytes",
     "set",
     "list",
     "tuple",
     "dict",
-    "function",
+
     "module",
+    "function",
+    "cfunction",
+
     "type",
+    "iter",
     "class",
 };
 

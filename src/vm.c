@@ -154,6 +154,14 @@ void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
                 break;
             case BC_NEW_OBJ:
                 switch (kv_A(func->opcodes, ++i)) {
+                    case PYLT_OBJ_TYPE_ITER:
+                        ret = castobj(pylt_obj_iter_new(state, castobj(kv_pop(state->vm.stack))));
+                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
+                        break;
+                }
+                break;
+            case BC_NEW_OBJ_EXTRA:
+                switch (kv_A(func->opcodes, ++i)) {
                     case PYLT_OBJ_TYPE_SET:
                         ret = castobj(pylt_obj_set_new(state));
                         tmp = kv_A(func->opcodes, ++i);
@@ -163,9 +171,10 @@ void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                         break;
                     case PYLT_OBJ_TYPE_DICT:
+                        ++i;
                         ret = castobj(pylt_obj_dict_new(state));
                         break;
-                }
+                } 
                 break;
             case BC_CALL:
                 tmp = kv_A(func->opcodes, ++i);
@@ -200,6 +209,20 @@ void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
                 break;
             case BC_JMP:
                 i += kv_A(func->opcodes, ++i);
+                break;
+            case BC_JMP_BACK:
+                i -= kv_A(func->opcodes, ++i);
+                break;
+            case BC_FORITER:
+                a = pylt_obj_iter_next(state, castiter(kv_top(state->vm.stack)));
+                if (a == NULL) i += kv_A(func->opcodes, ++i);
+                else {
+                    ++i;
+                    kv_push(uintptr_t, state->vm.stack, (uintptr_t)a);
+                }
+                break;
+            case BC_DEL_FORCE:
+                pylt_free(castobj(kv_pop(state->vm.stack)));
                 break;
             case BC_POP:
                 kv_pop(state->vm.stack);

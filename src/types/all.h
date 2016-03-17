@@ -17,5 +17,6 @@
 #include "module.h"
 
 #include "type.h"
+#include "iter.h"
 
 #endif
