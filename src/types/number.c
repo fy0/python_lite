@@ -1,6 +1,8 @@
 ﻿
 #include "bool.h"
 #include "number.h"
+#include "bytes.h"
+#include "string.h"
 
 pl_int_t pylt_obj_int_ccmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
@@ -99,6 +101,10 @@ PyLiteObject* pylt_obj_int_mul(PyLiteState *state, PyLiteIntObject *self, PyLite
             return castobj(pylt_obj_int_new(state, self->ob_val * castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
             return castobj(pylt_obj_float_new(state, self->ob_val * castfloat(other)->ob_val));
+        case PYLT_OBJ_TYPE_BYTES:
+            return pylt_obj_bytes_mul(state, castbytes(other), castobj(self));
+        case PYLT_OBJ_TYPE_STR:
+            return pylt_obj_str_mul(state, caststr(other), castobj(self));
         default: return NULL;
     }
 }
