@@ -16,6 +16,8 @@ pl_bool_t pylt_obj_str_ceq(PyLiteState *state, PyLiteStrObject *self, PyLiteObje
 pl_uint32_t pylt_obj_str_chash(PyLiteState *state, PyLiteStrObject *obj);
 pl_uint32_t pylt_obj_str_cforcehash(PyLiteState *state, PyLiteStrObject *obj);
 
+PyLiteStrObject* pylt_obj_str_cgetitem(PyLiteState *state, PyLiteStrObject *self, int index);
+
 PyLiteObject* pylt_obj_str_mul(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other);
 PyLiteObject* pylt_obj_str_plus(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other);
 

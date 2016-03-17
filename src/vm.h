@@ -22,6 +22,7 @@ enum {
     BC_POP,            // 弹出一个值
     BC_FORITER,        // For循环
     BC_DEL_FORCE,      // 强制释放
+    BC_GET_ITEM,       // 取下标
 
     BC_FAKE_BREAK,     // 伪指令，break
     BC_FAKE_CONTINUE,  // 伪指令，continue

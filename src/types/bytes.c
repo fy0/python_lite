@@ -51,6 +51,18 @@ pl_uint32_t pylt_obj_bytes_cforcehash(PyLiteState *state, PyLiteBytesObject *obj
     return (hash & 0x7FFFFFFF);
 }
 
+PyLiteBytesObject* pylt_obj_bytes_cgetitem(PyLiteState *state, PyLiteBytesObject *self, int index) {
+    char buf[1];
+    int len = self->ob_size;
+    if (index < 0) index += len;
+    if (index >= len) return NULL;
+    else {
+        buf[0] = self->ob_val[index];
+        return pylt_obj_bytes_new(state, buf, 1, true);
+    }
+    return NULL;
+}
+
 PyLiteObject* pylt_obj_bytes_mul(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
     PyLiteBytesObject *obj;
     if (other->ob_type != PYLT_OBJ_TYPE_INT) return NULL;

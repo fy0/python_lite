@@ -25,6 +25,8 @@ void parse_expr8(ParserState *ps);
 void parse_expr9(ParserState *ps);
 void parse_expr10(ParserState *ps);
 
+bool parse_try_index(ParserState *ps);
+
 bool parse_try_t(ParserState *ps);
 bool parse_try_expr(ParserState *ps);
 bool parse_try_expr10(ParserState *ps);
@@ -165,8 +167,6 @@ bool parse_basetype(ParserState *ps) {
         kv_pushobj(ps->func->const_val, obj);
         kv_pushbc(ps->func->opcodes, BC_LOADCONST);
         kv_pushbc(ps->func->opcodes, kv_size(ps->func->const_val));
-        debug_print_obj(obj);
-        putchar('\n');
         return true;
     } else {
         ret = parse_mutabletype(ps, &times);
@@ -239,6 +239,17 @@ static _INLINE void parse_t(ParserState *ps) {
     if (!parse_try_t(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 }
 
+static _INLINE bool parse_try_index(ParserState *ps) {
+    if (ps->ls->token.val == '[') {
+        next(ps);
+        parse_expr(ps);
+        ACCEPT(ps, ']');
+        kv_pushbc(ps->func->opcodes, BC_GET_ITEM);
+        return true;
+    }
+    return false;
+}
+
 /* EXPR -> EXPR10 ... EXPR1 */
 static _INLINE bool parse_try_expr(ParserState *ps) {
     if (!parse_try_expr10(ps)) return false;
@@ -251,6 +262,7 @@ static _INLINE bool parse_try_expr(ParserState *ps) {
     parse_expr3(ps);
     parse_expr2(ps);
     parse_expr1(ps);
+    parse_try_index(ps);
     return true;
 }
 
@@ -505,6 +517,7 @@ void loop_control_replace(ParserState *ps, int start_pos) {
             case BC_NEW_OBJ_EXTRA:i += 3; break;
             case BC_POP:
             case BC_PRINT:
+            case BC_GET_ITEM:
             case BC_DEL_FORCE:
                 i += 1; break;
             case BC_FAKE_BREAK:
@@ -569,6 +582,10 @@ void parse_stmt(ParserState *ps) {
                     kv_pushbc(ps->func->opcodes, (uintptr_t)obj);
                     ACCEPT(ps, ')');
                     break;
+                case '[':
+                    if (!parse_try_index(ps)) {
+                        error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+                    }
             }
             break;
         case TK_KW_IF:

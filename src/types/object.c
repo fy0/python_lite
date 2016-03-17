@@ -221,6 +221,22 @@ pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj) {
     }
 }
 
+PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key) {
+    switch (obj->ob_type) {
+        case PYLT_OBJ_TYPE_BYTES:
+            if (key->ob_type == PYLT_OBJ_TYPE_INT) {
+                return castobj(pylt_obj_bytes_cgetitem(state, castbytes(obj), castint(key)->ob_val));
+            }
+            break;
+        case PYLT_OBJ_TYPE_STR:
+            if (key->ob_type == PYLT_OBJ_TYPE_INT) {
+                return castobj(pylt_obj_str_cgetitem(state, caststr(obj), castint(key)->ob_val));
+            }
+            break;
+    }
+    return NULL;
+}
+
 PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj) {
     switch (op) {
         case OP_NOT: return castobj(pylt_obj_cistrue(state, obj) ? &PyLiteFalse : &PyLiteTrue);

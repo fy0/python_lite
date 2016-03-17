@@ -227,6 +227,19 @@ void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
             case BC_POP:
                 kv_pop(state->vm.stack);
                 break;
+            case BC_GET_ITEM:
+                b = castobj(kv_pop(state->vm.stack));
+                a = castobj(kv_pop(state->vm.stack));
+                ret = pylt_obj_getitem(state, a, b);
+                if (!ret) {
+                    printf("KeyError: ");
+                    debug_print_obj(b);
+                    putchar('\n');
+                    return;
+                } else {
+                    kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
+                }
+                break;
             case BC_PRINT:
                 if (kv_size(state->vm.stack) != 0) {
                     debug_print_obj(castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - 1)));

@@ -50,6 +50,18 @@ pl_uint32_t pylt_obj_str_cforcehash(PyLiteState *state, PyLiteStrObject *obj) {
     return (hash & 0x7FFFFFFF);
 }
 
+PyLiteStrObject* pylt_obj_str_cgetitem(PyLiteState *state, PyLiteStrObject *self, int index) {
+    uint32_t buf[1];
+    int len = self->ob_size;
+    if (index < 0) index += len;
+    if (index < 0 || index >= len) return NULL;
+    else {
+        buf[0] = self->ob_val[index];
+        return pylt_obj_str_new(state, buf, 1, true);
+    }
+    return NULL;
+}
+
 PyLiteObject* pylt_obj_str_mul(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other) {
     PyLiteStrObject *obj;
     if (other->ob_type != PYLT_OBJ_TYPE_INT) return NULL;
