@@ -124,10 +124,22 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
 
     switch (tk->val) {
         case '[':
+            next(ps);
             if (tk->val == ']') {
-                ;
+                if (ptimes) *ptimes = 0;
+                return PYLT_OBJ_TYPE_LIST;
             } else {
-                ;
+                tmp = 0;
+                while (true) {
+                    parse_expr(ps);
+                    tmp++;
+                    if (tk->val == ',') next(ps);
+                    else if (tk->val == ']') break;
+                    else return 0;
+                }
+                next(ps);
+                if (ptimes) *ptimes = tmp;
+                return PYLT_OBJ_TYPE_LIST;
             }
             break;
         case '{':
@@ -155,6 +167,7 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
                 case ':': // dict
                     break;
             }
+            break;
     }
     return 0;
 }

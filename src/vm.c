@@ -170,6 +170,15 @@ void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
                         }
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                         break;
+                    case PYLT_OBJ_TYPE_LIST:
+                        tmp = kv_A(func->opcodes, ++i);
+                        ret = castobj(pylt_obj_list_new_with_size(state, tmp));
+                        for (unsigned int j = tmp; j > 0; --j) {
+                            pylt_obj_list_append(state, castlist(ret), castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - j)));
+                        }
+                        kv_popn(state->vm.stack, tmp);
+                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
+                        break;
                     case PYLT_OBJ_TYPE_DICT:
                         ++i;
                         ret = castobj(pylt_obj_dict_new(state));

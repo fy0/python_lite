@@ -25,6 +25,15 @@ void debug_print_obj(PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_MODULE:
         case PYLT_OBJ_TYPE_TYPE:
         case PYLT_OBJ_TYPE_TUPLE:
+        case PYLT_OBJ_TYPE_LIST:
+            printf("[");
+            for (int i = 0; i < castlist(obj)->ob_size - 1; ++i) {
+                debug_print_obj(castlist(obj)->ob_val[i]);
+                printf(", ");
+            }
+            debug_print_obj(castlist(obj)->ob_val[castlist(obj)->ob_size - 1]);
+            printf("]");
+            break;
         case PYLT_OBJ_TYPE_SET:
             printf("{");
             for (khiter_t it = kho_begin(castset(obj)->ob_val); it < kho_end(castset(obj)->ob_val); ++it) {

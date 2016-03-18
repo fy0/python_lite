@@ -3,15 +3,30 @@
 #define PYLITE_TYPES_LIST_H
 
 #include "object.h"
-#include "../lib/klist.h"
-
-#define __the_free(x)
-KLIST_INIT(list_obj, PyLiteObject, __the_free)
 
 typedef struct PyLiteListObject {
     PyLiteObject_HEAD;
-    klist_t(list_obj) ob_val;
+    pl_uint_t ob_size;
+    pl_uint_t ob_maxsize;
+    PyLiteObject **ob_val;
 } PyLiteListObject;
 
+PyLiteListObject* pylt_obj_list_new(PyLiteState *state);
+PyLiteListObject* pylt_obj_list_new_with_size(PyLiteState *state, pl_uint_t size);
+void pylt_obj_list_free(PyLiteState *state, PyLiteListObject *self);
+
+void pylt_obj_list_append(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
+void pylt_obj_list_clear(PyLiteState *state, PyLiteListObject *self);
+PyLiteListObject* pylt_obj_list_copy(PyLiteState *state, PyLiteListObject *self);
+pl_uint_t pylt_obj_list_ccount(PyLiteState *state, PyLiteListObject *self);
+void pylt_obj_list_extend(PyLiteState *state, PyLiteListObject *self, PyLiteListObject *obj);
+pl_int_t pylt_obj_list_cindex(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
+void pylt_obj_list_insert(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
+PyLiteObject* pylt_obj_list_pop(PyLiteState *state, PyLiteListObject *self);
+pl_bool_t pylt_obj_list_remove(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
+void pylt_obj_list_reverse(PyLiteState *state, PyLiteListObject *self);
+void pylt_obj_list_sort(PyLiteState *state, PyLiteListObject *self);
+
+PyLiteObject* pylt_obj_list_cgetitem(PyLiteState *state, PyLiteListObject *self, int index);
 
 #endif
