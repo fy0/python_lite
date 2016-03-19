@@ -505,6 +505,14 @@ _INLINE void parse_expr10(ParserState *ps) {
     if (!parse_try_expr10(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 }
 
+void parse_block(ParserState *ps) {
+    Token *tk = &(ps->ls->token);
+    ACCEPT(ps, TK_INDENT);
+    parse_stmts(ps);
+    ACCEPT(ps, TK_DEDENT);
+}
+
+
 void parse_names(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     while (true) {
@@ -517,11 +525,27 @@ void parse_names(ParserState *ps) {
     }
 }
 
-void parse_block(ParserState *ps) {
+void parse_single_left_value(ParserState *ps) {
     Token *tk = &(ps->ls->token);
-    ACCEPT(ps, TK_INDENT);
-    parse_stmts(ps);
-    ACCEPT(ps, TK_DEDENT);
+    if (tk->val == TK_NAME) {
+        next(ps);
+        if (tk->val == '[') {
+            if (!parse_try_index(ps)) {
+                error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+            }
+            if (tk->val == '=') {
+                kv_pop(ps->func->opcodes);
+                next(ps);
+                parse_expr(ps);
+                //kv_pushbc(ps->func->opcodes, BC_SET_ITEM);
+                //kv_pushbc(ps->func->opcodes, (uintptr_t)obj);
+            }
+        }
+    }
+}
+
+void parse_left_value(ParserState *ps) {
+
 }
 
 void loop_control_replace(ParserState *ps, int start_pos) {
@@ -599,6 +623,14 @@ void parse_stmt(ParserState *ps) {
                     if (!parse_try_index(ps)) {
                         error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
                     }
+                    if (tk->val == '=') {
+                        kv_pop(ps->func->opcodes);
+                        next(ps);
+                        parse_expr(ps);
+                        kv_pushbc(ps->func->opcodes, BC_SET_ITEM);
+                        kv_pushbc(ps->func->opcodes, (uintptr_t)obj);
+                    }
+                    break;
             }
             break;
         case TK_KW_IF:
