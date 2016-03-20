@@ -31,6 +31,9 @@ bool parse_try_t(ParserState *ps);
 bool parse_try_expr(ParserState *ps);
 bool parse_try_expr10(ParserState *ps);
 
+void parse_left_value(ParserState *ps);
+
+
 void next(ParserState *ps) {
     pylt_lex_next(ps->ls);
 }
