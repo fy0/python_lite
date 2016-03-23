@@ -12,8 +12,9 @@ typedef struct ParserState {
     int loop_depth;
     kvec_t(PyLiteFunctionObject*) func_stack;
     PyLiteFunctionObject* func;
+    struct ParserState *prev;
 } ParserState;
-
+ 
 #define kv_pushobj(v, x) kv_push(PyLiteObject*, (v), (x))
 #define kv_pushbc(v, x) kv_push(size_t, (v), (x))
 

@@ -32,6 +32,7 @@ bool parse_try_expr(ParserState *ps);
 bool parse_try_expr10(ParserState *ps);
 
 void parse_left_value(ParserState *ps);
+void parse_func(ParserState *ps);
 
 void next(ParserState *ps) {
     pylt_lex_next(ps->ls);
@@ -576,6 +577,32 @@ void loop_control_replace(ParserState *ps, int start_pos) {
     }
 }
 
+void parse_func(ParserState *ps) {
+    Token *tk = &(ps->ls->token);
+    PyLiteObject *func_name;
+    ParserState new_ps;
+
+    ACCEPT(ps, TK_KW_DEF);
+    if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+    func_name = tk->obj;
+    next(ps);
+
+    ACCEPT(ps, '(');
+    /*while (true) {
+        if (tk->val == TK_NAME) {
+            ;
+        }
+        if (tk->val == ',') {
+            ;
+        }
+    }*/
+    ACCEPT(ps, ')');
+    ACCEPT(ps, ':');
+
+    pylt_parser_init(ps->state, &new_ps, ps->ls);
+    parse(&new_ps);
+}
+
 void parse_stmt(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     PyLiteObject *obj;
@@ -784,6 +811,9 @@ void parse_stmt(ParserState *ps) {
         case TK_KW_PASS:
             next(ps);
             break;
+        case TK_KW_DEF:
+            parse_func(ps);
+            break; 
         default:
             parse_expr(ps);
             kv_pushbc(ps->func->opcodes, BC_POP);
@@ -819,4 +849,5 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
     ps->loop_depth = 0;
     ps->func = pylt_obj_func_new(ps->state);
     kv_init(ps->func_stack);
+    ps->prev = NULL;
 }
