@@ -37,6 +37,9 @@ int main(int argc,char* argv[])
     debug_print_opcodes(&ps);
 
     pylt_vm_init(&state, &state.vm);
+    //PyLiteFunctionObject *func = pylt_obj_func_new(&state);
+    //func->
+
     pylt_vm_run(&state, ps.func);
 
     system("pause");

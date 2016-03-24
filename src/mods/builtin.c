@@ -34,7 +34,7 @@ void pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObject **arg
 }
 
 void pylt_mods_builtins_register(PyLiteState *state) {
-    PyLiteModuleObject *mod = pylt_obj_module_new(state, NULL);
+    PyLiteModuleObject *mod; // = pylt_obj_module_new(state, NULL);
 
     pylt_cfunc_register(
         mod,

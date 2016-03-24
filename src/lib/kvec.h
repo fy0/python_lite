@@ -21,29 +21,29 @@
    ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
-*/
+   */
 
 /*
   An example:
 
-#include "kvec.h"
-int main() {
-    kvec_t(int) array;
-    kv_init(array);
-    kv_push(int, array, 10); // append
-    kv_a(int, array, 20) = 5; // dynamic
-    kv_A(array, 20) = 4; // static
-    kv_destroy(array);
-    return 0;
-}
-*/
+  #include "kvec.h"
+  int main() {
+  kvec_t(int) array;
+  kv_init(array);
+  kv_push(int, array, 10); // append
+  kv_a(int, array, 20) = 5; // dynamic
+  kv_A(array, 20) = 4; // static
+  kv_destroy(array);
+  return 0;
+  }
+  */
 
 /*
   2008-09-22 (0.1.0):
 
-    * The initial version.
+  * The initial version.
 
-*/
+  */
 
 #ifndef AC_KVEC_H
 #define AC_KVEC_H
@@ -69,8 +69,13 @@ int main() {
 #define kv_popn(v, num) (v).n -= (num)
 #define kv_size(v) ((v).n)
 #define kv_max(v) ((v).m)
+#define kv_clear(v) ((v).n = 0)
 
 #define kv_resize(type, v, s)  ((v).m = (s), (v).a = (type*)krealloc((v).a, sizeof(type) * (v).m))
+
+#define kv_shallowcopy(dest, src) { \
+    (dest).n = (src).n; (dest).m = (src).m; (dest).a = (src).a; \
+}
 
 #define kv_copy(type, v1, v0) do {                            \
         if ((v1).m < (v0).n) kv_resize(type, v1, (v0).n);    \

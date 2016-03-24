@@ -6,13 +6,19 @@
 #include "lib/kvec.h"
 #include "types/all.h"
 
+typedef struct ParserInfo {
+    int loop_depth;
+    kvec_t(uintptr_t) opcodes;
+    struct ParserInfo *prev;
+} ParserInfo;
+
 typedef struct ParserState {
     LexState *ls;
     PyLiteState* state;
-    int loop_depth;
-    kvec_t(PyLiteFunctionObject*) func_stack;
-    PyLiteFunctionObject* func;
-    struct ParserState *prev;
+    kvec_t(PyLiteObject*) const_val;
+
+    ParserInfo *info;
+    ParserInfo *info_used;
 } ParserState;
  
 #define kv_pushobj(v, x) kv_push(PyLiteObject*, (v), (x))
