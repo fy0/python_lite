@@ -5,17 +5,17 @@
 #include "lexer.h"
 #include "lib/kvec.h"
 #include "types/all.h"
+#include "types/codesnippet.h"
 
 typedef struct ParserInfo {
     int loop_depth;
-    kvec_t(uintptr_t) opcodes;
+    PyLiteCodeSnippet code;
     struct ParserInfo *prev;
 } ParserInfo;
 
 typedef struct ParserState {
     LexState *ls;
     PyLiteState* state;
-    kvec_t(PyLiteObject*) const_val;
 
     ParserInfo *info;
     ParserInfo *info_used;
