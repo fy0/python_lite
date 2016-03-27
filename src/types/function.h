@@ -5,16 +5,16 @@
 #include "object.h"
 #include "string.h"
 #include "../lib/kvec.h"
+#include "codesnippet.h"
 
 typedef struct PyLiteFunctionObject {
     PyLiteObject_HEAD;
     pl_int_t length;                   /* length of parameters */
     pl_int_t minimal;                  /* minimal number of parameters */
 
+    PyLiteCodeSnippetObject code;
     PyLiteStrObject **names;           /* parameters' names */
     PyLiteObject **defaults;           /* default values of option parameters */
-    kvec_t(PyLiteObject*) const_val;
-    kvec_t(uintptr_t) opcodes;
     PyLiteStrObject *doc;
 } PyLiteFunctionObject;
 

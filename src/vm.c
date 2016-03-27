@@ -64,54 +64,76 @@ int token_de_to_op_val(uint32_t tk) {
 }
 
 void pylt_vm_init(struct PyLiteState *state, PyLiteVM* vm) {
+    PyLiteFrame *frame;
     kv_init(vm->stack);
-    kv_init(vm->calls);
+    kv_init(vm->frames);
+
+    kv_resize(PyLiteFrame, vm->frames, 1);
+
+    // built-in
+    //call = &kv_A(vm->calls, 0);
+    //call->func = NULL;
+    //kv_init(frame->var_tables);
+
+    // first local
+    frame = &kv_A(vm->frames, 0);
+    frame->func = NULL;
+    kv_init(frame->var_tables);
 }
 
 void pylt_vm_call_func(PyLiteState* state, PyLiteFunctionObject *func) {
-    PyLiteFuncCall *call;
+    PyLiteFrame *frame;
     PyLiteVM *vm = &state->vm;
-    int index = kv_size(vm->calls);
+    int index = kv_size(vm->frames);
 
-    kv_pushp(PyLiteFuncCall, vm->calls);
-    call = &kv_A(vm->calls, index);
-    call->func = func;
-    kv_init(call->var_tables);
+    kv_pushp(PyLiteFrame, vm->frames);
+    frame = &kv_A(vm->frames, index);
+    frame->func = func;
+    frame->code = &func->code;
+    kv_init(frame->var_tables);
 
     if (index) {
-        kv_copy1(PyLiteTable*, call->var_tables, kv_A(vm->calls, index - 1).var_tables);
+        kv_copy1(PyLiteTable*, frame->var_tables, kv_A(vm->frames, index - 1).var_tables);
     }
 
-    kv_push(PyLiteTable*, call->var_tables, pylt_obj_table_new(state));
+    kv_push(PyLiteTable*, frame->var_tables, pylt_obj_table_new(state));
 }
 
-void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
+
+void pylt_vm_load_code(PyLiteState* state, PyLiteCodeSnippetObject *code) {
+    PyLiteVM *vm = &state->vm;
+    PyLiteFrame *frame = &kv_top(vm->frames);
+    frame->func = NULL;
+    frame->code = code;
+}
+
+void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
     PyLiteObject *a, *b, *ret;
     PyLiteVM *vm = &state->vm;
     PyLiteTable *locals;
     uintptr_t op;
     uintptr_t tmp;
 
-    if (!func) return;
-    pylt_vm_call_func(state, func);
-    locals = kv_top(kv_top(vm->calls).var_tables);
+    if (!code) return;
+    pylt_vm_load_code(state, code);
+    locals = kv_top(kv_top(vm->frames).var_tables);
 
-    for (unsigned int i = 0; i < kv_size(func->opcodes); i++) {
-        switch (kv_A(func->opcodes, i)) {
+    for (unsigned int i = 0; i < kv_size(code->opcodes); i++) {
+        switch (kv_A(code->opcodes, i)) {
             case BC_LOADCONST:
                 //printf("   %-15s %d\n", "LOADCONST", );
-                //printf("%d\n", kv_A(func->opcodes, ++i));
-                kv_push(uintptr_t, state->vm.stack, (uintptr_t)kv_A(func->const_val, kv_A(func->opcodes, ++i)-1));
+                //printf("%d\n", kv_A(code->opcodes, ++i));
+                kv_push(uintptr_t, state->vm.stack, (uintptr_t)kv_A(code->const_val, kv_A(code->opcodes, ++i)-1));
                 break;
             case BC_SET_VAL:
-                pylt_obj_table_set(locals, castobj(kv_A(func->opcodes, ++i)), castobj(kv_pop(state->vm.stack)));
+                pylt_obj_table_set(locals, castobj(kv_A(code->opcodes, ++i)), castobj(kv_pop(state->vm.stack)));
                 break; 
             case BC_LOAD_VAL:
-                a = castobj(kv_A(func->opcodes, ++i));
+                a = castobj(kv_A(code->opcodes, ++i));
                 ret = pylt_obj_table_get(locals, a);
 
                 if (!ret) {
-                    for (int j = kv_size(kv_top(vm->calls).var_tables) - 2; j >= 0; ++j) {
+                    for (int j = kv_size(kv_top(vm->frames).var_tables) - 2; j >= 0; ++j) {
                         ret = pylt_obj_table_get(locals, a);
                         if (ret) break;
                     }
@@ -119,15 +141,15 @@ void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
 
                 if (!ret) {
                     printf("NameError: name '");
-                    debug_print_obj(castobj(kv_A(func->opcodes, i)));
+                    debug_print_obj(castobj(kv_A(code->opcodes, i)));
                     printf("' is not defined\n");
                     return;
                 }
                 kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                 break;
             case BC_OPERATOR:
-                //printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(func->opcodes, ++i)));
-                op = kv_A(func->opcodes, ++i);
+                //printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(code->opcodes, ++i)));
+                op = kv_A(code->opcodes, ++i);
                 switch (op) {
                     case OP_LT: case OP_LE: case OP_GT: case OP_GE: case OP_NE: case OP_EQ:
                     case OP_BITOR: case OP_BITXOR: case OP_BITAND: case OP_LSHIFT: case OP_RSHIFT:
@@ -153,7 +175,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
                 }
                 break;
             case BC_NEW_OBJ:
-                switch (kv_A(func->opcodes, ++i)) {
+                switch (kv_A(code->opcodes, ++i)) {
                     case PYLT_OBJ_TYPE_ITER:
                         ret = castobj(pylt_obj_iter_new(state, castobj(kv_pop(state->vm.stack))));
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
@@ -161,17 +183,17 @@ void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
                 }
                 break;
             case BC_NEW_OBJ_EXTRA:
-                switch (kv_A(func->opcodes, ++i)) {
+                switch (kv_A(code->opcodes, ++i)) {
                     case PYLT_OBJ_TYPE_SET:
                         ret = castobj(pylt_obj_set_new(state));
-                        tmp = kv_A(func->opcodes, ++i);
+                        tmp = kv_A(code->opcodes, ++i);
                         for (unsigned int j = 0; j < tmp; j++) {
                             pylt_obj_set_add(state, castset(ret), castobj(kv_pop(state->vm.stack)));
                         }
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                         break;
                     case PYLT_OBJ_TYPE_LIST:
-                        tmp = kv_A(func->opcodes, ++i);
+                        tmp = kv_A(code->opcodes, ++i);
                         ret = castobj(pylt_obj_list_new_with_size(state, tmp));
                         for (unsigned int j = tmp; j > 0; --j) {
                             pylt_obj_list_append(state, castlist(ret), castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - j)));
@@ -186,18 +208,18 @@ void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
                 } 
                 break;
             case BC_CALL:
-                tmp = kv_A(func->opcodes, ++i);
-                a = castobj(kv_A(func->opcodes, ++i));
+                tmp = kv_A(code->opcodes, ++i);
+                a = castobj(kv_A(code->opcodes, ++i));
 
-                for (int j = kv_size(kv_top(vm->calls).var_tables) - 1; j >= 0; ++j) {
+                for (int j = kv_size(kv_top(vm->frames).var_tables) - 1; j >= 0; ++j) {
                     ret = pylt_obj_table_get(locals, a);
                     if (ret) {
                         // set locals
 
                         if (ret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
-                            kv_top(vm->calls).code_pointer = i;
-                            pylt_vm_call_func(state, func);
-                            locals = kv_top(kv_top(vm->calls).var_tables);
+                            kv_top(vm->frames).prev_code_pointer = i;
+                            pylt_vm_call_func(state, castfunc(tmp));
+                            locals = kv_top(kv_top(vm->frames).var_tables);
                             ;
                         } else if (ret->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
                             //pylt_mods_builtins_print(state, );
@@ -207,24 +229,26 @@ void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func) {
                 }
                 break;
             case BC_CALL_END:
-                pylt_vm_call_func(state, func);
-                locals = kv_top(kv_top(vm->calls).var_tables);
+                kv_pop(vm->frames);
+                code = kv_top(vm->frames).code;
+                //pylt_vm_call_func(state, func);
+                locals = kv_top(kv_top(vm->frames).var_tables);
                 break;
             case BC_TEST:
                 //debug_print_obj(castobj(kv_top(state->vm.stack)));
                 if (!pylt_obj_cistrue(state, castobj(kv_pop(state->vm.stack)))) {
-                    i += kv_A(func->opcodes, ++i);
+                    i += kv_A(code->opcodes, ++i);
                 } else ++i;
                 break;
             case BC_JMP:
-                i += kv_A(func->opcodes, ++i);
+                i += kv_A(code->opcodes, ++i);
                 break;
             case BC_JMP_BACK:
-                i -= kv_A(func->opcodes, ++i);
+                i -= kv_A(code->opcodes, ++i);
                 break;
             case BC_FORITER:
                 a = pylt_obj_iter_next(state, castiter(kv_top(state->vm.stack)));
-                if (a == NULL) i += kv_A(func->opcodes, ++i);
+                if (a == NULL) i += kv_A(code->opcodes, ++i);
                 else {
                     ++i;
                     kv_push(uintptr_t, state->vm.stack, (uintptr_t)a);

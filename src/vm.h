@@ -45,15 +45,16 @@ enum {
 } OperatorValue;
 
 
-typedef struct PyLiteFuncCall {
+typedef struct PyLiteFrame {
     PyLiteFunctionObject *func;
-    pl_uint_t code_pointer;
+    PyLiteCodeSnippetObject *code;
+    pl_uint_t prev_code_pointer;
     kvec_t(PyLiteTable*) var_tables;
-} PyLiteFuncCall;
+} PyLiteFrame;
 
 typedef struct PyLiteVM {
     kvec_t(uintptr_t) stack;
-    kvec_t(PyLiteFuncCall) calls;
+    kvec_t(PyLiteFrame) frames;
 } PyLiteVM;
 
 struct PyLiteState;
@@ -65,6 +66,6 @@ int token_to_op_val(uint32_t tk);
 int token_de_to_op_val(uint32_t tk);
 
 void pylt_vm_init(struct PyLiteState *state, PyLiteVM *vm);
-void pylt_vm_run(PyLiteState* state, PyLiteFunctionObject *func);
+void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code);
 
 #endif

@@ -8,9 +8,9 @@
 typedef struct PyLiteModuleObject {
     PyLiteObject_HEAD;
     PyLiteTable *attrs;
-    PyLiteCodeSnippet code;
+    PyLiteCodeSnippetObject code;
 } PyLiteModuleObject;
 
-PyLiteModuleObject* pylt_obj_module_new(PyLiteState *state, PyLiteCodeSnippet *code);
+PyLiteModuleObject* pylt_obj_module_new(PyLiteState *state, PyLiteCodeSnippetObject *code);
 
 #endif

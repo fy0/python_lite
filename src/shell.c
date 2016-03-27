@@ -40,7 +40,7 @@ int main(int argc,char* argv[])
     //PyLiteFunctionObject *func = pylt_obj_func_new(&state);
     //func->
 
-    pylt_vm_run(&state, ps.func);
+    pylt_vm_run(&state, ps.info->code);
 
     system("pause");
     return 0;

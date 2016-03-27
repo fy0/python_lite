@@ -54,8 +54,8 @@ void debug_print_obj(PyLiteObject *obj) {
 
 void debug_print_const_vals(ParserState *ps) {
     printf("CONST VALS:\n");
-    for (unsigned int i = 0; i < kv_size(ps->const_val); i++) {
-        PyLiteObject *obj = kv_A(ps->const_val, i);
+    for (unsigned int i = 0; i < kv_size(ps->info->code->const_val); i++) {
+        PyLiteObject *obj = kv_A(ps->info->code->const_val, i);
         printf("   %-4d %-8s ", i + 1, pylt_type_name(obj->ob_type));
         debug_print_obj(obj);
         putchar('\n');
@@ -64,54 +64,56 @@ void debug_print_const_vals(ParserState *ps) {
 
 void debug_print_opcodes(ParserState *ps) {
     int a, b;
+    PyLiteCodeSnippetObject *code = ps->info->code;
+
     printf("OPCODES:\n");
-    for (unsigned int i = 0; i < kv_size(ps->info->opcodes); i++) {
+    for (unsigned int i = 0; i < kv_size(code->opcodes); i++) {
         printf("   L%05d: ", i);
-        switch (kv_A(ps->info->opcodes, i)) {
+        switch (kv_A(code->opcodes, i)) {
             case BC_OPERATOR:
-                printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(ps->info->opcodes, ++i)));
+                printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(code->opcodes, ++i)));
                 break;
             case BC_SET_VAL:
                 printf("   %-15s ", "SET_VAL");
-                debug_print_obj(castobj(kv_A(ps->info->opcodes, ++i)));
+                debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;
             case BC_LOAD_VAL:
                 printf("   %-15s ", "LOAD_VAL");
-                debug_print_obj(castobj(kv_A(ps->info->opcodes, ++i)));
+                debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;
             case BC_LOADCONST:
-                printf("   %-15s %d\n", "LOADCONST", kv_A(ps->info->opcodes, ++i));
+                printf("   %-15s %d\n", "LOADCONST", kv_A(code->opcodes, ++i));
                 break;
             case BC_NEW_OBJ:
-                a = kv_A(ps->info->opcodes, ++i);
+                a = kv_A(code->opcodes, ++i);
                 printf("   %-15s %s\n", "NEW_OBJ", pylt_type_name(a));
                 break;
             case BC_NEW_OBJ_EXTRA:
-                a = kv_A(ps->info->opcodes, ++i);
-                b = kv_A(ps->info->opcodes, ++i);
+                a = kv_A(code->opcodes, ++i);
+                b = kv_A(code->opcodes, ++i);
                 printf("   %-15s %s %d\n", "NEW_OBJ_EX", pylt_type_name(a), b);
                 break;
             case BC_CALL:
-                printf("   %-15s %-3d  ", "CALL", kv_A(ps->info->opcodes, ++i));
-                debug_print_obj(castobj(kv_A(ps->info->opcodes, ++i)));
+                printf("   %-15s %-3d  ", "CALL", kv_A(code->opcodes, ++i));
+                debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;
             case BC_TEST:
-                printf("   %-15s %-3d  ", "TEST", kv_A(ps->info->opcodes, ++i));
+                printf("   %-15s %-3d  ", "TEST", kv_A(code->opcodes, ++i));
                 putchar('\n');
                 break;
             case BC_JMP:
-                printf("   %-15s %-3d  ", "JMP", kv_A(ps->info->opcodes, ++i));
+                printf("   %-15s %-3d  ", "JMP", kv_A(code->opcodes, ++i));
                 putchar('\n');
                 break;
             case BC_JMP_BACK:
-                printf("   %-15s %-3d  ", "JMP_BACK", kv_A(ps->info->opcodes, ++i));
+                printf("   %-15s %-3d  ", "JMP_BACK", kv_A(code->opcodes, ++i));
                 putchar('\n');
                 break;
             case BC_FORITER:
-                printf("   %-15s %-3d  ", "FORITER", kv_A(ps->info->opcodes, ++i));
+                printf("   %-15s %-3d  ", "FORITER", kv_A(code->opcodes, ++i));
                 putchar('\n');
                 break;
             case BC_DEL_FORCE:
