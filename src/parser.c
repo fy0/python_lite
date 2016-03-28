@@ -836,10 +836,10 @@ void parse(ParserState *ps) {
 
 void func_push(ParserState *ps) {
     ParserInfo *info;
-    // 如果有用过的空槽
+    // 如果没有空槽
     if (!ps->info_used) {
         info = pylt_realloc(NULL, sizeof(ParserInfo));
-    // 如果没有空槽
+    // 如果有用过的空槽
     } else {
         info = ps->info_used;
         ps->info_used = ps->info_used->prev;

@@ -68,17 +68,16 @@ void pylt_vm_init(struct PyLiteState *state, PyLiteVM* vm) {
     kv_init(vm->stack);
     kv_init(vm->frames);
 
-    kv_resize(PyLiteFrame, vm->frames, 1);
-
-    // built-in
-    //call = &kv_A(vm->calls, 0);
-    //call->func = NULL;
-    //kv_init(frame->var_tables);
-
-    // first local
+    // first frame
+    kv_pushp(PyLiteFrame, vm->frames);
     frame = &kv_A(vm->frames, 0);
     frame->func = NULL;
     kv_init(frame->var_tables);
+
+    // built-in
+    //kv_push(PyLiteTable*, frame->var_tables, pylt_obj_table_new(state));
+    // first local
+    kv_push(PyLiteTable*, frame->var_tables, pylt_obj_table_new(state));
 }
 
 void pylt_vm_call_func(PyLiteState* state, PyLiteFunctionObject *func) {
