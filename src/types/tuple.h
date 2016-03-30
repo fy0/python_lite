@@ -11,6 +11,7 @@ typedef struct PyLiteTupleObject {
 } PyLiteTupleObject;
 
 PyLiteTupleObject* pylt_obj_tuple_new(PyLiteState *state, pl_int_t size);
+PyLiteObject* pylt_obj_tuple_cgetitem(PyLiteState *state, PyLiteTupleObject *self, int index);
 PyLiteTupleObject* pylt_obj_tuple_new_with_data(PyLiteState *state, pl_int_t len, PyLiteObject *objs);
 
 #endif

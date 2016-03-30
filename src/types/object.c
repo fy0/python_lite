@@ -238,6 +238,10 @@ PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObje
                 return castobj(pylt_obj_list_cgetitem(state, castlist(obj), castint(key)->ob_val));
             }
             break;
+        case PYLT_OBJ_TYPE_TUPLE:
+            if (key->ob_type == PYLT_OBJ_TYPE_INT) {
+                return castobj(pylt_obj_tuple_cgetitem(state, castlist(obj), castint(key)->ob_val));
+            }
     }
     return NULL;
 }
