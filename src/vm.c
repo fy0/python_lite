@@ -272,6 +272,9 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                     kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                 }
                 break;
+            case BC_SET_ITEM:
+                ;
+                break;
             case BC_PRINT:
                 if (kv_size(state->vm.stack) != 0) {
                     debug_print_obj(castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - 1)));

@@ -28,5 +28,6 @@ void pylt_obj_list_reverse(PyLiteState *state, PyLiteListObject *self);
 void pylt_obj_list_sort(PyLiteState *state, PyLiteListObject *self);
 
 PyLiteObject* pylt_obj_list_cgetitem(PyLiteState *state, PyLiteListObject *self, int index);
+pl_bool_t pylt_obj_list_csetitem(PyLiteState *state, PyLiteListObject *self, int index, PyLiteObject* obj);
 
 #endif

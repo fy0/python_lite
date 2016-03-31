@@ -98,13 +98,20 @@ void pylt_obj_list_sort(PyLiteState *state, PyLiteListObject *self) {
     // TODO
 }
 
+PyLiteObject* pylt_obj_list_pop(PyLiteState *state, PyLiteListObject *self) {
+    if (self->ob_size == 0) return NULL;
+    return self->ob_val[--self->ob_size];
+}
+
 PyLiteObject* pylt_obj_list_cgetitem(PyLiteState *state, PyLiteListObject *self, int index) {
     if (index < 0) index += self->ob_size;
     if (index < 0 || (pl_uint_t)index >= self->ob_size) return NULL;
     return self->ob_val[index];
 }
 
-PyLiteObject* pylt_obj_list_pop(PyLiteState *state, PyLiteListObject *self) {
-    if (self->ob_size == 0) return NULL;
-    return self->ob_val[--self->ob_size];
+pl_bool_t pylt_obj_list_csetitem(PyLiteState *state, PyLiteListObject *self, int index, PyLiteObject* obj) {
+    if (index < 0) index += self->ob_size;
+    if (index < 0 || (pl_uint_t)index >= self->ob_size) return false;
+    self->ob_val[index] = obj;
+    return true;
 }
