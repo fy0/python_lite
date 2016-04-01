@@ -125,6 +125,9 @@ void debug_print_opcodes(ParserState *ps) {
             case BC_GET_ITEM:
                 printf("   %-15s\n", "GET_ITEM");
                 break;
+            case BC_SET_ITEM:
+                printf("   %-15s\n", "SET_ITEM");
+                break;
             case BC_PRINT:
                 printf("   %-15s\n", "PRINT");
                 break;

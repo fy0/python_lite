@@ -64,7 +64,7 @@ pl_bool_t pylt_obj_citerable(PyLiteState *state, PyLiteObject *obj);
 pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj);
 
 PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key);
-pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* obj);
+pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
 //PyLiteObject* pylt_obj_cslice(PyLiteState *state, PyLiteObject *obj);
 
 PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj);

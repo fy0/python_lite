@@ -608,17 +608,32 @@ void parse_stmt(ParserState *ps) {
     PyLiteObject *obj;
     int tmp, tmp2, tmp3;
     int final_pos;
+    bool is_success;
 
     switch (tk->val) {
         case TK_NAME:
             obj = tk->obj;
             next(ps);
+            is_success = parse_try_index(ps);
             switch (tk->val) {
                 case '=':
                     next(ps);
+                    if (is_success) {
+                        //printf("%d\n", kv_top(ps->info->code->opcodes));
+                        //kv_top(ps->info->code->opcodes) = BC_SET_ITEM;
+                        kv_pop(ps->info->code->opcodes);
+                    }
+                    //kv_pop(ps->info->code->opcodes);
+                    //kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
                     parse_expr(ps);
-                    kv_pushbc(ps->info->code->opcodes, BC_SET_VAL);
-                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                    if (is_success) {
+                        kv_pushbc(ps->info->code->opcodes, BC_LOAD_VAL);
+                        kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                        kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
+                    } else {
+                        kv_pushbc(ps->info->code->opcodes, BC_SET_VAL);
+                        kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                    }
                     break;
                 case TK_DE_PLUS_EQ: case TK_DE_MINUS_EQ:  case TK_DE_MUL_EQ: case TK_DE_DIV_EQ:
                 case TK_DE_FLOORDIV_EQ: case TK_DE_MOD_EQ: case TK_DE_MATMUL_EQ:

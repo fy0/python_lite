@@ -246,11 +246,11 @@ PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObje
     return NULL;
 }
 
-pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* obj) {
-    switch (obj->ob_type) {
+pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value) {
+    switch (self->ob_type) {
         case PYLT_OBJ_TYPE_LIST:
             if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                return pylt_obj_list_csetitem(state, castlist(obj), castint(key)->ob_val, obj);
+                return pylt_obj_list_csetitem(state, castlist(self), castint(key)->ob_val, value);
             }
             break;
     }
