@@ -13,6 +13,7 @@ typedef struct PyLiteState {
     PyLiteSetObject *cache_str;
     PyLiteSetObject *cache_bytes;
     PyLiteTable *modules;
+    int error_code;
 } PyLiteState;
 
 void pylt_state_init(PyLiteState *state);

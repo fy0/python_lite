@@ -516,18 +516,6 @@ void parse_block(ParserState *ps) {
 }
 
 
-void parse_names(ParserState *ps) {
-    Token *tk = &(ps->ls->token);
-    while (true) {
-        if (tk->val == TK_NAME) {
-            ;
-        }
-        if (tk->val == ',') {
-            ;
-        }
-    }
-}
-
 void parse_single_left_value(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     if (tk->val == TK_NAME) {
