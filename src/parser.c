@@ -6,7 +6,7 @@
 #include "types/all.h"
 
 void func_push(ParserState *ps);
-void func_pop(ParserState *ps);
+ParserInfo* func_pop(ParserState *ps);
 
 void parse_t(ParserState *ps);
 
@@ -220,7 +220,7 @@ bool parse_try_t(ParserState *ps) {
             tk_val = tk->val;
             next(ps);
             parse_expr10(ps);
-            print_tk_val(tk_val);
+            //print_tk_val(tk_val);
             kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
             kv_pushbc(ps->info->code->opcodes, tk_val == '+' ? OP_POS : OP_NEG);
             break;
@@ -364,7 +364,7 @@ success:
     parse_expr6(ps);
     parse_expr5(ps);
     parse_expr4(ps);
-    printf("%s\n", pylt_vm_get_op_name(op_val));
+    //printf("%s\n", pylt_vm_get_op_name(op_val));
     kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
     kv_pushbc(ps->info->code->opcodes, op_val);
     parse_expr3(ps);
@@ -568,7 +568,8 @@ void loop_control_replace(ParserState *ps, int start_pos) {
 void parse_func(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     PyLiteObject *func_name;
-    ParserState new_ps;
+    ParserInfo *info;
+    //ParserState new_ps;
 
     ACCEPT(ps, TK_KW_DEF);
     if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
@@ -586,9 +587,24 @@ void parse_func(ParserState *ps) {
     }*/
     ACCEPT(ps, ')');
     ACCEPT(ps, ':');
+    ACCEPT(ps, TK_NEWLINE);
 
-    pylt_parser_init(ps->state, &new_ps, ps->ls);
-    parse(&new_ps);
+    func_push(ps);
+    ACCEPT(ps, TK_INDENT);
+    parse_stmts(ps);
+    ACCEPT(ps, TK_DEDENT);
+    info = func_pop(ps);
+
+    kv_pushobj(ps->info->code->const_val, func_name);
+    kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
+    kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
+
+    kv_pushobj(ps->info->code->const_val, info->code);
+    kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
+    kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
+
+    kv_pushbc(ps->info->code->opcodes, BC_NEW_OBJ);
+    kv_pushbc(ps->info->code->opcodes, PYLT_OBJ_TYPE_FUNCTION);
 }
 
 void parse_stmt(ParserState *ps) {
@@ -816,7 +832,7 @@ void parse_stmt(ParserState *ps) {
             break;
         case TK_KW_DEF:
             parse_func(ps);
-            break; 
+            return;
         default:
             parse_expr(ps);
             kv_pushbc(ps->info->code->opcodes, BC_POP);
@@ -855,12 +871,13 @@ void func_push(ParserState *ps) {
     ps->info = info;
 }
 
-void func_pop(ParserState *ps) {
+ParserInfo* func_pop(ParserState *ps) {
     ParserInfo *info = ps->info;
     ps->info = ps->info->prev;
 
     info->prev = ps->info_used;
     ps->info_used = info;
+    return info;
 }
 
 void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {

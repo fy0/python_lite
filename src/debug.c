@@ -22,6 +22,8 @@ void debug_print_obj(PyLiteObject *obj) {
             putchar('\'');
             break;
         case PYLT_OBJ_TYPE_FUNCTION:
+            printf("<function>");
+            break;
         case PYLT_OBJ_TYPE_MODULE:
         case PYLT_OBJ_TYPE_TYPE:
         case PYLT_OBJ_TYPE_TUPLE:
@@ -44,6 +46,9 @@ void debug_print_obj(PyLiteObject *obj) {
             printf("}");
             break;
         case PYLT_OBJ_TYPE_DICT:
+            break;
+        case PYLT_OBJ_TYPE_CODESNIPPET:
+            printf("Code");
             break;
         default:
             if (obj->ob_type >= PYLT_OBJ_TYPE_CLASS) {

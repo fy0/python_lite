@@ -179,6 +179,21 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         ret = castobj(pylt_obj_iter_new(state, castobj(kv_pop(state->vm.stack))));
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                         break;
+                    case PYLT_OBJ_TYPE_FUNCTION:
+                        b = castobj(kv_pop(state->vm.stack));
+                        a = castobj(kv_pop(state->vm.stack));
+                        ret = castobj(pylt_obj_func_new(state));
+                        
+                        memcpy(&castfunc(ret)->code, b, sizeof(PyLiteCodeSnippetObject));
+
+                        castfunc(ret)->length = 0;
+                        castfunc(ret)->minimal = 0;
+                        castfunc(ret)->names = NULL;
+                        castfunc(ret)->defaults = NULL;
+                        castfunc(ret)->doc = NULL;
+
+                        pylt_obj_table_set(locals, a, ret);
+                        break;
                 }
                 break;
             case BC_NEW_OBJ_EXTRA:
@@ -283,7 +298,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 break;
             case BC_PRINT:
                 if (kv_size(state->vm.stack) != 0) {
-                    debug_print_obj(castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - 1)));
+                    debug_print_obj(castobj(kv_top(state->vm.stack)));
                     putchar('\n');
                 }
                 printf("locals: {");

@@ -317,6 +317,7 @@ const char* pylt_obj_basetypes[] = {
     "module",
     "function",
     "cfunction",
+    "codesnippet",
 
     "type",
     "iter",
