@@ -593,13 +593,14 @@ void parse_func(ParserState *ps) {
     ACCEPT(ps, TK_INDENT);
     parse_stmts(ps);
     ACCEPT(ps, TK_DEDENT);
+    kv_pushbc(ps->info->code->opcodes, BC_RET);
     info = func_pop(ps);
 
     kv_pushobj(ps->info->code->const_val, func_name);
     kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
     kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
 
-    kv_pushobj(ps->info->code->const_val, info->code);
+    kv_pushobj(ps->info->code->const_val, castobj(info->code));
     kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
     kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
 

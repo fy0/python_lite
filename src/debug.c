@@ -105,6 +105,9 @@ void debug_print_opcodes(ParserState *ps) {
                 debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;
+            case BC_RET:
+                printf("   %-15s\n", "RET");
+                break;
             case BC_TEST:
                 printf("   %-15s %-3d  ", "TEST", kv_A(code->opcodes, ++i));
                 putchar('\n');

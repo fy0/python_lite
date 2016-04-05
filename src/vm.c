@@ -242,7 +242,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                     }
                 }
                 break;
-            case BC_CALL_END:
+            case BC_RET:
                 kv_pop(vm->frames);
                 code = kv_top(vm->frames).code;
                 //pylt_vm_call_func(state, func);
