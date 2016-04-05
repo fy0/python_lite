@@ -203,8 +203,7 @@ PyLiteStrObject* pylt_obj_str_new_from_c_str(PyLiteState *state, char *str, bool
     }
 
     obj = pylt_obj_str_new(state, buf, len, is_raw);
-    if (!obj) (p);
-    return NULL;
+    return obj;
 }
 
 void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self) {

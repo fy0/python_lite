@@ -8,6 +8,8 @@ void pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObject **args)
 void pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObject **args);
 void pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObject **args);
 
+void pylt_mods_builtins_simple_print(PyLiteState *state, int argc, PyLiteObject **args);
+
 
 void pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObject **args) {
     PyLiteObject *obj;
@@ -18,6 +20,11 @@ void pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObject **args)
             if (i != argc - 1) printf(" ");
         }
     }
+    putchar('\n');
+}
+
+void pylt_mods_builtins_simple_print(PyLiteState *state, int argc, PyLiteObject **args) {
+    if (argc) debug_print_obj(args[0]);
     putchar('\n');
 }
 
@@ -33,8 +40,8 @@ void pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObject **arg
     }
 }
 
-void pylt_mods_builtins_register(PyLiteState *state) {
-    PyLiteModuleObject *mod; // = pylt_obj_module_new(state, NULL);
+PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
+    PyLiteModuleObject *mod = pylt_obj_module_new(state, NULL);
 
     pylt_cfunc_register(
         mod,
@@ -43,6 +50,15 @@ void pylt_mods_builtins_register(PyLiteState *state) {
         _NT(state, 3, PARAM_NODEF, _NS(state, " "), _NS(state, "\n")),
         NULL, 
         &pylt_mods_builtins_print
+    );
+
+    pylt_cfunc_register(
+        mod,
+        _NS(state, "simple_print"),
+        _NST(state, 1, "values"),
+        NULL,
+        NULL,
+        &pylt_mods_builtins_simple_print
     );
 
     pylt_cfunc_register(
@@ -63,4 +79,5 @@ void pylt_mods_builtins_register(PyLiteState *state) {
         &pylt_mods_builtins_setattr
     );
 
+    return mod;
 }

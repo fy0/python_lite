@@ -65,6 +65,9 @@ int token_de_to_op_val(uint32_t tk) {
 
 void pylt_vm_init(struct PyLiteState *state, PyLiteVM* vm) {
     PyLiteFrame *frame;
+    PyLiteTable *locals;
+    PyLiteModuleObject *mod;
+
     kv_init(vm->stack);
     kv_init(vm->frames);
 
@@ -75,7 +78,18 @@ void pylt_vm_init(struct PyLiteState *state, PyLiteVM* vm) {
     kv_init(frame->var_tables);
 
     // built-in
-    //kv_push(PyLiteTable*, frame->var_tables, pylt_obj_table_new(state));
+    kv_push(PyLiteTable*, frame->var_tables, pylt_obj_table_new(state));
+    locals = kv_top(frame->var_tables);
+    mod = pylt_mods_builtins_register(state);
+
+    pl_int_t k = kho_begin(mod->attrs);
+    while (k != kho_end(mod->attrs)) {
+        if (kho_exist(mod->attrs, k)) {
+            pylt_obj_table_set(locals, kho_key(mod->attrs, k), kho_val(mod->attrs, k));
+        }
+        ++k;
+    }
+
     // first local
     kv_push(PyLiteTable*, frame->var_tables, pylt_obj_table_new(state));
 }
@@ -224,11 +238,11 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 } 
                 break;
             case BC_CALL:
-                tmp = kv_A(code->opcodes, ++i);
-                a = castobj(kv_A(code->opcodes, ++i));
+                tmp = kv_A(code->opcodes, ++i); // 参数个数
+                a = castobj(kv_A(code->opcodes, ++i)); // 函数名
 
-                for (int j = kv_size(kv_top(vm->frames).var_tables) - 1; j >= 0; ++j) {
-                    ret = pylt_obj_table_get(locals, a);
+                for (int j = kv_size(kv_top(vm->frames).var_tables) - 1; j >= 0; --j) {
+                    ret = pylt_obj_table_get(kv_A(kv_top(vm->frames).var_tables, j), a); // 函数对象
                     if (ret) {
                         // set locals
                         if (ret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
@@ -238,7 +252,8 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                             locals = kv_top(kv_top(vm->frames).var_tables);
                             i = -1;
                         } else if (ret->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
-                            //pylt_mods_builtins_print(state, );
+                            castcfunc(ret)->func(state, tmp, (PyLiteObject**)(&kv_topn(vm->stack, tmp-1)));
+                            kv_popn(vm->stack, tmp);
                         }
                         break;
                     }
