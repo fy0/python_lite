@@ -15,6 +15,7 @@ enum {
     BC_NEW_OBJ_EXTRA,  // 新建对象（带1额外参数）
     BC_CALL,           // 函数调用
     BC_RET,            // 函数结束
+    BC_HALT,           // 程序结束
     BC_PRINT,          // 测试输出
     BC_TEST,           // 真值测试
     BC_JMP,            // 跳转
@@ -48,7 +49,7 @@ enum {
 typedef struct PyLiteFrame {
     PyLiteFunctionObject *func;
     PyLiteCodeSnippetObject *code;
-    pl_uint_t prev_code_pointer;
+    pl_uint_t code_pointer_slot;
     kvec_t(PyLiteTable*) var_tables;
 } PyLiteFrame;
 

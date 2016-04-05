@@ -852,6 +852,7 @@ void parse(ParserState *ps) {
     //parse_expr(ps);
     parse_stmts(ps);
     kv_pushbc(ps->info->code->opcodes, BC_PRINT);
+    kv_pushbc(ps->info->code->opcodes, BC_HALT);
 }
 
 void func_push(ParserState *ps) {

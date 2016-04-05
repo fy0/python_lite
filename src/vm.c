@@ -117,7 +117,9 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
     pylt_vm_load_code(state, code);
     locals = kv_top(kv_top(vm->frames).var_tables);
 
-    for (unsigned int i = 0; i < kv_size(code->opcodes); i++) {
+    //for (unsigned int i = 0; i < kv_size(code->opcodes); i++) {
+    unsigned int i = 0;
+    while (true) {
         switch (kv_A(code->opcodes, i)) {
             case BC_LOADCONST:
                 //printf("   %-15s %d\n", "LOADCONST", );
@@ -229,12 +231,12 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                     ret = pylt_obj_table_get(locals, a);
                     if (ret) {
                         // set locals
-
                         if (ret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
-                            kv_top(vm->frames).prev_code_pointer = i;
-                            pylt_vm_call_func(state, castfunc(tmp));
+                            kv_top(vm->frames).code_pointer_slot = i;
+                            pylt_vm_call_func(state, castfunc(ret));
+                            code = kv_top(vm->frames).code;
                             locals = kv_top(kv_top(vm->frames).var_tables);
-                            ;
+                            i = -1;
                         } else if (ret->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
                             //pylt_mods_builtins_print(state, );
                         }
@@ -245,8 +247,8 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
             case BC_RET:
                 kv_pop(vm->frames);
                 code = kv_top(vm->frames).code;
-                //pylt_vm_call_func(state, func);
                 locals = kv_top(kv_top(vm->frames).var_tables);
+                i = kv_top(vm->frames).code_pointer_slot;
                 break;
             case BC_TEST:
                 //debug_print_obj(castobj(kv_top(state->vm.stack)));
@@ -311,6 +313,11 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 }
                 printf("}");
                 putchar('\n');
+            case BC_HALT:
+                goto _end;
+                break;
         }
+        i++;
     }
+_end:;
 }

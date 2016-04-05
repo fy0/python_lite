@@ -139,6 +139,9 @@ void debug_print_opcodes(ParserState *ps) {
             case BC_PRINT:
                 printf("   %-15s\n", "PRINT");
                 break;
+            case BC_HALT:
+                printf("   %-15s\n", "HALT");
+                break;
         }
     }
 }
