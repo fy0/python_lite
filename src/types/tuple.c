@@ -5,6 +5,7 @@ PyLiteTupleObject* pylt_obj_tuple_new(PyLiteState *state, pl_int_t len) {
     PyLiteTupleObject *obj = pylt_realloc(NULL, sizeof(PyLiteTupleObject));
     obj->ob_type = PYLT_OBJ_TYPE_TUPLE;
     obj->ob_val = pylt_realloc(NULL, len * sizeof(PyLiteObject*));
+    obj->ob_size = len;
     return obj;
 }
 

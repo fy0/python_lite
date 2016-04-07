@@ -679,7 +679,7 @@ void parse_func(ParserState *ps) {
     kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
 
     // params
-    kv_pushobj(ps->info->code->const_val, lst);
+    kv_pushobj(ps->info->code->const_val, castobj(lst));
     kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
     kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
 

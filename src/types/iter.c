@@ -21,6 +21,7 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
             iter->iter_func = &pylt_obj_tuple_iternext;
             return iter;
         case PYLT_OBJ_TYPE_LIST:
+            iter->iter_func = &pylt_obj_list_iternext;
             iter->array.index = 0;
             return iter;
         case PYLT_OBJ_TYPE_SET:
@@ -69,6 +70,10 @@ PyLiteObject* pylt_obj_tuple_iternext(PyLiteState *state, PyLiteIterObject *iter
 }
 
 PyLiteObject* pylt_obj_list_iternext(PyLiteState *state, PyLiteIterObject *iter) {
+    int len = castlist(iter->base)->ob_size;
+    if (iter->array.index < len) {
+        return castlist(iter->base)->ob_val[iter->array.index++];
+    }
     return NULL;
 }
 

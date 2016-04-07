@@ -120,12 +120,41 @@ void pylt_vm_load_code(PyLiteState* state, PyLiteCodeSnippetObject *code) {
     frame->code = code;
 }
 
+// 函数调用检查
+//  1 为当前的参数个数小于最少参数个数
+//  2 为当前的参数个数多于最少参数个数
+// -1 当前对象并非函数类型
+int func_call_check(PyLiteObject *obj, int params_num, int *pnum) {
+    int params_num_min, params_num_max;
+
+    if (obj->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
+        params_num_min = castfunc(obj)->minimal;
+        params_num_max = castfunc(obj)->length;
+    } else if (obj->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
+        params_num_min = castcfunc(obj)->minimal;
+        params_num_max = castcfunc(obj)->length;
+    } else return -1;
+
+    if (params_num < params_num_min) {
+        if (pnum) *pnum = params_num_min; 
+        return 1; 
+    }
+
+    if (params_num > params_num_max) {
+        if (pnum) *pnum = params_num_max;
+        return 2;
+    }
+
+    return 0;
+}
+
 void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
     PyLiteObject *a, *b, *c, *ret;
     PyLiteVM *vm = &state->vm;
     PyLiteTable *locals;
     uintptr_t op;
     uintptr_t tmp;
+    int num;
 
     if (!code) return;
     pylt_vm_load_code(state, code);
@@ -245,6 +274,20 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 for (int j = kv_size(kv_top(vm->frames).var_tables) - 1; j >= 0; --j) {
                     ret = pylt_obj_table_get(kv_A(kv_top(vm->frames).var_tables, j), a); // 函数对象
                     if (ret) {
+                        // check
+                        switch (func_call_check(ret, tmp, &num)) {
+                            case 1:
+                                printf("TypeError: ");
+                                debug_print_obj(a);
+                                printf("() missing %d required positional argument\n", num - tmp);
+                                return;
+                            case 2:
+                                printf("TypeError: ");
+                                debug_print_obj(a);
+                                printf("() takes %d positional arguments but %d were given\n", num, tmp);
+                                return;
+                        }
+
                         // set locals
                         if (ret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
                             kv_top(vm->frames).code_pointer_slot = i;
