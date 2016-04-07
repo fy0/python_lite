@@ -141,7 +141,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 kv_push(uintptr_t, state->vm.stack, (uintptr_t)kv_A(code->const_val, kv_A(code->opcodes, ++i)-1));
                 break;
             case BC_SET_VAL:
-                pylt_obj_table_set(locals, castobj(kv_A(code->opcodes, ++i)), castobj(kv_pop(state->vm.stack)));
+                pylt_obj_table_set(locals, castobj(kv_A(code->opcodes, ++i)), castobj(kv_top(state->vm.stack)));
                 break; 
             case BC_LOAD_VAL:
                 a = castobj(kv_A(code->opcodes, ++i));
@@ -252,8 +252,9 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                             locals = kv_top(kv_top(vm->frames).var_tables);
                             i = -1;
                         } else if (ret->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
-                            castcfunc(ret)->func(state, tmp, (PyLiteObject**)(&kv_topn(vm->stack, tmp-1)));
+                            ret = castcfunc(ret)->func(state, tmp, (PyLiteObject**)(&kv_topn(vm->stack, tmp-1)));
                             kv_popn(vm->stack, tmp);
+                            kv_push(uintptr_t, state->vm.stack, (uintptr_t)pylt_obj_int_new(state, 111));
                         }
                         break;
                     }
@@ -264,6 +265,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 code = kv_top(vm->frames).code;
                 locals = kv_top(kv_top(vm->frames).var_tables);
                 i = kv_top(vm->frames).code_pointer_slot;
+                kv_push(uintptr_t, state->vm.stack, (uintptr_t)pylt_obj_int_new(state, 111));
                 break;
             case BC_TEST:
                 //debug_print_obj(castobj(kv_top(state->vm.stack)));

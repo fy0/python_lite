@@ -49,6 +49,7 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_TYPE,
     PYLT_OBJ_TYPE_ITER,
     PYLT_OBJ_TYPE_CLASS,
+    PYLT_OBJ_TYPE_NONE,
 };
 
 #define PYLT_OBJ_TYPE_NUM PYLT_OBJ_TYPE_CLASS
@@ -135,7 +136,7 @@ const char* pylt_type_name(int ob_type);
 typedef PyLiteObject* (*PyLiteObjUnaryOpFunc)(PyLiteState *state, PyLiteObject *obj);
 typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
 
-typedef void(*PyLiteCFunctionPtr)(PyLiteState *state, int argc, PyLiteObject **args);
+typedef PyLiteObject* (*PyLiteCFunctionPtr)(PyLiteState *state, int argc, PyLiteObject **args);
 typedef void(*PyLiteCMethod)(PyLiteObject *self, PyLiteObject **args);
 
 typedef PyLiteObject* (*PyLiteIterFunc)(PyLiteState *state, struct PyLiteIterObject *iter);

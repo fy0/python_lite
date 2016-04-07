@@ -4,14 +4,14 @@
 #include "../debug.h"
 #include "helper.h"
 
-void pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObject **args);
-void pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObject **args);
-void pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObject **args);
+PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObject **args);
+PyLiteObject* pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObject **args);
+PyLiteObject* pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObject **args);
 
-void pylt_mods_builtins_simple_print(PyLiteState *state, int argc, PyLiteObject **args);
+PyLiteObject* pylt_mods_builtins_simple_print(PyLiteState *state, int argc, PyLiteObject **args);
 
 
-void pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObject **args) {
     PyLiteObject *obj;
     if (argc) {
         for (int i = 0; i < argc; i++) {
@@ -21,23 +21,27 @@ void pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObject **args)
         }
     }
     putchar('\n');
+    return NULL;
 }
 
-void pylt_mods_builtins_simple_print(PyLiteState *state, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_mods_builtins_simple_print(PyLiteState *state, int argc, PyLiteObject **args) {
     if (argc) debug_print_obj(args[0]);
     putchar('\n');
+    return NULL;
 }
 
-void pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObject **args) {
     ;
+    return NULL;
 }
 
-void pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObject **args) {
     switch (args[0]->ob_type) {
         case PYLT_OBJ_TYPE_MODULE:
             pylt_obj_table_set(castmod(args[0])->attrs, args[1], args[2]);
             break;
     }
+    return NULL;
 }
 
 PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {

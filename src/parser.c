@@ -205,11 +205,79 @@ T ->    ( EXPR ) |
 bool parse_try_t(ParserState *ps) {
     int tk_val;
     Token *tk = &(ps->ls->token);
+    PyLiteObject *obj, *tmp;
+    bool is_success;
+    int num;
+
     switch (tk->val) {
         case TK_NAME:
-            kv_pushbc(ps->info->code->opcodes, BC_LOAD_VAL);
-            kv_pushbc(ps->info->code->opcodes, (uintptr_t)tk->obj);
+            obj = tk->obj;
             next(ps);
+            is_success = parse_try_index(ps);
+            switch (tk->val) {
+                case '=':
+                    next(ps);
+                    if (is_success) {
+                        //printf("%d\n", kv_top(ps->info->code->opcodes));
+                        //kv_top(ps->info->code->opcodes) = BC_SET_ITEM;
+                        kv_pop(ps->info->code->opcodes);
+                    }
+                    //kv_pop(ps->info->code->opcodes);
+                    //kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
+                    parse_expr(ps);
+                    if (is_success) {
+                        kv_pushbc(ps->info->code->opcodes, BC_LOAD_VAL);
+                        kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                        kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
+                    } else {
+                        kv_pushbc(ps->info->code->opcodes, BC_SET_VAL);
+                        kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                    }
+                    break;
+                case TK_DE_PLUS_EQ: case TK_DE_MINUS_EQ:  case TK_DE_MUL_EQ: case TK_DE_DIV_EQ:
+                case TK_DE_FLOORDIV_EQ: case TK_DE_MOD_EQ: case TK_DE_MATMUL_EQ:
+                case TK_DE_BITAND_EQ: case TK_DE_BITOR_EQ: case TK_DE_BITXOR_EQ:
+                case TK_DE_RSHIFT_EQ: case TK_DE_LSHIFT_EQ: case TK_DE_POW_EQ:
+                    kv_pushbc(ps->info->code->opcodes, BC_LOAD_VAL);
+                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                    tmp = token_de_to_op_val(tk->val);
+                    next(ps);
+                    parse_expr(ps);
+                    kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
+                    kv_pushbc(ps->info->code->opcodes, tmp);
+                    kv_pushbc(ps->info->code->opcodes, BC_SET_VAL);
+                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                    break;
+                case '(':
+                    next(ps);
+                    num = 0;
+                    while (true) {
+                        if (!parse_try_expr(ps)) break;
+                        num++;
+                        if (tk->val != ',') break;
+                        else next(ps);
+                    }
+                    kv_pushbc(ps->info->code->opcodes, BC_CALL);
+                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)num);
+                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                    ACCEPT(ps, ')');
+                    break;
+                case '[':
+                    if (!parse_try_index(ps)) {
+                        error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+                    }
+                    if (tk->val == '=') {
+                        kv_pop(ps->info->code->opcodes);
+                        next(ps);
+                        parse_expr(ps);
+                        kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
+                        kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                    }
+                    break;
+                default:
+                    kv_pushbc(ps->info->code->opcodes, BC_LOAD_VAL);
+                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+            }
             break;
         case '(':
             next(ps);
@@ -613,75 +681,8 @@ void parse_stmt(ParserState *ps) {
     PyLiteObject *obj;
     int tmp, tmp2, tmp3;
     int final_pos;
-    bool is_success;
 
     switch (tk->val) {
-        case TK_NAME:
-            obj = tk->obj;
-            next(ps);
-            is_success = parse_try_index(ps);
-            switch (tk->val) {
-                case '=':
-                    next(ps);
-                    if (is_success) {
-                        //printf("%d\n", kv_top(ps->info->code->opcodes));
-                        //kv_top(ps->info->code->opcodes) = BC_SET_ITEM;
-                        kv_pop(ps->info->code->opcodes);
-                    }
-                    //kv_pop(ps->info->code->opcodes);
-                    //kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
-                    parse_expr(ps);
-                    if (is_success) {
-                        kv_pushbc(ps->info->code->opcodes, BC_LOAD_VAL);
-                        kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                        kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
-                    } else {
-                        kv_pushbc(ps->info->code->opcodes, BC_SET_VAL);
-                        kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                    }
-                    break;
-                case TK_DE_PLUS_EQ: case TK_DE_MINUS_EQ:  case TK_DE_MUL_EQ: case TK_DE_DIV_EQ:
-                case TK_DE_FLOORDIV_EQ: case TK_DE_MOD_EQ: case TK_DE_MATMUL_EQ:
-                case TK_DE_BITAND_EQ: case TK_DE_BITOR_EQ: case TK_DE_BITXOR_EQ:
-                case TK_DE_RSHIFT_EQ: case TK_DE_LSHIFT_EQ: case TK_DE_POW_EQ:
-                    kv_pushbc(ps->info->code->opcodes, BC_LOAD_VAL);
-                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                    tmp = token_de_to_op_val(tk->val);
-                    next(ps);
-                    parse_expr(ps);
-                    kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-                    kv_pushbc(ps->info->code->opcodes, tmp);
-                    kv_pushbc(ps->info->code->opcodes, BC_SET_VAL);
-                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                    break;
-                case '(':
-                    next(ps);
-                    tmp = 0;
-                    while (true) {
-                        if (!parse_try_expr(ps)) break;
-                        tmp++;
-                        if (tk->val != ',') break;
-                        else next(ps);
-                    }
-                    kv_pushbc(ps->info->code->opcodes, BC_CALL);
-                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)tmp);
-                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                    ACCEPT(ps, ')');
-                    break;
-                case '[':
-                    if (!parse_try_index(ps)) {
-                        error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-                    }
-                    if (tk->val == '=') {
-                        kv_pop(ps->info->code->opcodes);
-                        next(ps);
-                        parse_expr(ps);
-                        kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
-                        kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                    }
-                    break;
-            }
-            break;
         case TK_KW_IF:
             next(ps);
             parse_expr(ps);

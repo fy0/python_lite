@@ -322,6 +322,7 @@ const char* pylt_obj_basetypes[] = {
     "type",
     "iter",
     "class",
+    "none",
 };
 
 const char* pylt_obj_type_name_cstr(PyLiteState *state, PyLiteObject *obj) {
