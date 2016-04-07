@@ -12,7 +12,7 @@ pl_int_t pylt_obj_none_ccmp(PyLiteState *state, PyLiteNoneObject *self, PyLiteOb
 pl_bool_t pylt_obj_none_ceq(PyLiteState *state, PyLiteNoneObject *self, PyLiteObject *other);
 pl_uint32_t pylt_obj_none_chash(PyLiteState *state, PyLiteNoneObject *obj);
 
-PyLiteNoneObject* pylt_obj_none_new(PyLiteState *state, bool val);
+PyLiteNoneObject* pylt_obj_none_new(PyLiteState *state);
 
 PyLiteNoneObject PyLiteNone;
 

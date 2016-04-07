@@ -203,11 +203,10 @@ T ->    ( EXPR ) |
         IDENT
 */
 bool parse_try_t(ParserState *ps) {
-    int tk_val;
+    int num, tk_val;
     Token *tk = &(ps->ls->token);
-    PyLiteObject *obj, *tmp;
+    PyLiteObject *obj;
     bool is_success;
-    int num;
 
     switch (tk->val) {
         case TK_NAME:
@@ -240,11 +239,11 @@ bool parse_try_t(ParserState *ps) {
                 case TK_DE_RSHIFT_EQ: case TK_DE_LSHIFT_EQ: case TK_DE_POW_EQ:
                     kv_pushbc(ps->info->code->opcodes, BC_LOAD_VAL);
                     kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                    tmp = token_de_to_op_val(tk->val);
+                    num = token_de_to_op_val(tk->val);
                     next(ps);
                     parse_expr(ps);
                     kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-                    kv_pushbc(ps->info->code->opcodes, tmp);
+                    kv_pushbc(ps->info->code->opcodes, num);
                     kv_pushbc(ps->info->code->opcodes, BC_SET_VAL);
                     kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
                     break;
@@ -661,6 +660,9 @@ void parse_func(ParserState *ps) {
     ACCEPT(ps, TK_INDENT);
     parse_stmts(ps);
     ACCEPT(ps, TK_DEDENT);
+    kv_pushobj(ps->info->code->const_val, castobj(pylt_obj_none_new(ps->state)));
+    kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
+    kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
     kv_pushbc(ps->info->code->opcodes, BC_RET);
     info = func_pop(ps);
 
@@ -835,6 +837,15 @@ void parse_stmt(ParserState *ps) {
         case TK_KW_DEF:
             parse_func(ps);
             return;
+        case TK_KW_RETURN:
+            next(ps);
+            if (!parse_try_expr(ps)) {
+                kv_pushobj(ps->info->code->const_val, castobj(pylt_obj_none_new(ps->state)));
+                kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
+                kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
+            }
+            kv_pushbc(ps->info->code->opcodes, BC_RET);
+            break;
         default:
             parse_expr(ps);
             kv_pushbc(ps->info->code->opcodes, BC_POP);

@@ -265,7 +265,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 code = kv_top(vm->frames).code;
                 locals = kv_top(kv_top(vm->frames).var_tables);
                 i = kv_top(vm->frames).code_pointer_slot;
-                kv_push(uintptr_t, state->vm.stack, (uintptr_t)pylt_obj_int_new(state, 111));
+                //kv_push(uintptr_t, state->vm.stack, (uintptr_t)pylt_obj_int_new(state, 111));
                 break;
             case BC_TEST:
                 //debug_print_obj(castobj(kv_top(state->vm.stack)));
