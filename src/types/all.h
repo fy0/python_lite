@@ -18,5 +18,6 @@
 
 #include "type.h"
 #include "iter.h"
+#include "none.h"
 
 #endif
