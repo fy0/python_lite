@@ -121,7 +121,7 @@ void pylt_vm_load_code(PyLiteState* state, PyLiteCodeSnippetObject *code) {
 }
 
 void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
-    PyLiteObject *a, *b, *ret;
+    PyLiteObject *a, *b, *c, *ret;
     PyLiteVM *vm = &state->vm;
     PyLiteTable *locals;
     uintptr_t op;
@@ -148,8 +148,8 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 ret = pylt_obj_table_get(locals, a);
 
                 if (!ret) {
-                    for (int j = kv_size(kv_top(vm->frames).var_tables) - 2; j >= 0; ++j) {
-                        ret = pylt_obj_table_get(locals, a);
+                    for (int j = kv_size(kv_top(vm->frames).var_tables) - 2; j >= 0; --j) {
+                        ret = pylt_obj_table_get(kv_A(kv_top(vm->frames).var_tables, j), a);
                         if (ret) break;
                     }
                 }
@@ -196,15 +196,16 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                         break;
                     case PYLT_OBJ_TYPE_FUNCTION:
-                        b = castobj(kv_pop(state->vm.stack));
-                        a = castobj(kv_pop(state->vm.stack));
+                        c = castobj(kv_pop(state->vm.stack)); // params
+                        b = castobj(kv_pop(state->vm.stack)); // code
+                        a = castobj(kv_pop(state->vm.stack)); // name
                         ret = castobj(pylt_obj_func_new(state));
                         
                         memcpy(&castfunc(ret)->code, b, sizeof(PyLiteCodeSnippetObject));
 
-                        castfunc(ret)->length = 0;
-                        castfunc(ret)->minimal = 0;
-                        castfunc(ret)->names = NULL;
+                        castfunc(ret)->length = castlist(c)->ob_size;
+                        castfunc(ret)->minimal = castlist(c)->ob_size;
+                        castfunc(ret)->names = castlist(c)->ob_val;
                         castfunc(ret)->defaults = NULL;
                         castfunc(ret)->doc = NULL;
 
@@ -250,11 +251,16 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                             pylt_vm_call_func(state, castfunc(ret));
                             code = kv_top(vm->frames).code;
                             locals = kv_top(kv_top(vm->frames).var_tables);
+                            if (castfunc(ret)->length > 0) {
+                                for (int k = tmp - 1; k >= 0; --k) {
+                                    pylt_obj_table_set(locals, castfunc(ret)->names[k], castobj(kv_pop(state->vm.stack)));
+                                }
+                            }
                             i = -1;
                         } else if (ret->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
                             ret = castcfunc(ret)->func(state, tmp, (PyLiteObject**)(&kv_topn(vm->stack, tmp-1)));
                             kv_popn(vm->stack, tmp);
-                            kv_push(uintptr_t, state->vm.stack, (uintptr_t)pylt_obj_int_new(state, 111));
+                            kv_push(uintptr_t, state->vm.stack, (uintptr_t)pylt_obj_none_new(state));
                         }
                         break;
                     }

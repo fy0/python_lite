@@ -636,7 +636,6 @@ void parse_func(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     PyLiteObject *func_name;
     ParserInfo *info;
-    //ParserState new_ps;
 
     ACCEPT(ps, TK_KW_DEF);
     if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
@@ -644,14 +643,17 @@ void parse_func(ParserState *ps) {
     next(ps);
 
     ACCEPT(ps, '(');
-    /*while (true) {
-        if (tk->val == TK_NAME) {
-            ;
-        }
-        if (tk->val == ',') {
-            ;
-        }
-    }*/
+    
+    PyLiteListObject* lst = pylt_obj_list_new(ps->state);
+    
+    while (true) {
+        if (tk->val != TK_NAME) break;
+        pylt_obj_list_append(ps->state, lst, tk->obj);
+        next(ps);
+        if (tk->val != ',') break;
+        next(ps);
+    }
+
     ACCEPT(ps, ')');
     ACCEPT(ps, ':');
     ACCEPT(ps, TK_NEWLINE);
@@ -666,11 +668,18 @@ void parse_func(ParserState *ps) {
     kv_pushbc(ps->info->code->opcodes, BC_RET);
     info = func_pop(ps);
 
+    // name
     kv_pushobj(ps->info->code->const_val, func_name);
     kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
     kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
 
+    // code
     kv_pushobj(ps->info->code->const_val, castobj(info->code));
+    kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
+    kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
+
+    // params
+    kv_pushobj(ps->info->code->const_val, lst);
     kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
     kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
 
