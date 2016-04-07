@@ -73,13 +73,14 @@ PyLiteObject* pylt_obj_list_iternext(PyLiteState *state, PyLiteIterObject *iter)
 }
 
 PyLiteObject* pylt_obj_set_iternext(PyLiteState *state, PyLiteIterObject *iter) {
-    pl_uint_t k = iter->hashmap.k;
+    PyLiteObject *ret;
+
     if (pylt_obj_set_len(state, castset(iter->base)) != iter->hashmap.count)
         return NULL;
 
-    k = pylt_obj_set_next(state, castset(iter->base), k);
-    iter->hashmap.k = k;
-    return pylt_obj_set_itemvalue(state, castset(iter->base), k);
+    ret = pylt_obj_set_itemvalue(state, castset(iter->base), iter->hashmap.k);
+    iter->hashmap.k = pylt_obj_set_next(state, castset(iter->base), iter->hashmap.k);
+    return ret;
 }
 
 PyLiteObject* pylt_obj_dict_iternext(PyLiteState *state, PyLiteIterObject *iter) {

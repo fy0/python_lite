@@ -83,7 +83,6 @@ pl_int_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self) {
 pl_int_t pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t k) {
     while (++k != kho_end(self->ob_val)) {
         if (kho_exist(self->ob_val, k)) return k;
-        ++k;
     }
     return kho_end(self->ob_val);
 }

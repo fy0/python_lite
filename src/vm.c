@@ -287,7 +287,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 break;
             case BC_FORITER:
                 a = pylt_obj_iter_next(state, castiter(kv_top(state->vm.stack)));
-                if (a == NULL) i += kv_A(code->opcodes, ++i);
+                if (a == NULL) i += kv_A(code->opcodes, ++i) - 1;
                 else {
                     ++i;
                     kv_push(uintptr_t, state->vm.stack, (uintptr_t)a);

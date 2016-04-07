@@ -826,6 +826,7 @@ void parse_stmt(ParserState *ps) {
                 kv_pushbc(ps->info->code->opcodes, 0);
                 kv_pushbc(ps->info->code->opcodes, BC_SET_VAL);
                 kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                kv_pushbc(ps->info->code->opcodes, BC_POP);
 
                 ++ps->info->loop_depth;
                 ACCEPT(ps, TK_NEWLINE);
