@@ -350,7 +350,12 @@ static _INLINE bool parse_try_expr(ParserState *ps) {
 }
 
 void parse_expr(ParserState *ps) {
+    Token *tk = &(ps->ls->token);
     if (!parse_try_expr(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+    if (tk->val == '.') {
+        next(ps);
+        ACCEPT(ps, TK_NAME);
+    }
 }
 
 /* OR EXPR10 ... EXPR1 | ε */
