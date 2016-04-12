@@ -13,8 +13,8 @@ pl_int_t pylt_obj_dict_ccmp(PyLiteState *state, PyLiteDictObject *self, PyLiteOb
 pl_bool_t pylt_obj_dict_ceq(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *other);
 
 
-PyLiteObject* pylt_obj_dict_cgetitem(PyLiteState *state, PyLiteDictObject *self, int index);
-pl_bool_t pylt_obj_dict_csetitem(PyLiteState *state, PyLiteDictObject *self, int index, PyLiteObject* obj);
+PyLiteObject* pylt_obj_dict_cgetattr(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key);
+void pylt_obj_dict_csetattr(PyLiteState *state, PyLiteDictObject *self, PyLiteObject* key, PyLiteObject* value);
 
 pl_int_t pylt_obj_dict_len(PyLiteState *state, PyLiteDictObject *self);
 PyLiteObject* pylt_obj_dict_has(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *obj);

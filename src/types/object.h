@@ -93,7 +93,7 @@ pl_int_t pylt_obj_table_end(PyLiteTable *tab);
 void pylt_obj_table_next(PyLiteTable *tab, pl_int_t *k);
 PyLiteObject* pylt_obj_table_itemkey(PyLiteTable *tab, pl_int_t k);
 PyLiteObject* pylt_obj_table_itemvalue(PyLiteTable *tab, pl_int_t k);
-void pylt_obj_table_keyvalue(PyLiteTable *tab, pl_int_t k, PyLiteObject **key, PyLiteObject **val);
+void pylt_obj_table_keyvalue(PyLiteTable *tab, pl_int_t k, PyLiteObject **pkey, PyLiteObject **pval);
 
 // Type cast
 

@@ -127,7 +127,7 @@ bool pylt_obj_table_remove(PyLiteTable *tab, PyLiteObject *key) {
     return true;
 }
 
-_INLINE int pylt_obj_table_len(PyLiteTable *tab) {
+int pylt_obj_table_len(PyLiteTable *tab) {
     return kho_size(tab);
 }
 
@@ -163,13 +163,13 @@ PyLiteObject* pylt_obj_table_itemvalue(PyLiteTable *tab, pl_int_t k) {
     return (kho_exist(tab, k)) ? castobj(kho_val(tab, k)) : NULL;
 }
 
-void pylt_obj_table_keyvalue(PyLiteTable *tab, pl_int_t k, PyLiteObject **key, PyLiteObject **val) {
+void pylt_obj_table_keyvalue(PyLiteTable *tab, pl_int_t k, PyLiteObject **pkey, PyLiteObject **pval) {
     if (kho_exist(tab, k)) {
-        *key = castobj(kho_key(tab, k));
-        *val = castobj(kho_val(tab, k));
+        *pkey = castobj(kho_key(tab, k));
+        *pval = castobj(kho_val(tab, k));
     } else {
-        *key = NULL;
-        *val = NULL;
+        *pkey = NULL;
+        *pval = NULL;
     }
 }
 

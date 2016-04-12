@@ -30,6 +30,14 @@ pl_int_t pylt_obj_dict_len(PyLiteState *state, PyLiteDictObject *self) {
     return pylt_obj_table_len(self->ob_val);
 }
 
+PyLiteObject* pylt_obj_dict_cgetattr(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
+    return pylt_obj_table_get(self->ob_val, key);
+}
+
+void pylt_obj_dict_csetattr(PyLiteState *state, PyLiteDictObject *self, PyLiteObject* key, PyLiteObject* value) {
+    pylt_obj_table_set(self->ob_val, key, value);
+}
+
 PyLiteObject* pylt_obj_dict_has(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
     return pylt_obj_table_get(self->ob_val, key);
 }
@@ -66,6 +74,7 @@ PyLiteObject* pylt_obj_dict_itemvalue(PyLiteState *state, PyLiteDictObject *self
 void pylt_obj_dict_keyvalue(PyLiteState *state, PyLiteDictObject *self, pl_int_t k, PyLiteObject **pkey, PyLiteObject **pval) {
     return pylt_obj_table_keyvalue(self->ob_val, k, pkey, pval);
 }
+
 
 PyLiteDictObject* pylt_obj_dict_new(PyLiteState *state) {
     PyLiteDictObject *obj = pylt_realloc(NULL, sizeof(PyLiteDictObject));

@@ -265,7 +265,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         tmp = kv_A(code->opcodes, ++i);
                         ret = castobj(pylt_obj_dict_new(state));
                         for (int j = tmp; j > 0; j--) {
-                            //pylt_obj_dict_new
+                            //pylt_obj_dict_csetitem(state, )
                             kv_topn(vm->stack, j * 2);
                             kv_topn(vm->stack, j * 2 - 1);
                         }
