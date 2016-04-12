@@ -262,8 +262,14 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                         break;
                     case PYLT_OBJ_TYPE_DICT:
-                        ++i;
+                        tmp = kv_A(code->opcodes, ++i);
                         ret = castobj(pylt_obj_dict_new(state));
+                        for (int j = tmp; j > 0; j--) {
+                            //pylt_obj_dict_new
+                            kv_topn(vm->stack, j * 2);
+                            kv_topn(vm->stack, j * 2 - 1);
+                        }
+                        kv_popn(vm->stack, tmp * 2);
                         break;
                 } 
                 break;
@@ -362,6 +368,19 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 if (!pylt_obj_setitem(state, ret, a, b)) {
                     printf("IndexError: list assignment index out of range\n");
                     return;
+                }
+                break;
+            case BC_GET_ATTR:
+                b = castobj(kv_pop(state->vm.stack));
+                a = castobj(kv_pop(state->vm.stack));
+                ret = pylt_obj_getitem(state, a, b);
+                if (!ret) {
+                    printf("KeyError: ");
+                    debug_print_obj(b);
+                    putchar('\n');
+                    return;
+                } else {
+                    kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                 }
                 break;
             case BC_PRINT:

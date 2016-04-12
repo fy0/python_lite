@@ -64,6 +64,9 @@ pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj);
 pl_bool_t pylt_obj_citerable(PyLiteState *state, PyLiteObject *obj);
 pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj);
 
+PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key);
+pl_bool_t pylt_obj_setattr(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
+
 PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key);
 pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
 //PyLiteObject* pylt_obj_cslice(PyLiteState *state, PyLiteObject *obj);
@@ -85,6 +88,12 @@ bool pylt_obj_table_exists(PyLiteTable *tab, PyLiteObject *key);
 bool pylt_obj_table_remove(PyLiteTable *tab, PyLiteObject *key);
 int pylt_obj_table_len(PyLiteTable *tab);
 
+pl_int_t pylt_obj_table_begin(PyLiteTable *tab);
+pl_int_t pylt_obj_table_end(PyLiteTable *tab);
+void pylt_obj_table_next(PyLiteTable *tab, pl_int_t *k);
+PyLiteObject* pylt_obj_table_itemkey(PyLiteTable *tab, pl_int_t k);
+PyLiteObject* pylt_obj_table_itemvalue(PyLiteTable *tab, pl_int_t k);
+void pylt_obj_table_keyvalue(PyLiteTable *tab, pl_int_t k, PyLiteObject **key, PyLiteObject **val);
 
 // Type cast
 

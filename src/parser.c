@@ -38,6 +38,12 @@ void next(ParserState *ps) {
     pylt_lex_next(ps->ls);
 }
 
+void store_const(ParserState *ps, PyLiteObject *obj) {
+    kv_pushobj(ps->info->code->const_val, obj);
+    kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
+    kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
+}
+
 void error(ParserState *ps, int code) {
     Token *tk = &(ps->ls->token);
     printf("ERROR at line [%d]\n", ps->ls->linenumber);
@@ -168,6 +174,20 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
                     if (ptimes) *ptimes = tmp;
                     return PYLT_OBJ_TYPE_SET;
                 case ':': // dict
+                    next(ps);
+                    parse_expr(ps);
+                    tmp = 1;
+                    while (true) {
+                        if (tk->val != ',') break;
+                        next(ps);
+                        if (!parse_try_expr(ps)) break;
+                        ACCEPT(ps, ':');
+                        parse_expr(ps);
+                        tmp++;
+                    }
+                    ACCEPT(ps, '}');
+                    if (ptimes) *ptimes = tmp;
+                    return PYLT_OBJ_TYPE_DICT;
                     break;
             }
             break;
@@ -355,6 +375,8 @@ void parse_expr(ParserState *ps) {
     if (tk->val == '.') {
         next(ps);
         ACCEPT(ps, TK_NAME);
+        store_const(ps, castobj(tk->obj));
+        kv_pushbc(ps->info->code->opcodes, BC_GET_ATTR);
     }
 }
 
@@ -855,9 +877,7 @@ void parse_stmt(ParserState *ps) {
         case TK_KW_RETURN:
             next(ps);
             if (!parse_try_expr(ps)) {
-                kv_pushobj(ps->info->code->const_val, castobj(pylt_obj_none_new(ps->state)));
-                kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
-                kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
+                store_const(ps, castobj(pylt_obj_none_new(ps->state)));
             }
             kv_pushbc(ps->info->code->opcodes, BC_RET);
             break;

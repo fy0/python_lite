@@ -26,9 +26,9 @@ pl_int_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self);
 pl_int_t pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t k);
 pl_int_t pylt_obj_set_end(PyLiteState *state, PyLiteSetObject *self);
 
+// 存在则取值 否则为空
 PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int_t k);
 
-// 存在则取值 否则为空
 PyLiteSetObject* pylt_obj_set_new(PyLiteState *state);
 
 #endif

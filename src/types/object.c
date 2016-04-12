@@ -131,6 +131,55 @@ _INLINE int pylt_obj_table_len(PyLiteTable *tab) {
     return kho_size(tab);
 }
 
+pl_int_t pylt_obj_table_begin(PyLiteTable *tab) {
+    pl_int_t k = kho_begin(tab);
+    while (k != kho_end(tab)) {
+        if (kho_exist(tab, k)) return k;
+        ++k;
+    }
+    return kho_end(tab);
+}
+
+pl_int_t pylt_obj_table_end(PyLiteTable *tab) {
+    return kho_end(tab);
+}
+
+void pylt_obj_table_next(PyLiteTable *tab, pl_int_t *k) {
+    pl_int_t key = *k;
+    while (++key != kho_end(tab)) {
+        if (kho_exist(tab, key)) {
+            *k = key;
+            return;
+        }
+    }
+    *k = kho_end(tab);
+}
+
+PyLiteObject* pylt_obj_table_itemkey(PyLiteTable *tab, pl_int_t k) {
+    return (kho_exist(tab, k)) ? castobj(kho_key(tab, k)) : NULL;
+}
+
+PyLiteObject* pylt_obj_table_itemvalue(PyLiteTable *tab, pl_int_t k) {
+    return (kho_exist(tab, k)) ? castobj(kho_val(tab, k)) : NULL;
+}
+
+void pylt_obj_table_keyvalue(PyLiteTable *tab, pl_int_t k, PyLiteObject **key, PyLiteObject **val) {
+    if (kho_exist(tab, k)) {
+        *key = castobj(kho_key(tab, k));
+        *val = castobj(kho_val(tab, k));
+    } else {
+        *key = NULL;
+        *val = NULL;
+    }
+}
+
+/**
+返回 -1: a > b
+返回  0: a = b
+返回 +1: a < b
+返回  2: 无法比较
+返回  3: False
+*/
 pl_int_t pylt_obj_ccmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b) {
     if (a == b) return 0;
     switch (a->ob_type) {
@@ -219,6 +268,18 @@ pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_STR: return castbytes(obj)->ob_size != 0;
         default: return true;
     }
+}
+
+PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key) {
+    switch (obj->ob_type) {
+    }
+    return NULL;
+}
+
+pl_bool_t pylt_obj_setattr(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value) {
+    switch (self->ob_type) {
+    }
+    return false;
 }
 
 PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key) {
