@@ -16,7 +16,7 @@ pl_bool_t pylt_obj_dict_ceq(PyLiteState *state, PyLiteDictObject *self, PyLiteOb
             return false;
 
         for (pl_int_t it = pylt_obj_table_begin(a->ob_val); it != pylt_obj_table_end(a->ob_val); pylt_obj_table_next(a->ob_val, &it)) {
-            PyLiteDictObject *_a, *_b;
+            PyLiteObject *_a, *_b;
             _a = pylt_obj_table_get(b->ob_val, pylt_obj_table_itemkey(a->ob_val, it));
             _b = pylt_obj_table_itemvalue(a->ob_val, it);
             if (!pylt_obj_ceq(state, _a, _b)) return false;
@@ -30,11 +30,11 @@ pl_int_t pylt_obj_dict_len(PyLiteState *state, PyLiteDictObject *self) {
     return pylt_obj_table_len(self->ob_val);
 }
 
-PyLiteObject* pylt_obj_dict_cgetattr(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
+PyLiteObject* pylt_obj_dict_cgetitem(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
     return pylt_obj_table_get(self->ob_val, key);
 }
 
-void pylt_obj_dict_csetattr(PyLiteState *state, PyLiteDictObject *self, PyLiteObject* key, PyLiteObject* value) {
+void pylt_obj_dict_csetitem(PyLiteState *state, PyLiteDictObject *self, PyLiteObject* key, PyLiteObject* value) {
     pylt_obj_table_set(self->ob_val, key, value);
 }
 
@@ -72,7 +72,7 @@ PyLiteObject* pylt_obj_dict_itemvalue(PyLiteState *state, PyLiteDictObject *self
 }
 
 void pylt_obj_dict_keyvalue(PyLiteState *state, PyLiteDictObject *self, pl_int_t k, PyLiteObject **pkey, PyLiteObject **pval) {
-    return pylt_obj_table_keyvalue(self->ob_val, k, pkey, pval);
+    pylt_obj_table_keyvalue(self->ob_val, k, pkey, pval);
 }
 
 

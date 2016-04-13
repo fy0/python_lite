@@ -46,6 +46,14 @@ void debug_print_obj(PyLiteObject *obj) {
             printf("}");
             break;
         case PYLT_OBJ_TYPE_DICT:
+            printf("{");
+            for (pl_int_t it = pylt_obj_dict_begin(NULL, castdict(obj)); it != pylt_obj_dict_end(NULL, castdict(obj)); pylt_obj_dict_next(NULL, castdict(obj), &it)) {
+                debug_print_obj(pylt_obj_dict_itemkey(NULL, castdict(obj), it));
+                printf(": ");
+                debug_print_obj(pylt_obj_dict_itemvalue(NULL, castdict(obj), it));
+                printf(", ");
+            }
+            printf("}");
             break;
         case PYLT_OBJ_TYPE_CODESNIPPET:
             printf("Code");
@@ -138,6 +146,12 @@ void debug_print_opcodes(ParserState *ps) {
                 break;
             case BC_SET_ITEM:
                 printf("   %-15s\n", "SET_ITEM");
+                break;
+            case BC_GET_ATTR:
+                printf("   %-15s\n", "GET_ATTR");
+                break;
+            case BC_SET_ATTR:
+                printf("   %-15s\n", "SET_ATTR");
                 break;
             case BC_PRINT:
                 printf("   %-15s\n", "PRINT");

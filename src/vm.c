@@ -265,11 +265,10 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         tmp = kv_A(code->opcodes, ++i);
                         ret = castobj(pylt_obj_dict_new(state));
                         for (int j = tmp; j > 0; j--) {
-                            //pylt_obj_dict_csetitem(state, )
-                            kv_topn(vm->stack, j * 2);
-                            kv_topn(vm->stack, j * 2 - 1);
+                            pylt_obj_dict_csetitem(state, castdict(ret), castobj(kv_topn(vm->stack, j * 2 - 1)), castobj(kv_topn(vm->stack, (j - 1) * 2)));
                         }
                         kv_popn(vm->stack, tmp * 2);
+                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                         break;
                 } 
                 break;
@@ -302,7 +301,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                             locals = kv_top(kv_top(vm->frames).var_tables);
                             if (castfunc(ret)->length > 0) {
                                 for (int k = tmp - 1; k >= 0; --k) {
-                                    pylt_obj_table_set(locals, castfunc(ret)->names[k], castobj(kv_pop(state->vm.stack)));
+                                    pylt_obj_table_set(locals, castobj(castfunc(ret)->names[k]), castobj(kv_pop(state->vm.stack)));
                                 }
                             }
                             i = -1;
