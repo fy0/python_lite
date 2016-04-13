@@ -261,6 +261,13 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         kv_popn(state->vm.stack, tmp);
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
                         break;
+                    case PYLT_OBJ_TYPE_TUPLE:
+                        tmp = kv_A(code->opcodes, ++i);
+                        ret = castobj(pylt_obj_tuple_new(state, tmp));
+                        memcpy(casttuple(ret)->ob_val, &kv_topn(vm->stack, tmp-1), sizeof(PyLiteObject*) * tmp);
+                        kv_popn(state->vm.stack, tmp);
+                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)ret);
+                        break;
                     case PYLT_OBJ_TYPE_DICT:
                         tmp = kv_A(code->opcodes, ++i);
                         ret = castobj(pylt_obj_dict_new(state));

@@ -128,7 +128,6 @@ PyLiteObject* parse_get_consttype(ParserState *ps) {
 
 int parse_mutabletype(ParserState *ps, int *ptimes) {
     Token *tk = &(ps->ls->token);
-    //PyLiteObject *obj, *obj2;
     int tmp = 0;
 
     switch (tk->val) {
@@ -205,7 +204,9 @@ bool parse_basetype(ParserState *ps) {
         kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
         return true;
     } else {
+        ps->info->at_parse_mutable = true;
         ret = parse_mutabletype(ps, &times);
+        ps->info->at_parse_mutable = false;
         if (ret) {
             // NEW_OBJ TYPE EXTRA
             kv_pushbc(ps->info->code->opcodes, BC_NEW_OBJ_EXTRA);
@@ -220,6 +221,7 @@ bool parse_basetype(ParserState *ps) {
 T ->    ( EXPR ) |
         not EXPR |
         BASETYPE |
+        EXPR[x]  |
         IDENT
 */
 bool parse_try_t(ParserState *ps) {
@@ -301,6 +303,20 @@ bool parse_try_t(ParserState *ps) {
         case '(':
             next(ps);
             parse_expr(ps);
+            // try tuple
+            if (tk->val == ',') {
+                next(ps);
+                num = 1;
+                while (true) {
+                    if (!parse_try_expr(ps)) break;
+                    num++;
+                    if (tk->val != ',') break;
+                    next(ps);
+                }
+                kv_pushbc(ps->info->code->opcodes, BC_NEW_OBJ_EXTRA);
+                kv_pushbc(ps->info->code->opcodes, PYLT_OBJ_TYPE_TUPLE);
+                kv_pushbc(ps->info->code->opcodes, num);
+            }
             ACCEPT(ps, ')');
             break;
         case '+': case '-':
@@ -333,8 +349,25 @@ bool parse_try_t(ParserState *ps) {
             kv_pushbc(ps->info->code->opcodes, token_to_op_val(TK_KW_NOT));
             break;
         default:
-            return parse_basetype(ps);
+            if (!parse_basetype(ps))
+                return false;
     }
+
+    // is tuple ?
+    if (!ps->info->at_parse_mutable && tk->val == ',') {
+        next(ps);
+        num = 1;
+        while (true) {
+            if (!parse_try_expr(ps)) break;
+            num++;
+            if (tk->val != ',') break;
+            next(ps);
+        }
+        kv_pushbc(ps->info->code->opcodes, BC_NEW_OBJ_EXTRA);
+        kv_pushbc(ps->info->code->opcodes, PYLT_OBJ_TYPE_TUPLE);
+        kv_pushbc(ps->info->code->opcodes, num);
+    }
+
     return true;
 }
 
@@ -915,6 +948,7 @@ void func_push(ParserState *ps) {
 
     // 初始化
     info->code = pylt_obj_code_snippet_new(ps->state);
+    info->at_parse_mutable = false;
     info->loop_depth = 0;
     info->prev = ps->info;
     ps->info = info;

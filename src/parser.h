@@ -9,6 +9,7 @@
 
 typedef struct ParserInfo {
     int loop_depth;
+    bool at_parse_mutable;
     PyLiteCodeSnippetObject *code;
     struct ParserInfo *prev;
 } ParserInfo;
