@@ -235,6 +235,7 @@ bool parse_try_t(ParserState *ps) {
             next(ps);
             switch (tk->val) {
                 case '(':
+                    // is func call
                     next(ps);
                     num = 0;
                     while (true) {
@@ -251,13 +252,6 @@ bool parse_try_t(ParserState *ps) {
                 case '[':
                     if (!parse_try_index(ps)) {
                         error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-                    }
-                    if (tk->val == '=') {
-                        kv_pop(ps->info->code->opcodes);
-                        next(ps);
-                        parse_expr(ps);
-                        kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
-                        kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
                     }
                     break;
                 default:
@@ -318,6 +312,16 @@ bool parse_try_t(ParserState *ps) {
                 return false;
     }
 
+    // is getattr/setattr ?
+    if (tk->val == '.') {
+        next(ps);
+        if (tk->val == TK_NAME) {
+            store_const(ps, castobj(tk->obj));
+            kv_pushbc(ps->info->code->opcodes, BC_GET_ATTR);
+        }
+        ACCEPT(ps, TK_NAME);
+    }
+
     // is tuple ?
     if (!ps->info->at_parse_mutable && tk->val == ',') {
         next(ps);
@@ -370,12 +374,6 @@ static _INLINE bool parse_try_expr(ParserState *ps) {
 void parse_expr(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     if (!parse_try_expr(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-    if (tk->val == '.') {
-        next(ps);
-        ACCEPT(ps, TK_NAME);
-        store_const(ps, castobj(tk->obj));
-        kv_pushbc(ps->info->code->opcodes, BC_GET_ATTR);
-    }
 }
 
 /* OR EXPR10 ... EXPR1 | ε */
@@ -605,30 +603,6 @@ void parse_block(ParserState *ps) {
     ACCEPT(ps, TK_INDENT);
     parse_stmts(ps);
     ACCEPT(ps, TK_DEDENT);
-}
-
-
-void parse_single_left_value(ParserState *ps) {
-    Token *tk = &(ps->ls->token);
-    if (tk->val == TK_NAME) {
-        next(ps);
-        if (tk->val == '[') {
-            if (!parse_try_index(ps)) {
-                error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-            }
-            if (tk->val == '=') {
-                kv_pop(ps->info->code->opcodes);
-                next(ps);
-                parse_expr(ps);
-                //kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
-                //kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-            }
-        }
-    }
-}
-
-void parse_left_value(ParserState *ps) {
-
 }
 
 void loop_control_replace(ParserState *ps, int start_pos) {
@@ -880,7 +854,11 @@ void parse_stmt(ParserState *ps) {
             kv_pushbc(ps->info->code->opcodes, BC_RET);
             break;
         default:
+            tmp = kv_size(ps->info->code->opcodes);
             parse_expr(ps);
+            if (tk->val == '=') {
+                printf("123\n");
+            }
             kv_pushbc(ps->info->code->opcodes, BC_POP);
     }
     ACCEPT(ps, TK_NEWLINE);
