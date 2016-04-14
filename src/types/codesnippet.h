@@ -7,7 +7,7 @@
 
 typedef struct PyLiteInstruction {
     uint8_t code;
-    uint8_t extarg;
+    uint8_t exarg;
     int16_t extra;
 } PyLiteInstruction;
 

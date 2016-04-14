@@ -42,10 +42,10 @@ void next(ParserState *ps) {
 1b        1b         2b
 opcode    extarg     extra
 */
-PyLiteInstruction build_ins(uint8_t opcode, uint8_t extarg, int16_t extra) {
+PyLiteInstruction build_ins(uint8_t opcode, uint8_t exarg, int16_t extra) {
     PyLiteInstruction ret = {
         .code = opcode,
-        .extarg = extarg,
+        .exarg = exarg,
         .extra = extra
     };
     return ret;
@@ -55,8 +55,8 @@ PyLiteInstruction build_ins(uint8_t opcode, uint8_t extarg, int16_t extra) {
 1b        1b         2b
 opcode    extarg     extra
 */
-void write_ins(ParserState *ps, uint8_t opcode, uint8_t extarg, int16_t extra) {
-    PyLiteInstruction ins = build_ins(opcode, extarg, extra);
+void write_ins(ParserState *ps, uint8_t opcode, uint8_t exarg, int16_t extra) {
+    PyLiteInstruction ins = build_ins(opcode, exarg, extra);
     kv_pushins(ps->info->code->opcodes, ins);
 }
 

@@ -88,60 +88,55 @@ void debug_print_const_vals(ParserState *ps) {
 }
 
 void debug_print_opcodes(ParserState *ps) {
-    int a, b;
     PyLiteCodeSnippetObject *code = ps->info->code;
+    PyLiteInstruction ins;
+    int a, b;
 
     printf("OPCODES:\n");
-    for (unsigned int i = 0; i < kv_size(code->opcodes); i++) {
+    for (unsigned int i = 0; i < kv_size(code->opcodes); ++i) {
+        ins = kv_A(code->opcodes, i);
         printf("   L%05d: ", i);
-        switch (kv_A(code->opcodes, i)) {
+        switch (ins.code) {
             case BC_OPERATOR:
-                printf("   %-15s %s\n", "OPERATOR", get_op_name(kv_A(code->opcodes, ++i)));
+                printf("   %-15s %s\n", "OPERATOR", get_op_name(ins.extra));
                 break;
             case BC_SET_VAL:
-                printf("   %-15s ", "SET_VAL");
-                debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
+                printf("   %-15s %d", "SET_VAL", ins.extra);
+                //debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;
             case BC_LOAD_VAL:
-                printf("   %-15s ", "LOAD_VAL");
-                debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
+                printf("   %-15s %d", "LOAD_VAL", ins.extra);
                 putchar('\n');
                 break;
             case BC_LOADCONST:
-                printf("   %-15s %d\n", "LOADCONST", kv_A(code->opcodes, ++i));
+                printf("   %-15s %d\n", "LOADCONST", ins.extra);
                 break;
             case BC_NEW_OBJ:
-                a = kv_A(code->opcodes, ++i);
-                printf("   %-15s %s\n", "NEW_OBJ", pylt_type_name(a));
-                break;
-            case BC_NEW_OBJ_EXTRA:
-                a = kv_A(code->opcodes, ++i);
-                b = kv_A(code->opcodes, ++i);
-                printf("   %-15s %s %d\n", "NEW_OBJ_EX", pylt_type_name(a), b);
+                printf("   %-15s %s %d\n", "NEW_OBJ", pylt_type_name(ins.exarg), ins.extra);
                 break;
             case BC_CALL:
-                printf("   %-15s %-3d  ", "CALL", kv_A(code->opcodes, ++i));
-                debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
+                printf("   %-15s %-3d  %d", "CALL", ins.extra);
+                //debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;
             case BC_RET:
                 printf("   %-15s\n", "RET");
                 break;
             case BC_TEST:
-                printf("   %-15s %-3d  ", "TEST", kv_A(code->opcodes, ++i));
+                printf("   %-15s %-3d  ", "TEST", ins.extra);
                 putchar('\n');
                 break;
             case BC_JMP:
-                printf("   %-15s %-3d  ", "JMP", kv_A(code->opcodes, ++i));
+                printf("   %-15s %-3d  ", "JMP", ins.extra);
                 putchar('\n');
                 break;
             case BC_JMP_BACK:
-                printf("   %-15s %-3d  ", "JMP_BACK", kv_A(code->opcodes, ++i));
+                printf("   %-15s %-3d  ", "JMP_BACK", ins.extra);
                 putchar('\n');
                 break;
             case BC_FORITER:
-                printf("   %-15s %-3d  ", "FORITER", kv_A(code->opcodes, ++i));
+                printf("   %-15s %-3d  ", "FORITER", ins.extra);
                 putchar('\n');
                 break;
             case BC_DEL_FORCE:
@@ -157,10 +152,10 @@ void debug_print_opcodes(ParserState *ps) {
                 printf("   %-15s\n", "SET_ITEM");
                 break;
             case BC_GET_ATTR:
-                printf("   %-15s\n", "GET_ATTR");
+                printf("   %-15s  %d\n", "GET_ATTR", ins.extra);
                 break;
             case BC_SET_ATTR:
-                printf("   %-15s\n", "SET_ATTR");
+                printf("   %-15s  %d\n", "SET_ATTR", ins.extra);
                 break;
             case BC_PRINT:
                 printf("   %-15s\n", "PRINT");
