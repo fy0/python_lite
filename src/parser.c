@@ -228,47 +228,12 @@ bool parse_try_t(ParserState *ps) {
     int num, tk_val;
     Token *tk = &(ps->ls->token);
     PyLiteObject *obj;
-    bool is_success;
 
     switch (tk->val) {
         case TK_NAME:
             obj = tk->obj;
             next(ps);
-            is_success = parse_try_index(ps);
             switch (tk->val) {
-                case '=':
-                    next(ps);
-                    if (is_success) {
-                        //printf("%d\n", kv_top(ps->info->code->opcodes));
-                        //kv_top(ps->info->code->opcodes) = BC_SET_ITEM;
-                        kv_pop(ps->info->code->opcodes);
-                    }
-                    //kv_pop(ps->info->code->opcodes);
-                    //kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
-                    parse_expr(ps);
-                    if (is_success) {
-                        kv_pushbc(ps->info->code->opcodes, BC_LOAD_VAL);
-                        kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                        kv_pushbc(ps->info->code->opcodes, BC_SET_ITEM);
-                    } else {
-                        kv_pushbc(ps->info->code->opcodes, BC_SET_VAL);
-                        kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                    }
-                    break;
-                case TK_DE_PLUS_EQ: case TK_DE_MINUS_EQ:  case TK_DE_MUL_EQ: case TK_DE_DIV_EQ:
-                case TK_DE_FLOORDIV_EQ: case TK_DE_MOD_EQ: case TK_DE_MATMUL_EQ:
-                case TK_DE_BITAND_EQ: case TK_DE_BITOR_EQ: case TK_DE_BITXOR_EQ:
-                case TK_DE_RSHIFT_EQ: case TK_DE_LSHIFT_EQ: case TK_DE_POW_EQ:
-                    kv_pushbc(ps->info->code->opcodes, BC_LOAD_VAL);
-                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                    num = token_de_to_op_val(tk->val);
-                    next(ps);
-                    parse_expr(ps);
-                    kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-                    kv_pushbc(ps->info->code->opcodes, num);
-                    kv_pushbc(ps->info->code->opcodes, BC_SET_VAL);
-                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                    break;
                 case '(':
                     next(ps);
                     num = 0;

@@ -378,8 +378,7 @@ uint32_t read_kw_or_id(LexState *ls) {
 #define lex_isidentfirst(c) ((c >= 'A' && c<= 'Z') || (c >= 'a' && c<= 'z') || (c >= '_'))
 #define lex_isidentletter(c) ((c >= 'A' && c<= 'Z') || (c >= 'a' && c<= 'z') || (c >= '0' && c<= '9') || (c == '_'))
 
-int pylt_lex_next(LexState *ls)
-{
+int pylt_lex_next(LexState *ls) {
     // read indent
     int cur_indent = ls->current_indent;
     StringStream *ss = ls->ss;
