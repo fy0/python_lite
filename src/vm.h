@@ -47,7 +47,6 @@ enum {
     OP_POW
 } OperatorValue;
 
-
 typedef struct PyLiteFrame {
     PyLiteFunctionObject *func;
     PyLiteCodeSnippetObject *code;

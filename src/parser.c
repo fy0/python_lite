@@ -38,11 +38,49 @@ void next(ParserState *ps) {
     pylt_lex_next(ps->ls);
 }
 
-void store_const(ParserState *ps, PyLiteObject *obj) {
-    kv_pushobj(ps->info->code->const_val, obj);
-    kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
-    kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
+/**
+1b        1b         2b
+opcode    extarg     extra
+*/
+PyLiteInstruction build_ins(uint8_t opcode, uint8_t extarg, int16_t extra) {
+    PyLiteInstruction ret = {
+        .code = opcode,
+        .extarg = extarg,
+        .extra = extra
+    };
+    return ret;
 }
+
+/**
+1b        1b         2b
+opcode    extarg     extra
+*/
+void write_ins(ParserState *ps, uint8_t opcode, uint8_t extarg, int16_t extra) {
+    PyLiteInstruction ins = build_ins(opcode, extarg, extra);
+    kv_pushins(ps->info->code->opcodes, ins);
+}
+
+int store_const(ParserState *ps, PyLiteObject *obj) {
+    kv_pushobj(ps->info->code->const_val, obj);
+    return kv_size(ps->info->code->const_val);
+}
+
+void sload_const(ParserState *ps, PyLiteObject *obj) {
+    write_ins(ps, BC_LOADCONST, 0, store_const(ps, obj));
+}
+
+void sload_val(ParserState *ps, PyLiteObject *variable_name) {
+    write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, variable_name));
+}
+
+void sset_val(ParserState *ps, PyLiteObject *variable_name) {
+    write_ins(ps, BC_SET_VAL, 0, store_const(ps, variable_name));
+}
+
+void sget_attr(ParserState *ps, PyLiteObject *name) {
+    write_ins(ps, BC_GET_ATTR, 0, store_const(ps, name));
+}
+
 
 void error(ParserState *ps, int code) {
     Token *tk = &(ps->ls->token);
@@ -88,22 +126,6 @@ static _INLINE
 void ACCEPT(ParserState *ps, int token) {
     if (ps->ls->token.val != token) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
     next(ps);
-}
-
-void parse_number(ParserState *ps) {
-    Token *tk = &(ps->ls->token);
-    if (tk->val == '+' || tk->val == '-') {
-        next(ps);
-    }
-}
-
-void parse_op(ParserState *ps) {
-    Token *tk = &(ps->ls->token);
-    switch (tk->val) {
-        case '+': case '-': case '*': case '/': case '%': case '@': case '>': case '<':
-        case TK_OP_FLOORDIV: case TK_OP_POW: case TK_OP_GE: case TK_OP_LE: case TK_OP_EQ :
-            next(ps);
-    }
 }
 
 PyLiteObject* parse_get_consttype(ParserState *ps) {
@@ -199,19 +221,15 @@ bool parse_basetype(ParserState *ps) {
     PyLiteObject *obj = parse_get_consttype(ps);
 
     if (obj) {
-        kv_pushobj(ps->info->code->const_val, obj);
-        kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
-        kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
+        sload_const(ps, obj);
         return true;
     } else {
         ps->info->at_parse_mutable = true;
         ret = parse_mutabletype(ps, &times);
         ps->info->at_parse_mutable = false;
         if (ret) {
-            // NEW_OBJ TYPE EXTRA
-            kv_pushbc(ps->info->code->opcodes, BC_NEW_OBJ_EXTRA);
-            kv_pushbc(ps->info->code->opcodes, ret);
-            kv_pushbc(ps->info->code->opcodes, times);
+            // NEW_OBJ TYPE SIZE
+            write_ins(ps, BC_NEW_OBJ, ret, times);
         }
         return ret != 0;
     }
@@ -244,9 +262,8 @@ bool parse_try_t(ParserState *ps) {
                         if (tk->val != ',') break;
                         else next(ps);
                     }
-                    kv_pushbc(ps->info->code->opcodes, BC_CALL);
-                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)num);
-                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                    sload_val(ps, obj);
+                    write_ins(ps, BC_CALL, 0, num);
                     ACCEPT(ps, ')');
                     break;
                 case '[':
@@ -255,8 +272,7 @@ bool parse_try_t(ParserState *ps) {
                     }
                     break;
                 default:
-                    kv_pushbc(ps->info->code->opcodes, BC_LOAD_VAL);
-                    kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
+                    sload_val(ps, obj);
             }
             break;
         case '(':
@@ -272,9 +288,7 @@ bool parse_try_t(ParserState *ps) {
                     if (tk->val != ',') break;
                     next(ps);
                 }
-                kv_pushbc(ps->info->code->opcodes, BC_NEW_OBJ_EXTRA);
-                kv_pushbc(ps->info->code->opcodes, PYLT_OBJ_TYPE_TUPLE);
-                kv_pushbc(ps->info->code->opcodes, num);
+                write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TUPLE, num);
             }
             ACCEPT(ps, ')');
             break;
@@ -282,16 +296,13 @@ bool parse_try_t(ParserState *ps) {
             tk_val = tk->val;
             next(ps);
             parse_expr10(ps);
-            //print_tk_val(tk_val);
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, tk_val == '+' ? OP_POS : OP_NEG);
+            write_ins(ps, BC_OPERATOR, 0, tk_val == '+' ? OP_POS : OP_NEG);
             break;
         case '~':
             next(ps);
             parse_expr10(ps);
             print_tk_val('~');
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, token_to_op_val('~'));
+            write_ins(ps, BC_OPERATOR, 0, OP_BITNOT);
             break;
         case TK_KW_NOT:
             next(ps);
@@ -303,9 +314,7 @@ bool parse_try_t(ParserState *ps) {
             parse_expr5(ps);
             parse_expr4(ps);
             parse_expr3(ps);
-            print_tk_val(TK_KW_NOT);
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, token_to_op_val(TK_KW_NOT));
+            write_ins(ps, BC_OPERATOR, 0, OP_NOT);
             break;
         default:
             if (!parse_basetype(ps))
@@ -316,8 +325,7 @@ bool parse_try_t(ParserState *ps) {
     if (tk->val == '.') {
         next(ps);
         if (tk->val == TK_NAME) {
-            store_const(ps, castobj(tk->obj));
-            kv_pushbc(ps->info->code->opcodes, BC_GET_ATTR);
+            sget_attr(ps, tk->obj);
         }
         ACCEPT(ps, TK_NAME);
     }
@@ -332,9 +340,7 @@ bool parse_try_t(ParserState *ps) {
             if (tk->val != ',') break;
             next(ps);
         }
-        kv_pushbc(ps->info->code->opcodes, BC_NEW_OBJ_EXTRA);
-        kv_pushbc(ps->info->code->opcodes, PYLT_OBJ_TYPE_TUPLE);
-        kv_pushbc(ps->info->code->opcodes, num);
+        write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TUPLE, num);
     }
 
     return true;
@@ -349,7 +355,7 @@ static _INLINE bool parse_try_index(ParserState *ps) {
         next(ps);
         parse_expr(ps);
         ACCEPT(ps, ']');
-        kv_pushbc(ps->info->code->opcodes, BC_GET_ITEM);
+        write_ins(ps, BC_GET_ITEM, 0, 0);
         return true;
     }
     return false;
@@ -391,9 +397,7 @@ _INLINE void parse_expr1(ParserState *ps) {
             parse_expr4(ps);
             parse_expr3(ps);
             parse_expr2(ps);
-            print_tk_val(TK_KW_OR);
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, OP_OR);
+            write_ins(ps, BC_OPERATOR, 0, OP_OR);
             parse_expr1(ps);
             break;
     }
@@ -413,9 +417,7 @@ _INLINE void parse_expr2(ParserState *ps) {
             parse_expr5(ps);
             parse_expr4(ps);
             parse_expr3(ps);
-            print_tk_val(TK_KW_AND);
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, OP_AND);
+            write_ins(ps, BC_OPERATOR, 0, OP_AND);
             parse_expr2(ps);
             break;
     }
@@ -454,9 +456,7 @@ success:
     parse_expr6(ps);
     parse_expr5(ps);
     parse_expr4(ps);
-    //printf("%s\n", pylt_vm_get_op_name(op_val));
-    kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-    kv_pushbc(ps->info->code->opcodes, op_val);
+    write_ins(ps, BC_OPERATOR, 0, op_val);
     parse_expr3(ps);
 }
 
@@ -473,9 +473,7 @@ _INLINE void parse_expr4(ParserState *ps) {
             parse_expr7(ps);
             parse_expr6(ps);
             parse_expr5(ps);
-            print_tk_val('|');
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, OP_BITOR);
+            write_ins(ps, BC_OPERATOR, 0, OP_BITOR);
             parse_expr4(ps);
             break;
     }
@@ -493,9 +491,7 @@ _INLINE void parse_expr5(ParserState *ps) {
             parse_expr8(ps);
             parse_expr7(ps);
             parse_expr6(ps);
-            print_tk_val('^');
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, OP_BITXOR);
+            write_ins(ps, BC_OPERATOR, 0, OP_BITXOR);
             parse_expr5(ps);
             break;
     }
@@ -513,9 +509,7 @@ _INLINE void parse_expr6(ParserState *ps) {
             parse_expr9(ps);
             parse_expr8(ps);
             parse_expr7(ps);
-            print_tk_val('&');
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, OP_BITAND);
+            write_ins(ps, BC_OPERATOR, 0, OP_BITAND);
             parse_expr6(ps);
             break;
     }
@@ -533,9 +527,7 @@ _INLINE void parse_expr7(ParserState *ps) {
             parse_expr10(ps);
             parse_expr9(ps);
             parse_expr8(ps);
-            print_tk_val(tk_val);
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, token_to_op_val(tk_val));
+            write_ins(ps, BC_OPERATOR, 0, tk_val);
             parse_expr7(ps);
             break;
     }
@@ -552,9 +544,7 @@ _INLINE void parse_expr8(ParserState *ps) {
             next(ps);
             parse_expr10(ps);
             parse_expr9(ps);
-            print_tk_val(tk_val);
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, token_to_op_val(tk_val));
+            write_ins(ps, BC_OPERATOR, 0, token_to_op_val(tk_val));
             parse_expr8(ps);
             break;
     }
@@ -570,9 +560,7 @@ _INLINE void parse_expr9(ParserState *ps) {
             tk_val = tk->val;
             next(ps);
             parse_expr10(ps);
-            print_tk_val(tk_val);
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, token_to_op_val(tk_val));
+            write_ins(ps, BC_OPERATOR, 0, token_to_op_val(tk_val));
             parse_expr9(ps);
             break;
     }
@@ -586,9 +574,7 @@ _INLINE bool parse_try_expr10(ParserState *ps) {
         case TK_OP_POW:
             next(ps);
             parse_t(ps);
-            print_tk_val(TK_OP_POW);
-            kv_pushbc(ps->info->code->opcodes, BC_OPERATOR);
-            kv_pushbc(ps->info->code->opcodes, OP_POW);
+            write_ins(ps, BC_OPERATOR, 0, OP_POW);
             break;
     }
     return true;
@@ -606,27 +592,22 @@ void parse_block(ParserState *ps) {
 }
 
 void loop_control_replace(ParserState *ps, int start_pos) {
-    for (unsigned int i = start_pos; i < kv_size(ps->info->code->opcodes);) {
-        switch (kv_A(ps->info->code->opcodes, i)) {
-            case BC_NEW_OBJ_EXTRA:i += 3; break;
-            case BC_POP:
-            case BC_PRINT:
-            case BC_GET_ITEM:
-            case BC_DEL_FORCE:
-                i += 1; break;
+    PyLiteInstruction ins;
+    for (unsigned int i = start_pos; i < kv_size(ps->info->code->opcodes); ++i) {
+        ins = kv_A(ps->info->code->opcodes, i);
+        switch (ins.code) {
             case BC_FAKE_BREAK:
-                if (kv_A(ps->info->code->opcodes, i + 1) == ps->info->loop_depth + 1) {
-                    kv_A(ps->info->code->opcodes, i) = BC_JMP;
-                    kv_A(ps->info->code->opcodes, i + 1) = kv_size(ps->info->code->opcodes) - i;
+                if (ins.extra == ps->info->loop_depth + 1) {
+                    ins.code = BC_JMP;
+                    ins.extra = kv_size(ps->info->code->opcodes) - i;
                 }
                 break;
             case BC_FAKE_CONTINUE:
-                if (kv_A(ps->info->code->opcodes, i + 1) == ps->info->loop_depth + 1) {
-                    kv_A(ps->info->code->opcodes, i) = BC_JMP;
-                    kv_A(ps->info->code->opcodes, i + 1) = kv_size(ps->info->code->opcodes) - i - 2;
+                if (ins.extra == ps->info->loop_depth + 1) {
+                    ins.code = BC_JMP;
+                    ins.extra = kv_size(ps->info->code->opcodes) - i - 2;
                 }
                 break;
-            default: i += 2; break;
         }
     }
 }
@@ -661,29 +642,18 @@ void parse_func(ParserState *ps) {
     ACCEPT(ps, TK_INDENT);
     parse_stmts(ps);
     ACCEPT(ps, TK_DEDENT);
-    kv_pushobj(ps->info->code->const_val, castobj(pylt_obj_none_new(ps->state)));
-    kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
-    kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
-    kv_pushbc(ps->info->code->opcodes, BC_RET);
+    sload_const(ps, pylt_obj_none_new(ps->state));
+    write_ins(ps, BC_RET, 0, 0);
     info = func_pop(ps);
 
     // name
-    kv_pushobj(ps->info->code->const_val, func_name);
-    kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
-    kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
-
+    sload_const(ps, func_name);
     // code
-    kv_pushobj(ps->info->code->const_val, castobj(info->code));
-    kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
-    kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
-
+    sload_const(ps, castobj(info->code));
     // params
-    kv_pushobj(ps->info->code->const_val, castobj(lst));
-    kv_pushbc(ps->info->code->opcodes, BC_LOADCONST);
-    kv_pushbc(ps->info->code->opcodes, kv_size(ps->info->code->const_val));
+    sload_const(ps, castobj(lst));
 
-    kv_pushbc(ps->info->code->opcodes, BC_NEW_OBJ);
-    kv_pushbc(ps->info->code->opcodes, PYLT_OBJ_TYPE_FUNCTION);
+    write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_FUNCTION, 0);
 }
 
 void parse_stmt(ParserState *ps) {
@@ -697,8 +667,8 @@ void parse_stmt(ParserState *ps) {
             next(ps);
             parse_expr(ps);
             ACCEPT(ps, ':');
-            kv_pushbc(ps->info->code->opcodes, BC_TEST);
-            kv_pushbc(ps->info->code->opcodes, 0);
+            // test 0 X
+            write_ins(ps, BC_TEST, 0, 0);
             tmp = tmp3 = kv_size(ps->info->code->opcodes);
             if (tk->val == TK_NEWLINE) {
                 next(ps);
@@ -706,23 +676,21 @@ void parse_stmt(ParserState *ps) {
             } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
             // TODO: stmt
 
-            kv_A(ps->info->code->opcodes, tmp - 1) = kv_size(ps->info->code->opcodes) - tmp;
+            kv_A(ps->info->code->opcodes, tmp - 1).extra = kv_size(ps->info->code->opcodes) - tmp;
 
             tmp2 = 0;
             while (tk->val == TK_KW_ELIF) {
                 next(ps);
 
-                // jmp X
-                kv_A(ps->info->code->opcodes, tmp - 1) += 2;
-                kv_pushbc(ps->info->code->opcodes, BC_JMP);
-                kv_pushbc(ps->info->code->opcodes, 0);
+                // jmp 0 X
+                kv_A(ps->info->code->opcodes, tmp - 1).extra += 1;
+                write_ins(ps, BC_JMP, 0, 0);
                 tmp2 = kv_size(ps->info->code->opcodes);
 
                 parse_expr(ps);
                 ACCEPT(ps, ':');
-                // test X
-                kv_pushbc(ps->info->code->opcodes, BC_TEST);
-                kv_pushbc(ps->info->code->opcodes, 0);
+                // test 0 X
+                write_ins(ps, BC_TEST, 0, 0);
                 tmp = kv_size(ps->info->code->opcodes);
 
                 if (tk->val == TK_NEWLINE) {
@@ -731,18 +699,17 @@ void parse_stmt(ParserState *ps) {
                 } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 
                 // write X for jmp X
-                kv_A(ps->info->code->opcodes, tmp2 - 1) = kv_size(ps->info->code->opcodes) - tmp2 + 2;
+                kv_A(ps->info->code->opcodes, tmp2 - 1).extra = kv_size(ps->info->code->opcodes) - tmp2 + 1;
                 // write X for test X
-                kv_A(ps->info->code->opcodes, tmp - 1) = kv_size(ps->info->code->opcodes) - tmp;
+                kv_A(ps->info->code->opcodes, tmp - 1).extra = kv_size(ps->info->code->opcodes) - tmp;
             }
 
             if (tk->val == TK_KW_ELSE) {
                 next(ps);
                 ACCEPT(ps, ':');
-                kv_A(ps->info->code->opcodes, tmp - 1) += 2;
-                // jmp X
-                kv_pushbc(ps->info->code->opcodes, BC_JMP);
-                kv_pushbc(ps->info->code->opcodes, 0);
+                kv_A(ps->info->code->opcodes, tmp - 1).extra += 1;
+                // jmp 0 X
+                write_ins(ps, BC_JMP, 0, 0);
                 tmp = kv_size(ps->info->code->opcodes);
 
                 if (tk->val == TK_NEWLINE) {
@@ -751,24 +718,24 @@ void parse_stmt(ParserState *ps) {
                 } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 
                 // write X for jmp X
-                kv_A(ps->info->code->opcodes, tmp - 1) = kv_size(ps->info->code->opcodes) - tmp;
+                kv_A(ps->info->code->opcodes, tmp - 1).extra = kv_size(ps->info->code->opcodes) - tmp;
             } else {
                 // fix for last elif
                 if (tmp2) {
-                    kv_A(ps->info->code->opcodes, tmp - 1) = kv_size(ps->info->code->opcodes) - tmp;
+                    kv_A(ps->info->code->opcodes, tmp - 1).extra = kv_size(ps->info->code->opcodes) - tmp;
                 }
             }
 
             // new code pos
             final_pos = kv_size(ps->info->code->opcodes);
             // tmp3 <- pos of first jmp (if exists)
-            tmp3 += kv_A(ps->info->code->opcodes, tmp3 - 1);
+            tmp3 += kv_A(ps->info->code->opcodes, tmp3 - 1).extra;
 
             // change every jmp point
             while (tmp3 != final_pos) {
                 // tmp2 <- pos of next jmp (if exists) or block end
-                tmp2 = tmp3 + kv_A(ps->info->code->opcodes, tmp3 - 1);
-                kv_A(ps->info->code->opcodes, tmp3 - 1) = final_pos - tmp3;
+                tmp2 = tmp3 + kv_A(ps->info->code->opcodes, tmp3 - 1).extra;
+                kv_A(ps->info->code->opcodes, tmp3 - 1).extra = final_pos - tmp3;
                 tmp3 = tmp2;
             }
             return;
@@ -778,8 +745,7 @@ void parse_stmt(ParserState *ps) {
             parse_expr(ps);
             ACCEPT(ps, ':');
 
-            kv_pushbc(ps->info->code->opcodes, BC_TEST);
-            kv_pushbc(ps->info->code->opcodes, 0);
+            write_ins(ps, BC_TEST, 0, 0);
             tmp2 = kv_size(ps->info->code->opcodes);
 
             if (tk->val == TK_NEWLINE) {
@@ -790,25 +756,18 @@ void parse_stmt(ParserState *ps) {
             } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
             loop_control_replace(ps, tmp2);
 
-            kv_pushbc(ps->info->code->opcodes, BC_JMP_BACK);
-            kv_pushbc(ps->info->code->opcodes, (kv_size(ps->info->code->opcodes) - tmp + 1));
-            kv_A(ps->info->code->opcodes, tmp2 - 1) = kv_size(ps->info->code->opcodes) - tmp2;
+            write_ins(ps, BC_JMP_BACK, 0, (kv_size(ps->info->code->opcodes) - tmp + 1));
+            kv_A(ps->info->code->opcodes, tmp2 - 1).extra = kv_size(ps->info->code->opcodes) - tmp2;
             return;
         case TK_KW_BREAK:
             next(ps);
             if (ps->info->loop_depth == 0) error(ps, PYLT_ERR_PARSER_BREAK_OUTSIDE_LOOP);
-            else {
-                kv_pushbc(ps->info->code->opcodes, BC_FAKE_BREAK);
-                kv_pushbc(ps->info->code->opcodes, ps->info->loop_depth);
-            }
+            else write_ins(ps, BC_FAKE_BREAK, 0, ps->info->loop_depth);
             break;
         case TK_KW_CONTINUE:
             next(ps);
             if (ps->info->loop_depth == 0) error(ps, PYLT_ERR_PARSER_CONTINUE_OUTSIDE_LOOP);
-            else {
-                kv_pushbc(ps->info->code->opcodes, BC_FAKE_CONTINUE);
-                kv_pushbc(ps->info->code->opcodes, ps->info->loop_depth);
-            }
+            else write_ins(ps, BC_FAKE_CONTINUE, 0, ps->info->loop_depth);
             break;
         case TK_KW_FOR:
             next(ps);
@@ -818,14 +777,13 @@ void parse_stmt(ParserState *ps) {
                 ACCEPT(ps, TK_KW_IN);
                 parse_expr(ps);
                 ACCEPT(ps, ':');
-                kv_pushbc(ps->info->code->opcodes, BC_NEW_OBJ);
-                kv_pushbc(ps->info->code->opcodes, PYLT_OBJ_TYPE_ITER);
+                write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_ITER, 0);
                 tmp = kv_size(ps->info->code->opcodes);
-                kv_pushbc(ps->info->code->opcodes, BC_FORITER);
-                kv_pushbc(ps->info->code->opcodes, 0);
-                kv_pushbc(ps->info->code->opcodes, BC_SET_VAL);
-                kv_pushbc(ps->info->code->opcodes, (uintptr_t)obj);
-                kv_pushbc(ps->info->code->opcodes, BC_POP);
+
+                // for X
+                write_ins(ps, BC_FORITER, 0, 0);
+                sset_val(ps, obj);
+                write_ins(ps, BC_POP, 0, 0);
 
                 ++ps->info->loop_depth;
                 ACCEPT(ps, TK_NEWLINE);
@@ -833,11 +791,10 @@ void parse_stmt(ParserState *ps) {
                 --ps->info->loop_depth;
                 loop_control_replace(ps, tmp);
 
-                kv_A(ps->info->code->opcodes, tmp + 1) = kv_size(ps->info->code->opcodes) - tmp + 1;
-                kv_pushbc(ps->info->code->opcodes, BC_JMP_BACK);
-                kv_pushbc(ps->info->code->opcodes, (kv_size(ps->info->code->opcodes) - tmp + 1));
+                kv_A(ps->info->code->opcodes, tmp + 1).extra = kv_size(ps->info->code->opcodes) - tmp + 1;
+                write_ins(ps, BC_JMP_BACK, 0, kv_size(ps->info->code->opcodes) - tmp + 1);
 
-                kv_pushbc(ps->info->code->opcodes, BC_DEL_FORCE);
+                write_ins(ps, BC_DEL_FORCE, 0, 0);
             } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
             return;
         case TK_KW_PASS:
@@ -849,9 +806,9 @@ void parse_stmt(ParserState *ps) {
         case TK_KW_RETURN:
             next(ps);
             if (!parse_try_expr(ps)) {
-                store_const(ps, castobj(pylt_obj_none_new(ps->state)));
+                sload_const(ps, castobj(pylt_obj_none_new(ps->state)));
             }
-            kv_pushbc(ps->info->code->opcodes, BC_RET);
+            write_ins(ps, BC_RET, 0, 0);
             break;
         default:
             tmp = kv_size(ps->info->code->opcodes);
@@ -859,7 +816,7 @@ void parse_stmt(ParserState *ps) {
             if (tk->val == '=') {
                 printf("123\n");
             }
-            kv_pushbc(ps->info->code->opcodes, BC_POP);
+            write_ins(ps, BC_POP, 0, 0);
     }
     ACCEPT(ps, TK_NEWLINE);
 }
@@ -874,8 +831,8 @@ void parse(ParserState *ps) {
     next(ps);
     //parse_expr(ps);
     parse_stmts(ps);
-    kv_pushbc(ps->info->code->opcodes, BC_PRINT);
-    kv_pushbc(ps->info->code->opcodes, BC_HALT);
+    write_ins(ps, BC_PRINT, 0, 0);
+    write_ins(ps, BC_HALT, 0, 0);
 }
 
 void func_push(ParserState *ps) {

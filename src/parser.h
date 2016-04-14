@@ -23,7 +23,7 @@ typedef struct ParserState {
 } ParserState;
  
 #define kv_pushobj(v, x) kv_push(PyLiteObject*, (v), (x))
-#define kv_pushbc(v, x) kv_push(size_t, (v), (x))
+#define kv_pushins(v, x) kv_push(PyLiteInstruction, (v), (x))
 
 void parse(ParserState *ps);
 void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls);
