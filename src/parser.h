@@ -20,6 +20,14 @@ typedef struct ParserState {
 
     ParserInfo *info;
     ParserInfo *info_used;
+
+    struct {
+        bool enable;
+        bool can_be_left_val;
+        pl_int_t startcode;
+        pl_int_t expr_level;
+        kvec_t(PyLiteInstruction) bc_cache;
+    } lval_check;
 } ParserState;
  
 #define kv_pushobj(v, x) kv_push(PyLiteObject*, (v), (x))

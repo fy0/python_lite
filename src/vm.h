@@ -29,6 +29,10 @@ enum {
 
     BC_FAKE_BREAK,     // 伪指令，break
     BC_FAKE_CONTINUE,  // 伪指令，continue
+
+    BC_GET_ITEM_EX,    // 取下标
+    BC_LOAD_VAL_EX,    // 载入变量
+    BC_GET_ATTR_EX,    // 取属性
 };
 
 enum {

@@ -346,6 +346,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 kv_pop(state->vm.stack);
                 break;
             case BC_GET_ITEM:
+            case BC_GET_ITEM_EX:
                 // GET_ITEM     0       0
                 tb = castobj(kv_pop(state->vm.stack));
                 ta = castobj(kv_pop(state->vm.stack));
@@ -370,6 +371,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 }
                 break;
             case BC_GET_ATTR:
+            case BC_GET_ATTR_EX:
                 break;
             case BC_PRINT:
                 if (kv_size(state->vm.stack) != 0) {

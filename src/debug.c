@@ -108,6 +108,10 @@ void debug_print_opcodes(ParserState *ps) {
                 printf("   %-15s %d", "LOAD_VAL", ins.extra);
                 putchar('\n');
                 break;
+            case BC_LOAD_VAL_EX:
+                printf("   %-15s %d", "LOAD_VAL_EX", ins.extra);
+                putchar('\n');
+                break;
             case BC_LOADCONST:
                 printf("   %-15s %d\n", "LOADCONST", ins.extra);
                 break;
@@ -147,11 +151,17 @@ void debug_print_opcodes(ParserState *ps) {
             case BC_GET_ITEM:
                 printf("   %-15s\n", "GET_ITEM");
                 break;
+            case BC_GET_ITEM_EX:
+                printf("   %-15s\n", "GET_ITEM_EX");
+                break;
             case BC_SET_ITEM:
                 printf("   %-15s\n", "SET_ITEM");
                 break;
             case BC_GET_ATTR:
-                printf("   %-15s  %d\n", "GET_ATTR", ins.extra);
+                printf("   %-15s %d\n", "GET_ATTR", ins.extra);
+                break;
+            case BC_GET_ATTR_EX:
+                printf("   %-15s %d\n", "GET_ATTR_EX", ins.extra);
                 break;
             case BC_SET_ATTR:
                 printf("   %-15s  %d\n", "SET_ATTR", ins.extra);

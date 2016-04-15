@@ -24,12 +24,14 @@ void parse_expr7(ParserState *ps);
 void parse_expr8(ParserState *ps);
 void parse_expr9(ParserState *ps);
 void parse_expr10(ParserState *ps);
+void parse_expr_and_valassign(ParserState *ps);
 
 bool parse_try_index(ParserState *ps);
 
 bool parse_try_t(ParserState *ps);
 bool parse_try_expr(ParserState *ps);
 bool parse_try_expr10(ParserState *ps);
+bool parse_try_expr_and_valassign(ParserState *ps);
 
 void parse_left_value(ParserState *ps);
 void parse_func(ParserState *ps);
@@ -69,16 +71,8 @@ void sload_const(ParserState *ps, PyLiteObject *obj) {
     write_ins(ps, BC_LOADCONST, 0, store_const(ps, obj));
 }
 
-void sload_val(ParserState *ps, PyLiteObject *variable_name) {
-    write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, variable_name));
-}
-
 void sset_val(ParserState *ps, PyLiteObject *variable_name) {
     write_ins(ps, BC_SET_VAL, 0, store_const(ps, variable_name));
-}
-
-void sget_attr(ParserState *ps, PyLiteObject *name) {
-    write_ins(ps, BC_GET_ATTR, 0, store_const(ps, name));
 }
 
 
@@ -262,17 +256,15 @@ bool parse_try_t(ParserState *ps) {
                         if (tk->val != ',') break;
                         else next(ps);
                     }
-                    sload_val(ps, obj);
+                    write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, obj));
                     write_ins(ps, BC_CALL, 0, num);
                     ACCEPT(ps, ')');
                     break;
-                case '[':
-                    if (!parse_try_index(ps)) {
-                        error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-                    }
-                    break;
                 default:
-                    sload_val(ps, obj);
+                    if (ps->lval_check.enable && ps->lval_check.expr_level == 1)
+                        write_ins(ps, BC_LOAD_VAL_EX, 0, store_const(ps, obj));
+                    else
+                        write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, obj));
             }
             break;
         case '(':
@@ -297,12 +289,14 @@ bool parse_try_t(ParserState *ps) {
             next(ps);
             parse_expr10(ps);
             write_ins(ps, BC_OPERATOR, 0, tk_val == '+' ? OP_POS : OP_NEG);
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val = false;
             break;
         case '~':
             next(ps);
             parse_expr10(ps);
             print_tk_val('~');
             write_ins(ps, BC_OPERATOR, 0, OP_BITNOT);
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val = false;
             break;
         case TK_KW_NOT:
             next(ps);
@@ -315,6 +309,7 @@ bool parse_try_t(ParserState *ps) {
             parse_expr4(ps);
             parse_expr3(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_NOT);
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val = false;
             break;
         default:
             if (!parse_basetype(ps))
@@ -325,7 +320,10 @@ bool parse_try_t(ParserState *ps) {
     if (tk->val == '.') {
         next(ps);
         if (tk->val == TK_NAME) {
-            sget_attr(ps, tk->obj);
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) {
+                ps->lval_check.can_be_left_val = true;
+                write_ins(ps, BC_GET_ATTR_EX, 0, store_const(ps, tk->obj));
+            } else write_ins(ps, BC_GET_ATTR, 0, store_const(ps, tk->obj));
         }
         ACCEPT(ps, TK_NAME);
     }
@@ -355,7 +353,10 @@ static _INLINE bool parse_try_index(ParserState *ps) {
         next(ps);
         parse_expr(ps);
         ACCEPT(ps, ']');
-        write_ins(ps, BC_GET_ITEM, 0, 0);
+        if (ps->lval_check.enable && ps->lval_check.expr_level == 1) {
+            write_ins(ps, BC_GET_ITEM_EX, 0, 0);
+            ps->lval_check.can_be_left_val = true;
+        } else  write_ins(ps, BC_GET_ITEM, 0, 0);
         return true;
     }
     return false;
@@ -378,8 +379,9 @@ static _INLINE bool parse_try_expr(ParserState *ps) {
 }
 
 void parse_expr(ParserState *ps) {
-    Token *tk = &(ps->ls->token);
+    ps->lval_check.expr_level++;
     if (!parse_try_expr(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+    ps->lval_check.expr_level--;
 }
 
 /* OR EXPR10 ... EXPR1 | ε */
@@ -398,6 +400,7 @@ _INLINE void parse_expr1(ParserState *ps) {
             parse_expr3(ps);
             parse_expr2(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_OR);
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
             parse_expr1(ps);
             break;
     }
@@ -418,6 +421,7 @@ _INLINE void parse_expr2(ParserState *ps) {
             parse_expr4(ps);
             parse_expr3(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_AND);
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
             parse_expr2(ps);
             break;
     }
@@ -457,6 +461,7 @@ success:
     parse_expr5(ps);
     parse_expr4(ps);
     write_ins(ps, BC_OPERATOR, 0, op_val);
+    if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
     parse_expr3(ps);
 }
 
@@ -474,6 +479,7 @@ _INLINE void parse_expr4(ParserState *ps) {
             parse_expr6(ps);
             parse_expr5(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_BITOR);
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
             parse_expr4(ps);
             break;
     }
@@ -492,6 +498,7 @@ _INLINE void parse_expr5(ParserState *ps) {
             parse_expr7(ps);
             parse_expr6(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_BITXOR);
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
             parse_expr5(ps);
             break;
     }
@@ -510,6 +517,7 @@ _INLINE void parse_expr6(ParserState *ps) {
             parse_expr8(ps);
             parse_expr7(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_BITAND);
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
             parse_expr6(ps);
             break;
     }
@@ -528,6 +536,7 @@ _INLINE void parse_expr7(ParserState *ps) {
             parse_expr9(ps);
             parse_expr8(ps);
             write_ins(ps, BC_OPERATOR, 0, tk_val);
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
             parse_expr7(ps);
             break;
     }
@@ -545,6 +554,7 @@ _INLINE void parse_expr8(ParserState *ps) {
             parse_expr10(ps);
             parse_expr9(ps);
             write_ins(ps, BC_OPERATOR, 0, token_to_op_val(tk_val));
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
             parse_expr8(ps);
             break;
     }
@@ -561,6 +571,7 @@ _INLINE void parse_expr9(ParserState *ps) {
             next(ps);
             parse_expr10(ps);
             write_ins(ps, BC_OPERATOR, 0, token_to_op_val(tk_val));
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
             parse_expr9(ps);
             break;
     }
@@ -575,6 +586,7 @@ _INLINE bool parse_try_expr10(ParserState *ps) {
             next(ps);
             parse_t(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_POW);
+            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
             break;
     }
     return true;
@@ -654,6 +666,55 @@ void parse_func(ParserState *ps) {
     sload_const(ps, castobj(lst));
 
     write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_FUNCTION, 0);
+}
+
+void parse_expr_and_valassign(ParserState *ps) {
+    pl_uint_t size;
+    PyLiteInstruction ins, last_ins = {0};
+
+    //while (true) { ACCEPT(ps, '='); parse_expr(ps); break; }
+
+    while (true) {
+        ACCEPT(ps, '=');
+        size = kv_size(ps->info->code->opcodes) - ps->lval_check.startcode;
+
+        if (ps->lval_check.bc_cache.m < size) {
+            kv_resize(PyLiteInstruction, ps->lval_check.bc_cache, size);
+        }
+
+        ps->lval_check.bc_cache.n = size;
+        memcpy(ps->lval_check.bc_cache.a, ps->info->code->opcodes.a + ps->lval_check.startcode, sizeof(PyLiteInstruction) * size);
+        kv_popn(ps->info->code->opcodes, size);
+
+        parse_expr(ps);
+
+        for (pl_uint_t i = kv_size(ps->lval_check.bc_cache) - 1; i >= 0; --i) {
+            ins = kv_A(ps->lval_check.bc_cache, i);
+            switch (ins.code) {
+                case BC_GET_ITEM_EX:
+                    ins.code = BC_SET_ITEM;
+                    break;
+                case BC_LOAD_VAL_EX:
+                    ins.code = BC_SET_VAL;
+                    break;
+                case BC_GET_ATTR_EX:
+                    ins.code = BC_SET_ATTR;
+                    break;
+            }
+            last_ins = ins;
+        }
+
+        for (pl_uint_t i = 0; i < kv_size(ps->lval_check.bc_cache); ++i) {
+            kv_pushins(ps->info->code->opcodes, kv_A(ps->lval_check.bc_cache, i));
+        }
+
+        kv_clear(ps->lval_check.bc_cache);
+        break;
+    }
+}
+
+bool parse_try_expr_and_valassign(ParserState *ps) {
+    return false;
 }
 
 void parse_stmt(ParserState *ps) {
@@ -811,11 +872,18 @@ void parse_stmt(ParserState *ps) {
             write_ins(ps, BC_RET, 0, 0);
             break;
         default:
-            tmp = kv_size(ps->info->code->opcodes);
+            ps->lval_check.enable = true;
+            ps->lval_check.can_be_left_val = true;
+            ps->lval_check.startcode = kv_size(ps->info->code->opcodes);
+
             parse_expr(ps);
-            if (tk->val == '=') {
-                printf("123\n");
+            switch (tk->val) {
+                case '=':
+                    parse_expr_and_valassign(ps);
+                    break;
             }
+
+            ps->lval_check.enable = false;
             write_ins(ps, BC_POP, 0, 0);
     }
     ACCEPT(ps, TK_NEWLINE);
@@ -869,5 +937,10 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
 
     ps->info = NULL;
     ps->info_used = NULL;
+
+    ps->lval_check.enable = false;
+    ps->lval_check.expr_level = 0;
+    kv_init(ps->lval_check.bc_cache);
+
     func_push(ps);
 }
