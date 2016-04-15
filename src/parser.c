@@ -25,8 +25,6 @@ void parse_expr8(ParserState *ps);
 void parse_expr9(ParserState *ps);
 void parse_expr10(ParserState *ps);
 
-bool parse_try_index(ParserState *ps);
-
 bool parse_try_t(ParserState *ps);
 bool parse_try_expr(ParserState *ps);
 bool parse_try_expr10(ParserState *ps);
@@ -316,18 +314,35 @@ bool parse_try_t(ParserState *ps) {
                 return false;
     }
 
-    // is getattr/setattr ?
-    if (tk->val == '.') {
-        next(ps);
-        if (tk->val == TK_NAME) {
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) {
-                ps->lval_check.can_be_left_val = true;
-                write_ins(ps, BC_GET_ATTR_EX, 0, store_const(ps, tk->obj));
-            } else write_ins(ps, BC_GET_ATTR, 0, store_const(ps, tk->obj));
+    while (true) {
+        switch (tk->val) {
+            case '.':
+                // is getattr/setattr ?
+                next(ps);
+                if (tk->val == TK_NAME) {
+                    if (ps->lval_check.enable && ps->lval_check.expr_level == 1) {
+                        ps->lval_check.can_be_left_val = true;
+                        write_ins(ps, BC_GET_ATTR_EX, 0, store_const(ps, tk->obj));
+                    } else write_ins(ps, BC_GET_ATTR, 0, store_const(ps, tk->obj));
+                }
+                ACCEPT(ps, TK_NAME);
+                break;
+            case '[':
+                // is getitem/setitem ?
+                next(ps);
+                parse_expr(ps);
+                ACCEPT(ps, ']');
+                if (ps->lval_check.enable && ps->lval_check.expr_level == 1) {
+                    write_ins(ps, BC_GET_ITEM_EX, 0, 0);
+                    ps->lval_check.can_be_left_val = true;
+                } else  write_ins(ps, BC_GET_ITEM, 0, 0);
+                break;
+            default:
+                goto _tail;
         }
-        ACCEPT(ps, TK_NAME);
     }
 
+_tail:
     // is tuple ?
     if (!ps->info->at_parse_mutable && tk->val == ',') {
         next(ps);
@@ -348,19 +363,6 @@ static _INLINE void parse_t(ParserState *ps) {
     if (!parse_try_t(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 }
 
-static _INLINE bool parse_try_index(ParserState *ps) {
-    if (ps->ls->token.val == '[') {
-        next(ps);
-        parse_expr(ps);
-        ACCEPT(ps, ']');
-        if (ps->lval_check.enable && ps->lval_check.expr_level == 1) {
-            write_ins(ps, BC_GET_ITEM_EX, 0, 0);
-            ps->lval_check.can_be_left_val = true;
-        } else  write_ins(ps, BC_GET_ITEM, 0, 0);
-        return true;
-    }
-    return false;
-}
 
 /* EXPR -> EXPR10 ... EXPR1 */
 static _INLINE bool parse_try_expr(ParserState *ps) {
@@ -374,7 +376,6 @@ static _INLINE bool parse_try_expr(ParserState *ps) {
     parse_expr3(ps);
     parse_expr2(ps);
     parse_expr1(ps);
-    parse_try_index(ps);
     return true;
 }
 
