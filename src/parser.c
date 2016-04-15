@@ -24,17 +24,15 @@ void parse_expr7(ParserState *ps);
 void parse_expr8(ParserState *ps);
 void parse_expr9(ParserState *ps);
 void parse_expr10(ParserState *ps);
-void parse_expr_and_valassign(ParserState *ps);
 
 bool parse_try_index(ParserState *ps);
 
 bool parse_try_t(ParserState *ps);
 bool parse_try_expr(ParserState *ps);
 bool parse_try_expr10(ParserState *ps);
-bool parse_try_expr_and_valassign(ParserState *ps);
 
-void parse_left_value(ParserState *ps);
 void parse_func(ParserState *ps);
+void parse_value_assign(ParserState *ps);
 
 void next(ParserState *ps) {
     pylt_lex_next(ps->ls);
@@ -668,7 +666,7 @@ void parse_func(ParserState *ps) {
     write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_FUNCTION, 0);
 }
 
-void parse_expr_and_valassign(ParserState *ps) {
+void parse_value_assign(ParserState *ps) {
     pl_uint_t size;
     PyLiteInstruction ins, last_ins = {0};
 
@@ -713,9 +711,6 @@ void parse_expr_and_valassign(ParserState *ps) {
     }
 }
 
-bool parse_try_expr_and_valassign(ParserState *ps) {
-    return false;
-}
 
 void parse_stmt(ParserState *ps) {
     Token *tk = &(ps->ls->token);
@@ -879,7 +874,7 @@ void parse_stmt(ParserState *ps) {
             parse_expr(ps);
             switch (tk->val) {
                 case '=':
-                    parse_expr_and_valassign(ps);
+                    parse_value_assign(ps);
                     break;
             }
 
