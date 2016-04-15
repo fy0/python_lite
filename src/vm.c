@@ -169,7 +169,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
         switch (ins.code) {
             case BC_LOADCONST:
                 // LOAD_CONST   0       const_id
-                kv_push(uintptr_t, state->vm.stack, const_obj(ins.extra));
+                kv_pushptr(vm->stack, const_obj(ins.extra));
                 break;
             case BC_SET_VAL:
                 // SET_VAL      0       const_id
@@ -196,7 +196,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 break;
             case BC_OPERATOR:
                 // OPERATOR     0       op
-                switch (ins.exarg) {
+                switch (ins.extra) {
                     case OP_LT: case OP_LE: case OP_GT: case OP_GE: case OP_NE: case OP_EQ:
                     case OP_BITOR: case OP_BITXOR: case OP_BITAND: case OP_LSHIFT: case OP_RSHIFT:
                     case OP_PLUS: case OP_MINUS: case OP_MUL: case OP_MATMUL: case OP_DIV: case OP_FLOORDIV: case OP_MOD: case OP_POW:
@@ -241,11 +241,11 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         tfunc->defaults = NULL;
                         tfunc->doc = NULL;
 
-                        pylt_obj_table_set(locals, ta, tfunc);
+                        pylt_obj_table_set(locals, ta, castobj(tfunc));
                         break;
                     case PYLT_OBJ_TYPE_SET:
                         tobj = castobj(pylt_obj_set_new(state));
-                        for (pl_uint_t j = 0; j < ins.extra; ++j) {
+                        for (pl_int_t j = 0; j < ins.extra; ++j) {
                             pylt_obj_set_add(state, castset(tobj), castobj(kv_pop(state->vm.stack)));
                         }
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tobj);
@@ -270,13 +270,13 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                             pylt_obj_dict_csetitem(state, castdict(tobj), castobj(kv_topn(vm->stack, j * 2 - 1)), castobj(kv_topn(vm->stack, (j - 1) * 2)));
                         }
                         kv_popn(vm->stack, ins.extra * 2);
-                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)tobj);
+                        kv_push(uintptr_t, vm->stack, (uintptr_t)tobj);
                         break;
                 }
                 break;
             case BC_CALL:
                 // BC_CALL      0       params_num
-                tobj = kv_pop(vm->stack); // 函数对象
+                tobj = castobj(kv_pop(vm->stack)); // 函数对象
 
                 // check
                 switch (func_call_check(tobj, ins.extra, &tnum)) {

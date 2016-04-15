@@ -38,7 +38,7 @@ void debug_print_obj(PyLiteObject *obj) {
             break;
         case PYLT_OBJ_TYPE_LIST:
             printf("[");
-            for (int i = 0; i < castlist(obj)->ob_size - 1; ++i) {
+            for (pl_uint_t i = 0; i < castlist(obj)->ob_size - 1; ++i) {
                 debug_print_obj(castlist(obj)->ob_val[i]);
                 printf(", ");
             }
@@ -90,7 +90,6 @@ void debug_print_const_vals(ParserState *ps) {
 void debug_print_opcodes(ParserState *ps) {
     PyLiteCodeSnippetObject *code = ps->info->code;
     PyLiteInstruction ins;
-    int a, b;
 
     printf("OPCODES:\n");
     for (unsigned int i = 0; i < kv_size(code->opcodes); ++i) {

@@ -60,6 +60,8 @@ typedef struct PyLiteVM {
 
 struct PyLiteState;
 
+#define kv_pushptr(v, x) kv_push(uintptr_t, (v), (uintptr_t)(x))
+
 void pylt_vm_call_func(PyLiteState* state, PyLiteFunctionObject *func);
 
 const char* pylt_vm_get_op_name(int op);

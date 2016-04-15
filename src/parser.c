@@ -642,7 +642,7 @@ void parse_func(ParserState *ps) {
     ACCEPT(ps, TK_INDENT);
     parse_stmts(ps);
     ACCEPT(ps, TK_DEDENT);
-    sload_const(ps, pylt_obj_none_new(ps->state));
+    sload_const(ps, castobj(pylt_obj_none_new(ps->state)));
     write_ins(ps, BC_RET, 0, 0);
     info = func_pop(ps);
 
