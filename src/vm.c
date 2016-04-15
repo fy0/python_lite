@@ -202,7 +202,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                     case OP_PLUS: case OP_MINUS: case OP_MUL: case OP_MATMUL: case OP_DIV: case OP_FLOORDIV: case OP_MOD: case OP_POW:
                         tb = castobj(kv_pop(state->vm.stack));
                         ta = castobj(kv_pop(state->vm.stack));
-                        tret = pylt_obj_op_binary(state, ins.exarg, ta, tb);
+                        tret = pylt_obj_op_binary(state, ins.extra, ta, tb);
                         if (!tret) {
                             printf("TypeError: unsupported operand type(s) for %s: '%s' and '%s'\n", pylt_vm_get_op_name(ins.exarg), pylt_obj_type_name_cstr(state, ta), pylt_obj_type_name_cstr(state, tb));
                             return;
