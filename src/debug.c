@@ -81,7 +81,7 @@ void debug_print_const_vals(ParserState *ps) {
     printf("CONST VALS:\n");
     for (unsigned int i = 0; i < kv_size(ps->info->code->const_val); i++) {
         PyLiteObject *obj = kv_A(ps->info->code->const_val, i);
-        printf("   %-4d %-8s ", i + 1, pylt_type_name(obj->ob_type));
+        printf("   %-4d %-8s ", i, pylt_type_name(obj->ob_type));
         debug_print_obj(obj);
         putchar('\n');
     }
@@ -164,7 +164,7 @@ void debug_print_opcodes(ParserState *ps) {
                 printf("   %-15s %d\n", "GET_ATTR_EX", ins.extra);
                 break;
             case BC_SET_ATTR:
-                printf("   %-15s  %d\n", "SET_ATTR", ins.extra);
+                printf("   %-15s %d\n", "SET_ATTR", ins.extra);
                 break;
             case BC_PRINT:
                 printf("   %-15s\n", "PRINT");

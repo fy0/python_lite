@@ -44,5 +44,7 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls);
 #define PYLT_ERR_PARSER_BREAK_OUTSIDE_LOOP -3
 // SyntaxError: 'continue' not properly in loop
 #define PYLT_ERR_PARSER_CONTINUE_OUTSIDE_LOOP -4
+// SyntaxError: can't assign to literal
+#define PYLT_ERR_PARSER_CANT_ASSIGN_TO_LITERAL -5
 
 #endif

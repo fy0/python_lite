@@ -95,6 +95,9 @@ void error(ParserState *ps, int code) {
         case PYLT_ERR_PARSER_CONTINUE_OUTSIDE_LOOP:
             printf("SyntaxError: 'continue' not properly in loop\n");
             break;
+        case PYLT_ERR_PARSER_CANT_ASSIGN_TO_LITERAL:
+            printf("SyntaxError: can't assign to literal\n");
+            break;
     }
     system("pause");
     exit(-1);
@@ -292,7 +295,6 @@ bool parse_try_t(ParserState *ps) {
         case '~':
             next(ps);
             parse_expr10(ps);
-            print_tk_val('~');
             write_ins(ps, BC_OPERATOR, 0, OP_BITNOT);
             if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val = false;
             break;
@@ -671,9 +673,18 @@ void parse_value_assign(ParserState *ps) {
     PyLiteInstruction ins, last_ins = {0};
 
     //while (true) { ACCEPT(ps, '='); parse_expr(ps); break; }
+    //return;
+
+    if (ps->ls->token.val != '=')
+        error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 
     while (true) {
-        ACCEPT(ps, '=');
+        if (ps->ls->token.val != '=') break;
+        next(ps);
+
+        if (!ps->lval_check.can_be_left_val)
+            error(ps, PYLT_ERR_PARSER_CANT_ASSIGN_TO_LITERAL);
+
         size = kv_size(ps->info->code->opcodes) - ps->lval_check.startcode;
 
         if (ps->lval_check.bc_cache.m < size) {
@@ -686,20 +697,32 @@ void parse_value_assign(ParserState *ps) {
 
         parse_expr(ps);
 
-        for (pl_uint_t i = kv_size(ps->lval_check.bc_cache) - 1; i >= 0; --i) {
+        for (pl_int_t i = kv_size(ps->lval_check.bc_cache) - 1; i >= 0; ) {
             ins = kv_A(ps->lval_check.bc_cache, i);
             switch (ins.code) {
                 case BC_GET_ITEM_EX:
-                    ins.code = BC_SET_ITEM;
+                case BC_GET_ATTR_EX:
+                    kv_A(ps->lval_check.bc_cache, i).code = (ins.code == BC_GET_ITEM_EX) ? BC_SET_ITEM : BC_SET_ATTR;
+                    i -= 1;
+                    while (i >= 0) {
+                        ins = kv_A(ps->lval_check.bc_cache, i);
+                        /*if ((ins.code != BC_GET_ITEM_EX) && (ins.code != BC_GET_ATTR_EX) && (ins.code != BC_LOAD_VAL_EX)) {
+                            break;
+                        }*/
+                        if (ins.code == BC_LOAD_VAL_EX) {
+                            kv_A(ps->lval_check.bc_cache, i).code = BC_LOAD_VAL;
+                            i -= 1;
+                            break;
+                        }
+                        i -= 1;
+                    }
                     break;
                 case BC_LOAD_VAL_EX:
-                    ins.code = BC_SET_VAL;
+                    kv_A(ps->lval_check.bc_cache, i--).code = BC_SET_VAL;
                     break;
-                case BC_GET_ATTR_EX:
-                    ins.code = BC_SET_ATTR;
-                    break;
+                default:
+                    i--;
             }
-            last_ins = ins;
         }
 
         for (pl_uint_t i = 0; i < kv_size(ps->lval_check.bc_cache); ++i) {
@@ -707,7 +730,6 @@ void parse_value_assign(ParserState *ps) {
         }
 
         kv_clear(ps->lval_check.bc_cache);
-        break;
     }
 }
 
