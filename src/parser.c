@@ -154,6 +154,7 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
             } else {
                 tmp = 0;
                 while (true) {
+                    if (tk->val == ']') break;
                     parse_expr(ps);
                     tmp++;
                     if (tk->val == ',') next(ps);
