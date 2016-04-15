@@ -176,6 +176,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 pylt_obj_table_set(locals, const_obj(ins.extra), castobj(kv_top(state->vm.stack)));
                 break;
             case BC_LOAD_VAL:
+            case BC_LOAD_VAL_EX:
                 // LOAD_VAL     0       const_id
                 tobj = pylt_obj_table_get(locals, const_obj(ins.extra));
 
@@ -276,7 +277,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 break;
             case BC_CALL:
                 // BC_CALL      0       params_num
-                tobj = castobj(kv_pop(vm->stack)); // 函数对象
+                tobj = castobj(kv_topn(vm->stack, ins.extra)); // 函数对象
 
                 // check
                 switch (func_call_check(tobj, ins.extra, &tnum)) {
@@ -306,7 +307,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                     i = -1;
                 } else if (tobj->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
                     tobj = castcfunc(tobj)->func(state, ins.extra, (PyLiteObject**)(&kv_topn(vm->stack, ins.extra - 1)));
-                    kv_popn(vm->stack, ins.exarg);
+                    kv_popn(vm->stack, ins.extra+1);
                     kv_push(uintptr_t, state->vm.stack, (uintptr_t)pylt_obj_none_new(state));
                 }
                 break;

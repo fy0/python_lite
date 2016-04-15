@@ -119,7 +119,7 @@ void debug_print_opcodes(ParserState *ps) {
                 printf("   %-15s %s %d\n", "NEW_OBJ", pylt_type_name(ins.exarg), ins.extra);
                 break;
             case BC_CALL:
-                printf("   %-15s %-3d  %d", "CALL", ins.extra);
+                printf("   %-15s %d", "CALL", ins.extra);
                 //debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;

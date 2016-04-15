@@ -246,20 +246,6 @@ bool parse_try_t(ParserState *ps) {
             obj = tk->obj;
             next(ps);
             switch (tk->val) {
-                case '(':
-                    // is func call
-                    next(ps);
-                    num = 0;
-                    while (true) {
-                        if (!parse_try_expr(ps)) break;
-                        num++;
-                        if (tk->val != ',') break;
-                        else next(ps);
-                    }
-                    write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, obj));
-                    write_ins(ps, BC_CALL, 0, num);
-                    ACCEPT(ps, ')');
-                    break;
                 default:
                     if (ps->lval_check.enable && ps->lval_check.expr_level == 1)
                         write_ins(ps, BC_LOAD_VAL_EX, 0, store_const(ps, obj));
@@ -337,6 +323,19 @@ bool parse_try_t(ParserState *ps) {
                     write_ins(ps, BC_GET_ITEM_EX, 0, 0);
                     ps->lval_check.can_be_left_val = true;
                 } else  write_ins(ps, BC_GET_ITEM, 0, 0);
+                break;
+            case '(':
+                // is func call ?
+                next(ps);
+                num = 0;
+                while (true) {
+                    if (!parse_try_expr(ps)) break;
+                    num++;
+                    if (tk->val != ',') break;
+                    else next(ps);
+                }
+                write_ins(ps, BC_CALL, 0, num);
+                ACCEPT(ps, ')');
                 break;
             default:
                 goto _tail;
