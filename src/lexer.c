@@ -58,7 +58,7 @@ void pylt_lex_init(PyLiteState* state, LexState *ls, StringStream *ss) {
     ls->le.bytes.buf = pylt_realloc(NULL, PYLT_LEX_STR_DEFAULT_BUFFER_SIZE);
     ls->le.bytes.size = PYLT_LEX_STR_DEFAULT_BUFFER_SIZE;
 
-    ls->le.str.buf = pylt_realloc(NULL, PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE);
+    ls->le.str.buf = pylt_realloc(NULL, PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE * sizeof(uint32_t));
     ls->le.str.size = PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE;
 }
 
@@ -144,7 +144,7 @@ _INLINE static bool bytes_next(LexState *ls, uint32_t chr) {
 
 _INLINE static bool str_next(LexState *ls, uint32_t chr) {
     if (ls->le.str.pos + 1 == ls->le.str.size) {
-        ls->le.str.buf = pylt_realloc(ls->le.str.buf, ls->le.str.size += PYLT_LEX_STR_DEFAULT_BUFFER_INC_STEP);
+        ls->le.str.buf = pylt_realloc(ls->le.str.buf, (ls->le.str.size += PYLT_LEX_STR_DEFAULT_BUFFER_INC_STEP) * sizeof(uint32_t));
     }
     ls->le.str.buf[ls->le.str.pos++] = chr;
     return true;

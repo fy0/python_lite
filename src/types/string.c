@@ -181,7 +181,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, uint32_t *str, int size, b
         }
         obj->ob_size = pos;
         obj->ob_val[pos] = '\0';
-        pylt_realloc(obj->ob_val, sizeof(uint32_t)*pos + 1);
+        obj->ob_val = pylt_realloc(obj->ob_val, sizeof(uint32_t) * (size + 1));
     }
     return hash_and_check_cache(state, obj);
 }
