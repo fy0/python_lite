@@ -170,6 +170,7 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
             next(ps);
             if (tk->val == '}') {
                 if (ptimes) *ptimes = 0;
+                next(ps);
                 return PYLT_OBJ_TYPE_DICT;
             }
 

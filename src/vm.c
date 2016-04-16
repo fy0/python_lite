@@ -374,6 +374,23 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 break;
             case BC_GET_ATTR:
             case BC_GET_ATTR_EX:
+                // GET_ITEM     0       const_id
+                tobj = castobj(kv_pop(state->vm.stack));
+                if (!pylt_obj_getitem(state, tobj, const_obj(ins.extra))) {
+                    printf("IndexError: list assignment index out of range\n");
+                    return;
+                }
+                kv_pushptr(vm->stack, tb);
+                break;
+            case BC_SET_ATTR:
+                // SET_ITEM     0       const_id
+                tobj = castobj(kv_pop(state->vm.stack));
+                tb = castobj(kv_pop(state->vm.stack));
+                if (!pylt_obj_setitem(state, tobj, const_obj(ins.extra), tb)) {
+                    printf("IndexError: list assignment index out of range\n");
+                    return;
+                }
+                kv_pushptr(vm->stack, tb);
                 break;
             case BC_PRINT:
                 if (kv_size(state->vm.stack) != 0) {

@@ -316,6 +316,9 @@ pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject*
                 return pylt_obj_list_csetitem(state, castlist(self), castint(key)->ob_val, value);
             }
             break;
+        case PYLT_OBJ_TYPE_DICT:
+            pylt_obj_dict_csetitem(state, castdict(self), key, value);
+            return true;
     }
     return false;
 }
