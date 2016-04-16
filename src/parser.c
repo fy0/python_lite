@@ -67,10 +67,6 @@ void sload_const(ParserState *ps, PyLiteObject *obj) {
     write_ins(ps, BC_LOADCONST, 0, store_const(ps, obj));
 }
 
-void sset_val(ParserState *ps, PyLiteObject *variable_name) {
-    write_ins(ps, BC_SET_VAL, 0, store_const(ps, variable_name));
-}
-
 
 void error(ParserState *ps, int code) {
     Token *tk = &(ps->ls->token);
@@ -614,12 +610,14 @@ void loop_control_replace(ParserState *ps, int start_pos) {
                 if (ins.extra == ps->info->loop_depth + 1) {
                     ins.code = BC_JMP;
                     ins.extra = kv_size(ps->info->code->opcodes) - i;
+                    kv_A(ps->info->code->opcodes, i) = ins;
                 }
                 break;
             case BC_FAKE_CONTINUE:
                 if (ins.extra == ps->info->loop_depth + 1) {
                     ins.code = BC_JMP;
-                    ins.extra = kv_size(ps->info->code->opcodes) - i - 2;
+                    ins.extra = kv_size(ps->info->code->opcodes) - i - 1;
+                    kv_A(ps->info->code->opcodes, i) = ins;
                 }
                 break;
         }
@@ -825,8 +823,8 @@ void parse_stmt(ParserState *ps) {
             parse_expr(ps);
             ACCEPT(ps, ':');
 
-            write_ins(ps, BC_TEST, 0, 0);
             tmp2 = kv_size(ps->info->code->opcodes);
+            write_ins(ps, BC_TEST, 0, 0);
 
             if (tk->val == TK_NEWLINE) {
                 next(ps);
@@ -837,7 +835,7 @@ void parse_stmt(ParserState *ps) {
             loop_control_replace(ps, tmp2);
 
             write_ins(ps, BC_JMP_BACK, 0, (kv_size(ps->info->code->opcodes) - tmp + 1));
-            kv_A(ps->info->code->opcodes, tmp2 - 1).extra = kv_size(ps->info->code->opcodes) - tmp2;
+            kv_A(ps->info->code->opcodes, tmp2).extra = kv_size(ps->info->code->opcodes) - tmp2;
             return;
         case TK_KW_BREAK:
             next(ps);
@@ -862,7 +860,7 @@ void parse_stmt(ParserState *ps) {
 
                 // for X
                 write_ins(ps, BC_FORITER, 0, 0);
-                sset_val(ps, obj);
+                write_ins(ps, BC_SET_VAL, 0, store_const(ps, obj));
                 write_ins(ps, BC_POP, 0, 0);
 
                 ++ps->info->loop_depth;
@@ -871,7 +869,7 @@ void parse_stmt(ParserState *ps) {
                 --ps->info->loop_depth;
                 loop_control_replace(ps, tmp);
 
-                kv_A(ps->info->code->opcodes, tmp + 1).extra = kv_size(ps->info->code->opcodes) - tmp + 1;
+                kv_A(ps->info->code->opcodes, tmp).extra = kv_size(ps->info->code->opcodes) - tmp + 1;
                 write_ins(ps, BC_JMP_BACK, 0, kv_size(ps->info->code->opcodes) - tmp + 1);
 
                 write_ins(ps, BC_DEL_FORCE, 0, 0);

@@ -42,5 +42,5 @@ pl_uint32_t pylt_obj_bool_chash(PyLiteState *state, PyLiteBoolObject *obj) {
 }
 
 PyLiteBoolObject* pylt_obj_bool_new(PyLiteState *state, bool val) {
-    return (val == false) ? &PyLiteTrue : &PyLiteFalse;
+    return (val == false) ? &PyLiteFalse : &PyLiteTrue;
 }
