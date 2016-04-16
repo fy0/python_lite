@@ -356,13 +356,13 @@ _tail:
     return true;
 }
 
-static _INLINE void parse_t(ParserState *ps) {
+void parse_t(ParserState *ps) {
     if (!parse_try_t(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 }
 
 
 /* EXPR -> EXPR10 ... EXPR1 */
-static _INLINE bool parse_try_expr(ParserState *ps) {
+bool parse_try_expr(ParserState *ps) {
     if (!parse_try_expr10(ps)) return false;
     parse_expr9(ps);
     parse_expr8(ps);
