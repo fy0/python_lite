@@ -225,7 +225,7 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
         }
         //case '\\': {} TODO
         default:
-            if (ss->current >= 0x80) {
+            if ((!is_str_type) && (ss->current >= 0x80)) {
                 //SyntaxError: bytes can only contain ASCII literal characters.
                 return false;
             }
@@ -375,8 +375,8 @@ uint32_t read_kw_or_id(LexState *ls) {
 #define lex_isoct(c) (c >= '0' && c <= '7')
 #define lex_isdec(c) (c >= '0' && c <= '9')
 //#define lex_isescapenumflag(c) (c == 'x' || c == 'X' || c == 'b'  || c == 'B' || c == 'o' || c == 'O')
-#define lex_isidentfirst(c) ((c >= 'A' && c<= 'Z') || (c >= 'a' && c<= 'z') || (c >= '_'))
-#define lex_isidentletter(c) ((c >= 'A' && c<= 'Z') || (c >= 'a' && c<= 'z') || (c >= '0' && c<= '9') || (c == '_'))
+#define lex_isidentfirst(c) ((c >= 'A' && c<= 'Z') || (c >= 'a' && c<= 'z') || (c >= '_') || (c >= 128))
+#define lex_isidentletter(c) ((c >= 'A' && c<= 'Z') || (c >= 'a' && c<= 'z') || (c >= '0' && c<= '9') || (c == '_') || (c >= 128))
 
 int pylt_lex_next(LexState *ls) {
     // read indent
