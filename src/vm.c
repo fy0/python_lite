@@ -122,27 +122,32 @@ void pylt_vm_load_code(PyLiteState* state, PyLiteCodeSnippetObject *code) {
 
 // 函数调用检查
 //  1 为当前的参数个数小于最少参数个数
-//  2 为当前的参数个数多于最少参数个数
+//  2 为当前的参数个数多于参数个数
 // -1 当前对象并非函数类型
-int func_call_check(PyLiteObject *obj, int params_num, int *pnum) {
-    int params_num_min, params_num_max;
+int func_call_check(PyLiteObject *obj, int params_num) {
+    PyLiteFunctionInfo *info;
 
     if (obj->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
-        params_num_min = castfunc(obj)->minimal;
-        params_num_max = castfunc(obj)->length;
+        info = &castfunc(obj)->info;
     } else if (obj->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
-        params_num_min = castcfunc(obj)->minimal;
-        params_num_max = castcfunc(obj)->length;
-    } else return -1;
-
-    if (params_num < params_num_min) {
-        if (pnum) *pnum = params_num_min; 
-        return 1; 
+        info = &castcfunc(obj)->info;
+    } else {
+        // not function
+        return -1;
+    }
+    
+    if (params_num > info->length) {
+        printf("TypeError: ");
+        debug_print_obj(obj);
+        printf("() missing %d required positional argument (%d given)\n", (info->minimal - params_num), params_num);
+        return 1;
     }
 
-    if (params_num > params_num_max) {
-        if (pnum) *pnum = params_num_max;
-        return 2;
+    if (params_num < info->minimal) {
+        printf("TypeError: ");
+        debug_print_obj(obj);
+        printf("() takes %d positional arguments but %d were given (%d given)\n", info->length, params_num);
+        return 1;
     }
 
     return 0;
@@ -155,7 +160,6 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
     PyLiteTable *locals;
     PyLiteInstruction ins;
 
-    int tnum;
     PyLiteObject *tobj, *tret, *ta, *tb, *tc;
     PyLiteFunctionObject *tfunc;
 
@@ -232,15 +236,11 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         tc = castobj(kv_pop(state->vm.stack)); // params
                         tb = castobj(kv_pop(state->vm.stack)); // code
                         ta = castobj(kv_pop(state->vm.stack)); // name
-                        tfunc = pylt_obj_func_new(state);
 
-                        memcpy(&castfunc(tret)->code, tb, sizeof(PyLiteCodeSnippetObject));
-
-                        tfunc->length = castlist(tc)->ob_size;
-                        tfunc->minimal = castlist(tc)->ob_size;
-                        tfunc->names = castlist(tc)->ob_val;
-                        tfunc->defaults = NULL;
-                        tfunc->doc = NULL;
+                        tfunc = pylt_obj_func_new(state, tb);
+                        tfunc->info.length = castlist(tc)->ob_size;
+                        tfunc->info.minimal = castlist(tc)->ob_size;
+                        tfunc->info.names = castlist(tc)->ob_val;
 
                         pylt_obj_table_set(locals, ta, castobj(tfunc));
                         break;
@@ -280,17 +280,8 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 tobj = castobj(kv_topn(vm->stack, ins.extra)); // 函数对象
 
                 // check
-                switch (func_call_check(tobj, ins.extra, &tnum)) {
-                    case 1:
-                        printf("TypeError: ");
-                        debug_print_obj(tobj);
-                        printf("() missing %d required positional argument\n", tnum - ins.extra);
-                        return;
-                    case 2:
-                        printf("TypeError: ");
-                        debug_print_obj(tobj);
-                        printf("() takes %d positional arguments but %d were given\n", tnum, ins.extra);
-                        return;
+                if (func_call_check(tobj, ins.extra)) {
+                    return;
                 }
 
                 // set locals
@@ -299,14 +290,14 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                     pylt_vm_call_func(state, castfunc(tobj));
                     code = kv_top(vm->frames).code;
                     locals = kv_top(kv_top(vm->frames).var_tables);
-                    if (castfunc(tobj)->length > 0) {
+                    if (castfunc(tobj)->info.length > 0) {
                         for (int k = ins.extra - 1; k >= 0; --k) {
-                            pylt_obj_table_set(locals, castobj(castfunc(tobj)->names[k]), castobj(kv_pop(state->vm.stack)));
+                            pylt_obj_table_set(locals, castobj(castfunc(tobj)->info.names[k]), castobj(kv_pop(state->vm.stack)));
                         }
                     }
                     i = -1;
                 } else if (tobj->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
-                    tobj = castcfunc(tobj)->func(state, ins.extra, (PyLiteObject**)(&kv_topn(vm->stack, ins.extra - 1)));
+                    tobj = castcfunc(tobj)->code(state, ins.extra, (PyLiteObject**)(&kv_topn(vm->stack, ins.extra - 1)));
                     kv_popn(vm->stack, ins.extra+1);
                     kv_push(uintptr_t, state->vm.stack, (uintptr_t)pylt_obj_none_new(state));
                 }

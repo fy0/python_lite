@@ -46,12 +46,12 @@ int* _INTS(int n, ...) {
 PyLiteCFunctionObject* pylt_cfunc_register(PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_realloc(NULL, sizeof(PyLiteCFunctionObject));
     func->ob_type = PYLT_OBJ_TYPE_CFUNCTION;
-    func->length = param_names ? param_names->ob_size : 0;
-    func->minimal = func->length - (defaults ? defaults->ob_size : 0);
-    func->names = param_names ? (PyLiteStrObject**)param_names->ob_val : NULL;
-    func->defaults = defaults ? defaults->ob_val : NULL;
-    func->type_codes = types;
-    func->func = cfunc;
+    func->info.length = param_names ? param_names->ob_size : 0;
+    func->info.minimal = func->info.length - (defaults ? defaults->ob_size : 0);
+    func->info.names = param_names ? (PyLiteStrObject**)param_names->ob_val : NULL;
+    func->info.defaults = defaults ? defaults->ob_val : NULL;
+    func->info.type_codes = types;
+    func->code = cfunc;
     pylt_obj_table_set(mod->attrs, castobj(name), castobj(func));
 
     pylt_free(param_names);

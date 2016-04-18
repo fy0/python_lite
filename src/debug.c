@@ -28,21 +28,25 @@ void debug_print_obj(PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_TYPE:
         case PYLT_OBJ_TYPE_TUPLE:
             printf("(");
-            for (int i = 0; i < casttuple(obj)->ob_size - 1; ++i) {
-                debug_print_obj(casttuple(obj)->ob_val[i]);
-                printf(", ");
+            if (castlist(obj)->ob_size) {
+                for (int i = 0; i < casttuple(obj)->ob_size - 1; ++i) {
+                    debug_print_obj(casttuple(obj)->ob_val[i]);
+                    printf(", ");
+                }
+                debug_print_obj(casttuple(obj)->ob_val[casttuple(obj)->ob_size - 1]);
             }
-            debug_print_obj(casttuple(obj)->ob_val[casttuple(obj)->ob_size - 1]);
             if (casttuple(obj)->ob_size == 1) printf(",)");
             else printf(")");
             break;
         case PYLT_OBJ_TYPE_LIST:
             printf("[");
-            for (pl_uint_t i = 0; i < castlist(obj)->ob_size - 1; ++i) {
-                debug_print_obj(castlist(obj)->ob_val[i]);
-                printf(", ");
+            if (castlist(obj)->ob_size) {
+                for (pl_uint_t i = 0; i < castlist(obj)->ob_size - 1; ++i) {
+                    debug_print_obj(castlist(obj)->ob_val[i]);
+                    printf(", ");
+                }
+                debug_print_obj(castlist(obj)->ob_val[castlist(obj)->ob_size - 1]);
             }
-            debug_print_obj(castlist(obj)->ob_val[castlist(obj)->ob_size - 1]);
             printf("]");
             break;
         case PYLT_OBJ_TYPE_SET:

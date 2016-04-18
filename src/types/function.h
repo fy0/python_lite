@@ -7,31 +7,33 @@
 #include "../lib/kvec.h"
 #include "codesnippet.h"
 
-typedef struct PyLiteFunctionObject {
-    PyLiteObject_HEAD;
-    pl_int_t length;                   /* length of parameters */
-    pl_int_t minimal;                  /* minimal number of parameters */
-
-    PyLiteCodeSnippetObject code;
-    PyLiteStrObject **names;           /* parameters' names */
-    PyLiteObject **defaults;           /* default values of option parameters */
-    PyLiteStrObject *doc;
-} PyLiteFunctionObject;
-
-PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state);
-
-
-typedef struct PyLiteCFunctionObject {
-    PyLiteObject_HEAD;
+typedef struct PyLiteFunctionInfo {
     pl_int_t length;           /* length of parameters */
     pl_int_t minimal;          /* minimal number of parameters */
 
     PyLiteStrObject **names;   /* parameters' names */
     pl_int_t *type_codes;      /* parameters' type code */
     PyLiteObject **defaults;   /* default values of option parameters */
-    PyLiteCFunctionPtr func;   /* the C pointer */
     PyLiteStrObject *doc;
+} PyLiteFunctionInfo;
+
+typedef struct PyLiteFunctionObject {
+    PyLiteObject_HEAD;
+    PyLiteFunctionInfo info;
+    PyLiteCodeSnippetObject code;
+} PyLiteFunctionObject;
+
+PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeSnippetObject *code);
+
+
+typedef struct PyLiteCFunctionObject {
+    PyLiteObject_HEAD;
+    PyLiteFunctionInfo info;
+    PyLiteCFunctionPtr code;   /* the C pointer */
 } PyLiteCFunctionObject;
+
+
+PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteState *state, PyLiteObject *func);
 
 
 #endif
