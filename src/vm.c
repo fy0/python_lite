@@ -5,6 +5,7 @@
 #include "lib/kvec.h"
 #include "types/all.h"
 #include "mods/builtin.h"
+#include "mods/helper.h"
 
 const char* op_vals[] = {
     "or",
@@ -124,7 +125,7 @@ void pylt_vm_load_code(PyLiteState* state, PyLiteCodeSnippetObject *code) {
 //  1 为当前的参数个数小于最少参数个数
 //  2 为当前的参数个数多于参数个数
 // -1 当前对象并非函数类型
-int func_call_check(PyLiteObject *obj, int params_num) {
+int func_call_check(PyLiteState* state, PyLiteObject *obj, int params_num) {
     PyLiteFunctionInfo *info;
 
     if (obj->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
@@ -148,6 +149,40 @@ int func_call_check(PyLiteObject *obj, int params_num) {
         debug_print_obj(obj);
         printf("() takes %d positional arguments but %d were given (%d given)\n", info->length, params_num);
         return 1;
+    }
+
+    // type check
+    if (info->type_codes) {
+        for (int i = 0; i < info->length; ++i) {
+            ;
+        }
+    }
+
+    // default set
+    if (info->defaults) {
+        for (int i = info->minimal + 1; i < info->length; ++i) {
+            PyLiteObject *obj = info->defaults[i];
+            if (obj == PARAM_NODEF) {
+                ;
+            } else if (obj == PARAM_ARGS) {
+                int args_len = params_num - i;
+                PyLiteTupleObject *args = pylt_obj_tuple_new(state, args_len);
+                memcpy(args->ob_val, &kv_topn(state->vm.stack, args_len - 1), sizeof(PyLiteObject*) * args_len);
+                kv_popn(state->vm.stack, args_len);
+            } else {
+                kv_pushobj(state->vm.stack, obj);
+            }
+        }
+    }
+
+    for (int i = 0; i < info->length; ++i) {
+        if (i > info->minimal) {
+            ;
+        }
+        if (info->defaults) {
+            ;
+        }
+
     }
 
     return 0;
