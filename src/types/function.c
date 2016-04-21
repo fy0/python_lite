@@ -11,7 +11,6 @@ PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeSnippetObj
         kv_init(obj->code.const_val);
         kv_init(obj->code.opcodes);
     }
-    obj->info.with_args = -1;
     return obj;
 }
 

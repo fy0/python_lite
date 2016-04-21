@@ -48,7 +48,9 @@ PyLiteCFunctionObject* pylt_cfunc_register(PyLiteModuleObject *mod, PyLiteStrObj
     func->ob_type = PYLT_OBJ_TYPE_CFUNCTION;
     func->info.length = param_names ? param_names->ob_size : 0;
     func->info.minimal = func->info.length - (defaults ? defaults->ob_size : 0);
-    func->info.names = param_names ? (PyLiteStrObject**)param_names->ob_val : NULL;
+
+    func->info.name = name;
+    func->info.params = param_names ? (PyLiteStrObject**)param_names->ob_val : NULL;
     func->info.defaults = defaults ? defaults->ob_val : NULL;
     func->info.type_codes = types;
     func->code = cfunc;

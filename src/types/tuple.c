@@ -10,9 +10,9 @@ PyLiteTupleObject* pylt_obj_tuple_new(PyLiteState *state, pl_int_t len) {
 }
 
 
-PyLiteTupleObject* pylt_obj_tuple_new_with_data(PyLiteState *state, pl_int_t len, PyLiteObject *objs) {
+PyLiteTupleObject* pylt_obj_tuple_new_with_data(PyLiteState *state, pl_int_t len, void *data) {
     PyLiteTupleObject *obj = pylt_obj_tuple_new(state, len);
-    if (len) memcpy(obj->ob_val, objs, len * sizeof(PyLiteObject*));
+    if (len) memcpy(obj->ob_val, data, len * sizeof(PyLiteObject*));
     return obj;
 }
 
