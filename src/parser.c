@@ -234,7 +234,7 @@ T ->    ( EXPR ) |
         IDENT
 */
 bool parse_try_t(ParserState *ps) {
-    int num, tk_val;
+    int num, num2, tk_val;
     Token *tk = &(ps->ls->token);
     PyLiteObject *obj;
 
@@ -324,15 +324,45 @@ bool parse_try_t(ParserState *ps) {
             case '(':
                 // is func call ?
                 next(ps);
-                num = 0;
+                num = num2 = 0;
+                ps->disable_expr_tuple_parse = true;
                 while (true) {
                     if (!parse_try_expr(ps)) break;
                     num++;
-                    if (tk->val != ',') break;
-                    else next(ps);
+                    if (tk->val == ',') {
+                        next(ps);
+                        continue;
+                    } else if (tk->val == '=') {
+                        // func(a=1, b=2, ...)
+                        PyLiteInstruction ins = kv_top(ps->info->code->opcodes);
+                        num--;
+                        if (ins.code == BC_LOAD_VAL || ins.code == BC_LOAD_VAL_EX) {
+                            kv_top(ps->info->code->opcodes).code = BC_LOADCONST;
+                            num2 = 1;
+                            next(ps);
+                            parse_expr(ps);
+
+                            while (true) {
+                                if (tk->val != ',') break;
+                                next(ps);
+                                if (tk->val == TK_NAME) sload_const(ps, tk->obj);
+                                else error(ps, PYLT_ERR_PARSER_NON_KEYWORD_ARG_AFTER_KEYWORD_ARG);
+                                next(ps);
+                                ACCEPT(ps, '=');
+                                parse_expr(ps);
+                                num2++;
+                            }
+
+                            write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_DICT, num2);
+                            break;
+                        } else {
+                            error(ps, PYLT_ERR_PARSER_KEYWORD_CANT_BE_AN_EXPR);
+                        }
+                    } else break;
                 }
-                write_ins(ps, BC_CALL, 0, num);
+                write_ins(ps, BC_CALL, (num2) ? 1 : 0, num);
                 ACCEPT(ps, ')');
+                ps->disable_expr_tuple_parse = false;
                 break;
             default:
                 goto _tail;
@@ -341,16 +371,18 @@ bool parse_try_t(ParserState *ps) {
 
 _tail:
     // is tuple ?
-    if (!ps->info->at_parse_mutable && tk->val == ',') {
-        next(ps);
-        num = 1;
-        while (true) {
-            if (!parse_try_expr(ps)) break;
-            num++;
-            if (tk->val != ',') break;
+    if (!ps->disable_expr_tuple_parse) {
+        if (!ps->info->at_parse_mutable && tk->val == ',') {
             next(ps);
+            num = 1;
+            while (true) {
+                if (!parse_try_expr(ps)) break;
+                num++;
+                if (tk->val != ',') break;
+                next(ps);
+            }
+            write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TUPLE, num);
         }
-        write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TUPLE, num);
     }
 
     return true;
@@ -635,7 +667,7 @@ void parse_func(ParserState *ps) {
     next(ps);
 
     ACCEPT(ps, '(');
-    
+
     PyLiteListObject* lst = pylt_obj_list_new(ps->state);
     
     while (true) {
@@ -958,6 +990,8 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
     ps->lval_check.enable = false;
     ps->lval_check.expr_level = 0;
     kv_init(ps->lval_check.bc_cache);
+
+    ps->disable_expr_tuple_parse = false;
 
     func_push(ps);
 }

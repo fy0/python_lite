@@ -51,7 +51,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
         mod,
         _NS(state, "print"),
         _NST(state, 3, "values", "sep", "end"),
-        _NT(state, 3, PARAM_NODEF, _NS(state, " "), _NS(state, "\n")),
+        _NT(state, 3, PARAM_ARGS, _NS(state, " "), _NS(state, "\n")),
         NULL, 
         &pylt_mods_builtins_print
     );

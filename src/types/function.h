@@ -11,6 +11,9 @@ typedef struct PyLiteFunctionInfo {
     pl_int_t length;           /* length of parameters */
     pl_int_t minimal;          /* minimal number of parameters */
 
+    pl_int_t with_args;        /* args parameter (not -1 if exists) */
+    pl_int_t with_kwargs;      /* kwargs parameter (true or false) */
+
     PyLiteStrObject **names;   /* parameters' names */
     pl_int_t *type_codes;      /* parameters' type code */
     PyLiteObject **defaults;   /* default values of option parameters */
