@@ -1,8 +1,9 @@
 ﻿
 #include "builtin.h"
+#include "helper.h"
 #include "../state.h"
 #include "../debug.h"
-#include "helper.h"
+#include "../api.h"
 
 PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObject **args);
@@ -18,18 +19,13 @@ PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObjec
     for (int i = 0; i < values->ob_size; ++i) {
         obj = values->ob_val[i];
         debug_print_obj(obj);
-        if (i != values->ob_size - 1) printf(" ");
+        if (i != values->ob_size - 1) pylt_obj_output_str(state, caststr(args[1]));
     }
 
-    putchar('\n');
+    pylt_obj_output_str(state, caststr(args[2]));
     return NULL;
 }
 
-PyLiteObject* pylt_mods_builtins_simple_print(PyLiteState *state, int argc, PyLiteObject **args) {
-    if (argc) debug_print_obj(args[0]);
-    putchar('\n');
-    return NULL;
-}
 
 PyLiteObject* pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObject **args) {
     ;
@@ -47,24 +43,17 @@ PyLiteObject* pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObj
 
 PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     PyLiteModuleObject *mod = pylt_obj_module_new(state, NULL);
+    static int print_types[] = { 0, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR };
 
     pylt_cfunc_register(
         mod,
         _NS(state, "print"),
         _NST(state, 3, "values", "sep", "end"),
         _NT(state, 3, PARAM_ARGS, _NS(state, " "), _NS(state, "\n")),
-        NULL, 
+        (int*)&print_types,
         &pylt_mods_builtins_print
     );
 
-    pylt_cfunc_register(
-        mod,
-        _NS(state, "simple_print"),
-        _NST(state, 1, "values"),
-        NULL,
-        NULL,
-        &pylt_mods_builtins_simple_print
-    );
 
     pylt_cfunc_register(
         mod,

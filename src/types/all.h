@@ -13,8 +13,9 @@
 #include "tuple.h"
 #include "dict.h"
 
-#include "function.h"
 #include "module.h"
+#include "function.h"
+#include "codesnippet.h"
 
 #include "type.h"
 #include "iter.h"

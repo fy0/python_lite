@@ -236,13 +236,15 @@ int func_call_check(PyLiteState* state, PyLiteObject *func_obj, int params_num, 
 
     // type check
     if (info->type_codes) {
+        args = (PyLiteObject**)(&kv_topn(state->vm.stack, info->length - 1));
+
         for (int i = 0; i < info->length; ++i) {
-            args = (PyLiteObject**)(&kv_topn(state->vm.stack, info->length-1));
+            if (!info->type_codes[i]) continue;
             if (args[i]->ob_type != info->type_codes[i]) {
                 // 类型不符合，报错
                 printf("TypeError: ");
-                debug_print_obj(castobj(info->name));
-                printf("parameter type wrong\n");
+                debug_print_obj(castobj(info->params[i]));
+                printf(" must be %s\n", pylt_type_name(info->type_codes[i]));
                 return 3;
             }
         }
