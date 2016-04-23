@@ -8,7 +8,8 @@ PyLiteObject* pylt_method_obj_mro(PyLiteState *state, int argc, PyLiteObject **a
 
 PyLiteObject* pylt_method_int_is_integer(PyLiteState *state, int argc, PyLiteObject **args) {
     PyLiteFloatObject *self = castfloat(args[0]);
-    return castobj((modf(self->ob_val, NULL) == 0) ? &PyLiteTrue : &PyLiteFalse);
+    double i;
+    return castobj((modf(self->ob_val, &i) == 0) ? &PyLiteTrue : &PyLiteFalse);
 }
 
 PyLiteObject* pylt_method_list_append(PyLiteState *state, int argc, PyLiteObject **args) {

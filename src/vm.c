@@ -266,6 +266,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
 
     PyLiteObject *tobj, *tret, *ta, *tb, *tc;
     PyLiteFunctionObject *tfunc;
+    pl_bool_t at_type;
 
     if (!code) return;
     pylt_vm_load_code(state, code);
@@ -475,9 +476,9 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 break;
             case BC_GET_ATTR:
             case BC_GET_ATTR_EX:
-                // GET_ITEM     0       const_id
+                // GET_ATTR     0       const_id
                 tobj = castobj(kv_pop(state->vm.stack));
-                tret = pylt_obj_getitem(state, tobj, const_obj(ins.extra));
+                tret = pylt_obj_getattr(state, tobj, const_obj(ins.extra), &at_type);
                 if (!tret) {
                     printf("IndexError: list assignment index out of range\n");
                     return;

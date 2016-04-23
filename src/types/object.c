@@ -1,12 +1,7 @@
 ﻿
 #include "../vm.h"
-#include "object.h"
-#include "number.h"
-#include "bytes.h"
-#include "bool.h"
-#include "string.h"
-#include "bytes.h"
-#include "set.h"
+#include "../api.h"
+#include "all.h"
 
 
 void* basetype_op_func_table[][23] = {
@@ -270,8 +265,20 @@ pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj) {
     }
 }
 
-PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key) {
+PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type) {
     switch (obj->ob_type) {
+        case PYLT_OBJ_TYPE_MODULE:
+            if (p_at_type) *p_at_type = false;
+            return NULL;
+            break;
+        case PYLT_OBJ_TYPE_TYPE:
+            if (p_at_type) *p_at_type = false;
+            return pylt_obj_type_getattr(state, casttype(obj), key);
+            break;
+        default:
+            if (p_at_type) *p_at_type = true;
+            return pylt_obj_getattr(state, castobj(pylt_gettype(state, obj->ob_type)), key, NULL);
+            break;
     }
     return NULL;
 }

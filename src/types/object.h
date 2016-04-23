@@ -65,7 +65,7 @@ pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj);
 pl_bool_t pylt_obj_citerable(PyLiteState *state, PyLiteObject *obj);
 pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj);
 
-PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key);
+PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type);
 pl_bool_t pylt_obj_setattr(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
 
 PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key);
