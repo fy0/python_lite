@@ -52,7 +52,8 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_NONE,
 };
 
-#define PYLT_OBJ_TYPE_NUM PYLT_OBJ_TYPE_CLASS
+#define PYLT_OBJ_TYPE_NUM PYLT_OBJ_TYPE_NONE
+
 
 // Object methods
 

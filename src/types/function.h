@@ -4,7 +4,7 @@
 
 #include "object.h"
 #include "string.h"
-#include "../lib/kvec.h"
+#include "tuple.h"
 #include "codesnippet.h"
 
 typedef struct PyLiteFunctionInfo {
@@ -24,8 +24,6 @@ typedef struct PyLiteFunctionObject {
     PyLiteCodeSnippetObject code;
 } PyLiteFunctionObject;
 
-PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeSnippetObject *code);
-
 
 typedef struct PyLiteCFunctionObject {
     PyLiteObject_HEAD;
@@ -34,7 +32,10 @@ typedef struct PyLiteCFunctionObject {
 } PyLiteCFunctionObject;
 
 
+PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeSnippetObject *code);
 PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteState *state, PyLiteObject *func);
+
+PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteState *state, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc);
 
 
 #endif

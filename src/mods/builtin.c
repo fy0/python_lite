@@ -9,8 +9,6 @@ PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObjec
 PyLiteObject* pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObject **args);
 
-PyLiteObject* pylt_mods_builtins_simple_print(PyLiteState *state, int argc, PyLiteObject **args);
-
 
 PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObject **args) {
     PyLiteObject *obj;
@@ -64,12 +62,15 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
         &pylt_mods_builtins_import
     );
 
+
+    static int setattr_types[] = { PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PTLT_OBJ_TYPE_OBJ };
+
     pylt_cfunc_register(
         mod,
         _NS(state, "setattr"),
         _NST(state, 3, "object", "name", "value"),
         NULL,
-        _INTS(3, PTLT_OBJ_TYPE_OBJ, PYLT_OBJ_TYPE_STR, PTLT_OBJ_TYPE_OBJ),
+        (int*)&print_types,
         &pylt_mods_builtins_setattr
     );
 

@@ -6,10 +6,11 @@
 #include "vm.h"
 #include "lib/kvec.h"
 #include "types/set.h"
+#include "types/type.h"
 
 typedef struct PyLiteState {
     PyLiteVM vm;
-    kvec_t(uint32_t) cls_base;
+    kvec_t(PyLiteTypeObject*) cls_base;
     PyLiteSetObject *cache_str;
     PyLiteSetObject *cache_bytes;
     PyLiteTable *modules;
