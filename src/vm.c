@@ -268,6 +268,9 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
     PyLiteFunctionObject *tfunc;
     pl_bool_t at_type;
 
+    pl_uint_t params_num;
+    pl_uint_t params_offset = 0;
+
     if (!code) return;
     pylt_vm_load_code(state, code);
     locals = kv_top(kv_top(vm->frames).var_tables);
@@ -383,13 +386,16 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 break;
             case BC_CALL:
                 // BC_CALL      0       params_num
+                params_num = ins.extra + params_offset;
+                params_offset = 0;
+
                 ta = ins.exarg ? castobj(kv_pop(vm->stack)) : NULL;
-                tobj = castobj(kv_topn(vm->stack, ins.extra)); // 函数对象
+                tobj = castobj(kv_topn(vm->stack, params_num)); // 函数对象
                 //tsize = kv_size(vm->stack);
 
                 // check
                 PyLiteFunctionInfo *func_info;
-                if (func_call_check(state, tobj, ins.extra, castdict(ta), &func_info)) {
+                if (func_call_check(state, tobj, params_num, castdict(ta), &func_info)) {
                     return;
                 }
 
@@ -476,7 +482,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 break;
             case BC_GET_ATTR:
             case BC_GET_ATTR_EX:
-                // GET_ATTR     0       const_id
+                // GET_ATTR     0/1     const_id
                 tobj = castobj(kv_pop(state->vm.stack));
                 tret = pylt_obj_getattr(state, tobj, const_obj(ins.extra), &at_type);
                 if (!tret) {
@@ -484,6 +490,12 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                     return;
                 }
                 kv_pushptr(vm->stack, tret);
+
+                // next instruction is BC_CALL, and it's a method!
+                if (ins.exarg && at_type) {
+                    kv_pushptr(vm->stack, tobj);
+                    params_offset = 1;
+                }
                 break;
             case BC_SET_ATTR:
                 // SET_ITEM     0       const_id

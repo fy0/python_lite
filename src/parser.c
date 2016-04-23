@@ -237,6 +237,7 @@ bool parse_try_t(ParserState *ps) {
     int num, num2, tk_val;
     Token *tk = &(ps->ls->token);
     PyLiteObject *obj;
+    PyLiteInstruction ins;
 
     switch (tk->val) {
         case TK_NAME:
@@ -325,6 +326,13 @@ bool parse_try_t(ParserState *ps) {
                 // is func call ?
                 next(ps);
                 num = num2 = 0;
+                ins = kv_top(ps->info->code->opcodes);
+
+                // method trigger
+                if (ins.code == BC_GET_ATTR || ins.code == BC_GET_ATTR_EX) {
+                    kv_top(ps->info->code->opcodes).exarg = 1;
+                }
+
                 ps->disable_expr_tuple_parse = true;
                 while (true) {
                     if (!parse_try_expr(ps)) break;
@@ -334,7 +342,7 @@ bool parse_try_t(ParserState *ps) {
                         continue;
                     } else if (tk->val == '=') {
                         // func(a=1, b=2, ...)
-                        PyLiteInstruction ins = kv_top(ps->info->code->opcodes);
+                        ins = kv_top(ps->info->code->opcodes);
                         num--;
                         if (ins.code == BC_LOAD_VAL || ins.code == BC_LOAD_VAL_EX) {
                             kv_top(ps->info->code->opcodes).code = BC_LOADCONST;
