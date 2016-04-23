@@ -38,3 +38,7 @@ PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteState *state, PyLiteStrObject *n
     pylt_free(defaults);
     return func;
 }
+
+PyLiteCFunctionObject* pylt_obj_cfunc_new_no_args(PyLiteState *state, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc) {
+    return pylt_obj_cfunc_new(state, name, NULL, NULL, NULL, cfunc);
+}

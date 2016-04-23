@@ -6,6 +6,7 @@
 #include "types/all.h"
 #include "mods/builtin.h"
 #include "mods/helper.h"
+#include "pybind/bind.h"
 
 const char* op_vals[] = {
     "or",
@@ -79,6 +80,8 @@ void pylt_vm_init(struct PyLiteState *state, PyLiteVM* vm) {
     kv_init(frame->var_tables);
 
     // built-in
+    pylt_bind_all_types_register(state);
+
     kv_push(PyLiteTable*, frame->var_tables, pylt_obj_table_new(state));
     locals = kv_top(frame->var_tables);
     mod = pylt_mods_builtins_register(state);
@@ -405,7 +408,8 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 } else if (tobj->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
                     tobj = castcfunc(tobj)->code(state, func_info->length, (PyLiteObject**)(&kv_topn(vm->stack, func_info->length - 1)));
                     kv_popn(vm->stack, func_info->length + 1);
-                    kv_pushptr(state->vm.stack, (uintptr_t)pylt_obj_none_new(state));
+                    if (tobj) kv_pushptr(state->vm.stack, tobj);
+                    else kv_pushptr(state->vm.stack, (uintptr_t)pylt_obj_none_new(state));
                 }
                 break;
             case BC_RET:

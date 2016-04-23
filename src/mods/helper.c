@@ -44,9 +44,18 @@ int* _INTS(int n, ...) {
     return ret;
 }
 
-PyLiteCFunctionObject* pylt_cfunc_register(PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc) {
-    PyLiteCFunctionObject *func = pylt_obj_cfunc_new(NULL, name, param_names, defaults, types, cfunc);
+PyLiteCFunctionObject* pylt_cfunc_register(PyLiteState *state, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc) {
+    PyLiteCFunctionObject *func = pylt_obj_cfunc_new(state, name, param_names, defaults, types, cfunc);
     pylt_obj_table_set(mod->attrs, castobj(name), castobj(func));
     return func;
 }
 
+PyLiteCFunctionObject* pylt_cmethod_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc) {
+    PyLiteCFunctionObject *func = pylt_obj_cfunc_new(state, name, param_names, defaults, types, cfunc);
+    pylt_obj_type_setattr(state, type, castobj(name), castobj(func));
+    return func;
+}
+
+PyLiteCFunctionObject* pylt_cmethod_register_0_args(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc) {
+    return pylt_cmethod_register(state, type, name, _NST(state, 1, "self"), NULL, _INTS(1, type->ob_reftype), cfunc);
+}

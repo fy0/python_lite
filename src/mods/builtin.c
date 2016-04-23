@@ -44,6 +44,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     static int print_types[] = { 0, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR };
 
     pylt_cfunc_register(
+        state,
         mod,
         _NS(state, "print"),
         _NST(state, 3, "values", "sep", "end"),
@@ -54,6 +55,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
 
 
     pylt_cfunc_register(
+        state,
         mod,
         _NS(state, "__import__"),
         _NST(state, 1, "name", "globals", "locals"),
@@ -66,6 +68,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     static int setattr_types[] = { PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PTLT_OBJ_TYPE_OBJ };
 
     pylt_cfunc_register(
+        state,
         mod,
         _NS(state, "setattr"),
         _NST(state, 3, "object", "name", "value"),
@@ -73,6 +76,17 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
         (int*)&print_types,
         &pylt_mods_builtins_setattr
     );
+
+    pylt_mod_setattr(state, mod, "object", pylt_gettype(state, PTLT_OBJ_TYPE_OBJ));
+    pylt_mod_setattr(state, mod, "int", pylt_gettype(state, PTLT_OBJ_TYPE_OBJ));
+    pylt_mod_setattr(state, mod, "float", pylt_gettype(state, PYLT_OBJ_TYPE_FLOAT));
+    pylt_mod_setattr(state, mod, "bool", pylt_gettype(state, PYLT_OBJ_TYPE_BOOL));
+    pylt_mod_setattr(state, mod, "str", pylt_gettype(state, PYLT_OBJ_TYPE_STR));
+    pylt_mod_setattr(state, mod, "bytes", pylt_gettype(state, PYLT_OBJ_TYPE_BYTES));
+    pylt_mod_setattr(state, mod, "set", pylt_gettype(state, PYLT_OBJ_TYPE_SET));
+    pylt_mod_setattr(state, mod, "list", pylt_gettype(state, PYLT_OBJ_TYPE_LIST));
+    pylt_mod_setattr(state, mod, "tuple", pylt_gettype(state, PYLT_OBJ_TYPE_TUPLE));
+    pylt_mod_setattr(state, mod, "dict", pylt_gettype(state, PYLT_OBJ_TYPE_DICT));
 
     return mod;
 }

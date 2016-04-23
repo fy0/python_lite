@@ -36,6 +36,6 @@ PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeSnippetObj
 PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteState *state, PyLiteObject *func);
 
 PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteState *state, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc);
-
+PyLiteCFunctionObject* pylt_obj_cfunc_new_no_args(PyLiteState *state, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc);
 
 #endif
