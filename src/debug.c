@@ -22,10 +22,20 @@ void debug_print_obj(PyLiteObject *obj) {
             putchar('\'');
             break;
         case PYLT_OBJ_TYPE_FUNCTION:
-            printf("<function>");
+            printf("<function ");
+            debug_print_obj(castobj(castfunc(obj)->info.name));
+            printf(">");
+            break;
+        case PYLT_OBJ_TYPE_CFUNCTION:
+            printf("<cfunction ");
+            debug_print_obj(castobj(castcfunc(obj)->info.name));
+            printf(">");
             break;
         case PYLT_OBJ_TYPE_MODULE:
+            break;
         case PYLT_OBJ_TYPE_TYPE:
+            printf("<class '%s'>", pylt_type_name(casttype(obj)->ob_reftype));
+            break;
         case PYLT_OBJ_TYPE_TUPLE:
             printf("(");
             if (castlist(obj)->ob_size) {

@@ -113,6 +113,7 @@ struct PyLiteModuleObject;
 struct PyLiteFunctionObject;
 struct PyLiteCFunctionObject;
 
+struct PyLiteTypeObject;
 struct PyLiteIterObject;
 
 #define cast(t, exp)	((t)(exp))
@@ -123,17 +124,18 @@ struct PyLiteIterObject;
 
 #define castbytes(i)    cast(struct PyLiteBytesObject*, (i))
 #define caststr(i)      cast(struct PyLiteStrObject*, (i))
-#define castset(i)    cast(struct PyLiteSetObject*, (i))
+#define castset(i)      cast(struct PyLiteSetObject*, (i))
 #define castlist(i)     cast(struct PyLiteListObject*, (i))
 #define casttuple(i)    cast(struct PyLiteTupleObject*, (i))
 #define castdict(i)     cast(struct PyLiteDictObject*, (i))
 
-#define castmod(i)    cast(struct PyLiteModuleObject*, (i))
-#define castfunc(i)    cast(struct PyLiteFunctionObject*, (i))
+#define castmod(i)      cast(struct PyLiteModuleObject*, (i))
+#define castfunc(i)     cast(struct PyLiteFunctionObject*, (i))
 #define castcfunc(i)    cast(struct PyLiteCFunctionObject*, (i))
 
+#define casttype(i)     cast(struct PyLiteTypeObject*, (i))
 #define castclass(i)    cast(struct PyLiteCustomObject*, (i))
-#define castiter(i)    cast(struct PyLiteIterObject*, (i))
+#define castiter(i)     cast(struct PyLiteIterObject*, (i))
 
 
 void pylt_obj_free(PyLiteObject *obj);
