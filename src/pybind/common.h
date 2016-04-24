@@ -8,6 +8,12 @@ PyLiteObject* pylt_method_obj_mro(PyLiteState *state, int argc, PyLiteObject **a
 
 PyLiteObject* pylt_method_int_is_integer(PyLiteState *state, int argc, PyLiteObject **args);
 
+PyLiteObject* pylt_method_set_add(PyLiteState *state, int argc, PyLiteObject **args);
+PyLiteObject* pylt_method_set_clear(PyLiteState *state, int argc, PyLiteObject **args);
+PyLiteObject* pylt_method_set_copy(PyLiteState *state, int argc, PyLiteObject **args);
+PyLiteObject* pylt_method_set_pop(PyLiteState *state, int argc, PyLiteObject **args);
+PyLiteObject* pylt_method_set_remove(PyLiteState *state, int argc, PyLiteObject **args);
+
 PyLiteObject* pylt_method_list_append(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_list_clear(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_list_copy(PyLiteState *state, int argc, PyLiteObject **args);
@@ -19,6 +25,5 @@ PyLiteObject* pylt_method_list_pop(PyLiteState *state, int argc, PyLiteObject **
 PyLiteObject* pylt_method_list_remove(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_list_reverse(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_list_sort(PyLiteState *state, int argc, PyLiteObject **args);
-
 
 #endif

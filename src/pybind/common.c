@@ -16,6 +16,33 @@ PyLiteObject* pylt_method_int_is_integer(PyLiteState *state, int argc, PyLiteObj
 
 
 
+PyLiteObject* pylt_method_set_add(PyLiteState *state, int argc, PyLiteObject **args) {
+    pylt_obj_set_add(state, castset(args[0]), args[1]);
+    return NULL;
+}
+
+PyLiteObject* pylt_method_set_clear(PyLiteState *state, int argc, PyLiteObject **args) {
+    // TOOD
+    return NULL;
+}
+
+PyLiteObject* pylt_method_set_copy(PyLiteState *state, int argc, PyLiteObject **args) {
+    // TODO
+    // return pylt_obj_set_copy(state, castlist(args[0]));
+    return NULL;
+}
+
+PyLiteObject* pylt_method_set_pop(PyLiteState *state, int argc, PyLiteObject **args) {
+    return pylt_obj_set_pop(state, castset(args[0]));
+}
+
+PyLiteObject* pylt_method_set_remove(PyLiteState *state, int argc, PyLiteObject **args) {
+    pylt_obj_set_remove(state, castset(args[0]), args[1]);
+    return NULL;
+}
+
+
+
 PyLiteObject* pylt_method_list_append(PyLiteState *state, int argc, PyLiteObject **args) {
     pylt_obj_list_append(state, castlist(args[0]), args[1]);
     return NULL;

@@ -44,6 +44,11 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // set
     type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_SET, PTLT_OBJ_TYPE_OBJ);
+    pylt_cmethod_register_1_args(state, type, _NS(state, "add"), &pylt_method_set_add);
+    pylt_cmethod_register_0_args(state, type, _NS(state, "clear"), &pylt_method_set_clear);
+    pylt_cmethod_register_0_args(state, type, _NS(state, "copy"), &pylt_method_set_copy);
+    pylt_cmethod_register_0_args(state, type, _NS(state, "pop"), &pylt_method_set_pop);
+    pylt_cmethod_register_1_args(state, type, _NS(state, "remove"), &pylt_method_set_remove);
     pylt_obj_type_register(state, type);
 
     // list
