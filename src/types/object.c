@@ -279,7 +279,7 @@ PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObje
             break;
         default:
             if (p_at_type) *p_at_type = true;
-            return pylt_obj_getattr(state, castobj(pylt_gettype(state, obj->ob_type)), key, NULL);
+            return pylt_obj_getattr(state, castobj(pylt_api_gettype(state, obj->ob_type)), key, NULL);
             break;
     }
     return NULL;

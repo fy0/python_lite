@@ -29,7 +29,7 @@ typedef struct PyLiteCustomObject {
     struct PyLiteTable *ob_attrs
 
 enum PyLiteObjectTypeCode {
-    PTLT_OBJ_TYPE_OBJ = 1,
+    PYLT_OBJ_TYPE_OBJ = 1,
     PYLT_OBJ_TYPE_INT,
     PYLT_OBJ_TYPE_FLOAT,
     PYLT_OBJ_TYPE_BOOL,

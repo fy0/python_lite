@@ -3,7 +3,11 @@
 #include "all.h"
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
-    PyLiteIterObject *iter = pylt_realloc(NULL, sizeof(PyLiteIterObject));
+    PyLiteIterObject *iter;
+
+    if (obj->ob_type == PYLT_OBJ_TYPE_ITER) return castiter(obj);
+
+    iter = pylt_realloc(NULL, sizeof(PyLiteIterObject));
     iter->ob_type = PYLT_OBJ_TYPE_ITER;
     iter->base = obj;
 
