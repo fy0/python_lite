@@ -59,3 +59,7 @@ PyLiteCFunctionObject* pylt_cmethod_register(PyLiteState *state, PyLiteTypeObjec
 PyLiteCFunctionObject* pylt_cmethod_register_0_args(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc) {
     return pylt_cmethod_register(state, type, name, _NST(state, 1, "self"), NULL, _UINTS(1, type->ob_reftype), cfunc);
 }
+
+PyLiteCFunctionObject* pylt_cmethod_register_1_args(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc) {
+    return pylt_cmethod_register(state, type, name, _NST(state, 2, "self", "object"), NULL, _UINTS(2, type->ob_reftype, 0), cfunc);
+}

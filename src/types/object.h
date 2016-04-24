@@ -74,7 +74,6 @@ pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject*
 
 PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj);
 PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, PyLiteObject *b);
-const char* pylt_obj_type_name_cstr(PyLiteState *state, PyLiteObject *obj);
 //pylt_buildin_isinstance(PyLiteState *state, PyLiteObject *obj, PyLiteTypeObject *type);
 
 
@@ -143,7 +142,6 @@ void pylt_obj_free(PyLiteObject *obj);
 
 
 // Others
-const char* pylt_type_name(int ob_type);
 
 typedef PyLiteObject* (*PyLiteObjUnaryOpFunc)(PyLiteState *state, PyLiteObject *obj);
 typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);

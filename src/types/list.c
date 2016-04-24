@@ -51,9 +51,13 @@ pl_uint_t pylt_obj_list_ccount(PyLiteState *state, PyLiteListObject *self) {
 void pylt_obj_list_extend(PyLiteState *state, PyLiteListObject *self, PyLiteListObject *obj) {
     if (self->ob_size + obj->ob_size >= self->ob_maxsize) {
         self->ob_maxsize = self->ob_size + obj->ob_size;
-        pylt_realloc(self->ob_val, self->ob_maxsize * sizeof(PyLiteObject*));
+        self->ob_val = pylt_realloc(self->ob_val, self->ob_maxsize * sizeof(PyLiteObject*));
     }
+    /*for (int i = 0; i < obj->ob_size; ++i) {
+        self->ob_val[self->ob_size + i] = obj->ob_val[i];
+    }*/
     memcpy(self->ob_val + self->ob_size, obj->ob_val, obj->ob_size * sizeof(PyLiteObject*));
+    self->ob_size = self->ob_size + obj->ob_size;
 }
 
 pl_int_t pylt_obj_list_cindex(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
@@ -63,8 +67,18 @@ pl_int_t pylt_obj_list_cindex(PyLiteState *state, PyLiteListObject *self, PyLite
     return -1;
 }
 
-void pylt_obj_list_insert(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
-    // TODO
+pl_bool_t pylt_obj_list_insert(PyLiteState *state, PyLiteListObject *self, pl_int_t index, PyLiteObject *obj) {
+    if (index < 0) index += self->ob_size;
+    if (index < 0 || (pl_uint_t)index >= self->ob_size) return false;
+
+    if (self->ob_size + 1 >= self->ob_maxsize) {
+        self->ob_maxsize = self->ob_size + 1;
+        self->ob_val = pylt_realloc(self->ob_val, self->ob_maxsize * sizeof(PyLiteObject*));
+    }
+
+    memcpy(self->ob_val + index + 1, self->ob_val + index, (self->ob_size - index + 1) * sizeof(PyLiteObject*));
+    self->ob_val[index] = obj;
+    return true;
 }
 
 pl_bool_t pylt_obj_list_remove(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {

@@ -48,6 +48,16 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // list
     type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_LIST, PTLT_OBJ_TYPE_OBJ);
+    pylt_cmethod_register_1_args(state, type, _NS(state, "append"), &pylt_method_list_append);
+    pylt_cmethod_register_0_args(state, type, _NS(state, "clear"), &pylt_method_list_clear);
+    pylt_cmethod_register_0_args(state, type, _NS(state, "copy"), &pylt_method_list_copy);
+    pylt_cmethod_register_0_args(state, type, _NS(state, "count"), &pylt_method_list_count);
+    pylt_cmethod_register(state, type, _NS(state, "extend"), _NST(state, 2, "self", "object"), NULL, _UINTS(2, PYLT_OBJ_TYPE_LIST, PYLT_OBJ_TYPE_LIST), &pylt_method_list_extend);
+    pylt_cmethod_register_1_args(state, type, _NS(state, "index"), &pylt_method_list_index);
+    pylt_cmethod_register(state, type, _NS(state, "insert"), _NST(state, 3, "self", "index", "object"), NULL, _UINTS(3, PYLT_OBJ_TYPE_LIST, PYLT_OBJ_TYPE_INT, 0), &pylt_method_list_insert);
+    pylt_cmethod_register(state, type, _NS(state, "pop"), _NST(state, 2, "self", "index"), _NT(state, 2, 0, pylt_obj_int_new(state, -1)), _UINTS(2, PYLT_OBJ_TYPE_LIST, PYLT_OBJ_TYPE_INT), &pylt_method_list_pop);
+    pylt_cmethod_register_1_args(state, type, _NS(state, "remove"), &pylt_method_list_remove);
+    pylt_cmethod_register_0_args(state, type, _NS(state, "reverse"), &pylt_method_list_reverse);
     pylt_obj_type_register(state, type);
 
     // tuple

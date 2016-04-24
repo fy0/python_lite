@@ -21,7 +21,7 @@ PyLiteListObject* pylt_obj_list_copy(PyLiteState *state, PyLiteListObject *self)
 pl_uint_t pylt_obj_list_ccount(PyLiteState *state, PyLiteListObject *self);
 void pylt_obj_list_extend(PyLiteState *state, PyLiteListObject *self, PyLiteListObject *obj);
 pl_int_t pylt_obj_list_cindex(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
-void pylt_obj_list_insert(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
+pl_bool_t pylt_obj_list_insert(PyLiteState *state, PyLiteListObject *self, pl_int_t index, PyLiteObject *obj);
 PyLiteObject* pylt_obj_list_pop(PyLiteState *state, PyLiteListObject *self);
 pl_bool_t pylt_obj_list_remove(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
 void pylt_obj_list_reverse(PyLiteState *state, PyLiteListObject *self);

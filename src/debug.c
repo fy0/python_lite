@@ -1,8 +1,9 @@
 ﻿
+#include "types/all.h"
 #include "debug.h"
 #include "lexer.h"
 #include "vm.h"
-#include "types/all.h"
+#include "api.h"
 
 const char* get_op_name(uint32_t val) {
     return pylt_vm_get_op_name(val);
