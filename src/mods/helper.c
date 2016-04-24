@@ -32,30 +32,30 @@ PyLiteTupleObject* _NST(PyLiteState *state, int n, ...) {
     return obj;
 }
 
-int* _INTS(int n, ...) {
+pl_uint_t* _UINTS(pl_uint_t n, ...) {
     va_list args;
-    int *ret = pylt_realloc(NULL, sizeof(int) * n);
+    pl_uint_t *ret = pylt_realloc(NULL, sizeof(pl_uint_t) * n);
 
     va_start(args, n);
     for (int i = 0; i < n; ++i) {
-        ret[i] = va_arg(args, int);
+        ret[i] = va_arg(args, pl_uint_t);
     }
     va_end(args);
     return ret;
 }
 
-PyLiteCFunctionObject* pylt_cfunc_register(PyLiteState *state, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc) {
+PyLiteCFunctionObject* pylt_cfunc_register(PyLiteState *state, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_obj_cfunc_new(state, name, param_names, defaults, types, cfunc);
     pylt_obj_table_set(mod->attrs, castobj(name), castobj(func));
     return func;
 }
 
-PyLiteCFunctionObject* pylt_cmethod_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc) {
+PyLiteCFunctionObject* pylt_cmethod_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_obj_cfunc_new(state, name, param_names, defaults, types, cfunc);
     pylt_obj_type_setattr(state, type, castobj(name), castobj(func));
     return func;
 }
 
 PyLiteCFunctionObject* pylt_cmethod_register_0_args(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc) {
-    return pylt_cmethod_register(state, type, name, _NST(state, 1, "self"), NULL, _INTS(1, type->ob_reftype), cfunc);
+    return pylt_cmethod_register(state, type, name, _NST(state, 1, "self"), NULL, _UINTS(1, type->ob_reftype), cfunc);
 }

@@ -5,8 +5,8 @@
 #include "../types/all.h"
 #include "mods.h"
 
-PyLiteCFunctionObject* pylt_cfunc_register(PyLiteState *state, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc);
-PyLiteCFunctionObject* pylt_cmethod_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, int *types, PyLiteCFunctionPtr cfunc);
+PyLiteCFunctionObject* pylt_cfunc_register(PyLiteState *state, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc);
+PyLiteCFunctionObject* pylt_cmethod_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc);
 PyLiteCFunctionObject* pylt_cmethod_register_0_args(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc);
 
 
@@ -15,7 +15,7 @@ PyLiteCFunctionObject* pylt_cmethod_register_0_args(PyLiteState *state, PyLiteTy
 PyLiteTupleObject* _NT(PyLiteState *state, int n, ...);
 PyLiteTupleObject* _NST(PyLiteState *state, int n, ...);
 
-int* _INTS(int n, ...);
+pl_uint_t* _UINTS(pl_uint_t n, ...);
 
 //#define NS(str) pylt_obj_str_new_from_c_str(state, str, true)
 

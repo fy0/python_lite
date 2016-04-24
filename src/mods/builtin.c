@@ -47,7 +47,7 @@ PyLiteObject* pylt_mods_builtins_gettype(PyLiteState *state, int argc, PyLiteObj
 
 PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     PyLiteModuleObject *mod = pylt_obj_module_new(state, NULL);
-    static int print_types[] = { 0, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR };
+    static pl_uint_t print_types[] = { 0, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR };
 
     pylt_cfunc_register(
         state,
@@ -66,12 +66,12 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
         _NS(state, "__import__"),
         _NST(state, 1, "name", "globals", "locals"),
         NULL,
-        _INTS(1, PYLT_OBJ_TYPE_STR),
+        _UINTS(1, PYLT_OBJ_TYPE_STR),
         &pylt_mods_builtins_import
     );
 
 
-    static int setattr_types[] = { PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PTLT_OBJ_TYPE_OBJ };
+    static pl_uint_t setattr_types[] = { PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PTLT_OBJ_TYPE_OBJ };
 
     pylt_cfunc_register(
         state,
