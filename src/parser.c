@@ -238,6 +238,7 @@ bool parse_try_t(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     PyLiteObject *obj;
     PyLiteInstruction ins;
+    pl_bool_t old_disable_expr_tuple_parse;
 
     switch (tk->val) {
         case TK_NAME:
@@ -333,6 +334,7 @@ bool parse_try_t(ParserState *ps) {
                     kv_top(ps->info->code->opcodes).exarg = 1;
                 }
 
+                old_disable_expr_tuple_parse = ps->disable_expr_tuple_parse;
                 ps->disable_expr_tuple_parse = true;
                 while (true) {
                     if (!parse_try_expr(ps)) break;
@@ -370,7 +372,7 @@ bool parse_try_t(ParserState *ps) {
                 }
                 write_ins(ps, BC_CALL, (num2) ? 1 : 0, num);
                 ACCEPT(ps, ')');
-                ps->disable_expr_tuple_parse = false;
+                ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
                 break;
             default:
                 goto _tail;
