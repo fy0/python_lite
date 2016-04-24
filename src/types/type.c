@@ -20,3 +20,7 @@ PyLiteObject* pylt_obj_type_getattr(PyLiteState *state, PyLiteTypeObject *self, 
 void pylt_obj_type_setattr(PyLiteState *state, PyLiteTypeObject *self, PyLiteObject* key, PyLiteObject* value) {
     pylt_obj_dict_csetitem(state, self->ob_attrs, key, value);
 }
+
+pl_uint32_t pylt_obj_type_chash(PyLiteState *state, PyLiteTypeObject *self) {
+    return self->ob_reftype;
+}

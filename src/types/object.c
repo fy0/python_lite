@@ -208,6 +208,7 @@ pl_uint32_t pylt_obj_chash(PyLiteState *state, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_chash(state, castbool(obj));
         case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_chash(state, castbytes(obj));
         case PYLT_OBJ_TYPE_STR: return pylt_obj_str_chash(state, caststr(obj));
+        case PYLT_OBJ_TYPE_TYPE: return pylt_obj_type_chash(state, casttype(obj));
     }
     // custom type
     return 0;

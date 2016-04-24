@@ -79,7 +79,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
         _NS(state, "setattr"),
         _NST(state, 3, "object", "name", "value"),
         NULL,
-        (int*)&print_types,
+        (int*)&setattr_types,
         &pylt_mods_builtins_setattr
     );
 
