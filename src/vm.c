@@ -487,7 +487,8 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 tobj = castobj(kv_pop(state->vm.stack));
                 tret = pylt_obj_getattr(state, tobj, const_obj(ins.extra), &at_type);
                 if (!tret) {
-                    printf("IndexError: list assignment index out of range\n");
+                    // TODO
+                    printf("AttributeError: %s object has no this attribute\n", pylt_type_name(tobj->ob_type));
                     return;
                 }
                 kv_pushptr(vm->stack, tret);

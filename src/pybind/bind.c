@@ -16,7 +16,6 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // object
     type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_OBJ, 0);
-    pylt_cmethod_register_0_args(state, type, _NS(state, "mro"), &pylt_method_obj_mro);
     pylt_obj_type_register(state, type);
 
     // int
@@ -95,6 +94,7 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // type
     type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_TYPE, PYLT_OBJ_TYPE_OBJ);
+    pylt_cmethod_register_0_args(state, type, _NS(state, "mro"), &pylt_method_type_mro);
     pylt_obj_type_register(state, type);
 
     // iter

@@ -268,6 +268,7 @@ pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj) {
 }
 
 PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type) {
+    PyLiteObject *ret;
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_MODULE:
             if (p_at_type) *p_at_type = false;
@@ -275,8 +276,14 @@ PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObje
             break;
         case PYLT_OBJ_TYPE_TYPE:
             if (p_at_type) *p_at_type = false;
-            return pylt_obj_type_getattr(state, casttype(obj), key);
-            break;
+            ret = pylt_obj_type_getattr(state, casttype(obj), key);
+            if (!ret) {
+                ret = pylt_obj_type_getattr(state, pylt_api_gettype(state, PYLT_OBJ_TYPE_TYPE), key);
+                if (ret && p_at_type) {
+                    *p_at_type = true;
+                }
+            }
+            return ret;
         default:
             if (p_at_type) *p_at_type = true;
             return pylt_obj_getattr(state, castobj(pylt_api_gettype(state, obj->ob_type)), key, NULL);

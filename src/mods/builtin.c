@@ -139,5 +139,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     pylt_mod_setattr(state, mod, "tuple", pylt_api_gettype(state, PYLT_OBJ_TYPE_TUPLE));
     pylt_mod_setattr(state, mod, "dict", pylt_api_gettype(state, PYLT_OBJ_TYPE_DICT));
 
+    pylt_mod_setattr(state, mod, "type", pylt_api_gettype(state, PYLT_OBJ_TYPE_TYPE));
+
     return mod;
 }

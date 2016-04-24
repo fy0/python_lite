@@ -1,16 +1,26 @@
 ﻿
 #include "common.h"
+#include "../api.h"
 #include "../types/all.h"
 
-PyLiteObject* pylt_method_obj_mro(PyLiteState *state, int argc, PyLiteObject **args) {
-    return NULL;
+PyLiteObject* pylt_method_type_mro(PyLiteState *state, int argc, PyLiteObject **args) {
+    PyLiteTypeObject* type;
+    PyLiteListObject *lst = pylt_obj_list_new(state);
+    pl_uint32_t ob_type = casttype(args[0])->ob_reftype;
+
+    while (ob_type) {
+        type = pylt_api_gettype(state, ob_type);
+        pylt_obj_list_append(state, lst, castobj(type));
+        ob_type = type->ob_base;
+    }
+
+    return castobj(lst);
 }
 
 
-
 PyLiteObject* pylt_method_int_is_integer(PyLiteState *state, int argc, PyLiteObject **args) {
-    PyLiteFloatObject *self = castfloat(args[0]);
     double i;
+    PyLiteFloatObject *self = castfloat(args[0]);
     return castobj((modf(self->ob_val, &i) == 0) ? &PyLiteTrue : &PyLiteFalse);
 }
 
