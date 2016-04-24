@@ -60,6 +60,7 @@ enum PyLiteObjectTypeCode {
 pl_int_t pylt_obj_ccmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
 pl_bool_t pylt_obj_ceq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
 pl_uint32_t pylt_obj_chash(PyLiteState *state, PyLiteObject *obj);
+pl_int_t pylt_obj_len(PyLiteState *state, PyLiteObject *obj);
 
 pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj);
 pl_bool_t pylt_obj_citerable(PyLiteState *state, PyLiteObject *obj);

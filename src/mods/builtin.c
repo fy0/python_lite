@@ -35,11 +35,11 @@ PyLiteObject* pylt_mods_builtins_hash(PyLiteState *state, int argc, PyLiteObject
 }
 
 PyLiteObject* pylt_mods_builtins_len(PyLiteState *state, int argc, PyLiteObject **args) {
-    ;
+    return castobj(pylt_obj_int_new(state, (pl_int_t)pylt_obj_len(state, args[0])));
 }
 
 PyLiteObject* pylt_mods_builtins_dir(PyLiteState *state, int argc, PyLiteObject **args) {
-    ;
+    return NULL;
 }
 
 PyLiteObject* pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObject **args) {

@@ -261,7 +261,8 @@ pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_INT: return castint(obj)->ob_val != 0;
         case PYLT_OBJ_TYPE_FLOAT: return castfloat(obj)->ob_val != 0;
         case PYLT_OBJ_TYPE_BOOL: return castbool(obj)->ob_val != 0;
-        case PYLT_OBJ_TYPE_STR: return castbytes(obj)->ob_size != 0;
+        case PYLT_OBJ_TYPE_BYTES: return castbytes(obj)->ob_size != 0;
+        case PYLT_OBJ_TYPE_STR: return caststr(obj)->ob_size != 0;
         default: return true;
     }
 }
@@ -371,4 +372,16 @@ PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, Py
 
 void pylt_obj_free(PyLiteObject *obj) {
     ;
+}
+
+pl_int_t pylt_obj_len(PyLiteState *state, PyLiteObject *obj) {
+    switch (obj->ob_type) {
+        case PYLT_OBJ_TYPE_BYTES: return castbytes(obj)->ob_size;
+        case PYLT_OBJ_TYPE_STR: return caststr(obj)->ob_size;
+        case PYLT_OBJ_TYPE_SET: return pylt_obj_set_len(state, castset(obj));
+        case PYLT_OBJ_TYPE_LIST: return pylt_obj_list_ccount(state, castlist(obj));
+        case PYLT_OBJ_TYPE_TUPLE: return casttuple(obj)->ob_size;
+        case PYLT_OBJ_TYPE_DICT: return pylt_obj_dict_len(state, castdict(obj));
+    }
+    return -1;
 }
