@@ -1,5 +1,6 @@
 ﻿
 #include "vm.h"
+#include "api.h"
 #include "state.h"
 #include "debug.h"
 #include "lib/kvec.h"
@@ -324,7 +325,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         break;
                     default:
                         ta = castobj(kv_pop(state->vm.stack));
-                        tret = pylt_obj_op_unary(state, ins.exarg, ta);
+                        tret = pylt_obj_op_unary(state, ins.extra, ta);
                         if (!tret) {
                             printf("TypeError: bad operand type for unary %s: '%s'\n", pylt_vm_get_op_name(ins.exarg), pylt_obj_type_name_cstr(state, ta));
                             return;
