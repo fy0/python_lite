@@ -26,6 +26,21 @@ PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObjec
     return NULL;
 }
 
+PyLiteObject* pylt_mods_builtins_id(PyLiteState *state, int argc, PyLiteObject **args) {
+    return castobj(pylt_obj_int_new(state, (pl_int_t)args[0]));
+}
+
+PyLiteObject* pylt_mods_builtins_hash(PyLiteState *state, int argc, PyLiteObject **args) {
+    return castobj(pylt_obj_int_new(state, (pl_int_t)pylt_obj_chash(state, args[0])));
+}
+
+PyLiteObject* pylt_mods_builtins_len(PyLiteState *state, int argc, PyLiteObject **args) {
+    ;
+}
+
+PyLiteObject* pylt_mods_builtins_dir(PyLiteState *state, int argc, PyLiteObject **args) {
+    ;
+}
 
 PyLiteObject* pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObject **args) {
     ;
@@ -83,14 +98,11 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
         &pylt_mods_builtins_setattr
     );
 
-    pylt_cfunc_register(
-        state, mod,
-        _NS(state, "gettype"),
-        _NST(state, 1, "object"),
-        NULL,
-        NULL,
-        &pylt_mods_builtins_gettype
-    );
+    pylt_cfunc_register(state, mod, _NS(state, "gettype"), _NST(state, 1, "object"), NULL, NULL, &pylt_mods_builtins_gettype);
+    pylt_cfunc_register(state, mod, _NS(state, "id"), _NST(state, 1, "object"), NULL, NULL, &pylt_mods_builtins_id);
+    pylt_cfunc_register(state, mod, _NS(state, "dir"), _NST(state, 1, "object"), NULL, NULL, &pylt_mods_builtins_dir);
+    pylt_cfunc_register(state, mod, _NS(state, "len"), _NST(state, 1, "object"), NULL, NULL, &pylt_mods_builtins_len);
+    pylt_cfunc_register(state, mod, _NS(state, "hash"), _NST(state, 1, "object"), NULL, NULL, &pylt_mods_builtins_hash);
 
     pylt_mod_setattr(state, mod, "object", pylt_gettype(state, PTLT_OBJ_TYPE_OBJ));
     pylt_mod_setattr(state, mod, "int", pylt_gettype(state, PYLT_OBJ_TYPE_INT));
