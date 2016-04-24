@@ -16,6 +16,8 @@ pl_bool_t pylt_obj_set_ceq(PyLiteState *state, PyLiteSetObject *self, PyLiteObje
 
 pl_int_t pylt_obj_set_len(PyLiteState *state, PyLiteSetObject *self);
 pl_int_t pylt_obj_set_add(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *obj);
+void pylt_obj_set_clear(PyLiteState *state, PyLiteSetObject *self);
+PyLiteSetObject* pylt_obj_set_copy(PyLiteState *state, PyLiteSetObject *self);
 pl_bool_t pylt_obj_set_contains(PyLiteState *state, PyLiteSetObject *self, PyLiteSetObject *other);
 PyLiteObject* pylt_obj_set_has(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *obj);
 

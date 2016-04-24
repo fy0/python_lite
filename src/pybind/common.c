@@ -22,14 +22,12 @@ PyLiteObject* pylt_method_set_add(PyLiteState *state, int argc, PyLiteObject **a
 }
 
 PyLiteObject* pylt_method_set_clear(PyLiteState *state, int argc, PyLiteObject **args) {
-    // TOOD
+    pylt_obj_set_clear(state, castset(args[0]));
     return NULL;
 }
 
 PyLiteObject* pylt_method_set_copy(PyLiteState *state, int argc, PyLiteObject **args) {
-    // TODO
-    // return pylt_obj_set_copy(state, castlist(args[0]));
-    return NULL;
+    return castobj(pylt_obj_set_copy(state, castset(args[0])));
 }
 
 PyLiteObject* pylt_method_set_pop(PyLiteState *state, int argc, PyLiteObject **args) {

@@ -49,6 +49,21 @@ pl_int_t pylt_obj_set_add(PyLiteState *state, PyLiteSetObject *self, PyLiteObjec
     return 0;
 }
 
+void pylt_obj_set_clear(PyLiteState *state, PyLiteSetObject *self) {
+    kho_clear_set_obj(self->ob_val);
+}
+
+PyLiteSetObject* pylt_obj_set_copy(PyLiteState *state, PyLiteSetObject *self) {
+    PyLiteSetObject *obj = pylt_obj_set_new(state);
+    kho_resize(set_obj, obj->ob_val, pylt_obj_set_len(state, self));
+
+    for (pl_int_t k = pylt_obj_set_begin(state, self); k != pylt_obj_set_end(state, self); k = pylt_obj_set_next(state, self, k)) {
+        pylt_obj_set_add(state, obj, pylt_obj_set_itemvalue(state, self, k));
+    }
+
+    return obj;
+}
+
 PyLiteObject* pylt_obj_set_has(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *obj) {
     khiter_t x = kho_get(set_obj, self->ob_val, obj);
     return (x != kho_end(self->ob_val)) ? kho_key(self->ob_val, x) : NULL;
@@ -62,13 +77,12 @@ pl_int_t pylt_obj_set_remove(PyLiteState *state, PyLiteSetObject *self, PyLiteOb
 }
 
 PyLiteObject* pylt_obj_set_pop(PyLiteState *state, PyLiteSetObject *self) {
-    khiter_t x;
+    khiter_t k;
     if (kho_size(self->ob_val) == 0)
         return NULL;
-    x = kho_begin(self->ob_val);
-    if (kho_exist(self->ob_val, x))
-        return kho_key(self->ob_val, x);
-    return NULL;
+    k = pylt_obj_set_begin(state, self);
+    kho_del(set_obj, self->ob_val, k);
+    return pylt_obj_set_itemvalue(state, self, k);
 }
 
 pl_int_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self) {
