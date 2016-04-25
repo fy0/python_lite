@@ -39,7 +39,24 @@ PyLiteObject* pylt_mods_builtins_len(PyLiteState *state, int argc, PyLiteObject 
 }
 
 PyLiteObject* pylt_mods_builtins_dir(PyLiteState *state, int argc, PyLiteObject **args) {
-    return NULL;
+    PyLiteListObject *lst = pylt_obj_list_new(state);
+    PyLiteTypeObject *type = pylt_api_gettype(state, args[0]->ob_type);
+
+    for (pl_int_t it = pylt_obj_dict_begin(state, type->ob_attrs); it != pylt_obj_dict_end(state, type->ob_attrs); pylt_obj_dict_next(state, type->ob_attrs, &it)) {
+        pylt_obj_list_append(state, lst, pylt_obj_dict_itemkey(state, type->ob_attrs, it));
+    }
+
+    switch (type->ob_reftype) {
+        case PYLT_OBJ_TYPE_MODULE:
+            break;
+        case PYLT_OBJ_TYPE_TYPE:
+            for (pl_int_t it = pylt_obj_dict_begin(state, casttype(args[0])->ob_attrs); it != pylt_obj_dict_end(state, casttype(args[0])->ob_attrs); pylt_obj_dict_next(state, casttype(args[0])->ob_attrs, &it)) {
+                pylt_obj_list_append(state, lst, pylt_obj_dict_itemkey(state, casttype(args[0])->ob_attrs, it));
+            }
+            break;
+    }
+
+    return castobj(lst);
 }
 
 PyLiteObject* pylt_mods_builtins_iter(PyLiteState *state, int argc, PyLiteObject **args) {

@@ -248,7 +248,7 @@ int func_call_check(PyLiteState* state, PyLiteObject *func_obj, int params_num, 
                 // 类型不符合，报错
                 printf("TypeError: ");
                 debug_print_obj(castobj(info->params[i]));
-                printf(" must be %s\n", pylt_type_name(info->type_codes[i]));
+                printf(" must be %s\n", pylt_api_type_name(info->type_codes[i]));
                 return 3;
             }
         }
@@ -318,7 +318,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         ta = castobj(kv_pop(state->vm.stack));
                         tret = pylt_obj_op_binary(state, ins.extra, ta, tb);
                         if (!tret) {
-                            printf("TypeError: unsupported operand type(s) for %s: '%s' and '%s'\n", pylt_vm_get_op_name(ins.exarg), pylt_obj_type_name_cstr(state, ta), pylt_obj_type_name_cstr(state, tb));
+                            printf("TypeError: unsupported operand type(s) for %s: '%s' and '%s'\n", pylt_vm_get_op_name(ins.extra), pylt_obj_type_name_cstr(state, ta), pylt_obj_type_name_cstr(state, tb));
                             return;
                         }
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tret);
@@ -488,7 +488,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 tret = pylt_obj_getattr(state, tobj, const_obj(ins.extra), &at_type);
                 if (!tret) {
                     // TODO
-                    printf("AttributeError: %s object has no this attribute\n", pylt_type_name(tobj->ob_type));
+                    printf("AttributeError: %s object has no this attribute\n", pylt_api_type_name(tobj->ob_type));
                     return;
                 }
                 kv_pushptr(vm->stack, tret);

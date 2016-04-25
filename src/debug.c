@@ -35,7 +35,7 @@ void debug_print_obj(PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_MODULE:
             break;
         case PYLT_OBJ_TYPE_TYPE:
-            printf("<class '%s'>", pylt_type_name(casttype(obj)->ob_reftype));
+            printf("<class '%s'>", pylt_api_type_name(casttype(obj)->ob_reftype));
             break;
         case PYLT_OBJ_TYPE_TUPLE:
             printf("(");
@@ -96,7 +96,7 @@ void debug_print_const_vals(ParserState *ps) {
     printf("CONST VALS:\n");
     for (unsigned int i = 0; i < kv_size(ps->info->code->const_val); i++) {
         PyLiteObject *obj = kv_A(ps->info->code->const_val, i);
-        printf("   %-4d %-8s ", i, pylt_type_name(obj->ob_type));
+        printf("   %-4d %-8s ", i, pylt_api_type_name(obj->ob_type));
         debug_print_obj(obj);
         putchar('\n');
     }
@@ -131,7 +131,7 @@ void debug_print_opcodes(ParserState *ps) {
                 printf("   %-15s %d\n", "LOADCONST", ins.extra);
                 break;
             case BC_NEW_OBJ:
-                printf("   %-15s %s %d\n", "NEW_OBJ", pylt_type_name(ins.exarg), ins.extra);
+                printf("   %-15s %s %d\n", "NEW_OBJ", pylt_api_type_name(ins.exarg), ins.extra);
                 break;
             case BC_CALL:
                 printf("   %-15s %d", "CALL", ins.extra);
