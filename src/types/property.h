@@ -1,0 +1,19 @@
+
+#ifndef PYLITE_TYPES_PROPERTY_H
+#define PYLITE_TYPES_PROPERTY_H
+
+#include "object.h"
+#include "function.h"
+
+typedef struct PyLitePropertyObject {
+    PyLiteObject_HEAD;
+    union  {
+        PyLiteCFunctionObject *cfunc;
+        PyLiteFunctionObject *pyfunc;
+        PyLiteObject *func;
+    };
+} PyLitePropertyObject;
+
+PyLitePropertyObject* pylt_obj_property_new(PyLiteState *state, PyLiteObject *func);
+
+#endif

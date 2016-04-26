@@ -386,6 +386,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 }
                 break;
             case BC_CALL:
+                _BC_CALL:
                 // BC_CALL      0       params_num
                 params_num = ins.extra + params_offset;
                 params_offset = 0;
@@ -494,11 +495,26 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 kv_pushptr(vm->stack, tret);
 
                 // next instruction is BC_CALL, and it's a method!
-                if (ins.exarg && at_type) {
-                    kv_pushptr(vm->stack, tobj);
-                    params_offset = 1;
+                if (at_type) {
+                    if (ins.exarg) {
+                        kv_pushptr(vm->stack, tobj);
+                        params_offset = 1;
+                        break;
+                    }
+                    if (tret->ob_type == PYLT_OBJ_TYPE_PROP) {
+                        ins.code = BC_CALL;
+                        ins.exarg = 0;
+                        ins.extra = 1;
+                        // TODO: 这里以后最好直接传prop对象
+                        kv_pop(vm->stack);
+                        kv_pushptr(vm->stack, castprop(tret)->func);
+                        kv_pushptr(vm->stack, tobj);
+                        goto _BC_CALL;
+                    }
                 }
-                break;
+
+                printf("AttributeError: %s object has no this attribute\n", pylt_api_type_name(tobj->ob_type));
+                return;
             case BC_SET_ATTR:
                 // SET_ITEM     0       const_id
                 tobj = castobj(kv_pop(state->vm.stack));

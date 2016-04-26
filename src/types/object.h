@@ -50,9 +50,11 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_ITER,
     PYLT_OBJ_TYPE_CLASS,
     PYLT_OBJ_TYPE_NONE,
+
+    PYLT_OBJ_TYPE_PROP, // 19
 };
 
-#define PYLT_OBJ_TYPE_NUM PYLT_OBJ_TYPE_NONE
+#define PYLT_OBJ_TYPE_NUM PYLT_OBJ_TYPE_PROP
 
 
 // Object methods
@@ -137,6 +139,7 @@ struct PyLiteIterObject;
 #define castclass(i)    cast(struct PyLiteCustomObject*, (i))
 #define castiter(i)     cast(struct PyLiteIterObject*, (i))
 
+#define castprop(i)     cast(struct PyLitePropertyObject*, (i))
 
 void pylt_obj_free(PyLiteObject *obj);
 //comparable

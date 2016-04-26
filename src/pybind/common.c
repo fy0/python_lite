@@ -17,6 +17,11 @@ PyLiteObject* pylt_method_type_mro(PyLiteState *state, int argc, PyLiteObject **
     return castobj(lst);
 }
 
+PyLiteObject* pylt_prop_type_base(PyLiteState *state, int argc, PyLiteObject **args) {
+    PyLiteTypeObject *type = pylt_api_gettype(state, args[0]->ob_type);
+    return castobj(pylt_api_gettype(state, type->ob_base));
+}
+
 
 PyLiteObject* pylt_method_int_is_integer(PyLiteState *state, int argc, PyLiteObject **args) {
     double i;

@@ -7,7 +7,7 @@
 
 void pylt_obj_type_register(PyLiteState *state, PyLiteTypeObject* type) {
     kv_A(state->cls_base, type->ob_reftype) = type;
-    pylt_obj_type_setattr(state, type, castobj(_NS(state, "__base__")), castobj(kv_A(state->cls_base, type->ob_base)));
+    //pylt_obj_type_setattr(state, type, castobj(_NS(state, "__base__")), castobj(kv_A(state->cls_base, type->ob_base)));
 }
 
 void pylt_bind_all_types_register(PyLiteState *state) {
@@ -95,6 +95,7 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     // type
     type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_TYPE, PYLT_OBJ_TYPE_OBJ);
     pylt_cmethod_register_0_args(state, type, _NS(state, "mro"), &pylt_method_type_mro);
+    pylt_cprop_register(state, type, _NS(state, "__base__"), &pylt_prop_type_base);
     pylt_obj_type_register(state, type);
 
     // iter

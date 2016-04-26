@@ -5,6 +5,7 @@
 #include "../types/object.h"
 
 PyLiteObject* pylt_method_type_mro(PyLiteState *state, int argc, PyLiteObject **args);
+PyLiteObject* pylt_prop_type_base(PyLiteState *state, int argc, PyLiteObject **args);
 
 PyLiteObject* pylt_method_int_is_integer(PyLiteState *state, int argc, PyLiteObject **args);
 

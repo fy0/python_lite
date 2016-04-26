@@ -72,29 +72,54 @@ void* basetype_op_func_table[][23] = {
         NULL, NULL, NULL, NULL
     },
 
-    { // function
-        //NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
-        NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL, NULL
-    },
     { // module
         //NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
         NULL, NULL, NULL, NULL, NULL,
         &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
-
-    { // type
+    { // function
         //NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
         NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL
+    },
+    { // cfunction
+        NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL
+    },
+    { // code
+        NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL
+    },
+
+    { // type
+        NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL
+    },
+    { // iter
+        NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // class
-        //NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
         NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL
+    },
+    { // none
+        NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL
+    },
+
+
+    { // prop
+        NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
 };

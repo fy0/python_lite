@@ -21,4 +21,6 @@
 #include "iter.h"
 #include "none.h"
 
+#include "property.h"
+
 #endif

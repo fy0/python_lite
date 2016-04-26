@@ -34,12 +34,14 @@ const char* pylt_obj_basetypes[] = {
     "module",
     "function",
     "cfunction",
-    "codesnippet",
+    "code",
 
     "type",
     "iter",
     "class",
     "none",
+
+    "property",
 };
 
 const char* pylt_obj_type_name_cstr(PyLiteState *state, PyLiteObject *obj) {
