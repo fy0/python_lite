@@ -26,6 +26,7 @@ enum {
     BC_SET_ITEM,       // 存入下标
     BC_GET_ATTR,       // 取属性
     BC_SET_ATTR,       // 存入属性
+    BC_ASSERT,         // 真值断言
 
     BC_FAKE_BREAK,     // 伪指令，break
     BC_FAKE_CONTINUE,  // 伪指令，continue

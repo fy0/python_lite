@@ -525,6 +525,13 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 }
                 kv_pushptr(vm->stack, tb);
                 break;
+            case BC_ASSERT:
+                // ASSERT       0       0
+                if (!pylt_obj_cistrue(state, castobj(kv_pop(state->vm.stack)))) {
+                    printf("AssertionError\n");
+                    return;
+                }
+                break;
             case BC_PRINT:
                 if (kv_size(state->vm.stack) != 0) {
                     debug_print_obj(castobj(kv_top(state->vm.stack)));

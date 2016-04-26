@@ -184,6 +184,9 @@ void debug_print_opcodes(ParserState *ps) {
             case BC_SET_ATTR:
                 printf("   %-15s %d\n", "SET_ATTR", ins.extra);
                 break;
+            case BC_ASSERT:
+                printf("   %-15s\n", "ASSERT");
+                break;
             case BC_PRINT:
                 printf("   %-15s\n", "PRINT");
                 break;
