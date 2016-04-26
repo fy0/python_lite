@@ -80,10 +80,13 @@ void debug_print_obj(PyLiteObject *obj) {
             printf("}");
             break;
         case PYLT_OBJ_TYPE_CODESNIPPET:
-            printf("Code");
+            printf("<code>");
             break;
         case PYLT_OBJ_TYPE_NONE:
             printf("None");
+            break;
+        case PYLT_OBJ_TYPE_PROP:
+            printf("<property>");
             break;
         default:
             if (obj->ob_type >= PYLT_OBJ_TYPE_CLASS) {

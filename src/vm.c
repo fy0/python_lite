@@ -398,6 +398,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 // check
                 PyLiteFunctionInfo *func_info;
                 if (func_call_check(state, tobj, params_num, castdict(ta), &func_info)) {
+                    printf("TypeError: '%s' object is not callable\n", pylt_api_type_name(tobj->ob_type));
                     return;
                 }
 
@@ -499,7 +500,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                     if (ins.exarg) {
                         kv_pushptr(vm->stack, tobj);
                         params_offset = 1;
-                        break;
+                        continue;
                     }
                     if (tret->ob_type == PYLT_OBJ_TYPE_PROP) {
                         ins.code = BC_CALL;
@@ -513,8 +514,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                     }
                 }
 
-                printf("AttributeError: %s object has no this attribute\n", pylt_api_type_name(tobj->ob_type));
-                return;
+                break;
             case BC_SET_ATTR:
                 // SET_ITEM     0       const_id
                 tobj = castobj(kv_pop(state->vm.stack));
