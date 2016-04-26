@@ -380,21 +380,6 @@ bool parse_try_t(ParserState *ps) {
     }
 
 _tail:
-    // is tuple ?
-    if (!ps->disable_expr_tuple_parse) {
-        if (!ps->info->at_parse_mutable && tk->val == ',') {
-            next(ps);
-            num = 1;
-            while (true) {
-                if (!parse_try_expr(ps)) break;
-                num++;
-                if (tk->val != ',') break;
-                next(ps);
-            }
-            write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TUPLE, num);
-        }
-    }
-
     return true;
 }
 
@@ -415,6 +400,27 @@ bool parse_try_expr(ParserState *ps) {
     parse_expr3(ps);
     parse_expr2(ps);
     parse_expr1(ps);
+
+    // is tuple ?
+    if (!ps->disable_expr_tuple_parse) {
+        int num;
+        Token *tk = &(ps->ls->token);
+
+        if (!ps->info->at_parse_mutable && tk->val == ',') {
+            next(ps);
+            num = 1;
+            ps->disable_expr_tuple_parse = true;
+            while (true) {
+                if (!parse_try_expr(ps)) break;
+                num++;
+                if (tk->val != ',') break;
+                next(ps);
+            }
+            write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TUPLE, num);
+            ps->disable_expr_tuple_parse = false;
+        }
+    }
+
     return true;
 }
 
