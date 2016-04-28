@@ -75,10 +75,27 @@ void pylt_obj_dict_keyvalue(PyLiteState *state, PyLiteDictObject *self, pl_int_t
     pylt_obj_table_keyvalue(self->ob_val, k, pkey, pval);
 }
 
+PyLiteDictObject* pylt_obj_dict_copy(PyLiteState *state, PyLiteDictObject *self) {
+    PyLiteDictObject *obj = pylt_obj_dict_new(state);
+    kho_resize(table, obj->ob_val, pylt_obj_dict_len(state, self));
+
+    for (pl_int_t k = pylt_obj_dict_begin(state, self); k != pylt_obj_dict_end(state, self); pylt_obj_dict_next(state, self, &k)) {
+        pylt_obj_dict_csetitem(state, obj, pylt_obj_dict_itemkey(state, self, k), pylt_obj_dict_itemvalue(state, self, k));
+    }
+
+    return obj;
+}
 
 PyLiteDictObject* pylt_obj_dict_new(PyLiteState *state) {
     PyLiteDictObject *obj = pylt_realloc(NULL, sizeof(PyLiteDictObject));
     obj->ob_type = PYLT_OBJ_TYPE_DICT;
     obj->ob_val = pylt_obj_table_new(state);
+    return obj;
+}
+
+PyLiteDictObject* pylt_obj_dict_new_with_tab(PyLiteState *state, PyLiteTable *tab) {
+    PyLiteDictObject *obj = pylt_realloc(NULL, sizeof(PyLiteDictObject));
+    obj->ob_type = PYLT_OBJ_TYPE_DICT;
+    obj->ob_val = tab;
     return obj;
 }

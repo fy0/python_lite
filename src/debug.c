@@ -89,7 +89,7 @@ void debug_print_obj(PyLiteObject *obj) {
             printf("<property>");
             break;
         default:
-            if (obj->ob_type >= PYLT_OBJ_TYPE_CLASS) {
+            if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 ;
             }
     }
@@ -132,6 +132,9 @@ void debug_print_opcodes(ParserState *ps) {
                 break;
             case BC_LOADCONST:
                 printf("   %-15s %d\n", "LOADCONST", ins.extra);
+                break;
+            case BC_LOADLOCALS:
+                printf("   %-15s\n", "LOADLOCALS");
                 break;
             case BC_NEW_OBJ:
                 printf("   %-15s %s %d\n", "NEW_OBJ", pylt_api_type_name(ins.exarg), ins.extra);

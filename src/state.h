@@ -14,6 +14,7 @@ typedef struct PyLiteState {
     PyLiteSetObject *cache_str;
     PyLiteSetObject *cache_bytes;
     PyLiteTable *modules;
+    pl_int_t class_num;
     int error_code;
 } PyLiteState;
 

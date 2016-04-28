@@ -11,7 +11,7 @@ void pylt_obj_type_register(PyLiteState *state, PyLiteTypeObject* type) {
 
 void pylt_bind_all_types_register(PyLiteState *state) {
     PyLiteTypeObject *type;
-    kv_resize(PyLiteTypeObject*, state->cls_base, PYLT_OBJ_TYPE_NUM + 10);
+    kv_resize(PyLiteTypeObject*, state->cls_base, PYLT_OBJ_BUILTIN_TYPE_NUM + 10);
 
     // object
     type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_OBJ, 0);
@@ -101,11 +101,9 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_ITER, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
-    // class
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_CLASS, PYLT_OBJ_TYPE_OBJ);
-    pylt_obj_type_register(state, type);
-
     // none
     type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_NONE, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
+
+    state->class_num = PYLT_OBJ_BUILTIN_TYPE_NUM;
 }

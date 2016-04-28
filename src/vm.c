@@ -284,6 +284,10 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                 // LOAD_CONST   0       const_id
                 kv_pushptr(vm->stack, const_obj(ins.extra));
                 break;
+            case BC_LOADLOCALS:
+                // LOADLOCALS   0       0
+                kv_pushptr(vm->stack, pylt_obj_dict_new_with_tab(state, locals));
+                break;
             case BC_SET_VAL:
                 // SET_VAL      0       const_id
                 pylt_obj_table_set(locals, const_obj(ins.extra), castobj(kv_top(state->vm.stack)));
@@ -352,7 +356,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         tfunc->info.name = caststr(ta);
                         tfunc->info.params = castlist(tc)->ob_val;
 
-                        pylt_obj_table_set(locals, ta, castobj(tfunc));
+                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)tfunc);
                         break;
                     case PYLT_OBJ_TYPE_SET:
                         tobj = castobj(pylt_obj_set_new(state));
@@ -382,6 +386,14 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         }
                         kv_popn(vm->stack, ins.extra * 2);
                         kv_push(uintptr_t, vm->stack, (uintptr_t)tobj);
+                        break;
+                    case PYLT_OBJ_TYPE_TYPE:
+                        ta = castobj(kv_pop(vm->stack)); // name
+                        tb = castobj(kv_pop(vm->stack)); // base type
+                        tc = castobj(kv_pop(vm->stack)); // class vars
+                        PyLiteTypeObject *type = pylt_obj_type_new_with_vars(state, caststr(ta), castint(tb)->ob_val, castdict(tc));
+                        pylt_obj_type_register(state, type);
+                        kv_pushptr(vm->stack, type);
                         break;
                 }
                 break;

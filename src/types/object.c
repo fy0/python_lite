@@ -105,7 +105,7 @@ void* basetype_op_func_table[][23] = {
         NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
-    { // class
+    { // prop
         NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
@@ -116,12 +116,6 @@ void* basetype_op_func_table[][23] = {
         NULL, NULL, NULL, NULL
     },
 
-
-    { // prop
-        NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL, NULL
-    },
 };
 
 void pylt_obj_table_set(PyLiteTable *tab, PyLiteObject *key, PyLiteObject *val) {
@@ -255,7 +249,7 @@ pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_DICT:
             return false;
         default:
-            if (obj->ob_type >= PYLT_OBJ_TYPE_CLASS) {
+            if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 //pylt_obj_table_get(castclass(obj)->ob_attrs, "__hash__");
                 return false;
             }
@@ -273,7 +267,7 @@ pl_bool_t pylt_obj_citerable(PyLiteState *state, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_DICT:
             return true;
         default:
-            if (obj->ob_type > PYLT_OBJ_TYPE_NUM) {
+            if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 ;
             }
     }

@@ -11,6 +11,7 @@ enum {
     BC_SET_VAL,        // 赋值
     BC_LOAD_VAL,       // 载入变量（入栈）
     BC_LOADCONST,      // 载入常量
+    BC_LOADLOCALS,     // 载入本地变量空间
     BC_NEW_OBJ,        // 新建对象
     BC_CALL,           // 函数调用
     BC_RET,            // 函数结束

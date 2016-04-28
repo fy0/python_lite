@@ -9,7 +9,6 @@
 
 typedef struct ParserInfo {
     int loop_depth;
-    bool at_parse_mutable;
     PyLiteCodeSnippetObject *code;
     struct ParserInfo *prev;
 } ParserInfo;
@@ -30,6 +29,7 @@ typedef struct ParserState {
     } lval_check;
 
     bool disable_expr_tuple_parse;
+    bool disable_return_parse;
 } ParserState;
  
 #define kv_pushobj(v, x) kv_push(PyLiteObject*, (v), (PyLiteObject*)(x))
@@ -52,5 +52,7 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls);
 #define PYLT_ERR_PARSER_KEYWORD_CANT_BE_AN_EXPR -6
 // SyntaxError: non-keyword arg after keyword arg
 #define PYLT_ERR_PARSER_NON_KEYWORD_ARG_AFTER_KEYWORD_ARG -7
+// SyntaxError: 'return' outside function
+#define PYLT_ERR_PARSER_RETURN_OUTSIDE_FUNCTION -8
 
 #endif

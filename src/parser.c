@@ -30,6 +30,7 @@ bool parse_try_expr(ParserState *ps);
 bool parse_try_expr10(ParserState *ps);
 
 void parse_func(ParserState *ps);
+void parse_class(ParserState *ps);
 void parse_value_assign(ParserState *ps);
 
 void next(ParserState *ps) {
@@ -91,6 +92,9 @@ void error(ParserState *ps, int code) {
             break;
         case PYLT_ERR_PARSER_CANT_ASSIGN_TO_LITERAL:
             printf("SyntaxError: can't assign to literal\n");
+            break;
+        case PYLT_ERR_PARSER_RETURN_OUTSIDE_FUNCTION:
+            printf("SyntaxError: 'return' outside function\n");
             break;
     }
     system("pause");
@@ -215,9 +219,7 @@ bool parse_basetype(ParserState *ps) {
         sload_const(ps, obj);
         return true;
     } else {
-        ps->info->at_parse_mutable = true;
         ret = parse_mutabletype(ps, &times);
-        ps->info->at_parse_mutable = false;
         if (ret) {
             // NEW_OBJ TYPE SIZE
             write_ins(ps, BC_NEW_OBJ, ret, times);
@@ -406,7 +408,7 @@ bool parse_try_expr(ParserState *ps) {
         int num;
         Token *tk = &(ps->ls->token);
 
-        if (!ps->info->at_parse_mutable && tk->val == ',') {
+        if (tk->val == ',') {
             next(ps);
             num = 1;
             ps->disable_expr_tuple_parse = true;
@@ -673,9 +675,10 @@ void loop_control_replace(ParserState *ps, int start_pos) {
 }
 
 void parse_func(ParserState *ps) {
-    Token *tk = &(ps->ls->token);
-    PyLiteObject *func_name;
     ParserInfo *info;
+    PyLiteObject *func_name;
+    Token *tk = &(ps->ls->token);
+    bool old_disable_return;
 
     ACCEPT(ps, TK_KW_DEF);
     if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
@@ -698,6 +701,8 @@ void parse_func(ParserState *ps) {
     ACCEPT(ps, ':');
     ACCEPT(ps, TK_NEWLINE);
 
+    old_disable_return = ps->disable_return_parse;
+    ps->disable_return_parse = false;
     func_push(ps);
     ACCEPT(ps, TK_INDENT);
     parse_stmts(ps);
@@ -705,6 +710,7 @@ void parse_func(ParserState *ps) {
     sload_const(ps, castobj(pylt_obj_none_new(ps->state)));
     write_ins(ps, BC_RET, 0, 0);
     info = func_pop(ps);
+    ps->disable_return_parse = old_disable_return;
 
     // name
     sload_const(ps, func_name);
@@ -714,6 +720,56 @@ void parse_func(ParserState *ps) {
     sload_const(ps, castobj(lst));
 
     write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_FUNCTION, 0);
+    write_ins(ps, BC_SET_VAL, 0, store_const(ps, func_name));
+    write_ins(ps, BC_POP, 0, 0);
+}
+
+
+void parse_class(ParserState *ps) {
+    ParserInfo *info;
+    PyLiteObject *class_name;
+    Token *tk = &(ps->ls->token);
+    PyLiteListObject* lst = pylt_obj_list_new(ps->state);
+    bool old_disable_return;
+
+    ACCEPT(ps, TK_KW_CLASS);
+    if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+    class_name = tk->obj;
+    next(ps);
+
+    if (tk->val == '(') {
+        ;
+        ACCEPT(ps, ')');
+    }
+
+    ACCEPT(ps, ':');
+    ACCEPT(ps, TK_NEWLINE);
+
+    old_disable_return = ps->disable_return_parse;
+    ps->disable_return_parse = true;
+    func_push(ps);
+    ACCEPT(ps, TK_INDENT);
+    parse_stmts(ps);
+    ACCEPT(ps, TK_DEDENT);
+    write_ins(ps, BC_LOADLOCALS, 0, 0);
+    write_ins(ps, BC_RET, 0, 0);
+    info = func_pop(ps);
+    ps->disable_return_parse = old_disable_return;
+
+    // name
+    sload_const(ps, castobj(class_name));
+    // code
+    sload_const(ps, castobj(info->code));
+    // params
+    sload_const(ps, castobj(lst));
+    write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_FUNCTION, 0);
+
+    write_ins(ps, BC_CALL, 0, 0);
+    sload_const(ps, pylt_obj_int_new(ps->state, PYLT_OBJ_TYPE_OBJ));
+    sload_const(ps, castobj(class_name));
+    write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TYPE, 0);
+    write_ins(ps, BC_SET_VAL, 0, store_const(ps, class_name));
+    write_ins(ps, BC_POP, 0, 0);
 }
 
 void parse_value_assign(ParserState *ps) {
@@ -929,7 +985,13 @@ void parse_stmt(ParserState *ps) {
         case TK_KW_DEF:
             parse_func(ps);
             return;
+        case TK_KW_CLASS:
+            parse_class(ps);
+            return;
         case TK_KW_RETURN:
+            if (ps->disable_return_parse) {
+                error(ps, PYLT_ERR_PARSER_RETURN_OUTSIDE_FUNCTION);
+            }
             next(ps);
             if (!parse_try_expr(ps)) {
                 sload_const(ps, castobj(pylt_obj_none_new(ps->state)));
@@ -986,7 +1048,6 @@ void func_push(ParserState *ps) {
 
     // 初始化
     info->code = pylt_obj_code_snippet_new(ps->state);
-    info->at_parse_mutable = false;
     info->loop_depth = 0;
     info->prev = ps->info;
     ps->info = info;
@@ -1013,6 +1074,7 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
     kv_init(ps->lval_check.bc_cache);
 
     ps->disable_expr_tuple_parse = false;
+    ps->disable_return_parse = true;
 
     func_push(ps);
 }

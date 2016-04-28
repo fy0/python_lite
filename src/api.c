@@ -38,21 +38,23 @@ const char* pylt_obj_basetypes[] = {
 
     "type",
     "iter",
-    "class",
-    "none",
-
     "property",
+    "none",
 };
 
 const char* pylt_obj_type_name_cstr(PyLiteState *state, PyLiteObject *obj) {
-    if (obj->ob_type < PYLT_OBJ_TYPE_CLASS) {
+    if (obj->ob_type <= PYLT_OBJ_BUILTIN_TYPE_NUM) {
         return pylt_obj_basetypes[obj->ob_type];
     }
     return NULL;
 }
 
 const char* pylt_api_type_name(int ob_type) {
-    return pylt_obj_basetypes[ob_type];
+    if (ob_type <= PYLT_OBJ_BUILTIN_TYPE_NUM) {
+        return pylt_obj_basetypes[ob_type];
+    } else {
+        return "custom class";
+    }
 }
 
 PyLiteTypeObject* pylt_api_gettype(PyLiteState *state, pl_uint32_t type_code) {
