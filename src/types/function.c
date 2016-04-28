@@ -1,12 +1,12 @@
 ﻿
 #include "function.h"
 
-PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeSnippetObject *code) {
+PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeObject *code) {
     PyLiteFunctionObject *obj = pylt_realloc(NULL, sizeof(PyLiteFunctionObject));
     memset(obj, 0, sizeof(PyLiteFunctionObject));
     obj->ob_type = PYLT_OBJ_TYPE_FUNCTION;
     if (code) {
-        memcpy(&obj->code, code, sizeof(PyLiteCodeSnippetObject));
+        memcpy(&obj->code, code, sizeof(PyLiteCodeObject));
     } else {
         kv_init(obj->code.const_val);
         kv_init(obj->code.opcodes);

@@ -21,7 +21,7 @@ typedef struct PyLiteFunctionInfo {
 typedef struct PyLiteFunctionObject {
     PyLiteObject_HEAD;
     PyLiteFunctionInfo info;
-    PyLiteCodeSnippetObject code;
+    PyLiteCodeObject code;
 } PyLiteFunctionObject;
 
 
@@ -32,7 +32,7 @@ typedef struct PyLiteCFunctionObject {
 } PyLiteCFunctionObject;
 
 
-PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeSnippetObject *code);
+PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeObject *code);
 PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteState *state, PyLiteObject *func);
 
 PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteState *state, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc);

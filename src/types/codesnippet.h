@@ -11,12 +11,12 @@ typedef struct PyLiteInstruction {
     int16_t extra;
 } PyLiteInstruction;
 
-typedef struct PyLiteCodeSnippetObject {
+typedef struct PyLiteCodeObject {
     PyLiteObject_HEAD;
     kvec_t(PyLiteObject*) const_val;
     kvec_t(PyLiteInstruction) opcodes;
-} PyLiteCodeSnippetObject;
+} PyLiteCodeObject;
 
-PyLiteCodeSnippetObject* pylt_obj_code_snippet_new(PyLiteState *state);
+PyLiteCodeObject* pylt_obj_code_new(PyLiteState *state);
 
 #endif

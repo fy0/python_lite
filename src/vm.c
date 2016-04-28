@@ -118,7 +118,7 @@ void pylt_vm_call_func(PyLiteState* state, PyLiteFunctionObject *func) {
 }
 
 
-void pylt_vm_load_code(PyLiteState* state, PyLiteCodeSnippetObject *code) {
+void pylt_vm_load_code(PyLiteState* state, PyLiteCodeObject *code) {
     PyLiteVM *vm = &state->vm;
     PyLiteFrame *frame = &kv_top(vm->frames);
     frame->func = NULL;
@@ -270,7 +270,7 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
 
 #define const_obj(__index) castobj(kv_A(code->const_val, (__index)))
 
-void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
+void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
     PyLiteVM *vm = &state->vm;
     PyLiteTable *locals;
     PyLiteInstruction ins;
@@ -361,7 +361,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
                         tb = castobj(kv_pop(state->vm.stack)); // code
                         ta = castobj(kv_pop(state->vm.stack)); // name
 
-                        tfunc = pylt_obj_func_new(state, (PyLiteCodeSnippetObject*)tb);
+                        tfunc = pylt_obj_func_new(state, (PyLiteCodeObject*)tb);
                         tfunc->info.length = castlist(tc)->ob_size;
                         tfunc->info.minimal = castlist(tc)->ob_size;
                         tfunc->info.name = caststr(ta);

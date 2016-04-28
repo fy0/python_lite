@@ -54,7 +54,7 @@ enum {
 
 typedef struct PyLiteFrame {
     PyLiteFunctionObject *func;
-    PyLiteCodeSnippetObject *code;
+    PyLiteCodeObject *code;
     pl_uint_t code_pointer_slot;
     kvec_t(PyLiteTable*) var_tables;
 } PyLiteFrame;
@@ -75,6 +75,6 @@ int token_to_op_val(uint32_t tk);
 int token_de_to_op_val(uint32_t tk);
 
 void pylt_vm_init(struct PyLiteState *state, PyLiteVM *vm);
-void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code);
+void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code);
 
 #endif

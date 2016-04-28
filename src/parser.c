@@ -1048,7 +1048,7 @@ void func_push(ParserState *ps) {
     }
 
     // 初始化
-    info->code = pylt_obj_code_snippet_new(ps->state);
+    info->code = pylt_obj_code_new(ps->state);
     info->loop_depth = 0;
     info->prev = ps->info;
     ps->info = info;

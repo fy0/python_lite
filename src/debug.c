@@ -79,7 +79,7 @@ void debug_print_obj(PyLiteObject *obj) {
             }
             printf("}");
             break;
-        case PYLT_OBJ_TYPE_CODESNIPPET:
+        case PYLT_OBJ_TYPE_CODE:
             printf("<code>");
             break;
         case PYLT_OBJ_TYPE_NONE:
@@ -106,7 +106,7 @@ void debug_print_const_vals(ParserState *ps) {
 }
 
 void debug_print_opcodes(ParserState *ps) {
-    PyLiteCodeSnippetObject *code = ps->info->code;
+    PyLiteCodeObject *code = ps->info->code;
     PyLiteInstruction ins;
 
     printf("OPCODES:\n");

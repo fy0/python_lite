@@ -86,7 +86,7 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     pylt_obj_type_register(state, type);
 
     // code
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_CODESNIPPET, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_CODE, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // ============== 15 ==============

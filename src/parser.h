@@ -9,7 +9,7 @@
 
 typedef struct ParserInfo {
     int loop_depth;
-    PyLiteCodeSnippetObject *code;
+    PyLiteCodeObject *code;
     struct ParserInfo *prev;
 } ParserInfo;
 
