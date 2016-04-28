@@ -130,19 +130,29 @@ void pylt_vm_load_code(PyLiteState* state, PyLiteCodeSnippetObject *code) {
 //  2 为当前的参数个数多于参数个数
 //  3 为参数的类型不符合
 // -1 当前对象并非函数类型
-int func_call_check(PyLiteState* state, PyLiteObject *func_obj, int params_num, PyLiteDictObject *kwargs, PyLiteFunctionInfo **pinfo) {
+int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLiteDictObject *kwargs, PyLiteObject **pfunc_obj, PyLiteFunctionInfo **pinfo) {
     PyLiteFunctionInfo *info;
     PyLiteObject *obj, *defobj;
     PyLiteObject **args;
     int args_i;
+    bool at_type;
 
-    if (func_obj->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
-        info = &castfunc(func_obj)->info;
-    } else if (func_obj->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
-        info = &castcfunc(func_obj)->info;
+    info = pylt_obj_func_get_info(state, tobj);
+    if (info) {
+        if (pfunc_obj) *pfunc_obj = tobj;
     } else {
-        // not function
-        return -1;
+        if (tobj->ob_type == PYLT_OBJ_TYPE_TYPE) {
+            obj = pylt_obj_getattr(state, tobj, castobj(pylt_obj_str_new_from_c_str(state, "__new__", true)), &at_type);
+
+            if (obj) {
+                info = pylt_obj_func_get_info(state, obj);
+                if (!info) return -1;
+                if (pfunc_obj) *pfunc_obj = obj;
+            } else {
+                // not function
+                return -1;
+            }
+        }
     }
 
     if (!info->defaults && !kwargs) {
@@ -265,9 +275,10 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
     PyLiteTable *locals;
     PyLiteInstruction ins;
 
-    PyLiteObject *tobj, *tret, *ta, *tb, *tc;
-    PyLiteFunctionObject *tfunc;
+    pl_int_t tnum;
     pl_bool_t at_type;
+    PyLiteFunctionObject *tfunc;
+    PyLiteObject *tobj, *tret, *ta, *tb, *tc;
 
     pl_uint_t params_num;
     pl_uint_t params_offset = 0;
@@ -409,28 +420,30 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeSnippetObject *code) {
 
                 // check
                 PyLiteFunctionInfo *func_info;
-                if (func_call_check(state, tobj, params_num, castdict(ta), &func_info)) {
-                    printf("TypeError: '%s' object is not callable\n", pylt_api_type_name(tobj->ob_type));
+                if (tnum = func_call_check(state, tobj, params_num, castdict(ta), &tret, &func_info)) {
+                    if (tnum == -1) {
+                        printf("TypeError: '%s' object is not callable\n", pylt_api_type_name(tobj->ob_type));
+                    }
                     return;
                 }
 
                 // set locals
-                if (tobj->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
+                if (tret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
                     kv_top(vm->frames).code_pointer_slot = i;
-                    pylt_vm_call_func(state, castfunc(tobj));
+                    pylt_vm_call_func(state, castfunc(tret));
                     code = kv_top(vm->frames).code;
                     locals = kv_top(kv_top(vm->frames).var_tables);
                     if (func_info->length > 0) {
                         for (int k = func_info->length - 1; k >= 0; --k) {
-                            pylt_obj_table_set(locals, castobj(castfunc(tobj)->info.params[k]), castobj(kv_pop(state->vm.stack)));
+                            pylt_obj_table_set(locals, castobj(castfunc(tret)->info.params[k]), castobj(kv_pop(state->vm.stack)));
                         }
                     }
                     kv_pop(vm->stack); // pop func obj
                     i = -1;
-                } else if (tobj->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
-                    tobj = castcfunc(tobj)->code(state, func_info->length, (PyLiteObject**)(&kv_topn(vm->stack, func_info->length - 1)));
+                } else if (tret->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
+                    tret = castcfunc(tret)->code(state, func_info->length, (PyLiteObject**)(&kv_topn(vm->stack, func_info->length - 1)));
                     kv_popn(vm->stack, func_info->length + 1);
-                    if (tobj) kv_pushptr(state->vm.stack, tobj);
+                    if (tret) kv_pushptr(state->vm.stack, tret);
                     else kv_pushptr(state->vm.stack, (uintptr_t)pylt_obj_none_new(state));
                 }
                 break;
