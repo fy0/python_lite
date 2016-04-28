@@ -149,6 +149,7 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
         case '[':
             next(ps);
             if (tk->val == ']') {
+                next(ps);
                 if (ptimes) *ptimes = 0;
                 return PYLT_OBJ_TYPE_LIST;
             } else {
