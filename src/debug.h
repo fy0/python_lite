@@ -4,8 +4,8 @@
 
 #include "parser.h"
 
-void debug_print_const_vals(ParserState *ps);
-void debug_print_opcodes(ParserState *ps);
-void debug_print_obj(PyLiteObject *obj);
+void debug_print_const_vals(PyLiteState *state, ParserState *ps);
+void debug_print_opcodes(PyLiteState *state, ParserState *ps);
+void debug_print_obj(PyLiteState *state, PyLiteObject *obj);
 
 #endif

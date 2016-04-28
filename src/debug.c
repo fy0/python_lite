@@ -9,7 +9,7 @@ const char* get_op_name(uint32_t val) {
     return pylt_vm_get_op_name(val);
 }
 
-void debug_print_obj(PyLiteObject *obj) {
+void debug_print_obj(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_INT: printf("%d", castint(obj)->ob_val); break;
         case PYLT_OBJ_TYPE_FLOAT: printf("%f", castfloat(obj)->ob_val); break;
@@ -24,27 +24,27 @@ void debug_print_obj(PyLiteObject *obj) {
             break;
         case PYLT_OBJ_TYPE_FUNCTION:
             printf("<function ");
-            debug_print_obj(castobj(castfunc(obj)->info.name));
+            debug_print_obj(state, castobj(castfunc(obj)->info.name));
             printf(">");
             break;
         case PYLT_OBJ_TYPE_CFUNCTION:
             printf("<cfunction ");
-            debug_print_obj(castobj(castcfunc(obj)->info.name));
+            debug_print_obj(state, castobj(castcfunc(obj)->info.name));
             printf(">");
             break;
         case PYLT_OBJ_TYPE_MODULE:
             break;
         case PYLT_OBJ_TYPE_TYPE:
-            printf("<class '%s'>", pylt_api_type_name(casttype(obj)->ob_reftype));
+            printf("<class '%s'>", pylt_api_type_name_cstr(state, casttype(obj)->ob_reftype));
             break;
         case PYLT_OBJ_TYPE_TUPLE:
             printf("(");
             if (castlist(obj)->ob_size) {
                 for (int i = 0; i < casttuple(obj)->ob_size - 1; ++i) {
-                    debug_print_obj(casttuple(obj)->ob_val[i]);
+                    debug_print_obj(state, casttuple(obj)->ob_val[i]);
                     printf(", ");
                 }
-                debug_print_obj(casttuple(obj)->ob_val[casttuple(obj)->ob_size - 1]);
+                debug_print_obj(state, casttuple(obj)->ob_val[casttuple(obj)->ob_size - 1]);
             }
             if (casttuple(obj)->ob_size == 1) printf(",)");
             else printf(")");
@@ -53,10 +53,10 @@ void debug_print_obj(PyLiteObject *obj) {
             printf("[");
             if (castlist(obj)->ob_size) {
                 for (pl_uint_t i = 0; i < castlist(obj)->ob_size - 1; ++i) {
-                    debug_print_obj(castlist(obj)->ob_val[i]);
+                    debug_print_obj(state, castlist(obj)->ob_val[i]);
                     printf(", ");
                 }
-                debug_print_obj(castlist(obj)->ob_val[castlist(obj)->ob_size - 1]);
+                debug_print_obj(state, castlist(obj)->ob_val[castlist(obj)->ob_size - 1]);
             }
             printf("]");
             break;
@@ -64,17 +64,17 @@ void debug_print_obj(PyLiteObject *obj) {
             printf("{");
             for (khiter_t it = kho_begin(castset(obj)->ob_val); it < kho_end(castset(obj)->ob_val); ++it) {
                 if (!kho_exist(castset(obj)->ob_val, it)) continue;
-                debug_print_obj(kho_key(castset(obj)->ob_val, it));
+                debug_print_obj(state, kho_key(castset(obj)->ob_val, it));
                 printf(", ");
             }
             printf("}");
             break;
         case PYLT_OBJ_TYPE_DICT:
             printf("{");
-            for (pl_int_t it = pylt_obj_dict_begin(NULL, castdict(obj)); it != pylt_obj_dict_end(NULL, castdict(obj)); pylt_obj_dict_next(NULL, castdict(obj), &it)) {
-                debug_print_obj(pylt_obj_dict_itemkey(NULL, castdict(obj), it));
+            for (pl_int_t it = pylt_obj_dict_begin(state, castdict(obj)); it != pylt_obj_dict_end(state, castdict(obj)); pylt_obj_dict_next(state, castdict(obj), &it)) {
+                debug_print_obj(state, pylt_obj_dict_itemkey(state, castdict(obj), it));
                 printf(": ");
-                debug_print_obj(pylt_obj_dict_itemvalue(NULL, castdict(obj), it));
+                debug_print_obj(state, pylt_obj_dict_itemvalue(state, castdict(obj), it));
                 printf(", ");
             }
             printf("}");
@@ -90,22 +90,25 @@ void debug_print_obj(PyLiteObject *obj) {
             break;
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                ;
+                printf("<");
+                pylt_api_output_str(state, pylt_api_gettype(state, castcustom(obj)->ob_type)->name);
+                printf(" object at 0x%X", obj);
+                printf(">");
             }
     }
 }
 
-void debug_print_const_vals(ParserState *ps) {
+void debug_print_const_vals(PyLiteState *state, ParserState *ps) {
     printf("CONST VALS:\n");
     for (unsigned int i = 0; i < kv_size(ps->info->code->const_val); i++) {
         PyLiteObject *obj = kv_A(ps->info->code->const_val, i);
-        printf("   %-4d %-8s ", i, pylt_api_type_name(obj->ob_type));
-        debug_print_obj(obj);
+        printf("   %-4d %-8s ", i, pylt_api_type_name_cstr(NULL, obj->ob_type));
+        debug_print_obj(state, obj);
         putchar('\n');
     }
 }
 
-void debug_print_opcodes(ParserState *ps) {
+void debug_print_opcodes(PyLiteState *state, ParserState *ps) {
     PyLiteCodeObject *code = ps->info->code;
     PyLiteInstruction ins;
 
@@ -119,7 +122,7 @@ void debug_print_opcodes(ParserState *ps) {
                 break;
             case BC_SET_VAL:
                 printf("   %-15s %d", "SET_VAL", ins.extra);
-                //debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
+                //debug_print_obj(state, castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;
             case BC_LOAD_VAL:
@@ -137,11 +140,11 @@ void debug_print_opcodes(ParserState *ps) {
                 printf("   %-15s\n", "LOADLOCALS");
                 break;
             case BC_NEW_OBJ:
-                printf("   %-15s %s %d\n", "NEW_OBJ", pylt_api_type_name(ins.exarg), ins.extra);
+                printf("   %-15s %s %d\n", "NEW_OBJ", pylt_api_type_name_cstr(NULL, ins.exarg), ins.extra);
                 break;
             case BC_CALL:
                 printf("   %-15s %d", "CALL", ins.extra);
-                //debug_print_obj(castobj(kv_A(code->opcodes, ++i)));
+                //debug_print_obj(state, castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;
             case BC_RET:

@@ -18,11 +18,11 @@ PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObjec
 
     for (int i = 0; i < values->ob_size; ++i) {
         obj = values->ob_val[i];
-        debug_print_obj(obj);
-        if (i != values->ob_size - 1) pylt_obj_output_str(state, caststr(args[1]));
+        debug_print_obj(state, obj);
+        if (i != values->ob_size - 1) pylt_api_output_str(state, caststr(args[1]));
     }
 
-    pylt_obj_output_str(state, caststr(args[2]));
+    pylt_api_output_str(state, caststr(args[2]));
     return NULL;
 }
 

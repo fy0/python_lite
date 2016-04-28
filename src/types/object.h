@@ -15,19 +15,6 @@ typedef struct PyLiteObject {
 #define PyLiteObject_HEAD \
     uint32_t ob_type
 
-// Custom object
-
-typedef struct PyLiteCustomObject {
-    uint32_t ob_type;
-    uint32_t ob_base;
-    struct PyLiteTable *ob_attrs;
-} PyLiteCustomObject;
-
-#define PyLiteCustomObject_HEAD \
-    uint32_t ob_type; \
-    uint32_t ob_base; \
-    struct PyLiteTable *ob_attrs
-
 enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_OBJ = 1,
     PYLT_OBJ_TYPE_INT,
@@ -77,7 +64,6 @@ pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject*
 
 PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj);
 PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, PyLiteObject *b);
-//pylt_buildin_isinstance(PyLiteState *state, PyLiteObject *obj, PyLiteTypeObject *type);
 
 
 // Pylite table
@@ -118,6 +104,9 @@ struct PyLiteCFunctionObject;
 struct PyLiteTypeObject;
 struct PyLiteIterObject;
 
+struct PyLiteCustomObject;
+
+
 #define cast(t, exp)	((t)(exp))
 #define castobj(i)      cast(struct PyLiteObject*, (i))
 #define castint(i)      cast(struct PyLiteIntObject*, (i))
@@ -136,14 +125,13 @@ struct PyLiteIterObject;
 #define castcfunc(i)    cast(struct PyLiteCFunctionObject*, (i))
 
 #define casttype(i)     cast(struct PyLiteTypeObject*, (i))
-#define castclass(i)    cast(struct PyLiteCustomObject*, (i))
+#define castprop(i)     cast(struct PyLitePropertyObject*, (i))
 #define castiter(i)     cast(struct PyLiteIterObject*, (i))
 
-#define castprop(i)     cast(struct PyLitePropertyObject*, (i))
+#define castcustom(i)    cast(struct PyLiteCustomObject*, (i))
+
 
 void pylt_obj_free(PyLiteObject *obj);
-//comparable
-
 
 // Others
 
@@ -151,8 +139,6 @@ typedef PyLiteObject* (*PyLiteObjUnaryOpFunc)(PyLiteState *state, PyLiteObject *
 typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
 
 typedef PyLiteObject* (*PyLiteCFunctionPtr)(PyLiteState *state, int argc, PyLiteObject **args);
-typedef void(*PyLiteCMethod)(PyLiteObject *self, PyLiteObject **args);
-
 typedef PyLiteObject* (*PyLiteIterFunc)(PyLiteState *state, struct PyLiteIterObject *iter);
 
 #endif

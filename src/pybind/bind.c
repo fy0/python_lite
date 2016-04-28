@@ -6,6 +6,9 @@
 #include "../mods/helper.h"
 
 void pylt_obj_type_register(PyLiteState *state, PyLiteTypeObject* type) {
+    if (type->ob_reftype >= kv_size(state->cls_base)) {
+        kv_resize(PyLiteTypeObject*, state->cls_base, type->ob_reftype + 10);
+    }
     kv_A(state->cls_base, type->ob_reftype) = type;
 }
 
@@ -14,34 +17,35 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     kv_resize(PyLiteTypeObject*, state->cls_base, PYLT_OBJ_BUILTIN_TYPE_NUM + 10);
 
     // object
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_OBJ, 0);
+    type = pylt_obj_type_new(state, _NS(state, "object"), PYLT_OBJ_TYPE_OBJ, 0);
+    pylt_cmethod_register_0_args(state, type, _NS(state, "__new__"), &pylt_method_obj_new);
     pylt_obj_type_register(state, type);
 
     // int
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_INT, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "int"), PYLT_OBJ_TYPE_INT, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // float
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_FLOAT, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "float"), PYLT_OBJ_TYPE_FLOAT, PYLT_OBJ_TYPE_OBJ);
     pylt_cmethod_register_0_args(state, type, _NS(state, "is_integer"), &pylt_method_int_is_integer);
     pylt_obj_type_register(state, type);
 
     // bool
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_BOOL, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "bool"), PYLT_OBJ_TYPE_BOOL, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // ============== 5 ==============
 
     // str
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "str"), PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // bytes
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_BYTES, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "bytes"), PYLT_OBJ_TYPE_BYTES, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // set
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_SET, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "set"), PYLT_OBJ_TYPE_SET, PYLT_OBJ_TYPE_OBJ);
     pylt_cmethod_register_1_args(state, type, _NS(state, "add"), &pylt_method_set_add);
     pylt_cmethod_register_0_args(state, type, _NS(state, "clear"), &pylt_method_set_clear);
     pylt_cmethod_register_0_args(state, type, _NS(state, "copy"), &pylt_method_set_copy);
@@ -50,7 +54,7 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     pylt_obj_type_register(state, type);
 
     // list
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_LIST, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "list"), PYLT_OBJ_TYPE_LIST, PYLT_OBJ_TYPE_OBJ);
     pylt_cmethod_register_1_args(state, type, _NS(state, "append"), &pylt_method_list_append);
     pylt_cmethod_register_0_args(state, type, _NS(state, "clear"), &pylt_method_list_clear);
     pylt_cmethod_register_0_args(state, type, _NS(state, "copy"), &pylt_method_list_copy);
@@ -64,45 +68,45 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     pylt_obj_type_register(state, type);
 
     // tuple
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_TUPLE, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "tuple"), PYLT_OBJ_TYPE_TUPLE, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // dict
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_DICT, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "dict"), PYLT_OBJ_TYPE_DICT, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // ============== 11 ==============
 
     // module
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_MODULE, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "module"), PYLT_OBJ_TYPE_MODULE, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // function
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_FUNCTION, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "function"), PYLT_OBJ_TYPE_FUNCTION, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // cfunction
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_CFUNCTION, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "cfunction"), PYLT_OBJ_TYPE_CFUNCTION, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // code
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_CODE, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "code"), PYLT_OBJ_TYPE_CODE, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // ============== 15 ==============
 
     // type
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_TYPE, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "type"), PYLT_OBJ_TYPE_TYPE, PYLT_OBJ_TYPE_OBJ);
     pylt_cmethod_register_0_args(state, type, _NS(state, "mro"), &pylt_method_type_mro);
     pylt_cprop_register(state, type, _NS(state, "__base__"), &pylt_prop_type_base);
     pylt_obj_type_register(state, type);
 
     // iter
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_ITER, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "iterator"), PYLT_OBJ_TYPE_ITER, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // none
-    type = pylt_obj_type_new(state, PYLT_OBJ_TYPE_NONE, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new(state, _NS(state, "none"), PYLT_OBJ_TYPE_NONE, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     state->class_num = PYLT_OBJ_BUILTIN_TYPE_NUM;

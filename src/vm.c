@@ -159,14 +159,14 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
         // 极简情况，调用时不用字典调用，函数本身也没有默认值、*args和**kwargs
         if (params_num < info->length) {
             printf("TypeError: ");
-            debug_print_obj(castobj(info->name));
+            debug_print_obj(state, castobj(info->name));
             printf("() missing %d required positional argument\n", (info->minimal - params_num));
             return 1;
         }
 
         if (params_num > info->minimal) {
             printf("TypeError: ");
-            debug_print_obj(castobj(info->name));
+            debug_print_obj(state, castobj(info->name));
             printf("() takes %d positional arguments but %d were given\n", info->length, params_num);
             return 1;
         }
@@ -196,7 +196,7 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
                     }
 
                     printf("TypeError: ");
-                    debug_print_obj(castobj(info->name));
+                    debug_print_obj(state, castobj(info->name));
                     printf("() missing %d required positional argument (%d given)\n", (info->minimal - params_num), i);
                     return 1;
                 case PARAM_ARGS:
@@ -242,7 +242,7 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
         // 如果 args_i != params_num 那么参数多出来了，报错
         if (args_i != params_num) {
             printf("TypeError: ");
-            debug_print_obj(castobj(info->name));
+            debug_print_obj(state, castobj(info->name));
             printf("() takes %d positional arguments but %d were given (%d given)\n", info->length, params_num);
             return 1;
         }
@@ -257,8 +257,8 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
             if (args[i]->ob_type != info->type_codes[i]) {
                 // 类型不符合，报错
                 printf("TypeError: ");
-                debug_print_obj(castobj(info->params[i]));
-                printf(" must be %s\n", pylt_api_type_name(info->type_codes[i]));
+                debug_print_obj(state, castobj(info->params[i]));
+                printf(" must be %s\n", pylt_api_type_name_cstr(state, info->type_codes[i]));
                 return 3;
             }
         }
@@ -317,7 +317,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
 
                 if (!tobj) {
                     printf("NameError: name '");
-                    debug_print_obj(const_obj(ins.extra));
+                    debug_print_obj(state, const_obj(ins.extra));
                     printf("' is not defined\n");
                     return;
                 }
@@ -333,7 +333,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         ta = castobj(kv_pop(state->vm.stack));
                         tret = pylt_obj_op_binary(state, ins.extra, ta, tb);
                         if (!tret) {
-                            printf("TypeError: unsupported operand type(s) for %s: '%s' and '%s'\n", pylt_vm_get_op_name(ins.extra), pylt_obj_type_name_cstr(state, ta), pylt_obj_type_name_cstr(state, tb));
+                            printf("TypeError: unsupported operand type(s) for %s: '%s' and '%s'\n", pylt_vm_get_op_name(ins.extra), pylt_api_type_name_cstr(state, ta->ob_type), pylt_api_type_name_cstr(state, tb->ob_type));
                             return;
                         }
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tret);
@@ -342,7 +342,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         ta = castobj(kv_pop(state->vm.stack));
                         tret = pylt_obj_op_unary(state, ins.extra, ta);
                         if (!tret) {
-                            printf("TypeError: bad operand type for unary %s: '%s'\n", pylt_vm_get_op_name(ins.exarg), pylt_obj_type_name_cstr(state, ta));
+                            printf("TypeError: bad operand type for unary %s: '%s'\n", pylt_vm_get_op_name(ins.exarg), pylt_api_type_name_cstr(state, ta->ob_type));
                             return;
                         }
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tret);
@@ -414,15 +414,26 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 params_num = ins.extra + params_offset;
                 params_offset = 0;
 
-                ta = ins.exarg ? castobj(kv_pop(vm->stack)) : NULL;
+                ta = ins.exarg ? castobj(kv_pop(vm->stack)) : NULL; // kwargs
                 tobj = castobj(kv_topn(vm->stack, params_num)); // 函数对象
                 //tsize = kv_size(vm->stack);
+
+                // class new
+                if (tobj->ob_type == PYLT_OBJ_TYPE_TYPE) {
+                    if (params_num == 0) kv_pushptr(vm->stack, tobj); // __new__(cls, ...)
+                    else {
+                        kv_pushptr(vm->stack, NULL);
+                        memcpy(&kv_topn(vm->stack, params_num - 2), &kv_topn(vm->stack, params_num - 1), sizeof(uintptr_t) * params_num);
+                        kv_topn(vm->stack, params_num - 1) = (uintptr_t)tobj;
+                    }
+                    params_num++;
+                }
 
                 // check
                 PyLiteFunctionInfo *func_info;
                 if (tnum = func_call_check(state, tobj, params_num, castdict(ta), &tret, &func_info)) {
                     if (tnum == -1) {
-                        printf("TypeError: '%s' object is not callable\n", pylt_api_type_name(tobj->ob_type));
+                        printf("TypeError: '%s' object is not callable\n", pylt_api_type_name_cstr(state, tobj->ob_type));
                     }
                     return;
                 }
@@ -490,7 +501,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 tobj = pylt_obj_getitem(state, ta, tb);
                 if (!tobj) {
                     printf("KeyError: ");
-                    debug_print_obj(tb);
+                    debug_print_obj(state, tb);
                     putchar('\n');
                     return;
                 } else {
@@ -515,7 +526,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 tret = pylt_obj_getattr(state, tobj, const_obj(ins.extra), &at_type);
                 if (!tret) {
                     // TODO
-                    printf("AttributeError: %s object has no this attribute\n", pylt_api_type_name(tobj->ob_type));
+                    printf("AttributeError: %s object has no this attribute\n", pylt_api_type_name_cstr(state, tobj->ob_type));
                     return;
                 }
                 kv_pushptr(vm->stack, tret);
@@ -559,15 +570,15 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 break;
             case BC_PRINT:
                 if (kv_size(state->vm.stack) != 0) {
-                    debug_print_obj(castobj(kv_top(state->vm.stack)));
+                    debug_print_obj(state, castobj(kv_top(state->vm.stack)));
                     putchar('\n');
                 }
                 printf("locals: {");
                 for (khiter_t it = kho_begin(locals); it < kho_end(locals); ++it) {
                     if (!kho_exist(locals, it)) continue;
-                    debug_print_obj(kho_key(locals, it));
+                    debug_print_obj(state, kho_key(locals, it));
                     printf(": ");
-                    debug_print_obj(kho_value(locals, it));
+                    debug_print_obj(state, kho_value(locals, it));
                     printf(", ");
                 }
                 printf("}");

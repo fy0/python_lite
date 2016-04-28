@@ -22,5 +22,6 @@
 #include "property.h"
 #include "none.h"
 
+#include "custom.h"
 
 #endif

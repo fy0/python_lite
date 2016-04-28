@@ -2,7 +2,7 @@
 #include "api.h"
 #include "state.h"
 
-void pylt_obj_output_str(PyLiteState *state, PyLiteStrObject *obj) {
+void pylt_api_output_str(PyLiteState *state, PyLiteStrObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_BYTES:
             printf("%s", castbytes(obj)->ob_size, castbytes(obj)->ob_val);
@@ -42,14 +42,11 @@ const char* pylt_obj_basetypes[] = {
     "none",
 };
 
-const char* pylt_obj_type_name_cstr(PyLiteState *state, PyLiteObject *obj) {
-    if (obj->ob_type <= PYLT_OBJ_BUILTIN_TYPE_NUM) {
-        return pylt_obj_basetypes[obj->ob_type];
-    }
-    return NULL;
+PyLiteStrObject* pylt_api_type_name(PyLiteState *state, int ob_type) {
+    return kv_A(state->cls_base, ob_type)->name;
 }
 
-const char* pylt_api_type_name(int ob_type) {
+const char* pylt_api_type_name_cstr(PyLiteState *state, int ob_type) {
     if (ob_type <= PYLT_OBJ_BUILTIN_TYPE_NUM) {
         return pylt_obj_basetypes[ob_type];
     } else {

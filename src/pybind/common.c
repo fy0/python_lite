@@ -3,6 +3,11 @@
 #include "../api.h"
 #include "../types/all.h"
 
+PyLiteObject* pylt_method_obj_new(PyLiteState *state, int argc, PyLiteObject **args) {
+    PyLiteTypeObject *type = casttype(args[0]);
+    return pylt_obj_cutstom_new(state, type->ob_reftype);
+}
+
 PyLiteObject* pylt_method_type_mro(PyLiteState *state, int argc, PyLiteObject **args) {
     PyLiteTypeObject* type;
     PyLiteListObject *lst = pylt_obj_list_new(state);

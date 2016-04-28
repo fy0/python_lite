@@ -766,7 +766,7 @@ void parse_class(ParserState *ps) {
     write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_FUNCTION, 0);
 
     write_ins(ps, BC_CALL, 0, 0);
-    sload_const(ps, pylt_obj_int_new(ps->state, PYLT_OBJ_TYPE_OBJ));
+    sload_const(ps, castobj(pylt_obj_int_new(ps->state, PYLT_OBJ_TYPE_OBJ)));
     sload_const(ps, castobj(class_name));
     write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TYPE, 0);
     write_ins(ps, BC_SET_VAL, 0, store_const(ps, class_name));
