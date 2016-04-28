@@ -5,7 +5,6 @@
 #include "lexer.h"
 #include "lib/kvec.h"
 #include "types/all.h"
-#include "types/codesnippet.h"
 
 typedef struct ParserInfo {
     int loop_depth;

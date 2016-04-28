@@ -5,7 +5,7 @@
 #include "object.h"
 #include "string.h"
 #include "tuple.h"
-#include "codesnippet.h"
+#include "code.h"
 
 typedef struct PyLiteFunctionInfo {
     pl_int_t length;           /* length of parameters */

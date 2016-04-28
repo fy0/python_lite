@@ -3,7 +3,7 @@
 #define PYLITE_TYPES_MODULE_H
 
 #include "object.h"
-#include "codesnippet.h"
+#include "code.h"
 
 typedef struct PyLiteModuleObject {
     PyLiteObject_HEAD;

@@ -533,7 +533,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         ins.extra = 1;
                         // TODO: 这里以后最好直接传prop对象
                         kv_pop(vm->stack);
-                        kv_pushptr(vm->stack, castprop(tret)->func);
+                        kv_pushptr(vm->stack, castprop(tret)->fget.func);
                         kv_pushptr(vm->stack, tobj);
                         goto _BC_CALL;
                     }

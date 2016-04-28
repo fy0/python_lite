@@ -7,13 +7,18 @@
 
 typedef struct PyLitePropertyObject {
     PyLiteObject_HEAD;
-    union  {
+    union {
         PyLiteCFunctionObject *cfunc;
         PyLiteFunctionObject *pyfunc;
         PyLiteObject *func;
-    };
+    } fget;
+    union {
+        PyLiteCFunctionObject *cfunc;
+        PyLiteFunctionObject *pyfunc;
+        PyLiteObject *func;
+    } fset;
 } PyLitePropertyObject;
 
-PyLitePropertyObject* pylt_obj_property_new(PyLiteState *state, PyLiteObject *func);
+PyLitePropertyObject* pylt_obj_property_new(PyLiteState *state, PyLiteObject *fget, PyLiteObject *fset);
 
 #endif

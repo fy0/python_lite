@@ -1,5 +1,5 @@
 
-#include "codesnippet.h"
+#include "code.h"
 
 PyLiteCodeObject* pylt_obj_code_new(PyLiteState *state) {
     PyLiteCodeObject *obj = pylt_realloc(NULL, sizeof(PyLiteCodeObject));

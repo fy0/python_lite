@@ -15,12 +15,12 @@
 
 #include "module.h"
 #include "function.h"
-#include "codesnippet.h"
+#include "code.h"
 
 #include "type.h"
 #include "iter.h"
+#include "property.h"
 #include "none.h"
 
-#include "property.h"
 
 #endif

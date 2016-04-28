@@ -69,7 +69,8 @@ void pylt_attr_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObj
     pylt_obj_type_setattr(state, type, castobj(key), castobj(value));
 }
 
-void pylt_cprop_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *key, PyLiteCFunctionPtr cfunc) {
-    PyLiteCFunctionObject *func = pylt_obj_cfunc_new(state, key, _NST(state, 1, "self"), NULL, NULL, cfunc);
-    pylt_attr_register(state, type, key, castobj(pylt_obj_property_new(state, castobj(func))));
+void pylt_cprop_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *key, PyLiteCFunctionPtr cfget, PyLiteCFunctionPtr cfset) {
+    PyLiteCFunctionObject *fget = cfget ? pylt_obj_cfunc_new(state, key, _NST(state, 1, "self"), NULL, NULL, cfget) : NULL;
+    PyLiteCFunctionObject *fset = cfset ? pylt_obj_cfunc_new(state, key, _NST(state, 1, "self"), NULL, NULL, cfset) : NULL;
+    pylt_attr_register(state, type, key, castobj(pylt_obj_property_new(state, castobj(fget), castobj(fset))));
 }
