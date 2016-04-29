@@ -18,6 +18,8 @@ int main(int argc,char* argv[])
     char *buf = read_file("test.py", &size);
     if (!buf) return 0;
 
+    platform_init();
+
     PyLiteState state;
     LexState ls;
     ParserState ps;

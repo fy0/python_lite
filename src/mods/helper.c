@@ -65,6 +65,10 @@ PyLiteCFunctionObject* pylt_cmethod_register_1_args(PyLiteState *state, PyLiteTy
     return pylt_cmethod_register(state, type, name, _NST(state, 2, "self", "object"), NULL, NULL, cfunc);
 }
 
+PyLiteCFunctionObject* pylt_cclsmethod_register_0_args(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc) {
+    return pylt_cmethod_register(state, type, name, _NST(state, 1, "cls"), NULL, NULL, cfunc);
+}
+
 void pylt_attr_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *key, PyLiteObject *value) {
     pylt_obj_type_setattr(state, type, castobj(key), castobj(value));
 }

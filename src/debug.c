@@ -33,9 +33,12 @@ void debug_print_obj(PyLiteState *state, PyLiteObject *obj) {
             printf(">");
             break;
         case PYLT_OBJ_TYPE_MODULE:
+            printf("<module>");
             break;
         case PYLT_OBJ_TYPE_TYPE:
-            printf("<class '%s'>", pylt_api_type_name_cstr(state, casttype(obj)->ob_reftype));
+            printf("<class '");
+            pylt_api_output_str(state, pylt_api_type_name(state, casttype(obj)->ob_reftype));
+            printf("'>");
             break;
         case PYLT_OBJ_TYPE_TUPLE:
             printf("(");

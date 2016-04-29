@@ -133,7 +133,9 @@ void pylt_vm_load_code(PyLiteState* state, PyLiteCodeObject *code) {
 int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLiteDictObject *kwargs, PyLiteObject **pfunc_obj, PyLiteFunctionInfo **pinfo) {
     PyLiteFunctionInfo *info;
     PyLiteObject *obj, *defobj;
+    PyLiteObject *insert_caller = NULL;
     PyLiteObject **args;
+
     int args_i;
     bool at_type;
 
@@ -147,12 +149,28 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
             if (obj) {
                 info = pylt_obj_func_get_info(state, obj);
                 if (!info) return -1;
-                if (pfunc_obj) *pfunc_obj = obj;
             } else {
                 // not function
                 return -1;
             }
+        } else {
+            obj = pylt_obj_getattr(state, tobj, castobj(pylt_obj_str_new_from_c_str(state, "__call__", true)), &at_type);
+            if (obj) {
+                info = pylt_obj_func_get_info(state, obj);
+                if (!info) return -1;
+            } else return -1;
         }
+
+        // 插入首个参数
+        if (params_num == 0) kv_pushptr(state->vm.stack, tobj); // __new__(cls, ...) __call__(self, ...)
+        else {
+            kv_pushptr(state->vm.stack, NULL);
+            memcpy(&kv_topn(state->vm.stack, params_num-1), &kv_topn(state->vm.stack, params_num), sizeof(uintptr_t) * params_num);
+            kv_topn(state->vm.stack, params_num) = (uintptr_t)tobj;
+        }
+        params_num++;
+
+        if (pfunc_obj) *pfunc_obj = obj;
     }
 
     if (!info->defaults && !kwargs) {
@@ -418,22 +436,13 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 tobj = castobj(kv_topn(vm->stack, params_num)); // 函数对象
                 //tsize = kv_size(vm->stack);
 
-                // class new
-                if (tobj->ob_type == PYLT_OBJ_TYPE_TYPE) {
-                    if (params_num == 0) kv_pushptr(vm->stack, tobj); // __new__(cls, ...)
-                    else {
-                        kv_pushptr(vm->stack, NULL);
-                        memcpy(&kv_topn(vm->stack, params_num - 2), &kv_topn(vm->stack, params_num - 1), sizeof(uintptr_t) * params_num);
-                        kv_topn(vm->stack, params_num - 1) = (uintptr_t)tobj;
-                    }
-                    params_num++;
-                }
-
                 // check
                 PyLiteFunctionInfo *func_info;
                 if (tnum = func_call_check(state, tobj, params_num, castdict(ta), &tret, &func_info)) {
                     if (tnum == -1) {
-                        printf("TypeError: '%s' object is not callable\n", pylt_api_type_name_cstr(state, tobj->ob_type));
+                        printf("TypeError: ");
+                        debug_print_obj(state, castobj(pylt_api_type_name(state, tobj->ob_type)));
+                        printf(" object is not callable\n");
                     }
                     return;
                 }

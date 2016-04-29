@@ -21,6 +21,4 @@ typedef struct PyLiteState {
 void pylt_state_init(PyLiteState *state);
 //void pylt_state_err(PyLiteState *state);
 
-PyLiteObject* pylt_state_obj_get(PyLiteState* state, pl_int_t n_args, pl_int_t i);
-
 #endif

@@ -3,7 +3,7 @@
 #include "../api.h"
 #include "../types/all.h"
 
-PyLiteObject* pylt_method_obj_new(PyLiteState *state, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_cls_method_obj_new(PyLiteState *state, int argc, PyLiteObject **args) {
     PyLiteTypeObject *type = casttype(args[0]);
     return pylt_obj_cutstom_new(state, type->ob_reftype);
 }
@@ -22,9 +22,13 @@ PyLiteObject* pylt_method_type_mro(PyLiteState *state, int argc, PyLiteObject **
     return castobj(lst);
 }
 
-PyLiteObject* pylt_prop_type_base(PyLiteState *state, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_prop_type_base_get(PyLiteState *state, int argc, PyLiteObject **args) {
     PyLiteTypeObject *type = pylt_api_gettype(state, args[0]->ob_type);
     return castobj(pylt_api_gettype(state, type->ob_base));
+}
+
+PyLiteObject* pylt_cls_method_type_new(PyLiteState *state, int argc, PyLiteObject **args) {
+    return castobj(pylt_api_gettype(state, args[1]->ob_type));
 }
 
 

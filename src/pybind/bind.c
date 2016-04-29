@@ -18,7 +18,7 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // object
     type = pylt_obj_type_new(state, _NS(state, "object"), PYLT_OBJ_TYPE_OBJ, 0);
-    pylt_cmethod_register_0_args(state, type, _NS(state, "__new__"), &pylt_method_obj_new);
+    pylt_cclsmethod_register_0_args(state, type, _NS(state, "__new__"), &pylt_cls_method_obj_new);
     pylt_obj_type_register(state, type);
 
     // int
@@ -98,7 +98,8 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     // type
     type = pylt_obj_type_new(state, _NS(state, "type"), PYLT_OBJ_TYPE_TYPE, PYLT_OBJ_TYPE_OBJ);
     pylt_cmethod_register_0_args(state, type, _NS(state, "mro"), &pylt_method_type_mro);
-    pylt_cprop_register(state, type, _NS(state, "__base__"), &pylt_prop_type_base);
+    pylt_cprop_register(state, type, _NS(state, "__base__"), &pylt_prop_type_base_get, NULL);
+    pylt_cmethod_register(state, type, _NS(state, "__new__"), _NST(state, 2, "cls", "object"), NULL, NULL, &pylt_cls_method_type_new);
     pylt_obj_type_register(state, type);
 
     // iter
