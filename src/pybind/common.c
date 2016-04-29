@@ -23,7 +23,7 @@ PyLiteObject* pylt_method_type_mro(PyLiteState *state, int argc, PyLiteObject **
 }
 
 PyLiteObject* pylt_prop_type_base_get(PyLiteState *state, int argc, PyLiteObject **args) {
-    PyLiteTypeObject *type = pylt_api_gettype(state, args[0]->ob_type);
+    PyLiteTypeObject *type = pylt_api_gettype(state, casttype(args[0])->ob_reftype);
     return castobj(pylt_api_gettype(state, type->ob_base));
 }
 

@@ -3,6 +3,7 @@
 #include "parser.h"
 #include "debug.h"
 #include "vm.h"
+#include "api.h"
 #include "types/all.h"
 
 void func_push(ParserState *ps);
@@ -731,6 +732,7 @@ void parse_func(ParserState *ps) {
 void parse_class(ParserState *ps) {
     ParserInfo *info;
     PyLiteObject *class_name;
+    PyLiteObject *base_class_name = NULL;
     Token *tk = &(ps->ls->token);
     PyLiteListObject* lst = pylt_obj_list_new(ps->state);
     bool old_disable_return;
@@ -741,7 +743,11 @@ void parse_class(ParserState *ps) {
     next(ps);
 
     if (tk->val == '(') {
-        ;
+        next(ps);
+        if (tk->val == TK_NAME) {
+            base_class_name = tk->obj;
+            next(ps);
+        }
         ACCEPT(ps, ')');
     }
 
@@ -768,7 +774,8 @@ void parse_class(ParserState *ps) {
     write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_FUNCTION, 0);
 
     write_ins(ps, BC_CALL, 0, 0);
-    sload_const(ps, castobj(pylt_obj_int_new(ps->state, PYLT_OBJ_TYPE_OBJ)));
+    if (base_class_name) write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, base_class_name));
+    else sload_const(ps, castobj(&PyLiteNone));
     sload_const(ps, castobj(class_name));
     write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TYPE, 0);
     write_ins(ps, BC_SET_VAL, 0, store_const(ps, class_name));

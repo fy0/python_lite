@@ -418,7 +418,9 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         ta = castobj(kv_pop(vm->stack)); // name
                         tb = castobj(kv_pop(vm->stack)); // base type
                         tc = castobj(kv_pop(vm->stack)); // class vars
-                        PyLiteTypeObject *type = pylt_obj_type_new_with_vars(state, caststr(ta), castint(tb)->ob_val, castdict(tc));
+
+                        tb = (tb->ob_type == PYLT_OBJ_TYPE_NONE) ? castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_OBJ)) : tb;
+                        PyLiteTypeObject *type = pylt_obj_type_new_with_vars(state, caststr(ta), casttype(tb)->ob_reftype, castdict(tc));
                         pylt_obj_type_register(state, type);
                         kv_pushptr(vm->stack, type);
                         break;
