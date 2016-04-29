@@ -595,18 +595,25 @@ _end:;
 
 PyLiteObject* pylt_vm_call_func(PyLiteState* state, PyLiteObject *callable, int argc, PyLiteObject **args) {
     PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc };
+    PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
     PyLiteCodeObject *code = pylt_obj_code_new(state);
+    PyLiteFrame frame_bak = kv_top(state->vm.frames);
+
     kv_pushptr(state->vm.stack, callable);
     for (pl_int_t i = 0; i < argc; ++i) {
         kv_pushptr(state->vm.stack, args[i]);
     }
     kv_pushins(code->opcodes, bc_call);
+    kv_pushins(code->opcodes, bc_halt);
     pylt_vm_run(state, code);
+
+    kv_top(state->vm.frames) = frame_bak;
     return castobj(kv_pop(state->vm.stack));
 }
 
 PyLiteObject* pylt_vm_call_method(PyLiteState* state, PyLiteObject *self, PyLiteObject *callable, int argc, PyLiteObject **args) {
     PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc + 1 };
+    PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
     PyLiteCodeObject *code = pylt_obj_code_new(state);
     PyLiteFrame frame_bak = kv_top(state->vm.frames);
 
@@ -616,6 +623,7 @@ PyLiteObject* pylt_vm_call_method(PyLiteState* state, PyLiteObject *self, PyLite
         kv_pushptr(state->vm.stack, args[i]);
     }
     kv_pushins(code->opcodes, bc_call);
+    kv_pushins(code->opcodes, bc_halt);
     pylt_vm_run(state, code);
 
     kv_top(state->vm.frames) = frame_bak;
