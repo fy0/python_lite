@@ -228,8 +228,18 @@ pl_uint32_t pylt_obj_chash(PyLiteState *state, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_chash(state, castbytes(obj));
         case PYLT_OBJ_TYPE_STR: return pylt_obj_str_chash(state, caststr(obj));
         case PYLT_OBJ_TYPE_TYPE: return pylt_obj_type_chash(state, casttype(obj));
+        default:
+            if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
+                PyLiteObject *ret;
+                PyLiteObject *hash_func = pylt_obj_getattr(state, obj, castobj(pylt_obj_str_new_from_c_str(state, "__hash__", true)), NULL);
+                if (hash_func) {
+                    ret = pylt_vm_call_method(state, obj, hash_func, 0, NULL);
+                    if (ret->ob_type == PYLT_OBJ_TYPE_INT) {
+                        return (pl_uint32_t)castint(ret)->ob_val;
+                    }
+                }
+            }
     }
-    // custom type
     return 0;
 }
 
@@ -250,7 +260,6 @@ pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj) {
             return false;
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                //pylt_obj_table_get(castclass(obj)->ob_attrs, "__hash__");
                 return false;
             }
     }
