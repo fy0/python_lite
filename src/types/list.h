@@ -6,8 +6,8 @@
 
 typedef struct PyLiteListObject {
     PyLiteObject_HEAD;
-    pl_uint_t ob_size;
-    pl_uint_t ob_maxsize;
+    pl_int_t ob_size;
+    pl_int_t ob_maxsize;
     PyLiteObject **ob_val;
 } PyLiteListObject;
 
@@ -15,7 +15,7 @@ PyLiteListObject* pylt_obj_list_new(PyLiteState *state);
 PyLiteListObject* pylt_obj_list_new_with_size(PyLiteState *state, pl_uint_t size);
 void pylt_obj_list_free(PyLiteState *state, PyLiteListObject *self);
 
-void pylt_obj_list_append(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
+pl_int_t pylt_obj_list_append(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
 void pylt_obj_list_clear(PyLiteState *state, PyLiteListObject *self);
 PyLiteListObject* pylt_obj_list_copy(PyLiteState *state, PyLiteListObject *self);
 pl_uint_t pylt_obj_list_ccount(PyLiteState *state, PyLiteListObject *self);

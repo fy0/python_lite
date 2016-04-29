@@ -286,7 +286,7 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
     return 0;
 }
 
-#define const_obj(__index) castobj(kv_A(code->const_val, (__index)))
+#define const_obj(__index) pylt_obj_list_cgetitem(state, code->const_val, (__index))
 
 void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
     PyLiteVM *vm = &state->vm;

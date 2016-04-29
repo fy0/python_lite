@@ -60,8 +60,10 @@ void write_ins(ParserState *ps, uint8_t opcode, uint8_t exarg, int16_t extra) {
 }
 
 int store_const(ParserState *ps, PyLiteObject *obj) {
-    kv_pushobj(ps->info->code->const_val, obj);
-    return kv_size(ps->info->code->const_val) - 1;
+    PyLiteListObject *const_val = ps->info->code->const_val;
+    pl_int_t index = pylt_obj_list_cindex(ps->state, const_val, obj);
+    if (index == -1) index = pylt_obj_list_append(ps->state, const_val, obj);
+    return index;
 }
 
 void sload_const(ParserState *ps, PyLiteObject *obj) {

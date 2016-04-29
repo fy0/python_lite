@@ -3,6 +3,7 @@
 #define PYLITE_TYPES_CODE_SNIPPET_H
 
 #include "object.h"
+#include "list.h"
 #include "../lib/kvec.h"
 
 typedef struct PyLiteInstruction {
@@ -13,7 +14,7 @@ typedef struct PyLiteInstruction {
 
 typedef struct PyLiteCodeObject {
     PyLiteObject_HEAD;
-    kvec_t(PyLiteObject*) const_val;
+    PyLiteListObject *const_val;
     kvec_t(PyLiteInstruction) opcodes;
 } PyLiteCodeObject;
 

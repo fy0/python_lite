@@ -18,6 +18,6 @@ PyLiteTupleObject* pylt_obj_tuple_new_with_data(PyLiteState *state, pl_int_t len
 
 PyLiteObject* pylt_obj_tuple_cgetitem(PyLiteState *state, PyLiteTupleObject *self, int index) {
     if (index < 0) index += self->ob_size;
-    if (index < 0 || (pl_uint_t)index >= self->ob_size) return NULL;
+    if (index < 0 || index >= self->ob_size) return NULL;
     return self->ob_val[index];
 }

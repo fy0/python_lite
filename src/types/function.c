@@ -8,7 +8,7 @@ PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeObject *co
     if (code) {
         memcpy(&obj->code, code, sizeof(PyLiteCodeObject));
     } else {
-        kv_init(obj->code.const_val);
+        obj->code.const_val = pylt_obj_list_new(state);
         kv_init(obj->code.opcodes);
     }
     return obj;
