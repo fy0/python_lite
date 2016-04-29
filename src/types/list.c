@@ -27,7 +27,7 @@ void pylt_obj_list_free(PyLiteState *state, PyLiteListObject *self) {
 pl_int_t pylt_obj_list_append(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
     if (self->ob_size >= self->ob_maxsize) {
         self->ob_maxsize *= 2;
-        pylt_realloc(self->ob_val, self->ob_maxsize * sizeof(PyLiteObject*));
+        self->ob_val = pylt_realloc(self->ob_val, self->ob_maxsize * sizeof(PyLiteObject*));
     }
     self->ob_val[self->ob_size++] = obj;
     return self->ob_size - 1;
