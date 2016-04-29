@@ -20,13 +20,16 @@ PyLiteTypeObject* pylt_obj_type_new_with_vars(PyLiteState *state, PyLiteStrObjec
     return type;
 }
 
-PyLiteObject* pylt_obj_type_getattr(PyLiteState *state, PyLiteTypeObject *self, PyLiteObject *key) {
+PyLiteObject* pylt_obj_type_getattr(PyLiteState *state, PyLiteTypeObject *self, PyLiteObject *key, pl_bool_t *p_at_type) {
     PyLiteObject *obj;
+
+    if (p_at_type) *p_at_type = false;
     while (true) {
         obj = pylt_obj_dict_cgetitem(state, self->ob_attrs, key);
         if (obj) return obj;
         if (self->ob_reftype == PYLT_OBJ_TYPE_OBJ) return NULL;
         self = pylt_api_gettype(state, self->ob_base);
+        if (p_at_type) *p_at_type = true;
     }
 }
 

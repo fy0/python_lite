@@ -287,25 +287,17 @@ pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj) {
 }
 
 PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type) {
-    PyLiteObject *ret;
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_MODULE:
             if (p_at_type) *p_at_type = false;
             return NULL;
             break;
         case PYLT_OBJ_TYPE_TYPE:
-            if (p_at_type) *p_at_type = false;
-            ret = pylt_obj_type_getattr(state, casttype(obj), key);
-            if (!ret) {
-                ret = pylt_obj_type_getattr(state, pylt_api_gettype(state, PYLT_OBJ_TYPE_TYPE), key);
-                if (ret && p_at_type) {
-                    *p_at_type = true;
-                }
-            }
-            return ret;
+            return pylt_obj_type_getattr(state, casttype(obj), key, p_at_type);
         default:
-            if (p_at_type) *p_at_type = true;
-            return pylt_obj_getattr(state, castobj(pylt_api_gettype(state, obj->ob_type)), key, NULL);
+            if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
+                return pylt_obj_custom_getattr(state, castcustom(obj), key, p_at_type);
+            }
             break;
     }
     return NULL;
@@ -313,6 +305,14 @@ PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObje
 
 pl_bool_t pylt_obj_setattr(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value) {
     switch (self->ob_type) {
+        case PYLT_OBJ_TYPE_TYPE:
+            pylt_obj_type_setattr(state, casttype(self), key, value);
+            return true;
+        default:
+            if (self->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
+                pylt_obj_custom_setattr(state, castcustom(self), key, value);
+            }
+            return true;
     }
     return false;
 }
@@ -374,8 +374,8 @@ PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, Py
         case OP_OR: return pylt_obj_cistrue(state, a) ? a : b;
         case OP_AND: return pylt_obj_cistrue(state, a) ? b : a;
         case OP_IN: return NULL; // TODO
-        case OP_IS: return NULL; // TODO
-        case OP_IS_NOT: return NULL; // TODO
+        case OP_IS: return castobj(a == b ? &PyLiteTrue : &PyLiteFalse);
+        case OP_IS_NOT: return castobj(a != b ? &PyLiteTrue : &PyLiteFalse);
         case OP_LT: case OP_LE: case OP_GT: case OP_GE:
             switch (pylt_obj_ccmp(state, a, b)) {
                 case -1: return castobj((op == OP_LT || op == OP_LE) ? &PyLiteTrue : &PyLiteFalse);

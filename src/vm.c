@@ -344,6 +344,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
             case BC_OPERATOR:
                 // OPERATOR     0       op
                 switch (ins.extra) {
+                    case OP_OR: case OP_AND: case OP_IN: case OP_IS: case OP_IS_NOT:
                     case OP_LT: case OP_LE: case OP_GT: case OP_GE: case OP_NE: case OP_EQ:
                     case OP_BITOR: case OP_BITXOR: case OP_BITAND: case OP_LSHIFT: case OP_RSHIFT:
                     case OP_PLUS: case OP_MINUS: case OP_MUL: case OP_MATMUL: case OP_DIV: case OP_FLOORDIV: case OP_MOD: case OP_POW:
@@ -351,7 +352,11 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         ta = castobj(kv_pop(state->vm.stack));
                         tret = pylt_obj_op_binary(state, ins.extra, ta, tb);
                         if (!tret) {
-                            printf("TypeError: unsupported operand type(s) for %s: '%s' and '%s'\n", pylt_vm_get_op_name(ins.extra), pylt_api_type_name_cstr(state, ta->ob_type), pylt_api_type_name_cstr(state, tb->ob_type));
+                            printf("TypeError: unsupported operand type(s) for %s: ", pylt_vm_get_op_name(ins.extra));
+                            debug_print_obj(state, castobj(pylt_api_type_name(state, ta->ob_type)));
+                            printf(" and ");
+                            debug_print_obj(state, castobj(pylt_api_type_name(state, tb->ob_type)));
+                            printf("\n");
                             return;
                         }
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tret);
@@ -360,7 +365,9 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         ta = castobj(kv_pop(state->vm.stack));
                         tret = pylt_obj_op_unary(state, ins.extra, ta);
                         if (!tret) {
-                            printf("TypeError: bad operand type for unary %s: '%s'\n", pylt_vm_get_op_name(ins.exarg), pylt_api_type_name_cstr(state, ta->ob_type));
+                            printf("TypeError: bad operand type for unary '%s': ", pylt_vm_get_op_name(ins.extra));
+                            debug_print_obj(state, castobj(pylt_api_type_name(state, tobj->ob_type)));
+                            printf("\n");
                             return;
                         }
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tret);
@@ -535,7 +542,9 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 tret = pylt_obj_getattr(state, tobj, const_obj(ins.extra), &at_type);
                 if (!tret) {
                     // TODO
-                    printf("AttributeError: %s object has no this attribute\n", pylt_api_type_name_cstr(state, tobj->ob_type));
+                    printf("AttributeError: ");
+                    debug_print_obj(state, castobj(pylt_api_type_name(state, tobj->ob_type)));
+                    printf(" object has no this attribute\n");
                     return;
                 }
                 kv_pushptr(vm->stack, tret);
@@ -551,21 +560,21 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         ins.code = BC_CALL;
                         ins.exarg = 0;
                         ins.extra = 1;
-                        // TODO: 这里以后最好直接传prop对象
                         kv_pop(vm->stack);
                         kv_pushptr(vm->stack, castprop(tret)->fget.func);
                         kv_pushptr(vm->stack, tobj);
                         goto _BC_CALL;
                     }
                 }
-
                 break;
             case BC_SET_ATTR:
-                // SET_ITEM     0       const_id
+                // SET_ATTR     0       const_id
                 tobj = castobj(kv_pop(state->vm.stack));
                 tb = castobj(kv_pop(state->vm.stack));
-                if (!pylt_obj_setitem(state, tobj, const_obj(ins.extra), tb)) {
-                    printf("IndexError: list assignment index out of range\n");
+                if (!pylt_obj_setattr(state, tobj, const_obj(ins.extra), tb)) {
+                    printf("TypeError: can't set attributes of built-in/extension type ");
+                    debug_print_obj(state, castobj(pylt_api_type_name(state, tobj->ob_type)));
+                    printf("\n");
                     return;
                 }
                 kv_pushptr(vm->stack, tb);

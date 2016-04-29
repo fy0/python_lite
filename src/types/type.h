@@ -17,7 +17,7 @@ typedef struct PyLiteTypeObject {
 PyLiteTypeObject* pylt_obj_type_new(PyLiteState *state, PyLiteStrObject *name, pl_uint32_t instance_type, pl_uint32_t base_type);
 PyLiteTypeObject* pylt_obj_type_new_with_vars(PyLiteState *state, PyLiteStrObject *name, pl_uint32_t base_type, PyLiteDictObject *dict);
 
-PyLiteObject* pylt_obj_type_getattr(PyLiteState *state, PyLiteTypeObject *self, PyLiteObject *key);
+PyLiteObject* pylt_obj_type_getattr(PyLiteState *state, PyLiteTypeObject *self, PyLiteObject *key, pl_bool_t *p_at_type);
 void pylt_obj_type_setattr(PyLiteState *state, PyLiteTypeObject *self, PyLiteObject* key, PyLiteObject* value);
 pl_uint32_t pylt_obj_type_chash(PyLiteState *state, PyLiteTypeObject *self);
 
