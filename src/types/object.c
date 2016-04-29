@@ -203,6 +203,16 @@ pl_int_t pylt_obj_ccmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b) {
         case PYLT_OBJ_TYPE_STR: return pylt_obj_str_ccmp(state, caststr(a), b);
         case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_ccmp(state, castbytes(a), b);
         case PYLT_OBJ_TYPE_SET: return pylt_obj_set_ccmp(state, castset(a), b);
+        default:
+            if (a->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
+                PyLiteObject *hash_func = pylt_obj_getattr(state, a, castobj(pylt_obj_str_new_from_c_str(state, "__cmp__", true)), NULL);
+                if (hash_func) {
+                    PyLiteObject *ret = pylt_vm_call_method(state, a, hash_func, 1, b);
+                    if (ret->ob_type == PYLT_OBJ_TYPE_INT) {
+                        return castint(ret)->ob_val;
+                    }
+                }
+            }
     }
     return 2;
 }
@@ -216,6 +226,14 @@ pl_bool_t pylt_obj_ceq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b) {
         case PYLT_OBJ_TYPE_STR: return pylt_obj_str_ceq(state, caststr(a), b);
         case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_ceq(state, castbytes(a), b);
         case PYLT_OBJ_TYPE_SET: return pylt_obj_set_ceq(state, castset(a), b);
+        default:
+            if (a->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
+                PyLiteObject *hash_func = pylt_obj_getattr(state, a, castobj(pylt_obj_str_new_from_c_str(state, "__eq__", true)), NULL);
+                if (hash_func) {
+                    PyLiteObject *ret = pylt_vm_call_method(state, a, hash_func, 1, b);
+                    return pylt_obj_cistrue(state, ret);
+                }
+            }
     }
     return false;
 }
@@ -319,7 +337,13 @@ pl_bool_t pylt_obj_setattr(PyLiteState *state, PyLiteObject *self, PyLiteObject*
             return true;
         default:
             if (self->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                pylt_obj_custom_setattr(state, castcustom(self), key, value);
+                PyLiteObject *method_func = pylt_obj_getattr(state, self, castobj(pylt_obj_str_new_from_c_str(state, "__setattr__", true)), NULL);
+                if (method_func) {
+                    PyLiteObject *ret = pylt_vm_call_method(state, self, method_func, 2, key, value);
+                    return pylt_obj_cistrue(state, ret);
+                } else {
+                    pylt_obj_custom_setattr(state, castcustom(self), key, value);
+                }
             }
             return true;
     }

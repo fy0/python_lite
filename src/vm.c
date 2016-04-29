@@ -593,16 +593,21 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
 _end:;
 }
 
-PyLiteObject* pylt_vm_call_func(PyLiteState* state, PyLiteObject *callable, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_vm_call_func(PyLiteState* state, PyLiteObject *callable, int argc, ...) {
     PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc };
     PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
     PyLiteCodeObject *code = pylt_obj_code_new(state);
     PyLiteFrame frame_bak = kv_top(state->vm.frames);
+    va_list args;
 
     kv_pushptr(state->vm.stack, callable);
+
+    va_start(args, argc);
     for (pl_int_t i = 0; i < argc; ++i) {
-        kv_pushptr(state->vm.stack, args[i]);
+        kv_pushptr(state->vm.stack, va_arg(args, PyLiteObject*));
     }
+    va_end(args);
+
     kv_pushins(code->opcodes, bc_call);
     kv_pushins(code->opcodes, bc_halt);
     pylt_vm_run(state, code);
@@ -611,17 +616,22 @@ PyLiteObject* pylt_vm_call_func(PyLiteState* state, PyLiteObject *callable, int 
     return castobj(kv_pop(state->vm.stack));
 }
 
-PyLiteObject* pylt_vm_call_method(PyLiteState* state, PyLiteObject *self, PyLiteObject *callable, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_vm_call_method(PyLiteState* state, PyLiteObject *self, PyLiteObject *callable, int argc, ...) {
     PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc + 1 };
     PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
     PyLiteCodeObject *code = pylt_obj_code_new(state);
     PyLiteFrame frame_bak = kv_top(state->vm.frames);
+    va_list args;
 
     kv_pushptr(state->vm.stack, callable);
     kv_pushptr(state->vm.stack, self);
+
+    va_start(args, argc);
     for (pl_int_t i = 0; i < argc; ++i) {
-        kv_pushptr(state->vm.stack, args[i]);
+        kv_pushptr(state->vm.stack, va_arg(args, PyLiteObject*));
     }
+    va_end(args);
+
     kv_pushins(code->opcodes, bc_call);
     kv_pushins(code->opcodes, bc_halt);
     pylt_vm_run(state, code);

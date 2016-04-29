@@ -78,7 +78,7 @@ int token_de_to_op_val(uint32_t tk);
 void pylt_vm_init(struct PyLiteState *state, PyLiteVM *vm);
 void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code);
 
-PyLiteObject* pylt_vm_call_method(PyLiteState* state, PyLiteObject *self, PyLiteObject *callable, int argc, PyLiteObject **args);
-PyLiteObject* pylt_vm_call_func(PyLiteState* state, PyLiteObject *callable, int argc, PyLiteObject **args);
+PyLiteObject* pylt_vm_call_method(PyLiteState* state, PyLiteObject *self, PyLiteObject *callable, int argc, ...);
+PyLiteObject* pylt_vm_call_func(PyLiteState* state, PyLiteObject *callable, int argc, ...);
 
 #endif
