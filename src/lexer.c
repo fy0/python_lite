@@ -105,27 +105,27 @@ uint32_t read_str_or_bytes_head(StringStream *ss, bool *is_raw) {
 
     for (;;) {
         switch (ss->current) {
-        case '\'': case '\"':
-            if ((state & 1) && is_raw) *is_raw = true;
-            if (state & 4) return TK_BYTES;
-            else return TK_STRING;
-        case 'r': case 'R':
-            if (state & 1) goto _not_str;
-            state |= 1;
-            ss_nextc(ss);
-            break;
-        case 'u': case 'U':
-            if (state & (2 | 4)) goto _not_str;
-            state |= 2;
-            ss_nextc(ss);
-            break;
-        case 'b': case 'B':
-            if (state & (2 | 4)) goto _not_str;
-            state |= 4;
-            ss_nextc(ss);
-            break;
-        default:
-            goto _not_str;
+            case '\'': case '\"':
+                if ((state & 1) && is_raw) *is_raw = true;
+                if (state & 4) return TK_BYTES;
+                else return TK_STRING;
+            case 'r': case 'R':
+                if (state & 1) goto _not_str;
+                state |= 1;
+                ss_nextc(ss);
+                break;
+            case 'u': case 'U':
+                if (state & (2 | 4)) goto _not_str;
+                state |= 2;
+                ss_nextc(ss);
+                break;
+            case 'b': case 'B':
+                if (state & (2 | 4)) goto _not_str;
+                state |= 4;
+                ss_nextc(ss);
+                break;
+            default:
+                goto _not_str;
         }
     }
 
@@ -187,50 +187,50 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
 
     for (;;) {
         switch (ss->current) {
-        case '\'': case '"':
-            if (ss->current == sign) {
-                if (is_long_string_or_bytes) {
-                    ss_nextc(ss);
-                    if (ss->current != sign) {
-                        bs_next(ls, sign, is_str_type);
-                        continue;
+            case '\'': case '"':
+                if (ss->current == sign) {
+                    if (is_long_string_or_bytes) {
+                        ss_nextc(ss);
+                        if (ss->current != sign) {
+                            bs_next(ls, sign, is_str_type);
+                            continue;
+                        }
+                        ss_nextc(ss);
+                        if (ss->current != sign) {
+                            bs_next(ls, sign, is_str_type);
+                            bs_next(ls, sign, is_str_type);
+                            continue;
+                        }
+                        ss_nextc(ss);
+                        goto the_end;
+                    } else {
+                        ss_nextc(ss);
+                        goto the_end;
                     }
-                    ss_nextc(ss);
-                    if (ss->current != sign) {
-                        bs_next(ls, sign, is_str_type);
-                        bs_next(ls, sign, is_str_type);
-                        continue;
-                    }
-                    ss_nextc(ss);
-                    goto the_end;
-                } else {
-                    ss_nextc(ss);
-                    goto the_end;
                 }
+            case '\n': {
+                ls->linenumber++;
+                if (!is_long_string_or_bytes) return false;
+                bs_next(ls, ss->current, is_str_type);
+                ss_nextc(ss);
+                break;
             }
-        case '\n': {
-            ls->linenumber++;
-            if (!is_long_string_or_bytes) return false;
-            bs_next(ls, ss->current, is_str_type);
-            ss_nextc(ss);
-            break;
-        }
-        case '\r': {
-            ls->linenumber++;
-            if (!is_long_string_or_bytes) return false;
-            bs_next(ls, '\n', is_str_type);
-            ss_nextc(ss);
-            if (ss->current == '\n') ss_nextc(ss);
-            break;
-        }
-        //case '\\': {} TODO
-        default:
-            if ((!is_str_type) && (ss->current >= 0x80)) {
-                //SyntaxError: bytes can only contain ASCII literal characters.
-                return false;
+            case '\r': {
+                ls->linenumber++;
+                if (!is_long_string_or_bytes) return false;
+                bs_next(ls, '\n', is_str_type);
+                ss_nextc(ss);
+                if (ss->current == '\n') ss_nextc(ss);
+                break;
             }
-            bs_next(ls, ss->current, is_str_type);
-            ss_nextc(ss);
+                       //case '\\': {} TODO
+            default:
+                if ((!is_str_type) && (ss->current >= 0x80)) {
+                    //SyntaxError: bytes can only contain ASCII literal characters.
+                    return false;
+                }
+                bs_next(ls, ss->current, is_str_type);
+                ss_nextc(ss);
         }
     }
     return false;
@@ -389,33 +389,32 @@ int pylt_lex_next(LexState *ls) {
         ss_nextc(ss);
         for (;;) {
             switch (ss->current) {
-            case '#':
-                do { ss_nextc(ss); } 
-                while (ss->current != '\n' && ss->current != '\r');
-                break;
-            case '\n':
-                cur_indent = 0;
-                ls->linenumber++;
-                ss_nextc(ss);
-                break;
-            case '\r':
-                cur_indent = 0;
-                ls->linenumber++;
-                ss_nextc(ss);
-                if (ss->current == '\n') ss_nextc(ss);
-                break;
-            case ' ':
-                cur_indent++;
-                ss_nextc(ss);
-                break;
-            case '\t':
-                cur_indent += 8;
-                ss_nextc(ss);
-                break;
-            default:
-                ls->current_indent = cur_indent;
-                goto indent_end;
-                break;
+                case '#':
+                    do { ss_nextc(ss); } while (ss->current != '\n' && ss->current != '\r');
+                    break;
+                case '\n':
+                    cur_indent = 0;
+                    ls->linenumber++;
+                    ss_nextc(ss);
+                    break;
+                case '\r':
+                    cur_indent = 0;
+                    ls->linenumber++;
+                    ss_nextc(ss);
+                    if (ss->current == '\n') ss_nextc(ss);
+                    break;
+                case ' ':
+                    cur_indent++;
+                    ss_nextc(ss);
+                    break;
+                case '\t':
+                    cur_indent += 8;
+                    ss_nextc(ss);
+                    break;
+                default:
+                    ls->current_indent = cur_indent;
+                    goto indent_end;
+                    break;
             }
         }
     }

@@ -335,7 +335,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
 
                 if (!tobj) {
                     printf("NameError: name '");
-                    debug_print_obj(state, const_obj(ins.extra));
+                    pylt_api_output_str(state, caststr(const_obj(ins.extra)));
                     printf("' is not defined\n");
                     return;
                 }
