@@ -4,10 +4,11 @@
 
 #include "object.h"
 #include "code.h"
+#include "dict.h"
 
 typedef struct PyLiteModuleObject {
     PyLiteObject_HEAD;
-    PyLiteTable *attrs;
+    PyLiteDictObject *attrs;
     PyLiteCodeObject *code;
 } PyLiteModuleObject;
 

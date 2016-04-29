@@ -56,7 +56,7 @@ typedef struct PyLiteFrame {
     PyLiteFunctionObject *func;
     PyLiteCodeObject *code;
     pl_uint_t code_pointer_slot;
-    kvec_t(PyLiteTable*) var_tables;
+    kvec_t(PyLiteDictObject*) var_tables;
 } PyLiteFrame;
 
 typedef struct PyLiteVM {

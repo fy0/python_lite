@@ -68,7 +68,6 @@ int token_de_to_op_val(uint32_t tk) {
 
 void pylt_vm_init(struct PyLiteState *state, PyLiteVM* vm) {
     PyLiteFrame *frame;
-    PyLiteTable *locals;
     PyLiteModuleObject *mod;
 
     kv_init(vm->stack);
@@ -83,20 +82,11 @@ void pylt_vm_init(struct PyLiteState *state, PyLiteVM* vm) {
     // built-in
     pylt_bind_all_types_register(state);
 
-    kv_push(PyLiteTable*, frame->var_tables, pylt_obj_table_new(state));
-    locals = kv_top(frame->var_tables);
     mod = pylt_mods_builtins_register(state);
-
-    pl_int_t k = kho_begin(mod->attrs);
-    while (k != kho_end(mod->attrs)) {
-        if (kho_exist(mod->attrs, k)) {
-            pylt_obj_table_set(locals, kho_key(mod->attrs, k), kho_val(mod->attrs, k));
-        }
-        ++k;
-    }
+    kv_push(PyLiteDictObject*, frame->var_tables, mod->attrs);
 
     // first local
-    kv_push(PyLiteTable*, frame->var_tables, pylt_obj_table_new(state));
+    kv_push(PyLiteDictObject*, frame->var_tables, pylt_obj_dict_new(state));
 }
 
 void pylt_vm_call_func(PyLiteState* state, PyLiteFunctionObject *func) {
@@ -111,10 +101,10 @@ void pylt_vm_call_func(PyLiteState* state, PyLiteFunctionObject *func) {
     kv_init(frame->var_tables);
 
     if (index) {
-        kv_copy1(PyLiteTable*, frame->var_tables, kv_A(vm->frames, index - 1).var_tables);
+        kv_copy1(PyLiteDictObject*, frame->var_tables, kv_A(vm->frames, index - 1).var_tables);
     }
 
-    kv_push(PyLiteTable*, frame->var_tables, pylt_obj_table_new(state));
+    kv_push(PyLiteDictObject*, frame->var_tables, pylt_obj_dict_new(state));
 }
 
 
@@ -290,7 +280,7 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
 
 void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
     PyLiteVM *vm = &state->vm;
-    PyLiteTable *locals;
+    PyLiteDictObject *locals;
     PyLiteInstruction ins;
 
     pl_int_t tnum;
@@ -315,20 +305,20 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 break;
             case BC_LOADLOCALS:
                 // LOADLOCALS   0       0
-                kv_pushptr(vm->stack, pylt_obj_dict_new_with_tab(state, locals));
+                kv_pushptr(vm->stack, locals);
                 break;
             case BC_SET_VAL:
                 // SET_VAL      0       const_id
-                pylt_obj_table_set(locals, const_obj(ins.extra), castobj(kv_top(state->vm.stack)));
+                pylt_obj_dict_csetitem(state, locals, const_obj(ins.extra), castobj(kv_top(state->vm.stack)));
                 break;
             case BC_LOAD_VAL:
             case BC_LOAD_VAL_EX:
                 // LOAD_VAL     0       const_id
-                tobj = pylt_obj_table_get(locals, const_obj(ins.extra));
+                tobj = pylt_obj_dict_cgetitem(state, locals, const_obj(ins.extra));
 
                 if (!tobj) {
                     for (int j = kv_size(kv_top(vm->frames).var_tables) - 2; j >= 0; --j) {
-                        tobj = pylt_obj_table_get(kv_A(kv_top(vm->frames).var_tables, j), const_obj(ins.extra));
+                        tobj = pylt_obj_dict_cgetitem(state, kv_A(kv_top(vm->frames).var_tables, j), const_obj(ins.extra));
                         if (tobj) break;
                     }
                 }
@@ -462,7 +452,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                     locals = kv_top(kv_top(vm->frames).var_tables);
                     if (func_info->length > 0) {
                         for (int k = func_info->length - 1; k >= 0; --k) {
-                            pylt_obj_table_set(locals, castobj(castfunc(tret)->info.params[k]), castobj(kv_pop(state->vm.stack)));
+                            pylt_obj_dict_csetitem(state, locals, castobj(castfunc(tret)->info.params[k]), castobj(kv_pop(state->vm.stack)));
                         }
                     }
                     kv_pop(vm->stack); // pop func obj
@@ -591,15 +581,8 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                     debug_print_obj(state, castobj(kv_top(state->vm.stack)));
                     putchar('\n');
                 }
-                printf("locals: {");
-                for (khiter_t it = kho_begin(locals); it < kho_end(locals); ++it) {
-                    if (!kho_exist(locals, it)) continue;
-                    debug_print_obj(state, kho_key(locals, it));
-                    printf(": ");
-                    debug_print_obj(state, kho_value(locals, it));
-                    printf(", ");
-                }
-                printf("}");
+                printf("locals: ");
+                debug_print_obj(state, castobj(locals));
                 putchar('\n');
             case BC_HALT:
                 goto _end;

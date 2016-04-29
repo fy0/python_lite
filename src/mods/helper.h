@@ -22,7 +22,7 @@ pl_uint_t* _UINTS(pl_uint_t n, ...);
 
 //#define NS(str) pylt_obj_str_new_from_c_str(state, str, true)
 
-#define pylt_mod_setattr(state, mod, key_str, value) pylt_obj_table_set((mod)->attrs, castobj(_NS(state, (key_str))), castobj(value));
+#define pylt_mod_setattr(state, mod, key_str, value) pylt_obj_dict_csetitem(state, (mod)->attrs, castobj(_NS(state, (key_str))), castobj(value));
 
 #define PARAM_NODEF  0
 #define PARAM_ARGS   1

@@ -87,11 +87,7 @@ PyLiteObject* pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObje
 }
 
 PyLiteObject* pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObject **args) {
-    switch (args[0]->ob_type) {
-        case PYLT_OBJ_TYPE_MODULE:
-            pylt_obj_table_set(castmod(args[0])->attrs, args[1], args[2]);
-            break;
-    }
+    pylt_obj_setattr(state, args[0], args[1], args[2]);
     return NULL;
 }
 
