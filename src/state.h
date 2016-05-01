@@ -2,6 +2,7 @@
 #ifndef PYLITE_STATE_H
 #define PYLITE_STATE_H
 
+#include "lexer.h"
 #include "parser.h"
 #include "vm.h"
 #include "lib/kvec.h"
@@ -10,6 +11,9 @@
 
 typedef struct PyLiteState {
     PyLiteVM vm;
+    LexState *lexer;
+    ParserState *parser;
+
     kvec_t(PyLiteTypeObject*) cls_base;
     PyLiteSetObject *cache_str;
     PyLiteSetObject *cache_bytes;
@@ -19,6 +23,7 @@ typedef struct PyLiteState {
 } PyLiteState;
 
 void pylt_state_init(PyLiteState *state);
+void pylt_state_load_stream(PyLiteState *state, StringStream *ss);
 //void pylt_state_err(PyLiteState *state);
 
 #endif

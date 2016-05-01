@@ -21,8 +21,27 @@ int main(int argc,char* argv[])
     platform_init();
 
     PyLiteState state;
+    pylt_state_init(&state);
+
+    StringStream *ss = ss_new(buf, size);
+    printf(buf);
+    putchar('\n');
+
+    pylt_state_load_stream(&state, ss);
+
+    putchar('\n');
+    debug_print_const_vals(&state, state.parser);
+    debug_print_opcodes(&state, state.parser);
+
+    pylt_vm_init(&state, &state.vm);
+    pylt_vm_run(&state, state.parser->info->code);
+
+    system("pause");
+    return 0;
+    //*/
+
+    /*PyLiteState state;
     LexState ls;
-    ParserState ps;
     pylt_state_init(&state);
 
     StringStream *ss = ss_new(buf, size);
@@ -30,21 +49,6 @@ int main(int argc,char* argv[])
     putchar('\n');
 
     pylt_lex_init(&state, &ls, ss);
-    
-    ///*
-    pylt_parser_init(&state, &ps, &ls);
-    parse(&ps);
-
-    putchar('\n');
-    debug_print_const_vals(&state, &ps);
-    debug_print_opcodes(&state, &ps);
-
-    pylt_vm_init(&state, &state.vm);
-    pylt_vm_run(&state, ps.info->code);
-
-    system("pause");
-    return 0;
-    //*/
 
     for (;;) {
         int code = pylt_lex_next(&ls);
@@ -77,7 +81,7 @@ int main(int argc,char* argv[])
         if (ls.token.val == TK_END) break;
     }
 
-    system("pause");
+    system("pause");*/
     return 0;
 }
 

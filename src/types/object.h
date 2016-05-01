@@ -97,12 +97,15 @@ struct PyLiteListObject;
 struct PyLiteTupleObject;
 struct PyLiteDictObject;
 
+struct PyLiteCodeObject;
 struct PyLiteModuleObject;
 struct PyLiteFunctionObject;
 struct PyLiteCFunctionObject;
 
 struct PyLiteTypeObject;
 struct PyLiteIterObject;
+struct PyLitePropertyObject;
+struct PyLiteNoneObject;
 
 struct PyLiteCustomObject;
 

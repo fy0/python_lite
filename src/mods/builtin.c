@@ -86,6 +86,11 @@ PyLiteObject* pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObje
     return NULL;
 }
 
+PyLiteObject* pylt_mods_builtins_super(PyLiteState *state, int argc, PyLiteObject **args) {
+    PyLiteTypeObject *type = pylt_api_gettype(state, args[0]->ob_type);
+    return castobj(type);
+}
+
 PyLiteObject* pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObject **args) {
     pylt_obj_setattr(state, args[0], args[1], args[2]);
     return NULL;
@@ -136,6 +141,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     pylt_cfunc_register(state, mod, _NS(state, "hash"), _NST(state, 1, "object"), NULL, NULL, &pylt_mods_builtins_hash);
     pylt_cfunc_register(state, mod, _NS(state, "iter"), _NST(state, 1, "object"), NULL, NULL, &pylt_mods_builtins_iter);
     pylt_cfunc_register(state, mod, _NS(state, "isinstance"), _NST(state, 2, "object", "class_or_type_or_tuple"), NULL, NULL, &pylt_mods_builtins_isinstance);
+    pylt_cfunc_register(state, mod, _NS(state, "super"), _NST(state, 1, "object"), NULL, NULL, &pylt_mods_builtins_super);
 
     pylt_mod_setattr(state, mod, "object", pylt_api_gettype(state, PYLT_OBJ_TYPE_OBJ));
     pylt_mod_setattr(state, mod, "int", pylt_api_gettype(state, PYLT_OBJ_TYPE_INT));
