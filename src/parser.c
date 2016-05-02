@@ -147,6 +147,7 @@ PyLiteObject* parse_get_consttype(ParserState *ps) {
 int parse_mutabletype(ParserState *ps, int *ptimes) {
     Token *tk = &(ps->ls->token);
     int tmp = 0;
+    bool old_disable_expr_tuple_parse;
 
     switch (tk->val) {
         case '[':
@@ -157,6 +158,8 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
                 return PYLT_OBJ_TYPE_LIST;
             } else {
                 tmp = 0;
+                old_disable_expr_tuple_parse = ps->disable_expr_tuple_parse;
+                ps->disable_expr_tuple_parse = true;
                 while (true) {
                     if (tk->val == ']') break;
                     parse_expr(ps);
@@ -167,6 +170,7 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
                 }
                 next(ps);
                 if (ptimes) *ptimes = tmp;
+                ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
                 return PYLT_OBJ_TYPE_LIST;
             }
             break;
@@ -178,6 +182,8 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
                 return PYLT_OBJ_TYPE_DICT;
             }
 
+            old_disable_expr_tuple_parse = ps->disable_expr_tuple_parse;
+            ps->disable_expr_tuple_parse = true;
             parse_expr(ps);
             tmp = 1;
             switch (tk->val) {
@@ -192,6 +198,7 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
                 case '}':
                     ACCEPT(ps, '}');
                     if (ptimes) *ptimes = tmp;
+                    ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
                     return PYLT_OBJ_TYPE_SET;
                 case ':': // dict
                     next(ps);
@@ -207,6 +214,7 @@ int parse_mutabletype(ParserState *ps, int *ptimes) {
                     }
                     ACCEPT(ps, '}');
                     if (ptimes) *ptimes = tmp;
+                    ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
                     return PYLT_OBJ_TYPE_DICT;
                     break;
             }

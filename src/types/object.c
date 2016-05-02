@@ -5,44 +5,38 @@
 
 
 void* basetype_op_func_table[][23] = {
-    /* { //LT, LE, GT, GE, NE, EQ, 
+    /* {
      BITOR, BITXOR, BITAND, BITLS, BITRS, 
      PLUS, MINUS, MUL, MATMUL, DIV, FLOORDIV, MOD, 
      POS, NEG, BITNOT,  POW }
     */
     { // object
-        //NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, 
         NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // int
-        //&pylt_obj_int_lt, &pylt_obj_int_le, &pylt_obj_int_gt, &pylt_obj_int_ge, &pylt_obj_int_ne, &pylt_obj_int_eq,
         &pylt_obj_int_bitor, &pylt_obj_int_bitxor, &pylt_obj_int_bitand, &pylt_obj_int_bitls, &pylt_obj_int_bitrs,
         &pylt_obj_int_plus, &pylt_obj_int_minus, &pylt_obj_int_mul, NULL, &pylt_obj_int_div, &pylt_obj_int_floordiv, &pylt_obj_int_mod,
         &pylt_obj_int_positive, &pylt_obj_int_negative, &pylt_obj_int_bitnot, &pylt_obj_int_pow
     },
     { // float
-        //&pylt_obj_float_lt, &pylt_obj_float_le, &pylt_obj_float_gt, &pylt_obj_float_ge, &pylt_obj_float_ne, &pylt_obj_float_eq,
         NULL, NULL, NULL, NULL, NULL,
         &pylt_obj_float_plus, &pylt_obj_float_minus, &pylt_obj_float_mul, NULL, &pylt_obj_float_div, &pylt_obj_float_floordiv, &pylt_obj_float_mod,
         &pylt_obj_float_positive, &pylt_obj_float_negative, NULL, &pylt_obj_float_pow
     },
     { // bool
-        //NULL, NULL, NULL, NULL, NULL, &pylt_obj_bool_eq,
         NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
 
     { // str
-        //NULL, NULL, NULL, NULL, &pylt_obj_str_ne, &pylt_obj_str_eq,
         NULL, NULL, NULL, NULL, NULL,
         &pylt_obj_str_plus, NULL, &pylt_obj_str_mul, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // bytes
-        //NULL, NULL, NULL, NULL, &pylt_obj_bytes_ne, &pylt_obj_bytes_eq,
         NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL

@@ -14,7 +14,7 @@ typedef struct PyLiteFunctionInfo {
     PyLiteStrObject *name;
     PyLiteStrObject **params;  /* parameters' names */
     pl_int_t *type_codes;      /* parameters' type code */
-    PyLiteObject **defaults;   /* default values of option parameters */
+    PyLiteObject **defaults;   /* default values of parameters */
     PyLiteStrObject *doc;
 } PyLiteFunctionInfo;
 
