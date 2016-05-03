@@ -1,9 +1,10 @@
-﻿
-#ifndef PYLITE_MODS_HELPER_H
-#define PYLITE_MODS_HELPER_H
 
-#include "../types/all.h"
-#include "mods.h"
+#ifndef PYLITE_BIND_BIND_H
+#define PYLITE_BIND_BIND_H
+
+#include "types/all.h"
+
+void pylt_obj_type_register(PyLiteState *state, PyLiteTypeObject* type);
 
 PyLiteCFunctionObject* pylt_cfunc_register(PyLiteState *state, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc);
 PyLiteCFunctionObject* pylt_cmethod_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc);
@@ -21,8 +22,6 @@ PyLiteTupleObject* _NST(PyLiteState *state, int n, ...);
 pl_uint_t* _UINTS(pl_uint_t n, ...);
 
 //#define NS(str) pylt_obj_str_new_from_c_str(state, str, true)
-
-#define pylt_mod_setattr(state, mod, key_str, value) pylt_obj_dict_csetitem(state, (mod)->attrs, castobj(_NS(state, (key_str))), castobj(value));
 
 #define PARAM_NODEF  0
 #define PARAM_ARGS   1

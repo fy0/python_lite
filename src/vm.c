@@ -3,11 +3,11 @@
 #include "api.h"
 #include "state.h"
 #include "debug.h"
+#include "bind.h"
 #include "lib/kvec.h"
 #include "types/all.h"
 #include "mods/builtin.h"
-#include "mods/helper.h"
-#include "pybind/bind.h"
+#include "pybind/typebind.h"
 
 const char* op_vals[] = {
     "or",

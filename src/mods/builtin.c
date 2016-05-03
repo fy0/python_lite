@@ -1,9 +1,9 @@
 ﻿
 #include "builtin.h"
-#include "helper.h"
 #include "../state.h"
 #include "../debug.h"
 #include "../api.h"
+#include "../bind.h"
 
 PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObject **args);
@@ -143,18 +143,18 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     pylt_cfunc_register(state, mod, _NS(state, "isinstance"), _NST(state, 2, "object", "class_or_type_or_tuple"), NULL, NULL, &pylt_mods_builtins_isinstance);
     pylt_cfunc_register(state, mod, _NS(state, "super"), _NST(state, 1, "object"), NULL, NULL, &pylt_mods_builtins_super);
 
-    pylt_mod_setattr(state, mod, "object", pylt_api_gettype(state, PYLT_OBJ_TYPE_OBJ));
-    pylt_mod_setattr(state, mod, "int", pylt_api_gettype(state, PYLT_OBJ_TYPE_INT));
-    pylt_mod_setattr(state, mod, "float", pylt_api_gettype(state, PYLT_OBJ_TYPE_FLOAT));
-    pylt_mod_setattr(state, mod, "bool", pylt_api_gettype(state, PYLT_OBJ_TYPE_BOOL));
-    pylt_mod_setattr(state, mod, "str", pylt_api_gettype(state, PYLT_OBJ_TYPE_STR));
-    pylt_mod_setattr(state, mod, "bytes", pylt_api_gettype(state, PYLT_OBJ_TYPE_BYTES));
-    pylt_mod_setattr(state, mod, "set", pylt_api_gettype(state, PYLT_OBJ_TYPE_SET));
-    pylt_mod_setattr(state, mod, "list", pylt_api_gettype(state, PYLT_OBJ_TYPE_LIST));
-    pylt_mod_setattr(state, mod, "tuple", pylt_api_gettype(state, PYLT_OBJ_TYPE_TUPLE));
-    pylt_mod_setattr(state, mod, "dict", pylt_api_gettype(state, PYLT_OBJ_TYPE_DICT));
+    pylt_obj_mod_setattr(state, mod, "object", pylt_api_gettype(state, PYLT_OBJ_TYPE_OBJ));
+    pylt_obj_mod_setattr(state, mod, "int", pylt_api_gettype(state, PYLT_OBJ_TYPE_INT));
+    pylt_obj_mod_setattr(state, mod, "float", pylt_api_gettype(state, PYLT_OBJ_TYPE_FLOAT));
+    pylt_obj_mod_setattr(state, mod, "bool", pylt_api_gettype(state, PYLT_OBJ_TYPE_BOOL));
+    pylt_obj_mod_setattr(state, mod, "str", pylt_api_gettype(state, PYLT_OBJ_TYPE_STR));
+    pylt_obj_mod_setattr(state, mod, "bytes", pylt_api_gettype(state, PYLT_OBJ_TYPE_BYTES));
+    pylt_obj_mod_setattr(state, mod, "set", pylt_api_gettype(state, PYLT_OBJ_TYPE_SET));
+    pylt_obj_mod_setattr(state, mod, "list", pylt_api_gettype(state, PYLT_OBJ_TYPE_LIST));
+    pylt_obj_mod_setattr(state, mod, "tuple", pylt_api_gettype(state, PYLT_OBJ_TYPE_TUPLE));
+    pylt_obj_mod_setattr(state, mod, "dict", pylt_api_gettype(state, PYLT_OBJ_TYPE_DICT));
 
-    pylt_mod_setattr(state, mod, "type", pylt_api_gettype(state, PYLT_OBJ_TYPE_TYPE));
+    pylt_obj_mod_setattr(state, mod, "type", pylt_api_gettype(state, PYLT_OBJ_TYPE_TYPE));
 
     return mod;
 }

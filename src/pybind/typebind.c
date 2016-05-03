@@ -1,16 +1,8 @@
 
-#include "bind.h"
-#include "common.h"
+#include "../bind.h"
 #include "../state.h"
 #include "../types/all.h"
-#include "../mods/helper.h"
-
-void pylt_obj_type_register(PyLiteState *state, PyLiteTypeObject* type) {
-    if (type->ob_reftype >= kv_size(state->cls_base)) {
-        kv_resize(PyLiteTypeObject*, state->cls_base, type->ob_reftype + 10);
-    }
-    kv_A(state->cls_base, type->ob_reftype) = type;
-}
+#include "common.h"
 
 void pylt_bind_all_types_register(PyLiteState *state) {
     PyLiteTypeObject *type;
