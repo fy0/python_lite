@@ -9,3 +9,7 @@ PyLiteModuleObject* pylt_obj_module_new(PyLiteState *state, PyLiteCodeObject *co
     obj->code = code;
     return obj;
 }
+
+void pylt_obj_mod_setattr(PyLiteState *state, PyLiteModuleObject *mod, PyLiteStrObject *key, PyLiteObject *value) {
+    pylt_obj_dict_csetitem(state, (mod)->attrs, castobj(key), value);
+}

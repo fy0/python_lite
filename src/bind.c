@@ -42,7 +42,7 @@ pl_uint_t* _UINTS(pl_uint_t n, ...) {
     pl_uint_t *ret = pylt_realloc(NULL, sizeof(pl_uint_t) * n);
 
     va_start(args, n);
-    for (int i = 0; i < n; ++i) {
+    for (pl_uint_t i = 0; i < n; ++i) {
         ret[i] = va_arg(args, pl_uint_t);
     }
     va_end(args);

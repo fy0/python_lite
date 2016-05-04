@@ -55,7 +55,7 @@ void debug_print_obj(PyLiteState *state, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_LIST:
             printf("[");
             if (castlist(obj)->ob_size) {
-                for (pl_uint_t i = 0; i < castlist(obj)->ob_size - 1; ++i) {
+                for (pl_int_t i = 0; i < castlist(obj)->ob_size - 1; ++i) {
                     debug_print_obj(state, castlist(obj)->ob_val[i]);
                     printf(", ");
                 }

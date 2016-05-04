@@ -1,6 +1,6 @@
 
-#ifndef PYLITE_BIND_BIND_H
-#define PYLITE_BIND_BIND_H
+#ifndef PYLITE_BIND_TYPEBIND_H
+#define PYLITE_BIND_TYPEBIND_H
 
 #include "../types/all.h"
 

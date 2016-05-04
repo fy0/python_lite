@@ -5,6 +5,7 @@
 #include "io.h"
 #include "debug.h"
 #include "vm.h"
+#include "api.h"
 #include "state.h"
 
 #include "types/object.h"
