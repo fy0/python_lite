@@ -29,5 +29,6 @@ PyLiteObject* pylt_obj_tuple_iternext(PyLiteState *state, PyLiteIterObject *iter
 PyLiteObject* pylt_obj_list_iternext(PyLiteState *state, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_set_iternext(PyLiteState *state, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_dict_iternext(PyLiteState *state, PyLiteIterObject *iter);
+PyLiteObject* pylt_obj_range_iternext(PyLiteState *state, PyLiteIterObject *iter);
 
 #endif

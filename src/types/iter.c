@@ -95,3 +95,9 @@ PyLiteObject* pylt_obj_set_iternext(PyLiteState *state, PyLiteIterObject *iter) 
 PyLiteObject* pylt_obj_dict_iternext(PyLiteState *state, PyLiteIterObject *iter) {
     return NULL;
 }
+
+PyLiteObject* pylt_obj_range_iternext(PyLiteState *state, PyLiteIterObject *iter) {
+    if (iter->hashmap.k < iter->hashmap.count)
+        return pylt_obj_int_new(state, iter->hashmap.k++);
+    return NULL;
+}

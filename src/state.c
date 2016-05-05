@@ -58,6 +58,7 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.print = pylt_obj_str_new_from_c_str(state, "print", true);
     pl_static.str.setattr = pylt_obj_str_new_from_c_str(state, "setattr", true);
     pl_static.str.getattr = pylt_obj_str_new_from_c_str(state, "getattr", true);
+    pl_static.str.range = pylt_obj_str_new_from_c_str(state, "range", true);
 
     pl_static.str.object = pylt_obj_str_new_from_c_str(state, "object", true);
     pl_static.str.int_ = pylt_obj_str_new_from_c_str(state, "int_", true);

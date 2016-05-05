@@ -57,6 +57,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *print;
         PyLiteStrObject *setattr;
         PyLiteStrObject *getattr;
+        PyLiteStrObject *range;
 
         PyLiteStrObject *object;
         PyLiteStrObject *int_;

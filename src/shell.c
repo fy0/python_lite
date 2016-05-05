@@ -25,7 +25,7 @@ int main(int argc,char* argv[])
     pylt_state_init(&state);
 
     StringStream *ss = ss_new(buf, size);
-    printf(buf);
+    //printf(buf);
     putchar('\n');
 
     pylt_state_load_stream(&state, ss);
@@ -33,6 +33,7 @@ int main(int argc,char* argv[])
     putchar('\n');
     debug_print_const_vals(&state, state.parser);
     debug_print_opcodes(&state, state.parser);
+    putchar('\n');
 
     pylt_vm_init(&state, &state.vm);
     pylt_vm_run(&state, state.parser->info->code);

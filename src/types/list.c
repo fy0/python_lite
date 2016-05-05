@@ -68,6 +68,15 @@ pl_int_t pylt_obj_list_cindex(PyLiteState *state, PyLiteListObject *self, PyLite
     return -1;
 }
 
+pl_int_t pylt_obj_list_cindex_strict(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
+    for (pl_int_t i = 0; i < self->ob_size; ++i) {
+        if ((self->ob_val[i]->ob_type == obj->ob_type) && (pylt_obj_ceq(state, self->ob_val[i], obj))) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 pl_bool_t pylt_obj_list_insert(PyLiteState *state, PyLiteListObject *self, pl_int_t index, PyLiteObject *obj) {
     if (index < 0) index += self->ob_size;
     if (index < 0 || index >= self->ob_size) return false;

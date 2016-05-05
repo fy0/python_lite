@@ -3,7 +3,9 @@
 #define PLATFORM_UTILS_H
 
 #if defined(_WIN32) && !defined(_WIN32_WCE)
-#define PLATFORM_WINDOWS  /* enable goodies for regular Windows */
+#define PLATFORM_WINDOWS
+#else
+#define PLATFORM_LINUX
 #endif
 
 #ifdef _MSC_VER
