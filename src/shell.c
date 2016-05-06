@@ -35,8 +35,7 @@ int main(int argc,char* argv[])
     debug_print_opcodes(&state, state.parser);
     putchar('\n');
 
-    pylt_vm_init(&state, &state.vm);
-    pylt_vm_run(&state, state.parser->info->code);
+    pylt_state_run(&state);
 
     system("pause");
     return 0;

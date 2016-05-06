@@ -18,11 +18,16 @@ void pylt_state_init(PyLiteState *state) {
     pylt_lex_init(state, state->lexer, NULL);
     pylt_parser_init(state, state->parser, state->lexer);
     pylt_utils_static_objs_init(state);
+    pylt_vm_init(state, &state->vm);
 }
 
 void pylt_state_load_stream(PyLiteState *state, StringStream *ss) {
     state->lexer->ss = ss;
     parse(state->parser);
+}
+
+void pylt_state_run(PyLiteState *state) {
+    pylt_vm_run(state, state->parser->info->code);
 }
 
 void pylt_utils_static_objs_init(PyLiteState *state) {
@@ -99,4 +104,8 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
 
     pl_static.str.None = pylt_obj_str_new_from_c_str(state, "None", true);
 
+    pl_static.str.param1 = pylt_obj_str_new_from_c_str(state, "param1", true);
+    pl_static.str.param2 = pylt_obj_str_new_from_c_str(state, "param2", true);
+    pl_static.str.param3 = pylt_obj_str_new_from_c_str(state, "param3", true);
+    pl_static.str.param4 = pylt_obj_str_new_from_c_str(state, "param4", true);
 }

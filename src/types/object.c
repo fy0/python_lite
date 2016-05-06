@@ -311,8 +311,7 @@ PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObje
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_MODULE:
             if (p_at_type) *p_at_type = false;
-            return NULL;
-            break;
+            return pylt_obj_mod_getattr(state, castmod(obj), key);
         case PYLT_OBJ_TYPE_TYPE:
             return pylt_obj_type_getattr(state, casttype(obj), key, p_at_type);
         default:

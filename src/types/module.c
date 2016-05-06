@@ -13,3 +13,7 @@ PyLiteModuleObject* pylt_obj_module_new(PyLiteState *state, PyLiteCodeObject *co
 void pylt_obj_mod_setattr(PyLiteState *state, PyLiteModuleObject *mod, PyLiteStrObject *key, PyLiteObject *value) {
     pylt_obj_dict_csetitem(state, (mod)->attrs, castobj(key), value);
 }
+
+PyLiteObject* pylt_obj_mod_getattr(PyLiteState *state, PyLiteModuleObject *self, PyLiteObject *key) {
+    return pylt_obj_dict_cgetitem(state, self->attrs, key);
+}

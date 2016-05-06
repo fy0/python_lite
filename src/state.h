@@ -97,10 +97,16 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *reverse;
 
         PyLiteStrObject *None;
+
+        PyLiteStrObject *param1;
+        PyLiteStrObject *param2;
+        PyLiteStrObject *param3;
+        PyLiteStrObject *param4;
     } str;
 } pl_static;
 
 void pylt_state_init(PyLiteState *state);
+void pylt_state_run(PyLiteState *state);
 void pylt_state_load_stream(PyLiteState *state, StringStream *ss);
 //void pylt_state_err(PyLiteState *state);
 

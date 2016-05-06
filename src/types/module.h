@@ -15,5 +15,6 @@ typedef struct PyLiteModuleObject {
 
 PyLiteModuleObject* pylt_obj_module_new(PyLiteState *state, PyLiteCodeObject *code);
 void pylt_obj_mod_setattr(PyLiteState *state, PyLiteModuleObject *mod, PyLiteStrObject *key, PyLiteObject *value);
+PyLiteObject* pylt_obj_mod_getattr(PyLiteState *state, PyLiteModuleObject *self, PyLiteObject *key);
 
 #endif
