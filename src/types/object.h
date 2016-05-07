@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_OBJECT_H
 #define PYLITE_TYPES_OBJECT_H
 
-#include "../utils.h"
+#include "../misc.h"
 #include "../io.h"
 #include "../lib/khash_obj.h"
 

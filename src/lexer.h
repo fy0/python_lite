@@ -2,7 +2,7 @@
 #ifndef PYLITE_LEXER_H
 #define PYLITE_LEXER_H
 
-#include "utils.h"
+#include "misc.h"
 #include "io.h"
 
 #define FIRST_TOKEN    128

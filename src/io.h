@@ -2,7 +2,7 @@
 #ifndef PYLITE_IO_H
 #define PYLITE_IO_H
 
-#include "utils.h"
+#include "misc.h"
 
 typedef struct pylt_FileSystem {
     void(*fs_init);

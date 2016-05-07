@@ -2,7 +2,7 @@
 #ifndef PYLITE_VM_H
 #define PYLITE_VM_H
 
-#include "utils.h"
+#include "misc.h"
 #include "lib/kvec.h"
 #include "types/all.h"
 
