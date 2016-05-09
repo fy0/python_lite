@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_PROPERTY_H
 #define PYLITE_TYPES_PROPERTY_H
 
-#include "object.h"
+#include "../object.h"
 #include "function.h"
 
 typedef struct PyLitePropertyObject {

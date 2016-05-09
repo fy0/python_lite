@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_ITER_H
 #define PYLITE_TYPES_ITER_H
 
-#include "object.h"
+#include "../object.h"
 
 // Common Iterator
 typedef struct PyLiteIterObject {

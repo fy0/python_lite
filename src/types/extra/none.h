@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_NONE_H
 #define PYLITE_TYPES_NONE_H
 
-#include "object.h"
+#include "../object.h"
 
 typedef struct PyLiteNoneObject {
     PyLiteObject_HEAD;

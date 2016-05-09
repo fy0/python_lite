@@ -1,6 +1,6 @@
 ﻿
 #include "module.h"
-#include "dict.h"
+#include "../dict.h"
 
 PyLiteModuleObject* pylt_obj_module_new(PyLiteState *state, PyLiteCodeObject *code) {
     PyLiteModuleObject *obj = castmod(pylt_realloc(NULL, sizeof(PyLiteModuleObject)));

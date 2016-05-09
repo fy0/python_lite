@@ -2,10 +2,10 @@
 #ifndef PYLITE_TYPES_MODULE_H
 #define PYLITE_TYPES_MODULE_H
 
-#include "object.h"
-#include "string.h"
+#include "../object.h"
+#include "../string.h"
+#include "../dict.h"
 #include "code.h"
-#include "dict.h"
 
 typedef struct PyLiteModuleObject {
     PyLiteObject_HEAD;

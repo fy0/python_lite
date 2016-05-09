@@ -2,9 +2,9 @@
 #ifndef PYLITE_TYPES_FUNC_H
 #define PYLITE_TYPES_FUNC_H
 
-#include "object.h"
-#include "string.h"
-#include "tuple.h"
+#include "../object.h"
+#include "../string.h"
+#include "../tuple.h"
 #include "code.h"
 
 typedef struct PyLiteFunctionInfo {

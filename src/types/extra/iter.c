@@ -1,6 +1,6 @@
 ﻿
 #include "iter.h"
-#include "all.h"
+#include "../all.h"
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
     PyLiteIterObject *iter;
