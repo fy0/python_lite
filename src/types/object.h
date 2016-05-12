@@ -38,7 +38,9 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_PROP,
     PYLT_OBJ_TYPE_NONE,
 
-    PYLT_OBJ_TYPE_USERCLASS, // 19
+    PYLT_OBJ_TYPE_RANGE, // 19
+
+    PYLT_OBJ_TYPE_USERCLASS, // 20
 };
 
 #define PYLT_OBJ_BUILTIN_TYPE_NUM PYLT_OBJ_TYPE_NONE
@@ -130,6 +132,8 @@ struct PyLiteCustomObject;
 #define casttype(i)     cast(struct PyLiteTypeObject*, (i))
 #define castprop(i)     cast(struct PyLitePropertyObject*, (i))
 #define castiter(i)     cast(struct PyLiteIterObject*, (i))
+
+#define castrange(i)    cast(struct PyLiteRangeObject*, (i))
 
 #define castcustom(i)    cast(struct PyLiteCustomObject*, (i))
 

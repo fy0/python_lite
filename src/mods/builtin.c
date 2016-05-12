@@ -41,9 +41,6 @@ PyLiteObject* pylt_mods_builtins_len(PyLiteState *state, int argc, PyLiteObject 
     return castobj(pylt_obj_int_new(state, (pl_int_t)pylt_obj_len(state, args[0])));
 }
 
-PyLiteObject* pylt_mods_builtins_range(PyLiteState *state, int argc, PyLiteObject **args) {
-    //return castobj(pylt_obj_iter_new_range(state, castint(args[0])->ob_val, (pl_int_t)castint(args[1])->ob_val));
-}
 
 PyLiteObject* pylt_mods_builtins_fsqrt(PyLiteState *state, int argc, PyLiteObject **args) {
     if (args[0]->ob_type == PYLT_OBJ_TYPE_INT) {
@@ -129,7 +126,6 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     pylt_cfunc_register(state, mod, pl_static.str.iter, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_iter);
     pylt_cfunc_register(state, mod, pl_static.str.isinstance, _NST(state, 2, "object", "class_or_type_or_tuple"), NULL, NULL, &pylt_mods_builtins_isinstance);
     pylt_cfunc_register(state, mod, pl_static.str.super, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_super);
-    pylt_cfunc_register(state, mod, pl_static.str.range, _NST(state, 2, "min", "max"), NULL, NULL, &pylt_mods_builtins_range);
     pylt_cfunc_register(state, mod, _NS(state, "fsqrt"), _NST(state, 1, "val"), NULL, NULL, &pylt_mods_builtins_fsqrt);
 
     pylt_obj_mod_setattr(state, mod, pl_static.str.object, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_OBJ)));
@@ -144,6 +140,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     pylt_obj_mod_setattr(state, mod, pl_static.str.dict, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_DICT)));
 
     pylt_obj_mod_setattr(state, mod, pl_static.str.type, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_TYPE)));
+    pylt_obj_mod_setattr(state, mod, pl_static.str.range, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_RANGE)));
 
     pylt_obj_mod_setattr(state, mod, pl_static.str.None, castobj(&PyLiteNone));
 

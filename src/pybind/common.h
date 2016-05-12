@@ -1,6 +1,6 @@
 
-#ifndef PYLITE_BIND_OBJ_H
-#define PYLITE_BIND_OBJ_H
+#ifndef PYLITE_BIND_COMMON_H
+#define PYLITE_BIND_COMMON_H
 
 #include "../types/object.h"
 

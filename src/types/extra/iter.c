@@ -35,6 +35,10 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
             return iter;
         case PYLT_OBJ_TYPE_DICT:
             break;
+        case PYLT_OBJ_TYPE_RANGE:
+            iter->array.index = castrange(obj)->start;
+            iter->iter_func = &pylt_obj_range_iternext;
+            return iter;
     }
     return NULL;
 }
@@ -97,7 +101,9 @@ PyLiteObject* pylt_obj_dict_iternext(PyLiteState *state, PyLiteIterObject *iter)
 }
 
 PyLiteObject* pylt_obj_range_iternext(PyLiteState *state, PyLiteIterObject *iter) {
-    if (iter->hashmap.k < iter->hashmap.count)
-        return pylt_obj_int_new(state, iter->hashmap.k++);
+    PyLiteRangeObject *range = castrange(iter->base);
+    iter->array.index += range->step;
+    if ((iter->array.index >= range->start) && (iter->array.index < range->stop))
+        return castobj(pylt_obj_int_new(state, iter->array.index));
     return NULL;
 }

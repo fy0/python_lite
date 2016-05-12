@@ -22,6 +22,8 @@
 #include "extra/property.h"
 #include "extra/none.h"
 
+#include "extra/range.h"
+
 #include "custom.h"
 
 #endif
