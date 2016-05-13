@@ -102,8 +102,10 @@ PyLiteObject* pylt_obj_dict_iternext(PyLiteState *state, PyLiteIterObject *iter)
 
 PyLiteObject* pylt_obj_range_iternext(PyLiteState *state, PyLiteIterObject *iter) {
     PyLiteRangeObject *range = castrange(iter->base);
-    iter->array.index += range->step;
-    if ((iter->array.index >= range->start) && (iter->array.index < range->stop))
-        return castobj(pylt_obj_int_new(state, iter->array.index));
+    pl_int_t index = iter->array.index;
+    if ((index >= range->start) && (index < range->stop)) {
+        iter->array.index += range->step;
+        return castobj(pylt_obj_int_new(state, index));
+    }
     return NULL;
 }

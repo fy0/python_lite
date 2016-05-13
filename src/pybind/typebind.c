@@ -108,7 +108,7 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // range
     type = pylt_obj_type_new(state, pl_static.str.range, PYLT_OBJ_TYPE_RANGE, PYLT_OBJ_TYPE_OBJ);
-    pylt_cmethod_register(state, type, pl_static.str.__new__, _NST(state, 4, "cls", "start", "stop", "step"), _NT(state, 4, PARAM_NODEF, PARAM_NODEF, PARAM_NODEF, pylt_obj_int_new(state, 1)), NULL, &pylt_cls_method_range_new);
+    pylt_cmethod_register(state, type, pl_static.str.__new__, _NST(state, 4, "cls", "start", "stop", "step"), _NT(state, 4, PARAM_NODEF, PARAM_NODEF, &PyLiteNone, pylt_obj_int_new(state, 1)), NULL, &pylt_cls_method_range_new);
     pylt_obj_type_register(state, type);
 
     state->class_num = PYLT_OBJ_BUILTIN_TYPE_NUM;

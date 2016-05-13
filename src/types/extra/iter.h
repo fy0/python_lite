@@ -11,7 +11,7 @@ typedef struct PyLiteIterObject {
     PyLiteIterFunc iter_func;
     union {
         struct {
-            int index;
+            pl_int_t index;
         } array;
         struct {
             int count;
