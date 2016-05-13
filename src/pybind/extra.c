@@ -4,7 +4,7 @@
 
 PyLiteObject* pylt_cls_method_range_new(PyLiteState *state, int argc, PyLiteObject **args) {
     pl_int_t start, end;
-    if (args[2] == &PyLiteNone) {
+    if (castnone(args[2]) == &PyLiteNone) {
         start = 0;
         end = castint(args[1])->ob_val;
     } else {

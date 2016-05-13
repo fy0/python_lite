@@ -67,25 +67,6 @@ pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject*
 PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj);
 PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, PyLiteObject *b);
 
-
-// Pylite table
-KHASHO_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_chash, pylt_obj_ceq);
-typedef khasho_t(table) PyLiteTable;
-
-#define pylt_obj_table_new(state) kho_init(table, state)
-void pylt_obj_table_set(PyLiteTable *tab, PyLiteObject *key, PyLiteObject *val);
-PyLiteObject* pylt_obj_table_get(PyLiteTable *tab, PyLiteObject *key);
-bool pylt_obj_table_exists(PyLiteTable *tab, PyLiteObject *key);
-bool pylt_obj_table_remove(PyLiteTable *tab, PyLiteObject *key);
-int pylt_obj_table_len(PyLiteTable *tab);
-
-pl_int_t pylt_obj_table_begin(PyLiteTable *tab);
-pl_int_t pylt_obj_table_end(PyLiteTable *tab);
-void pylt_obj_table_next(PyLiteTable *tab, pl_int_t *k);
-PyLiteObject* pylt_obj_table_itemkey(PyLiteTable *tab, pl_int_t k);
-PyLiteObject* pylt_obj_table_itemvalue(PyLiteTable *tab, pl_int_t k);
-void pylt_obj_table_keyvalue(PyLiteTable *tab, pl_int_t k, PyLiteObject **pkey, PyLiteObject **pval);
-
 // Type cast
 
 struct PyLiteIntObject;
@@ -109,6 +90,8 @@ struct PyLiteIterObject;
 struct PyLitePropertyObject;
 struct PyLiteNoneObject;
 
+struct PyLiteRangeObject;
+
 struct PyLiteCustomObject;
 
 
@@ -130,8 +113,9 @@ struct PyLiteCustomObject;
 #define castcfunc(i)    cast(struct PyLiteCFunctionObject*, (i))
 
 #define casttype(i)     cast(struct PyLiteTypeObject*, (i))
-#define castprop(i)     cast(struct PyLitePropertyObject*, (i))
 #define castiter(i)     cast(struct PyLiteIterObject*, (i))
+#define castprop(i)     cast(struct PyLitePropertyObject*, (i))
+#define castnone(i)     cast(struct PyLiteNoneObject*, (i))
 
 #define castrange(i)    cast(struct PyLiteRangeObject*, (i))
 

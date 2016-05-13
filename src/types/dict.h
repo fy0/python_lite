@@ -4,10 +4,13 @@
 
 #include "object.h"
 
+KHASHO_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_chash, pylt_obj_ceq);
+
 typedef struct PyLiteDictObject {
     PyLiteObject_HEAD;
-    PyLiteTable *ob_val;
+    khasho_t(table) *ob_val;
 } PyLiteDictObject;
+
 
 pl_int_t pylt_obj_dict_ccmp(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *other);
 pl_bool_t pylt_obj_dict_ceq(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *other);
@@ -19,7 +22,7 @@ void pylt_obj_dict_csetitem(PyLiteState *state, PyLiteDictObject *self, PyLiteOb
 pl_int_t pylt_obj_dict_len(PyLiteState *state, PyLiteDictObject *self);
 PyLiteDictObject* pylt_obj_dict_copy(PyLiteState *state, PyLiteDictObject *self);
 PyLiteObject* pylt_obj_dict_has(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *obj);
-
+pl_bool_t pylt_obj_dict_remove(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key);
 PyLiteObject* pylt_obj_dict_pop(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *obj);
 
 pl_int_t pylt_obj_dict_begin(PyLiteState *state, PyLiteDictObject *self);
@@ -30,6 +33,5 @@ PyLiteObject* pylt_obj_dict_itemvalue(PyLiteState *state, PyLiteDictObject *self
 void pylt_obj_dict_keyvalue(PyLiteState *state, PyLiteDictObject *self, pl_int_t k, PyLiteObject **key, PyLiteObject **val);
 
 PyLiteDictObject* pylt_obj_dict_new(PyLiteState *state);
-PyLiteDictObject* pylt_obj_dict_new_with_tab(PyLiteState *state, PyLiteTable *tab);
 
 #endif
