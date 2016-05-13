@@ -118,6 +118,21 @@ void print_tk_val(int tk_val) {
     putchar('\n');
 }
 
+void skip_space(ParserState *ps) {
+    Token *tk = &(ps->ls->token);
+    while (true) {
+        switch (tk->val) {
+            case TK_INDENT:
+            case TK_DEDENT:
+            case TK_NEWLINE:
+                next(ps);
+                break;
+            default:
+                return;
+        }
+    }
+}
+
 static _INLINE
 void ACCEPT(ParserState *ps, int token) {
     if (ps->ls->token.val != token) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
@@ -1045,7 +1060,7 @@ void parse_stmts(ParserState *ps) {
     }
 }
 
-void parse(ParserState *ps) {
+void pylt_parser_parse(ParserState *ps) {
     next(ps);
     //parse_expr(ps);
     parse_stmts(ps);

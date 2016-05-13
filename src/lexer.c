@@ -43,6 +43,7 @@ void pylt_lex_init(PyLiteState* state, LexState *ls, StringStream *ss) {
     ls->linenumber = 1;
     ls->ss = ss;
     ls->current_indent = -1;
+    ls->inside_couples = 0;
     
     ls->indent = idt = pylt_realloc(NULL, sizeof(IndentInfo));
     idt->val = 0;
@@ -449,13 +450,26 @@ indent_end:
     for (;;) {
         switch (ss->current) {
             case '\n': case '\r':
+                if (ls->inside_couples > 0) {
+                    ss_nextc(ss);
+                    break;
+                }
                 ls->current_indent = -1;
                 ls->token.val = TK_NEWLINE;
                 return 0;
             case ' ': case '\t':
                 ss_nextc(ss);
                 break;
-            case '(': case ')': case '[': case ']': case '{': case '}':
+            case '(':  case '[': case '{':
+                ls->inside_couples++;
+                ls->token.val = ss->current;
+                ss_nextc(ss);
+                return 0;
+            case ')': case ']': case '}':
+                ls->inside_couples--;
+                ls->token.val = ss->current;
+                ss_nextc(ss);
+                return 0;
             case ',': case ':': case '.': case '~':
                 ls->token.val = ss->current;
                 ss_nextc(ss);

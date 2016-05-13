@@ -23,7 +23,7 @@ void pylt_state_init(PyLiteState *state) {
 
 void pylt_state_load_stream(PyLiteState *state, StringStream *ss) {
     state->lexer->ss = ss;
-    parse(state->parser);
+    pylt_parser_parse(state->parser);
 }
 
 void pylt_state_run(PyLiteState *state) {

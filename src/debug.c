@@ -4,6 +4,7 @@
 #include "lexer.h"
 #include "vm.h"
 #include "api.h"
+#include "state.h"
 
 const char* get_op_name(uint32_t val) {
     return pylt_vm_get_op_name(val);
@@ -203,5 +204,40 @@ void debug_print_opcodes(PyLiteState *state, ParserState *ps) {
                 printf("   %-15s\n", "HALT");
                 break;
         }
+    }
+}
+
+void debug_test_lexer(PyLiteState *state, StringStream *ss) {
+    state->lexer->ss = ss;
+
+    for (;;) {
+        int code = pylt_lex_next(state->lexer);
+        if (code) {
+            printf("ERROR: %d\n", code);
+            break;
+        }
+        if (state->lexer->token.val < FIRST_TOKEN) printf("[%d] %c\n", state->lexer->linenumber, state->lexer->token.val);
+        else {
+            switch (state->lexer->token.val) {
+                case TK_INT: case TK_FLOAT:
+                    printf("[%d] %s: ", state->lexer->linenumber, pylt_lex_get_token_name(state->lexer->token.val));
+                    debug_print_obj(state, state->lexer->token.obj);
+                    //raw_str_print(&state->lexer->token.str);
+                    putchar('\n');
+                    break;
+                case TK_BYTES: case TK_STRING: case TK_NAME:
+                    printf("[%d] %s: ", state->lexer->linenumber, pylt_lex_get_token_name(state->lexer->token.val));
+                    //raw_str_print(&state->lexer->token.str);
+                    debug_print_obj(state, state->lexer->token.obj);
+                    putchar('\n');
+                    break;
+                case TK_INDENT: case TK_DEDENT:
+                    printf("[%d] %s: %d\n", state->lexer->linenumber, pylt_lex_get_token_name(state->lexer->token.val), state->lexer->current_indent);
+                    break;
+                default:
+                    printf("[%d] %s\n", state->lexer->linenumber, pylt_lex_get_token_name(state->lexer->token.val));
+            }
+        }
+        if (state->lexer->token.val == TK_END) break;
     }
 }

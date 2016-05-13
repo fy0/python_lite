@@ -77,6 +77,7 @@ typedef struct LexState {
     PyLiteState *state;
 
     int current_indent;
+    int inside_couples; /* [...] (...) {...} */
     IndentInfo *indent; /* indent stack */
     IndentInfo *indent_used;
 } LexState;
