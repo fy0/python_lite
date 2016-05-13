@@ -11,10 +11,11 @@ typedef struct PyLiteIterObject {
     PyLiteIterFunc iter_func;
     union {
         struct {
+            pl_int_t count;
             pl_int_t index;
         } array;
         struct {
-            int count;
+            pl_int_t count;
             pl_uint_t k;
         } hashmap;
     };

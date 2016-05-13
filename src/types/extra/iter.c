@@ -13,18 +13,22 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
 
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_BYTES:
+            iter->array.count = castbytes(obj)->ob_size;
             iter->array.index = 0;
             iter->iter_func = &pylt_obj_bytes_iternext;
             return iter;
         case PYLT_OBJ_TYPE_STR:
+            iter->array.count = caststr(obj)->ob_size;
             iter->array.index = 0;
             iter->iter_func = &pylt_obj_str_iternext;
             return iter;
         case PYLT_OBJ_TYPE_TUPLE:
+            iter->array.count = casttuple(obj)->ob_size;
             iter->array.index = 0;
             iter->iter_func = &pylt_obj_tuple_iternext;
             return iter;
         case PYLT_OBJ_TYPE_LIST:
+            iter->array.count = castlist(obj)->ob_size;
             iter->iter_func = &pylt_obj_list_iternext;
             iter->array.index = 0;
             return iter;
@@ -36,6 +40,7 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_DICT:
             break;
         case PYLT_OBJ_TYPE_RANGE:
+            iter->array.count = pylt_obj_range_itertimes(state, castrange(obj));
             iter->array.index = castrange(obj)->start;
             iter->iter_func = &pylt_obj_range_iternext;
             return iter;

@@ -281,11 +281,13 @@ pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj) {
 
 pl_bool_t pylt_obj_citerable(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
-        case PYLT_OBJ_TYPE_BYTES:
         case PYLT_OBJ_TYPE_STR:
-        case PYLT_OBJ_TYPE_TUPLE:
+        case PYLT_OBJ_TYPE_BYTES:
         case PYLT_OBJ_TYPE_SET:
+        case PYLT_OBJ_TYPE_LIST:
+        case PYLT_OBJ_TYPE_TUPLE:
         case PYLT_OBJ_TYPE_DICT:
+        case PYLT_OBJ_TYPE_RANGE:
             return true;
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {

@@ -18,6 +18,7 @@ PyLiteObject* pylt_method_set_copy(PyLiteState *state, int argc, PyLiteObject **
 PyLiteObject* pylt_method_set_pop(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_set_remove(PyLiteState *state, int argc, PyLiteObject **args);
 
+PyLiteObject* pylt_cls_method_list_new(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_list_append(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_list_clear(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_list_copy(PyLiteState *state, int argc, PyLiteObject **args);

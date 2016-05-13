@@ -251,7 +251,7 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
         if (args_i != params_num) {
             printf("TypeError: ");
             debug_print_obj(state, castobj(info->name));
-            printf("() takes %d positional arguments but %d were given (%d given)\n", info->length, params_num);
+            printf("() takes %d positional arguments but %d were given\n", info->length, params_num);
             return 1;
         }
     }

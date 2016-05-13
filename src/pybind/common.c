@@ -63,7 +63,20 @@ PyLiteObject* pylt_method_set_remove(PyLiteState *state, int argc, PyLiteObject 
     return NULL;
 }
 
+PyLiteObject* pylt_cls_method_list_new(PyLiteState *state, int argc, PyLiteObject **args) {
+    PyLiteObject *obj;
+    PyLiteListObject *lst = pylt_obj_list_new(state);
 
+    if (pylt_obj_citerable(state, args[1])) {
+        PyLiteIterObject *iter = pylt_obj_iter_new(state, args[1]);
+        for (obj = pylt_obj_iter_next(state, iter); obj; obj = pylt_obj_iter_next(state, iter)) {
+            pylt_obj_list_append(state, lst, obj);
+        }
+    } else {
+        // error
+    }
+    return castobj(lst);
+}
 
 PyLiteObject* pylt_method_list_append(PyLiteState *state, int argc, PyLiteObject **args) {
     pylt_obj_list_append(state, castlist(args[0]), args[1]);

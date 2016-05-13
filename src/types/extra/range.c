@@ -10,3 +10,7 @@ PyLiteRangeObject* pylt_obj_range_new(PyLiteState *state, pl_int_t start, pl_int
     obj->step = step;
     return obj;
 }
+
+pl_int_t pylt_obj_range_itertimes(PyLiteState *state, PyLiteRangeObject* range) {
+    return max(0, (pl_int_t)ceil((range->stop - range->start) / range->step));
+}
