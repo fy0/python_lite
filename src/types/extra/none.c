@@ -4,11 +4,11 @@
 PyLiteNoneObject PyLiteNone = { PYLT_OBJ_TYPE_NONE };
 
 
-pl_int_t pylt_obj_none_ccmp(PyLiteState *state, PyLiteNoneObject *self, PyLiteObject *other) {
+pl_int_t pylt_obj_none_cmp(PyLiteState *state, PyLiteNoneObject *self, PyLiteObject *other) {
     return 2;
 }
 
-pl_bool_t pylt_obj_none_ceq(PyLiteState *state, PyLiteNoneObject *self, PyLiteObject *other) {
+pl_bool_t pylt_obj_none_eq(PyLiteState *state, PyLiteNoneObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_NONE:
             return true;

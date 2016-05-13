@@ -48,14 +48,14 @@ enum PyLiteObjectTypeCode {
 
 // Object methods
 
-pl_int_t pylt_obj_ccmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
-pl_bool_t pylt_obj_ceq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
-pl_uint32_t pylt_obj_chash(PyLiteState *state, PyLiteObject *obj);
+pl_int_t pylt_obj_cmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
+pl_bool_t pylt_obj_eq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
+pl_uint32_t pylt_obj_hash(PyLiteState *state, PyLiteObject *obj);
 pl_int_t pylt_obj_len(PyLiteState *state, PyLiteObject *obj);
 
-pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj);
-pl_bool_t pylt_obj_citerable(PyLiteState *state, PyLiteObject *obj);
-pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj);
+pl_bool_t pylt_obj_hashable(PyLiteState *state, PyLiteObject *obj);
+pl_bool_t pylt_obj_iterable(PyLiteState *state, PyLiteObject *obj);
+pl_bool_t pylt_obj_istrue(PyLiteState *state, PyLiteObject *obj);
 
 PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type);
 pl_bool_t pylt_obj_setattr(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);

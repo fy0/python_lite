@@ -5,7 +5,7 @@
 
 static PyLiteStrObject* hash_and_check_cache(PyLiteState *state, PyLiteStrObject *obj) {
     PyLiteStrObject *obj2;
-    obj->ob_hash = pylt_obj_str_cforcehash(state, obj);
+    obj->ob_hash = pylt_obj_str_forcehash(state, obj);
     obj2 = caststr(pylt_obj_set_has(state, state->cache_str, castobj(obj)));
     if (obj2) {
         pylt_obj_str_free(state, obj);
@@ -16,11 +16,11 @@ static PyLiteStrObject* hash_and_check_cache(PyLiteState *state, PyLiteStrObject
     return obj;
 }
 
-pl_int_t pylt_obj_str_ccmp(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other) {
+pl_int_t pylt_obj_str_cmp(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other) {
     return false;
 }
 
-pl_bool_t pylt_obj_str_ceq(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other) {
+pl_bool_t pylt_obj_str_eq(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other) {
     unsigned int i;
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_STR:
@@ -37,12 +37,12 @@ pl_bool_t pylt_obj_str_ceq(PyLiteState *state, PyLiteStrObject *self, PyLiteObje
     }
 }
 
-pl_uint32_t pylt_obj_str_chash(PyLiteState *state, PyLiteStrObject *obj) {
-    return caststr(obj)->ob_hash;
+pl_uint32_t pylt_obj_str_hash(PyLiteState *state, PyLiteStrObject *obj) {
+    return obj->ob_hash;
 }
 
 // BKDR Hash
-pl_uint32_t pylt_obj_str_cforcehash(PyLiteState *state, PyLiteStrObject *obj) {
+pl_uint32_t pylt_obj_str_forcehash(PyLiteState *state, PyLiteStrObject *obj) {
     register size_t hash = 0;
     for (unsigned int i = 0; i < obj->ob_size; i++) {
         hash = hash * 131 + obj->ob_val[i];
@@ -50,7 +50,7 @@ pl_uint32_t pylt_obj_str_cforcehash(PyLiteState *state, PyLiteStrObject *obj) {
     return (hash & 0x7FFFFFFF);
 }
 
-PyLiteStrObject* pylt_obj_str_cgetitem(PyLiteState *state, PyLiteStrObject *self, int index) {
+PyLiteStrObject* pylt_obj_str_getitem(PyLiteState *state, PyLiteStrObject *self, int index) {
     uint32_t buf[1];
     int len = self->ob_size;
     if (index < 0) index += len;

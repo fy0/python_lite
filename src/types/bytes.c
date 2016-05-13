@@ -6,7 +6,7 @@
 
 static PyLiteBytesObject* hash_and_check_cache(PyLiteState *state, PyLiteBytesObject *obj) {
     PyLiteBytesObject *obj2;
-    obj->ob_hash = pylt_obj_bytes_cforcehash(state, obj);
+    obj->ob_hash = pylt_obj_bytes_forcehash(state, obj);
     obj2 = castbytes(pylt_obj_set_has(state, state->cache_bytes, castobj(obj)));
     if (obj2) {
         pylt_obj_bytes_free(state, obj);
@@ -17,11 +17,11 @@ static PyLiteBytesObject* hash_and_check_cache(PyLiteState *state, PyLiteBytesOb
     return obj;
 }
 
-pl_int_t pylt_obj_bytes_ccmp(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
+pl_int_t pylt_obj_bytes_cmp(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
     return false;
 }
 
-pl_bool_t pylt_obj_bytes_ceq(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
+pl_bool_t pylt_obj_bytes_eq(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {
     unsigned int i;
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_BYTES:
@@ -38,12 +38,12 @@ pl_bool_t pylt_obj_bytes_ceq(PyLiteState *state, PyLiteBytesObject *self, PyLite
     }
 }
 
-pl_uint32_t pylt_obj_bytes_chash(PyLiteState *state, PyLiteBytesObject *obj) {
+pl_uint32_t pylt_obj_bytes_hash(PyLiteState *state, PyLiteBytesObject *obj) {
     return castbytes(obj)->ob_hash;
 }
 
 // BKDR Hash
-pl_uint32_t pylt_obj_bytes_cforcehash(PyLiteState *state, PyLiteBytesObject *obj) {
+pl_uint32_t pylt_obj_bytes_forcehash(PyLiteState *state, PyLiteBytesObject *obj) {
     register size_t hash = 0;
     for (unsigned int i = 0; i < obj->ob_size; i++) {
         hash = hash * 131 + obj->ob_val[i];
@@ -51,7 +51,7 @@ pl_uint32_t pylt_obj_bytes_cforcehash(PyLiteState *state, PyLiteBytesObject *obj
     return (hash & 0x7FFFFFFF);
 }
 
-PyLiteBytesObject* pylt_obj_bytes_cgetitem(PyLiteState *state, PyLiteBytesObject *self, int index) {
+PyLiteBytesObject* pylt_obj_bytes_getitem(PyLiteState *state, PyLiteBytesObject *self, int index) {
     char buf[1];
     int len = self->ob_size;
     if (index < 0) index += len;

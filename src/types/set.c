@@ -2,9 +2,9 @@
 #include "set.h"
 #include "../debug.h"
 
-pl_int_t pylt_obj_set_ccmp(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *other) {
+pl_int_t pylt_obj_set_cmp(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *other) {
     if (other->ob_type == PYLT_OBJ_TYPE_SET) {
-        if (pylt_obj_set_ceq(state, self, other)) return 0;
+        if (pylt_obj_set_eq(state, self, other)) return 0;
         if (pylt_obj_set_contains(state, self, castset(other))) return  1;
         if (pylt_obj_set_contains(state, castset(other), self)) return -1;
         return 3;
@@ -13,7 +13,7 @@ pl_int_t pylt_obj_set_ccmp(PyLiteState *state, PyLiteSetObject *self, PyLiteObje
 }
 
 
-pl_bool_t pylt_obj_set_ceq(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *other) {
+pl_bool_t pylt_obj_set_eq(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *other) {
     if (other->ob_type == PYLT_OBJ_TYPE_SET) {
         if (kho_size(self->ob_val) != kho_size(castset(other)->ob_val))
             return false;
@@ -44,7 +44,7 @@ pl_bool_t pylt_obj_set_contains(PyLiteState *state, PyLiteSetObject *self, PyLit
 
 pl_int_t pylt_obj_set_add(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *obj) {
     int ret;
-    if (!pylt_obj_chashable(state, obj)) return -1;
+    if (!pylt_obj_hashable(state, obj)) return -1;
     kho_put(set_obj, self->ob_val, obj, &ret);
     return 0;
 }
@@ -57,7 +57,7 @@ PyLiteSetObject* pylt_obj_set_copy(PyLiteState *state, PyLiteSetObject *self) {
     PyLiteSetObject *obj = pylt_obj_set_new(state);
     kho_resize(set_obj, obj->ob_val, pylt_obj_set_len(state, self));
 
-    for (pl_int_t k = pylt_obj_set_begin(state, self); k != pylt_obj_set_end(state, self); k = pylt_obj_set_next(state, self, k)) {
+    for (pl_int_t k = pylt_obj_set_begin(state, self); k != pylt_obj_set_end(state, self); pylt_obj_set_next(state, self, &k)) {
         pylt_obj_set_add(state, obj, pylt_obj_set_itemvalue(state, self, k));
     }
 
@@ -94,19 +94,23 @@ pl_int_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self) {
     return kho_end(self->ob_val);
 }
 
-pl_int_t pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t k) {
-    while (++k != kho_end(self->ob_val)) {
-        if (kho_exist(self->ob_val, k)) return k;
-    }
-    return kho_end(self->ob_val);
-}
-
 pl_int_t pylt_obj_set_end(PyLiteState *state, PyLiteSetObject *self) {
     return kho_end(self->ob_val);
 }
 
 PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int_t k) {
     return (kho_exist(self->ob_val, k)) ? castobj(kho_key(self->ob_val, k)) : NULL;
+}
+
+void pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t *k) {
+    pl_int_t key = *k;
+    while (++key != kho_end(self->ob_val)) {
+        if (kho_exist(self->ob_val, key)) {
+            *k = key;
+            return;
+        }
+    }
+    *k = kho_end(self->ob_val);
 }
 
 PyLiteSetObject* pylt_obj_set_new(PyLiteState *state) {

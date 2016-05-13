@@ -45,7 +45,7 @@ PyLiteListObject* pylt_obj_list_copy(PyLiteState *state, PyLiteListObject *self)
     return obj;
 }
 
-pl_uint_t pylt_obj_list_ccount(PyLiteState *state, PyLiteListObject *self) {
+pl_uint_t pylt_obj_list_count(PyLiteState *state, PyLiteListObject *self) {
     return self->ob_size;
 }
 
@@ -61,16 +61,16 @@ void pylt_obj_list_extend(PyLiteState *state, PyLiteListObject *self, PyLiteList
     self->ob_size = self->ob_size + obj->ob_size;
 }
 
-pl_int_t pylt_obj_list_cindex(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
+pl_int_t pylt_obj_list_index(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
     for (pl_int_t i = 0; i < self->ob_size; ++i) {
-        if (pylt_obj_ceq(state, self->ob_val[i], obj)) return i;
+        if (pylt_obj_eq(state, self->ob_val[i], obj)) return i;
     }
     return -1;
 }
 
-pl_int_t pylt_obj_list_cindex_strict(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
+pl_int_t pylt_obj_list_index_strict(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
     for (pl_int_t i = 0; i < self->ob_size; ++i) {
-        if ((self->ob_val[i]->ob_type == obj->ob_type) && (pylt_obj_ceq(state, self->ob_val[i], obj))) {
+        if ((self->ob_val[i]->ob_type == obj->ob_type) && (pylt_obj_eq(state, self->ob_val[i], obj))) {
             return i;
         }
     }
@@ -93,7 +93,7 @@ pl_bool_t pylt_obj_list_insert(PyLiteState *state, PyLiteListObject *self, pl_in
 
 pl_bool_t pylt_obj_list_remove(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
     for (pl_int_t i = 0; i < self->ob_size; ++i) {
-        if (pylt_obj_ceq(state, self->ob_val[i], obj)) {
+        if (pylt_obj_eq(state, self->ob_val[i], obj)) {
             if (i == self->ob_size - 1) self->ob_size--;
             else {
                 memcpy(self->ob_val + i, self->ob_val + i + 1, (self->ob_size - i - 1) * sizeof(PyLiteObject*));
@@ -127,13 +127,13 @@ PyLiteObject* pylt_obj_list_pop(PyLiteState *state, PyLiteListObject *self) {
     return self->ob_val[--self->ob_size];
 }
 
-PyLiteObject* pylt_obj_list_cgetitem(PyLiteState *state, PyLiteListObject *self, int index) {
+PyLiteObject* pylt_obj_list_getitem(PyLiteState *state, PyLiteListObject *self, int index) {
     if (index < 0) index += self->ob_size;
     if (index < 0 || index >= self->ob_size) return NULL;
     return self->ob_val[index];
 }
 
-pl_bool_t pylt_obj_list_csetitem(PyLiteState *state, PyLiteListObject *self, int index, PyLiteObject* obj) {
+pl_bool_t pylt_obj_list_setitem(PyLiteState *state, PyLiteListObject *self, int index, PyLiteObject* obj) {
     if (index < 0) index += self->ob_size;
     if (index < 0 || index >= self->ob_size) return false;
     self->ob_val[index] = obj;

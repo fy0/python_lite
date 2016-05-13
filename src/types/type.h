@@ -19,6 +19,6 @@ PyLiteTypeObject* pylt_obj_type_new_with_vars(PyLiteState *state, PyLiteStrObjec
 
 PyLiteObject* pylt_obj_type_getattr(PyLiteState *state, PyLiteTypeObject *self, PyLiteObject *key, pl_bool_t *p_at_type);
 void pylt_obj_type_setattr(PyLiteState *state, PyLiteTypeObject *self, PyLiteObject* key, PyLiteObject* value);
-pl_uint32_t pylt_obj_type_chash(PyLiteState *state, PyLiteTypeObject *self);
+pl_uint32_t pylt_obj_type_hash(PyLiteState *state, PyLiteTypeObject *self);
 
 #endif

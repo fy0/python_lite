@@ -97,7 +97,7 @@ PyLiteObject* pylt_obj_set_iternext(PyLiteState *state, PyLiteIterObject *iter) 
         return NULL;
 
     ret = pylt_obj_set_itemvalue(state, castset(iter->base), iter->hashmap.k);
-    iter->hashmap.k = pylt_obj_set_next(state, castset(iter->base), iter->hashmap.k);
+    pylt_obj_set_next(state, castset(iter->base), &(iter->hashmap.k));
     return ret;
 }
 

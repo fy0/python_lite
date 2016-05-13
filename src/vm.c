@@ -276,7 +276,7 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
     return 0;
 }
 
-#define const_obj(__index) pylt_obj_list_cgetitem(state, code->const_val, (__index))
+#define const_obj(__index) pylt_obj_list_getitem(state, code->const_val, (__index))
 
 
 void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
@@ -310,16 +310,16 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 break;
             case BC_SET_VAL:
                 // SET_VAL      0       const_id
-                pylt_obj_dict_csetitem(state, locals, const_obj(ins.extra), castobj(kv_top(state->vm.stack)));
+                pylt_obj_dict_setitem(state, locals, const_obj(ins.extra), castobj(kv_top(state->vm.stack)));
                 break;
             case BC_LOAD_VAL:
             case BC_LOAD_VAL_EX:
                 // LOAD_VAL     0       const_id
-                tobj = pylt_obj_dict_cgetitem(state, locals, const_obj(ins.extra));
+                tobj = pylt_obj_dict_getitem(state, locals, const_obj(ins.extra));
 
                 if (!tobj) {
                     for (int j = kv_size(kv_top(vm->frames).var_tables) - 2; j >= 0; --j) {
-                        tobj = pylt_obj_dict_cgetitem(state, kv_A(kv_top(vm->frames).var_tables, j), const_obj(ins.extra));
+                        tobj = pylt_obj_dict_getitem(state, kv_A(kv_top(vm->frames).var_tables, j), const_obj(ins.extra));
                         if (tobj) break;
                     }
                 }
@@ -409,7 +409,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                     case PYLT_OBJ_TYPE_DICT:
                         tobj = castobj(pylt_obj_dict_new(state));
                         for (pl_uint_t j = ins.extra; j > 0; j--) {
-                            pylt_obj_dict_csetitem(state, castdict(tobj), castobj(kv_topn(vm->stack, j * 2 - 1)), castobj(kv_topn(vm->stack, (j - 1) * 2)));
+                            pylt_obj_dict_setitem(state, castdict(tobj), castobj(kv_topn(vm->stack, j * 2 - 1)), castobj(kv_topn(vm->stack, (j - 1) * 2)));
                         }
                         kv_popn(vm->stack, ins.extra * 2);
                         kv_push(uintptr_t, vm->stack, (uintptr_t)tobj);
@@ -455,7 +455,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                     locals = kv_top(kv_top(vm->frames).var_tables);
                     if (func_info->length > 0) {
                         for (int k = func_info->length - 1; k >= 0; --k) {
-                            pylt_obj_dict_csetitem(state, locals, castobj(castfunc(tret)->info.params[k]), castobj(kv_pop(state->vm.stack)));
+                            pylt_obj_dict_setitem(state, locals, castobj(castfunc(tret)->info.params[k]), castobj(kv_pop(state->vm.stack)));
                         }
                     }
                     kv_pop(vm->stack); // pop func obj
@@ -476,7 +476,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 break;
             case BC_TEST:
                 // TEST         0       jump_offset
-                if (!pylt_obj_cistrue(state, castobj(kv_pop(state->vm.stack)))) {
+                if (!pylt_obj_istrue(state, castobj(kv_pop(state->vm.stack)))) {
                     i += ins.extra;
                 }
                 break;
@@ -574,7 +574,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 break;
             case BC_ASSERT:
                 // ASSERT       0       0
-                if (!pylt_obj_cistrue(state, castobj(kv_pop(state->vm.stack)))) {
+                if (!pylt_obj_istrue(state, castobj(kv_pop(state->vm.stack)))) {
                     printf("AssertionError\n");
                     return;
                 }

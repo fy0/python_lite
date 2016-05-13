@@ -51,7 +51,7 @@ pl_uint_t* _UINTS(pl_uint_t n, ...) {
 
 PyLiteCFunctionObject* pylt_cfunc_register(PyLiteState *state, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_obj_cfunc_new(state, name, param_names, defaults, types, cfunc);
-    pylt_obj_dict_csetitem(state, mod->attrs, castobj(name), castobj(func));
+    pylt_obj_dict_setitem(state, mod->attrs, castobj(name), castobj(func));
     return func;
 }
 

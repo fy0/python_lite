@@ -16,9 +16,9 @@ typedef struct PyLiteFloatObject {
 } PyLiteFloatObject;
 
 
-pl_int_t pylt_obj_int_ccmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
-pl_bool_t pylt_obj_int_ceq(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
-pl_uint32_t pylt_obj_int_chash(PyLiteState *state, PyLiteIntObject *obj);
+pl_int_t pylt_obj_int_cmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
+pl_bool_t pylt_obj_int_eq(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
+pl_uint32_t pylt_obj_int_hash(PyLiteState *state, PyLiteIntObject *obj);
 
 PyLiteObject* pylt_obj_int_bitor(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
 PyLiteObject* pylt_obj_int_bitxor(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
@@ -39,9 +39,9 @@ PyLiteObject* pylt_obj_int_bitnot(PyLiteState *state, PyLiteIntObject *self);
 PyLiteObject* pylt_obj_int_pow(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other);
 
 
-pl_int_t pylt_obj_float_ccmp(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
-pl_bool_t pylt_obj_float_ceq(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
-pl_uint32_t pylt_obj_float_chash(PyLiteState *state, PyLiteFloatObject *obj);
+pl_int_t pylt_obj_float_cmp(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
+pl_bool_t pylt_obj_float_eq(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
+pl_uint32_t pylt_obj_float_hash(PyLiteState *state, PyLiteFloatObject *obj);
 
 PyLiteObject* pylt_obj_float_plus(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
 PyLiteObject* pylt_obj_float_minus(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);

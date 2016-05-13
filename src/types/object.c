@@ -1,6 +1,7 @@
 ﻿
 #include "../vm.h"
 #include "../api.h"
+#include "../state.h"
 #include "all.h"
 
 
@@ -120,15 +121,16 @@ void* basetype_op_func_table[][23] = {
 返回  2: 无法比较
 返回  3: False
 */
-pl_int_t pylt_obj_ccmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b) {
+pl_int_t pylt_obj_cmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b) {
     if (a == b) return 0;
     switch (a->ob_type) {
-        case PYLT_OBJ_TYPE_INT: return pylt_obj_int_ccmp(state, castint(a), b);
-        case PYLT_OBJ_TYPE_FLOAT: return pylt_obj_float_ccmp(state, castfloat(a), b);
-        case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_ccmp(state, castbool(a), b);
-        case PYLT_OBJ_TYPE_STR: return pylt_obj_str_ccmp(state, caststr(a), b);
-        case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_ccmp(state, castbytes(a), b);
-        case PYLT_OBJ_TYPE_SET: return pylt_obj_set_ccmp(state, castset(a), b);
+        case PYLT_OBJ_TYPE_INT: return pylt_obj_int_cmp(state, castint(a), b);
+        case PYLT_OBJ_TYPE_FLOAT: return pylt_obj_float_cmp(state, castfloat(a), b);
+        case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_cmp(state, castbool(a), b);
+        case PYLT_OBJ_TYPE_STR: return pylt_obj_str_cmp(state, caststr(a), b);
+        case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_cmp(state, castbytes(a), b);
+        case PYLT_OBJ_TYPE_SET: return pylt_obj_set_cmp(state, castset(a), b);
+        case PYLT_OBJ_TYPE_DICT: return pylt_obj_dict_cmp(state, castdict(a), b);
         default:
             if (a->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 PyLiteObject *hash_func = pylt_obj_getattr(state, a, castobj(pylt_obj_str_new_from_c_str(state, "__cmp__", true)), NULL);
@@ -143,35 +145,36 @@ pl_int_t pylt_obj_ccmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b) {
     return 2;
 }
 
-pl_bool_t pylt_obj_ceq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b) {
+pl_bool_t pylt_obj_eq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b) {
     if (a == b) return true;
     switch (a->ob_type) {
-        case PYLT_OBJ_TYPE_INT: return pylt_obj_int_ceq(state, castint(a), b);
-        case PYLT_OBJ_TYPE_FLOAT: return pylt_obj_float_ceq(state, castfloat(a), b);
-        case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_ceq(state, castbool(a), b);
-        case PYLT_OBJ_TYPE_STR: return pylt_obj_str_ceq(state, caststr(a), b);
-        case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_ceq(state, castbytes(a), b);
-        case PYLT_OBJ_TYPE_SET: return pylt_obj_set_ceq(state, castset(a), b);
+        case PYLT_OBJ_TYPE_INT: return pylt_obj_int_eq(state, castint(a), b);
+        case PYLT_OBJ_TYPE_FLOAT: return pylt_obj_float_eq(state, castfloat(a), b);
+        case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_eq(state, castbool(a), b);
+        case PYLT_OBJ_TYPE_STR: return pylt_obj_str_eq(state, caststr(a), b);
+        case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_eq(state, castbytes(a), b);
+        case PYLT_OBJ_TYPE_SET: return pylt_obj_set_eq(state, castset(a), b);
+        case PYLT_OBJ_TYPE_DICT: return pylt_obj_dict_eq(state, castdict(a), b);
         default:
             if (a->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                PyLiteObject *hash_func = pylt_obj_getattr(state, a, castobj(pylt_obj_str_new_from_c_str(state, "__eq__", true)), NULL);
+                PyLiteObject *hash_func = pylt_obj_getattr(state, a, castobj(pl_static.str.__eq__), NULL);
                 if (hash_func) {
                     PyLiteObject *ret = pylt_vm_call_method(state, a, hash_func, 1, b);
-                    return pylt_obj_cistrue(state, ret);
+                    return pylt_obj_istrue(state, ret);
                 }
             }
     }
     return false;
 }
 
-pl_uint32_t pylt_obj_chash(PyLiteState *state, PyLiteObject *obj) {
+pl_uint32_t pylt_obj_hash(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
-        case PYLT_OBJ_TYPE_INT: return pylt_obj_int_chash(state, castint(obj));
-        case PYLT_OBJ_TYPE_FLOAT: return pylt_obj_float_chash(state, castfloat(obj));
-        case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_chash(state, castbool(obj));
-        case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_chash(state, castbytes(obj));
-        case PYLT_OBJ_TYPE_STR: return pylt_obj_str_chash(state, caststr(obj));
-        case PYLT_OBJ_TYPE_TYPE: return pylt_obj_type_chash(state, casttype(obj));
+        case PYLT_OBJ_TYPE_INT: return pylt_obj_int_hash(state, castint(obj));
+        case PYLT_OBJ_TYPE_FLOAT: return pylt_obj_float_hash(state, castfloat(obj));
+        case PYLT_OBJ_TYPE_BOOL: return pylt_obj_bool_hash(state, castbool(obj));
+        case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_hash(state, castbytes(obj));
+        case PYLT_OBJ_TYPE_STR: return pylt_obj_str_hash(state, caststr(obj));
+        case PYLT_OBJ_TYPE_TYPE: return pylt_obj_type_hash(state, casttype(obj));
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 PyLiteObject *ret;
@@ -187,7 +190,7 @@ pl_uint32_t pylt_obj_chash(PyLiteState *state, PyLiteObject *obj) {
     return 0;
 }
 
-pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj) {
+pl_bool_t pylt_obj_hashable(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_INT:
         case PYLT_OBJ_TYPE_FLOAT:
@@ -211,7 +214,7 @@ pl_bool_t pylt_obj_chashable(PyLiteState *state, PyLiteObject *obj) {
 }
 
 
-pl_bool_t pylt_obj_citerable(PyLiteState *state, PyLiteObject *obj) {
+pl_bool_t pylt_obj_iterable(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_STR:
         case PYLT_OBJ_TYPE_BYTES:
@@ -230,7 +233,7 @@ pl_bool_t pylt_obj_citerable(PyLiteState *state, PyLiteObject *obj) {
 }
 
 
-pl_bool_t pylt_obj_cistrue(PyLiteState *state, PyLiteObject *obj) {
+pl_bool_t pylt_obj_istrue(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_INT: return castint(obj)->ob_val != 0;
         case PYLT_OBJ_TYPE_FLOAT: return castfloat(obj)->ob_val != 0;
@@ -267,7 +270,7 @@ pl_bool_t pylt_obj_setattr(PyLiteState *state, PyLiteObject *self, PyLiteObject*
                 PyLiteObject *method_func = pylt_obj_getattr(state, self, castobj(pylt_obj_str_new_from_c_str(state, "__setattr__", true)), NULL);
                 if (method_func) {
                     PyLiteObject *ret = pylt_vm_call_method(state, self, method_func, 2, key, value);
-                    return pylt_obj_cistrue(state, ret);
+                    return pylt_obj_istrue(state, ret);
                 } else {
                     pylt_obj_custom_setattr(state, castcustom(self), key, value);
                 }
@@ -281,25 +284,25 @@ PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObje
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_BYTES:
             if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                return castobj(pylt_obj_bytes_cgetitem(state, castbytes(obj), castint(key)->ob_val));
+                return castobj(pylt_obj_bytes_getitem(state, castbytes(obj), castint(key)->ob_val));
             }
             break;
         case PYLT_OBJ_TYPE_STR:
             if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                return castobj(pylt_obj_str_cgetitem(state, caststr(obj), castint(key)->ob_val));
+                return castobj(pylt_obj_str_getitem(state, caststr(obj), castint(key)->ob_val));
             }
             break;
         case PYLT_OBJ_TYPE_LIST:
             if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                return castobj(pylt_obj_list_cgetitem(state, castlist(obj), castint(key)->ob_val));
+                return castobj(pylt_obj_list_getitem(state, castlist(obj), castint(key)->ob_val));
             }
             break;
         case PYLT_OBJ_TYPE_TUPLE:
             if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                return castobj(pylt_obj_tuple_cgetitem(state, casttuple(obj), castint(key)->ob_val));
+                return castobj(pylt_obj_tuple_getitem(state, casttuple(obj), castint(key)->ob_val));
             }
         case PYLT_OBJ_TYPE_DICT:
-            return pylt_obj_dict_cgetitem(state, castdict(obj), key);
+            return pylt_obj_dict_getitem(state, castdict(obj), key);
     }
     return NULL;
 }
@@ -308,11 +311,11 @@ pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject*
     switch (self->ob_type) {
         case PYLT_OBJ_TYPE_LIST:
             if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                return pylt_obj_list_csetitem(state, castlist(self), castint(key)->ob_val, value);
+                return pylt_obj_list_setitem(state, castlist(self), castint(key)->ob_val, value);
             }
             break;
         case PYLT_OBJ_TYPE_DICT:
-            pylt_obj_dict_csetitem(state, castdict(self), key, value);
+            pylt_obj_dict_setitem(state, castdict(self), key, value);
             return true;
     }
     return false;
@@ -320,7 +323,7 @@ pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject*
 
 PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj) {
     switch (op) {
-        case OP_NOT: return castobj(pylt_obj_cistrue(state, obj) ? &PyLiteFalse : &PyLiteTrue);
+        case OP_NOT: return castobj(pylt_obj_istrue(state, obj) ? &PyLiteFalse : &PyLiteTrue);
         default: {
             PyLiteObjUnaryOpFunc func = basetype_op_func_table[obj->ob_type - 1][op - OP_BITOR];
             if (func) return func(state, obj);
@@ -331,13 +334,13 @@ PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj) {
 
 PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, PyLiteObject *b) {
     switch (op) {
-        case OP_OR: return pylt_obj_cistrue(state, a) ? a : b;
-        case OP_AND: return pylt_obj_cistrue(state, a) ? b : a;
+        case OP_OR: return pylt_obj_istrue(state, a) ? a : b;
+        case OP_AND: return pylt_obj_istrue(state, a) ? b : a;
         case OP_IN: return NULL; // TODO
         case OP_IS: return castobj(a == b ? &PyLiteTrue : &PyLiteFalse);
         case OP_IS_NOT: return castobj(a != b ? &PyLiteTrue : &PyLiteFalse);
         case OP_LT: case OP_LE: case OP_GT: case OP_GE:
-            switch (pylt_obj_ccmp(state, a, b)) {
+            switch (pylt_obj_cmp(state, a, b)) {
                 case -1: return castobj((op == OP_LT || op == OP_LE) ? &PyLiteTrue : &PyLiteFalse);
                 case  0: return castobj((op == OP_LE || op == OP_GE) ? &PyLiteTrue : &PyLiteFalse);
                 case  1: return castobj((op == OP_GT || op == OP_GE) ? &PyLiteTrue : &PyLiteFalse);
@@ -345,9 +348,9 @@ PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, Py
                 default: return NULL;
             }
         case OP_NE:
-            return castobj(pylt_obj_ceq(state, a, b) ? &PyLiteFalse : &PyLiteTrue);
+            return castobj(pylt_obj_eq(state, a, b) ? &PyLiteFalse : &PyLiteTrue);
         case OP_EQ:
-            return castobj(pylt_obj_ceq(state, a, b) ? &PyLiteTrue : &PyLiteFalse);
+            return castobj(pylt_obj_eq(state, a, b) ? &PyLiteTrue : &PyLiteFalse);
         default: {
             PyLiteObjBinaryOpFunc func = basetype_op_func_table[a->ob_type - 1][op - OP_BITOR];
             if (func) return func(state, a, b);
@@ -365,7 +368,7 @@ pl_int_t pylt_obj_len(PyLiteState *state, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_BYTES: return castbytes(obj)->ob_size;
         case PYLT_OBJ_TYPE_STR: return caststr(obj)->ob_size;
         case PYLT_OBJ_TYPE_SET: return pylt_obj_set_len(state, castset(obj));
-        case PYLT_OBJ_TYPE_LIST: return pylt_obj_list_ccount(state, castlist(obj));
+        case PYLT_OBJ_TYPE_LIST: return pylt_obj_list_count(state, castlist(obj));
         case PYLT_OBJ_TYPE_TUPLE: return casttuple(obj)->ob_size;
         case PYLT_OBJ_TYPE_DICT: return pylt_obj_dict_len(state, castdict(obj));
     }

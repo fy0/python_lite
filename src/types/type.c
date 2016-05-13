@@ -25,7 +25,7 @@ PyLiteObject* pylt_obj_type_getattr(PyLiteState *state, PyLiteTypeObject *self, 
     if (p_at_type) *p_at_type = false;
 
     while (true) {
-        obj = pylt_obj_dict_cgetitem(state, self->ob_attrs, key);
+        obj = pylt_obj_dict_getitem(state, self->ob_attrs, key);
         if (obj) return obj;
         if (self->ob_reftype == PYLT_OBJ_TYPE_OBJ) break;
         self = pylt_api_gettype(state, self->ob_base);
@@ -33,7 +33,7 @@ PyLiteObject* pylt_obj_type_getattr(PyLiteState *state, PyLiteTypeObject *self, 
     }
 
     if (self->ob_reftype != PYLT_OBJ_TYPE_TYPE) {
-        obj = pylt_obj_dict_cgetitem(state, pylt_api_gettype(state, PYLT_OBJ_TYPE_TYPE)->ob_attrs, key);
+        obj = pylt_obj_dict_getitem(state, pylt_api_gettype(state, PYLT_OBJ_TYPE_TYPE)->ob_attrs, key);
         if (p_at_type) *p_at_type = true;
         if (obj) return obj;
     }
@@ -43,9 +43,9 @@ PyLiteObject* pylt_obj_type_getattr(PyLiteState *state, PyLiteTypeObject *self, 
 
 
 void pylt_obj_type_setattr(PyLiteState *state, PyLiteTypeObject *self, PyLiteObject* key, PyLiteObject* value) {
-    pylt_obj_dict_csetitem(state, self->ob_attrs, key, value);
+    pylt_obj_dict_setitem(state, self->ob_attrs, key, value);
 }
 
-pl_uint32_t pylt_obj_type_chash(PyLiteState *state, PyLiteTypeObject *self) {
+pl_uint32_t pylt_obj_type_hash(PyLiteState *state, PyLiteTypeObject *self) {
     return self->ob_reftype;
 }

@@ -1,11 +1,11 @@
 ﻿
 #include "dict.h"
 
-pl_int_t pylt_obj_dict_ccmp(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *other) {
+pl_int_t pylt_obj_dict_cmp(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *other) {
     return 2;
 }
 
-pl_bool_t pylt_obj_dict_ceq(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *other) {
+pl_bool_t pylt_obj_dict_eq(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *other) {
     PyLiteDictObject *a, *b;
 
     if (other->ob_type == PYLT_OBJ_TYPE_DICT) {
@@ -17,9 +17,9 @@ pl_bool_t pylt_obj_dict_ceq(PyLiteState *state, PyLiteDictObject *self, PyLiteOb
 
         for (pl_int_t it = pylt_obj_dict_begin(state, a); it != pylt_obj_dict_end(state, a); pylt_obj_dict_next(state, a, &it)) {
             PyLiteObject *_a, *_b;
-            _a = pylt_obj_dict_cgetitem(state, b, pylt_obj_dict_itemkey(state, a, it));
+            _a = pylt_obj_dict_getitem(state, b, pylt_obj_dict_itemkey(state, a, it));
             _b = pylt_obj_dict_itemvalue(state, a, it);
-            if (!pylt_obj_ceq(state, _a, _b)) return false;
+            if (!pylt_obj_eq(state, _a, _b)) return false;
         }
         return true;
     }
@@ -30,19 +30,19 @@ pl_int_t pylt_obj_dict_len(PyLiteState *state, PyLiteDictObject *self) {
     return kho_size(self->ob_val);
 }
 
-PyLiteObject* pylt_obj_dict_cgetitem(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
+PyLiteObject* pylt_obj_dict_getitem(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
     khiter_t k = kho_get(table, self->ob_val, key);
     return k == kho_end(self->ob_val) ? NULL : kho_value(self->ob_val, k);
 }
 
-void pylt_obj_dict_csetitem(PyLiteState *state, PyLiteDictObject *self, PyLiteObject* key, PyLiteObject* value) {
+void pylt_obj_dict_setitem(PyLiteState *state, PyLiteDictObject *self, PyLiteObject* key, PyLiteObject* value) {
     int ret;
     khiter_t k = kho_put(table, self->ob_val, key, &ret);
     kho_value(self->ob_val, k) = value;
 }
 
 PyLiteObject* pylt_obj_dict_has(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
-    return pylt_obj_dict_cgetitem(state, self, key);
+    return pylt_obj_dict_getitem(state, self, key);
 }
 
 pl_bool_t pylt_obj_dict_remove(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
@@ -53,7 +53,7 @@ pl_bool_t pylt_obj_dict_remove(PyLiteState *state, PyLiteDictObject *self, PyLit
 }
 
 PyLiteObject* pylt_obj_dict_pop(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
-    PyLiteObject *obj = pylt_obj_dict_cgetitem(state, self, key);
+    PyLiteObject *obj = pylt_obj_dict_getitem(state, self, key);
     if (obj) {
         pylt_obj_dict_remove(state, self, key);
         return obj;
@@ -108,7 +108,7 @@ PyLiteDictObject* pylt_obj_dict_copy(PyLiteState *state, PyLiteDictObject *self)
     kho_resize(table, obj->ob_val, pylt_obj_dict_len(state, self));
 
     for (pl_int_t k = pylt_obj_dict_begin(state, self); k != pylt_obj_dict_end(state, self); pylt_obj_dict_next(state, self, &k)) {
-        pylt_obj_dict_csetitem(state, obj, pylt_obj_dict_itemkey(state, self, k), pylt_obj_dict_itemvalue(state, self, k));
+        pylt_obj_dict_setitem(state, obj, pylt_obj_dict_itemkey(state, self, k), pylt_obj_dict_itemvalue(state, self, k));
     }
 
     return obj;

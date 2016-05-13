@@ -4,7 +4,7 @@
 #include "bytes.h"
 #include "string.h"
 
-pl_int_t pylt_obj_int_ccmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+pl_int_t pylt_obj_int_cmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
             if (self->ob_val < castint(other)->ob_val) return -1;
@@ -23,7 +23,7 @@ pl_int_t pylt_obj_int_ccmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObje
     }
 }
 
-pl_bool_t pylt_obj_int_ceq(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+pl_bool_t pylt_obj_int_eq(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
             return self->ob_val == castint(other)->ob_val;
@@ -36,7 +36,7 @@ pl_bool_t pylt_obj_int_ceq(PyLiteState *state, PyLiteIntObject *self, PyLiteObje
     }
 }
 
-pl_uint32_t pylt_obj_int_chash(PyLiteState *state, PyLiteIntObject *obj) {
+pl_uint32_t pylt_obj_int_hash(PyLiteState *state, PyLiteIntObject *obj) {
     return obj->ob_val;
 }
 
@@ -161,7 +161,7 @@ PyLiteObject* pylt_obj_int_pow(PyLiteState *state, PyLiteIntObject *self, PyLite
     }
 }
 
-pl_int_t pylt_obj_float_ccmp(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
+pl_int_t pylt_obj_float_cmp(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
             if (self->ob_val < castint(other)->ob_val) return -1;
@@ -180,7 +180,7 @@ pl_int_t pylt_obj_float_ccmp(PyLiteState *state, PyLiteFloatObject *self, PyLite
     }
 }
 
-pl_bool_t pylt_obj_float_ceq(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
+pl_bool_t pylt_obj_float_eq(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
     case PYLT_OBJ_TYPE_INT:
         return self->ob_val == castint(other)->ob_val;
@@ -193,7 +193,7 @@ pl_bool_t pylt_obj_float_ceq(PyLiteState *state, PyLiteFloatObject *self, PyLite
     }
 }
 
-pl_uint32_t pylt_obj_float_chash(PyLiteState *state, PyLiteFloatObject *obj) {
+pl_uint32_t pylt_obj_float_hash(PyLiteState *state, PyLiteFloatObject *obj) {
     double num;
     double _frac = modf(obj->ob_val, &num);
     if (_frac == 0) return (uint32_t)num;

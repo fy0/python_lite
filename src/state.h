@@ -44,6 +44,7 @@ struct PyLiteStaticObjectsType {
 
         PyLiteStrObject *__hash__;
         PyLiteStrObject *__cmp__;
+        PyLiteStrObject *__eq__;
         PyLiteStrObject *__setattr__;
         PyLiteStrObject *__getattr__;
 
