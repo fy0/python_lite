@@ -139,6 +139,5 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     pylt_obj_mod_setattr(state, mod, pl_static.str.range, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_RANGE)));
 
     pylt_obj_mod_setattr(state, mod, pl_static.str.None, castobj(&PyLiteNone));
-
     return mod;
 }

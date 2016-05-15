@@ -118,21 +118,6 @@ void print_tk_val(int tk_val) {
     putchar('\n');
 }
 
-void skip_space(ParserState *ps) {
-    Token *tk = &(ps->ls->token);
-    while (true) {
-        switch (tk->val) {
-            case TK_INDENT:
-            case TK_DEDENT:
-            case TK_NEWLINE:
-                next(ps);
-                break;
-            default:
-                return;
-        }
-    }
-}
-
 static _INLINE
 void ACCEPT(ParserState *ps, int token) {
     if (ps->ls->token.val != token) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
@@ -1021,6 +1006,20 @@ void parse_stmt(ParserState *ps) {
         case TK_KW_CLASS:
             parse_class(ps);
             return;
+        case TK_KW_IMPORT:
+            next(ps);
+            tmp = 0;
+            while (true) {
+                if (tk->val == TK_NAME) {
+                    tmp++;
+                    sload_const(ps, tk->obj);
+                    next(ps);
+                } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+                if (tk->val == '.') next(ps);
+                else break;
+            }
+            write_ins(ps, BC_IMPORT_NAME, 0, tmp);
+            break;
         case TK_KW_RETURN:
             if (ps->disable_return_parse) {
                 error(ps, PYLT_ERR_PARSER_RETURN_OUTSIDE_FUNCTION);

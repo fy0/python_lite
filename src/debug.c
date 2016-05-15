@@ -197,6 +197,9 @@ void debug_print_opcodes(PyLiteState *state, ParserState *ps) {
             case BC_ASSERT:
                 printf("   %-15s\n", "ASSERT");
                 break;
+            case BC_IMPORT_NAME:
+                printf("   %-15s %d\n", "IMPORT_NAME", ins.extra);
+                break;
             case BC_PRINT:
                 printf("   %-15s\n", "PRINT");
                 break;

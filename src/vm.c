@@ -7,6 +7,7 @@
 #include "lib/kvec.h"
 #include "types/all.h"
 #include "mods/builtin.h"
+#include "mods/math.h"
 #include "pybind/typebind.h"
 
 const char* op_vals[] = {
@@ -578,6 +579,18 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                     printf("AssertionError\n");
                     return;
                 }
+                break;
+            case BC_IMPORT_NAME:
+                // IMPORT_NAME  0       N
+                tobj = castobj(kv_topn(vm->stack, ins.extra - 1)); // name
+                if (tobj == castobj(pl_static.str.math)) {
+                    pylt_obj_dict_setitem(state, locals, castobj(pl_static.str.math), castobj(pylt_mods_math_register(state)));
+                } else if (tobj == castobj(pl_static.str.builtins)) {
+                    pylt_obj_dict_setitem(state, locals, castobj(pl_static.str.builtins), castobj(pylt_mods_builtins_register(state)));
+                } else {
+                    // TODO
+                }
+                kv_popn(vm->stack, ins.extra);
                 break;
             case BC_PRINT:
                 if (kv_size(state->vm.stack) != 0) {

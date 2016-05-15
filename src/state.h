@@ -99,6 +99,9 @@ struct PyLiteStaticObjectsType {
 
         PyLiteStrObject *None;
 
+        PyLiteStrObject *math;
+        PyLiteStrObject *builtins;
+
         PyLiteStrObject *param1;
         PyLiteStrObject *param2;
         PyLiteStrObject *param3;
@@ -106,6 +109,7 @@ struct PyLiteStaticObjectsType {
     } str;
 } pl_static;
 
+PyLiteState* pylt_state_new();
 void pylt_state_init(PyLiteState *state);
 void pylt_state_run(PyLiteState *state);
 void pylt_state_load_stream(PyLiteState *state, StringStream *ss);

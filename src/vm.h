@@ -29,6 +29,8 @@ enum {
     BC_SET_ATTR,       // 存入属性
     BC_ASSERT,         // 真值断言
 
+    BC_IMPORT_NAME,    // 导入模块
+
     BC_GET_ITEM_EX,    // 取下标
     BC_LOAD_VAL_EX,    // 载入变量
     BC_GET_ATTR_EX,    // 取属性

@@ -5,6 +5,12 @@ void pylt_state_err(PyLiteState *state) {
     exit(-1);
 }
 
+PyLiteState* pylt_state_new() {
+    PyLiteState *state = pylt_realloc(NULL, sizeof(PyLiteState));
+    pylt_state_init(state);
+    return state;
+}
+
 void pylt_state_init(PyLiteState *state) {
     kv_init(state->cls_base);
     state->modules = pylt_obj_dict_new(state);
@@ -104,6 +110,9 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.reverse = pylt_obj_str_new_from_c_str(state, "reverse", true);
 
     pl_static.str.None = pylt_obj_str_new_from_c_str(state, "None", true);
+
+    pl_static.str.math = pylt_obj_str_new_from_c_str(state, "math", true);
+    pl_static.str.builtins = pylt_obj_str_new_from_c_str(state, "builtins", true);
 
     pl_static.str.param1 = pylt_obj_str_new_from_c_str(state, "param1", true);
     pl_static.str.param2 = pylt_obj_str_new_from_c_str(state, "param2", true);
