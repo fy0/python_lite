@@ -68,6 +68,7 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.super = pylt_obj_str_new_from_c_str(state, "super", true);
     pl_static.str.isinstance = pylt_obj_str_new_from_c_str(state, "isinstance", true);
     pl_static.str.print = pylt_obj_str_new_from_c_str(state, "print", true);
+    pl_static.str.pow = pylt_obj_str_new_from_c_str(state, "pow", true);
     pl_static.str.setattr = pylt_obj_str_new_from_c_str(state, "setattr", true);
     pl_static.str.getattr = pylt_obj_str_new_from_c_str(state, "getattr", true);
     pl_static.str.range = pylt_obj_str_new_from_c_str(state, "range", true);
@@ -118,4 +119,7 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.param2 = pylt_obj_str_new_from_c_str(state, "param2", true);
     pl_static.str.param3 = pylt_obj_str_new_from_c_str(state, "param3", true);
     pl_static.str.param4 = pylt_obj_str_new_from_c_str(state, "param4", true);
+
+    pl_static.str.x = pylt_obj_str_new_from_c_str(state, "x", true);
+    pl_static.str.y = pylt_obj_str_new_from_c_str(state, "y", true);
 }

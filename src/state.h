@@ -56,6 +56,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *super;
         PyLiteStrObject *isinstance;
         PyLiteStrObject *print;
+        PyLiteStrObject *pow;
         PyLiteStrObject *setattr;
         PyLiteStrObject *getattr;
         PyLiteStrObject *range;
@@ -106,6 +107,9 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *param2;
         PyLiteStrObject *param3;
         PyLiteStrObject *param4;
+
+        PyLiteStrObject *x;
+        PyLiteStrObject *y;
     } str;
 } pl_static;
 

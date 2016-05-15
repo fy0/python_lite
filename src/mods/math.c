@@ -1,4 +1,5 @@
 ﻿
+#include <math.h>
 #include "math.h"
 #include "../state.h"
 #include "../debug.h"
@@ -6,6 +7,7 @@
 #include "../bind.h"
 #include "../types/all.h"
 
+#define MATH_PI       3.14159265358979323846
 #define get_val(i) ((i)->ob_type == PYLT_OBJ_TYPE_FLOAT) ? (castfloat((i))->ob_val) : (castint((i))->ob_val)
 
 
@@ -120,6 +122,11 @@ PyLiteObject* pylt_mods_math_cosh(PyLiteState *state, int argc, PyLiteObject **a
 }
 
 PyLiteObject* pylt_mods_math_degrees(PyLiteState *state, int argc, PyLiteObject **args) {
+    if (isnum(args[0])) {
+        return castobj(pylt_obj_float_new(state, get_val(args[0]) * 180.0 / MATH_PI));
+    } else {
+        // TODO
+    }
     return NULL;
 }
 
@@ -327,7 +334,13 @@ PyLiteObject* pylt_mods_math_pow(PyLiteState *state, int argc, PyLiteObject **ar
     return NULL;
 }
 
+
 PyLiteObject* pylt_mods_math_radians(PyLiteState *state, int argc, PyLiteObject **args) {
+    if (isnum(args[0])) {
+        return castobj(pylt_obj_float_new(state, get_val(args[0]) * MATH_PI / 180.0));
+    } else {
+        // TODO
+    }
     return NULL;
 }
 
@@ -429,6 +442,6 @@ PyLiteModuleObject* pylt_mods_math_register(PyLiteState *state) {
     //pylt_cfunc_register(state, mod, _NS(state, "trunc"), _NST(state, 1, "val"), NULL, NULL, &pylt_mods_math_trunc);
 
     pylt_obj_mod_setattr(state, mod, _NS(state, "e"), castobj(pylt_obj_float_new(state, 2.718281828459045)));
-    pylt_obj_mod_setattr(state, mod, _NS(state, "pi"), castobj(pylt_obj_float_new(state, 3.141592653589)));
+    pylt_obj_mod_setattr(state, mod, _NS(state, "pi"), castobj(pylt_obj_float_new(state, MATH_PI)));
     return mod;
 }

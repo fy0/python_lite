@@ -25,27 +25,33 @@ PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObjec
     return NULL;
 }
 
+
 PyLiteObject* pylt_mods_builtins_id(PyLiteState *state, int argc, PyLiteObject **args) {
     return castobj(pylt_obj_int_new(state, (pl_int_t)args[0]));
 }
 
+
 PyLiteObject* pylt_mods_builtins_hash(PyLiteState *state, int argc, PyLiteObject **args) {
     return castobj(pylt_obj_int_new(state, (pl_int_t)pylt_obj_hash(state, args[0])));
 }
+
 
 PyLiteObject* pylt_mods_builtins_len(PyLiteState *state, int argc, PyLiteObject **args) {
     return castobj(pylt_obj_int_new(state, (pl_int_t)pylt_obj_len(state, args[0])));
 }
 
 
-PyLiteObject* pylt_mods_builtins_fsqrt(PyLiteState *state, int argc, PyLiteObject **args) {
-    if (args[0]->ob_type == PYLT_OBJ_TYPE_INT) {
-        return castobj(pylt_obj_float_new(state, sqrt((double)castint(args[0])->ob_val)));
-    } else if (args[0]->ob_type == PYLT_OBJ_TYPE_FLOAT) {
-        return castobj(pylt_obj_float_new(state, sqrt(castfloat(args[0])->ob_val)));
+#define get_numval(i) ((i)->ob_type == PYLT_OBJ_TYPE_FLOAT) ? (castfloat((i))->ob_val) : (castint((i))->ob_val)
+
+PyLiteObject* pylt_mods_builtins_pow(PyLiteState *state, int argc, PyLiteObject **args) {
+    if (isnum(args[0]) && isnum(args[1])) {
+        return castobj(pylt_obj_float_new(state, pow(get_numval(args[0]), get_numval(args[1]))));
+    } else {
+        // TODO
     }
     return NULL;
 }
+
 
 PyLiteObject* pylt_mods_builtins_dir(PyLiteState *state, int argc, PyLiteObject **args) {
     PyLiteListObject *lst = pylt_obj_list_new(state);
@@ -125,7 +131,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     pylt_cfunc_register(state, mod, pl_static.str.iter, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_iter);
     pylt_cfunc_register(state, mod, pl_static.str.isinstance, _NST(state, 2, "object", "class_or_type_or_tuple"), NULL, NULL, &pylt_mods_builtins_isinstance);
     pylt_cfunc_register(state, mod, pl_static.str.super, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_super);
-    pylt_cfunc_register(state, mod, _NS(state, "fsqrt"), _NST(state, 1, "val"), NULL, NULL, &pylt_mods_builtins_fsqrt);
+    pylt_cfunc_register(state, mod, pl_static.str.pow, _NT(state, 2, pl_static.str.x, pl_static.str.y), NULL, NULL, &pylt_mods_builtins_pow);
 
     pylt_obj_mod_setattr(state, mod, pl_static.str.object, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_OBJ)));
     pylt_obj_mod_setattr(state, mod, pl_static.str.int_, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_INT)));
