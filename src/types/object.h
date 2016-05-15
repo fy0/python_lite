@@ -119,8 +119,10 @@ struct PyLiteCustomObject;
 
 #define castrange(i)    cast(struct PyLiteRangeObject*, (i))
 
-#define castcustom(i)    cast(struct PyLiteCustomObject*, (i))
+#define castcustom(i)   cast(struct PyLiteCustomObject*, (i))
 
+#define isstr(i)        (i->ob_type == PYLT_OBJ_TYPE_STR)
+#define isnum(i)        ((i->ob_type == PYLT_OBJ_TYPE_INT) || (i->ob_type == PYLT_OBJ_TYPE_FLOAT))
 
 void pylt_obj_free(PyLiteObject *obj);
 
