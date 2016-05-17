@@ -1035,23 +1035,21 @@ void parse_stmt(ParserState *ps) {
             parse_expr(ps);
             write_ins(ps, BC_ASSERT, 0, 0);
             break;
-        case TK_NAME:
+        default:
             ps->lval_check.enable = true;
             ps->lval_check.can_be_left_val = true;
             ps->lval_check.startcode = kv_size(ps->info->code->opcodes);
 
-            obj = tk->obj;
-            next(ps);
-
+            parse_expr(ps);
             switch (tk->val) {
                 case '=':
                     parse_value_assign(ps);
-                    write_ins(ps, BC_SET_VAL, 0, store_const(ps, obj));
                     break;
                 case TK_DE_PLUS_EQ: case TK_DE_MINUS_EQ:  case TK_DE_MUL_EQ: case TK_DE_DIV_EQ:
                 case TK_DE_FLOORDIV_EQ: case TK_DE_MOD_EQ: case TK_DE_MATMUL_EQ:
                 case TK_DE_BITAND_EQ: case TK_DE_BITOR_EQ: case TK_DE_BITXOR_EQ:
                 case TK_DE_RSHIFT_EQ: case TK_DE_LSHIFT_EQ: case TK_DE_POW_EQ:
+                    // TODO: sth. wrong
                     write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, obj));
                     tmp = token_de_to_op_val(tk->val);
                     next(ps);
@@ -1059,15 +1057,9 @@ void parse_stmt(ParserState *ps) {
                     write_ins(ps, BC_OPERATOR, 0, tmp);
                     write_ins(ps, BC_SET_VAL, 0, store_const(ps, obj));
                     break;
-                default:
-                    write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, obj));
             }
 
             ps->lval_check.enable = false;
-            write_ins(ps, BC_POP, 0, 0);
-            break;
-        default:
-            parse_expr(ps);
             write_ins(ps, BC_POP, 0, 0);
     }
     ACCEPT(ps, TK_NEWLINE);
