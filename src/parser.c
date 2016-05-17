@@ -229,6 +229,7 @@ bool parse_basetype(ParserState *ps) {
 
     if (obj) {
         sload_const(ps, obj);
+        if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val = false;
         return true;
     } else {
         ret = parse_mutabletype(ps, &times);
@@ -384,6 +385,7 @@ bool parse_try_t(ParserState *ps) {
                         }
                     } else break;
                 }
+                if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val = false;
                 write_ins(ps, BC_CALL, (num2) ? 1 : 0, num);
                 ACCEPT(ps, ')');
                 ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
