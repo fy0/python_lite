@@ -68,6 +68,7 @@ pl_int_t pylt_obj_list_index(PyLiteState *state, PyLiteListObject *self, PyLiteO
     return -1;
 }
 
+// 同时要求类型相同，例如 1 == 1.0 但仍有区别
 pl_int_t pylt_obj_list_index_strict(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
     for (pl_int_t i = 0; i < self->ob_size; ++i) {
         if ((self->ob_val[i]->ob_type == obj->ob_type) && (pylt_obj_eq(state, self->ob_val[i], obj))) {
@@ -138,4 +139,8 @@ pl_bool_t pylt_obj_list_setitem(PyLiteState *state, PyLiteListObject *self, int 
     if (index < 0 || index >= self->ob_size) return false;
     self->ob_val[index] = obj;
     return true;
+}
+
+pl_bool_t pylt_obj_list_has(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
+    return pylt_obj_list_index(state, self, obj) != -1;
 }

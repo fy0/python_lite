@@ -31,4 +31,6 @@ void pylt_obj_list_sort(PyLiteState *state, PyLiteListObject *self);
 PyLiteObject* pylt_obj_list_getitem(PyLiteState *state, PyLiteListObject *self, int index);
 pl_bool_t pylt_obj_list_setitem(PyLiteState *state, PyLiteListObject *self, int index, PyLiteObject* obj);
 
+pl_bool_t pylt_obj_list_has(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
+
 #endif

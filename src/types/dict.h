@@ -21,7 +21,7 @@ void pylt_obj_dict_setitem(PyLiteState *state, PyLiteDictObject *self, PyLiteObj
 
 pl_int_t pylt_obj_dict_len(PyLiteState *state, PyLiteDictObject *self);
 PyLiteDictObject* pylt_obj_dict_copy(PyLiteState *state, PyLiteDictObject *self);
-PyLiteObject* pylt_obj_dict_has(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *obj);
+pl_bool_t pylt_obj_dict_has(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *obj);
 pl_bool_t pylt_obj_dict_remove(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key);
 PyLiteObject* pylt_obj_dict_pop(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *obj);
 

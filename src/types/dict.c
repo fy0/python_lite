@@ -41,8 +41,8 @@ void pylt_obj_dict_setitem(PyLiteState *state, PyLiteDictObject *self, PyLiteObj
     kho_value(self->ob_val, k) = value;
 }
 
-PyLiteObject* pylt_obj_dict_has(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
-    return pylt_obj_dict_getitem(state, self, key);
+pl_bool_t pylt_obj_dict_has(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
+    return pylt_obj_dict_getitem(state, self, key) != NULL;
 }
 
 pl_bool_t pylt_obj_dict_remove(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {

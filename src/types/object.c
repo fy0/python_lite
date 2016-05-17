@@ -321,6 +321,22 @@ pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject*
     return false;
 }
 
+pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj) {
+    switch (self->ob_type) {
+        case PYLT_OBJ_TYPE_STR:
+            break;
+        case PYLT_OBJ_TYPE_SET:
+            return pylt_obj_set_has(state, castset(self), obj);
+        case PYLT_OBJ_TYPE_LIST:
+            return pylt_obj_list_has(state, castlist(self), obj);
+        case PYLT_OBJ_TYPE_TUPLE:
+            break;
+        case PYLT_OBJ_TYPE_DICT:
+            return pylt_obj_dict_has(state, castdict(self), obj);
+    }
+    return false;
+}
+
 PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj) {
     switch (op) {
         case OP_NOT: return castobj(pylt_obj_istrue(state, obj) ? &PyLiteFalse : &PyLiteTrue);
@@ -336,7 +352,11 @@ PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, Py
     switch (op) {
         case OP_OR: return pylt_obj_istrue(state, a) ? a : b;
         case OP_AND: return pylt_obj_istrue(state, a) ? b : a;
-        case OP_IN: return NULL; // TODO
+        case OP_IN:
+            if (pylt_obj_iterable(state, b)) {
+                return castobj(pylt_obj_has(state, b, a) ? &PyLiteTrue : &PyLiteFalse);
+            }
+            return NULL; 
         case OP_IS: return castobj(a == b ? &PyLiteTrue : &PyLiteFalse);
         case OP_IS_NOT: return castobj(a != b ? &PyLiteTrue : &PyLiteFalse);
         case OP_LT: case OP_LE: case OP_GT: case OP_GE:

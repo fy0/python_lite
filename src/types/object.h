@@ -66,6 +66,8 @@ PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObje
 pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
 //PyLiteObject* pylt_obj_cslice(PyLiteState *state, PyLiteObject *obj);
 
+pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj);
+
 PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj);
 PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, PyLiteObject *b);
 
