@@ -186,3 +186,37 @@ void pylt_obj_bytes_free(PyLiteState *state, PyLiteBytesObject *self) {
     pylt_free(self->ob_val);
     pylt_free(self);
 }
+
+pl_int_t pylt_obj_bytes_index_full(PyLiteState *state, PyLiteBytesObject *self, PyLiteBytesObject *sub, pl_int_t start, pl_int_t end) {
+    pl_int_t i, j, k;
+    pl_int_t len_self = (pl_int_t)self->ob_size;
+
+    if (start < 0) start += len_self;
+    start = max(0, start);
+    if (start >= len_self) return -2;
+
+    if (end < 0) end += len_self;
+    end = min(len_self, end);
+    if (end <= start) return -2;
+
+    for (i = start; i < end; ++i) {
+        if (self->ob_val[i] == sub->ob_val[0]) {
+            k = 1;
+            j = i + 1;
+            while ((j < end) && (k < (pl_int_t)sub->ob_size)) {
+                if (self->ob_val[j] != sub->ob_val[k]) {
+                    break;
+                }
+                ++j; ++k;
+            }
+            if (k == sub->ob_size) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+pl_int_t pylt_obj_bytes_index(PyLiteState *state, PyLiteBytesObject *self, PyLiteBytesObject *sub) {
+    return pylt_obj_bytes_index_full(state, self, sub, 0, self->ob_size);
+}

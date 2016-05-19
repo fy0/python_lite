@@ -64,7 +64,7 @@ pl_bool_t pylt_obj_setattr(PyLiteState *state, PyLiteObject *self, PyLiteObject*
 
 PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key);
 pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
-//PyLiteObject* pylt_obj_cslice(PyLiteState *state, PyLiteObject *obj);
+//PyLiteObject* pylt_obj_slice(PyLiteState *state, PyLiteObject *obj);
 
 pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj, pl_bool_t *is_valid);
 

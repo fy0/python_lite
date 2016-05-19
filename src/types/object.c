@@ -326,6 +326,11 @@ pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj
     if (is_valid) *is_valid = true;
     switch (self->ob_type) {
         case PYLT_OBJ_TYPE_STR:
+            if (isstr(obj)) {
+                return pylt_obj_str_index(state, caststr(self), caststr(obj)) >= 0;
+            } else {
+                if (is_valid) *is_valid = false;
+            }
             break;
         case PYLT_OBJ_TYPE_SET:
             return pylt_obj_set_has(state, castset(self), obj);
