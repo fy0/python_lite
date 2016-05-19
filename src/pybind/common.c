@@ -39,6 +39,12 @@ PyLiteObject* pylt_method_int_is_integer(PyLiteState *state, int argc, PyLiteObj
 }
 
 
+PyLiteObject* pylt_method_str_index(PyLiteState *state, int argc, PyLiteObject **args) {
+    pl_int_t ret = pylt_obj_str_index_full(state, caststr(args[0]), caststr(args[1]), castint(args[2])->ob_val, castint(args[3])->ob_val);
+    // TODO: -2
+    return castobj(pylt_obj_int_new(state, ret));
+}
+
 
 PyLiteObject* pylt_method_set_add(PyLiteState *state, int argc, PyLiteObject **args) {
     pylt_obj_set_add(state, castset(args[0]), args[1]);

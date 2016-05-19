@@ -15,6 +15,10 @@ void pylt_cprop_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrOb
 void pylt_attr_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *key, PyLiteObject *value);
 
 #define _NS(state, str) pylt_obj_str_new_from_c_str(state, str, true)
+#define _NI(_int_val) pylt_obj_int_new(state, (_int_val))
+
+// static string
+#define _S(name) pl_static.str.name
 
 PyLiteTupleObject* _NT(PyLiteState *state, int n, ...);
 PyLiteTupleObject* _NST(PyLiteState *state, int n, ...);

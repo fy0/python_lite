@@ -96,6 +96,10 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
 
     pl_static.str.mro = pylt_obj_str_new_from_c_str(state, "mro", true);
 
+    pl_static.str.sub = pylt_obj_str_new_from_c_str(state, "sub", true);
+    pl_static.str.start = pylt_obj_str_new_from_c_str(state, "start", true);
+    pl_static.str.end = pylt_obj_str_new_from_c_str(state, "end", true);
+
     pl_static.str.is_integer = pylt_obj_str_new_from_c_str(state, "is_integer", true);
 
     pl_static.str.add = pylt_obj_str_new_from_c_str(state, "add", true);
@@ -116,11 +120,13 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.math = pylt_obj_str_new_from_c_str(state, "math", true);
     pl_static.str.builtins = pylt_obj_str_new_from_c_str(state, "builtins", true);
 
+    pl_static.str.cls = pylt_obj_str_new_from_c_str(state, "cls", true);
+    pl_static.str.self = pylt_obj_str_new_from_c_str(state, "self", true);
     pl_static.str.param1 = pylt_obj_str_new_from_c_str(state, "param1", true);
     pl_static.str.param2 = pylt_obj_str_new_from_c_str(state, "param2", true);
     pl_static.str.param3 = pylt_obj_str_new_from_c_str(state, "param3", true);
     pl_static.str.param4 = pylt_obj_str_new_from_c_str(state, "param4", true);
-
+     
     pl_static.str.x = pylt_obj_str_new_from_c_str(state, "x", true);
     pl_static.str.y = pylt_obj_str_new_from_c_str(state, "y", true);
 }

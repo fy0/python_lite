@@ -82,16 +82,25 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *property_;
         PyLiteStrObject *none;
 
+        // object
         PyLiteStrObject *mro;
 
+        // str
+        PyLiteStrObject *sub;
+        PyLiteStrObject *start;
+        PyLiteStrObject *end;
+
+        // int
         PyLiteStrObject *is_integer;
 
+        // set
         PyLiteStrObject *add;
         PyLiteStrObject *clear;
         PyLiteStrObject *copy;
         PyLiteStrObject *pop;
         PyLiteStrObject *remove;
 
+        // list
         PyLiteStrObject *append;
         PyLiteStrObject *count;
         PyLiteStrObject *index;
@@ -104,6 +113,8 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *math;
         PyLiteStrObject *builtins;
 
+        PyLiteStrObject *cls;
+        PyLiteStrObject *self;
         PyLiteStrObject *param1;
         PyLiteStrObject *param2;
         PyLiteStrObject *param3;

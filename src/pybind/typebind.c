@@ -32,6 +32,7 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // str
     type = pylt_obj_type_new(state, pl_static.str.str, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_OBJ);
+    pylt_cmethod_register(state, type, _S(index), _NT(state, 4, _S(self), _S(sub), _S(start), _S(end)), _NT(state, 4, PARAM_NODEF, PARAM_NODEF, _NI(0), _NI(-1)), _UINTS(4, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_INT, PYLT_OBJ_TYPE_INT), &pylt_method_str_index);
     pylt_obj_type_register(state, type);
 
     // bytes
