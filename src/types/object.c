@@ -255,6 +255,9 @@ PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObje
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 return pylt_obj_custom_getattr(state, castcustom(obj), key, p_at_type);
+            } else {
+                if (p_at_type) *p_at_type = true;
+                return pylt_obj_type_getattr(state, pylt_api_gettype(state, obj->ob_type), key, NULL);
             }
             break;
     }
