@@ -257,7 +257,7 @@ PyLiteObject* pylt_mods_math_isnan(PyLiteState *state, int argc, PyLiteObject **
 
 PyLiteObject* pylt_mods_math_ldexp(PyLiteState *state, int argc, PyLiteObject **args) {
     if (isnum(args[0]) && isnum(args[1])) {
-        return castobj(pylt_obj_float_new(state, ldexp(get_val(args[0]), (int)get_val(args[1]))));
+        return castobj(pylt_obj_float_new(state, ldexp(get_val(args[0]), (int)(get_val(args[1])))));
     } else {
         // TODO
     }

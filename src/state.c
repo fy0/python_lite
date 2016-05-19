@@ -55,6 +55,7 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.__rshift__ = pylt_obj_str_new_from_c_str(state, "__rshift__", true);
 
     pl_static.str.__hash__ = pylt_obj_str_new_from_c_str(state, "__hash__", true);
+    pl_static.str.__iter__ = pylt_obj_str_new_from_c_str(state, "__iter__", true);
     pl_static.str.__cmp__ = pylt_obj_str_new_from_c_str(state, "__cmp__", true);
     pl_static.str.__eq__ = pylt_obj_str_new_from_c_str(state, "__eq__", true);
     pl_static.str.__setattr__ = pylt_obj_str_new_from_c_str(state, "__setattr__", true);

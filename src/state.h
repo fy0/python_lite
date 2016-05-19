@@ -43,6 +43,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *__rshift__;
 
         PyLiteStrObject *__hash__;
+        PyLiteStrObject *__iter__;
         PyLiteStrObject *__cmp__;
         PyLiteStrObject *__eq__;
         PyLiteStrObject *__setattr__;

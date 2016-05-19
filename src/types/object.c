@@ -178,7 +178,7 @@ pl_uint32_t pylt_obj_hash(PyLiteState *state, PyLiteObject *obj) {
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 PyLiteObject *ret;
-                PyLiteObject *hash_func = pylt_obj_getattr(state, obj, castobj(pylt_obj_str_new_from_c_str(state, "__hash__", true)), NULL);
+                PyLiteObject *hash_func = pylt_obj_getattr(state, obj, castobj(pl_static.str.__hash__), NULL);
                 if (hash_func) {
                     ret = pylt_vm_call_method(state, obj, hash_func, 0, NULL);
                     if (ret->ob_type == PYLT_OBJ_TYPE_INT) {
@@ -226,7 +226,8 @@ pl_bool_t pylt_obj_iterable(PyLiteState *state, PyLiteObject *obj) {
             return true;
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                ;
+                PyLiteObject *obj_func = pylt_obj_getattr(state, obj, castobj(pl_static.str.__iter__), NULL);
+                return (obj_func) ? true : false;
             }
     }
     return false;
@@ -267,7 +268,7 @@ pl_bool_t pylt_obj_setattr(PyLiteState *state, PyLiteObject *self, PyLiteObject*
             return true;
         default:
             if (self->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                PyLiteObject *method_func = pylt_obj_getattr(state, self, castobj(pylt_obj_str_new_from_c_str(state, "__setattr__", true)), NULL);
+                PyLiteObject *method_func = pylt_obj_getattr(state, self, castobj(pl_static.str.__setattr__), NULL);
                 if (method_func) {
                     PyLiteObject *ret = pylt_vm_call_method(state, self, method_func, 2, key, value);
                     return pylt_obj_istrue(state, ret);
@@ -321,7 +322,8 @@ pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject*
     return false;
 }
 
-pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj) {
+pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj, pl_bool_t *is_valid) {
+    if (is_valid) *is_valid = true;
     switch (self->ob_type) {
         case PYLT_OBJ_TYPE_STR:
             break;
@@ -333,6 +335,20 @@ pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj
             break;
         case PYLT_OBJ_TYPE_DICT:
             return pylt_obj_dict_has(state, castdict(self), obj);
+        default: {
+            PyLiteObject *i;
+            PyLiteIterObject *iter = pylt_obj_iter_new(state, self);
+            if (iter) {
+                for (i = pylt_obj_iter_next(state, iter); i; i = pylt_obj_iter_next(state, iter)) {
+                    if (pylt_obj_eq(state, obj, i)) {
+                        return true;
+                    }
+                }
+                return false;
+            } else {
+                if (is_valid) *is_valid = false;
+            }
+        }
     }
     return false;
 }
@@ -349,14 +365,16 @@ PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj) {
 }
 
 PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, PyLiteObject *b) {
+    pl_bool_t ret;
+    pl_bool_t is_valid;
+
     switch (op) {
         case OP_OR: return pylt_obj_istrue(state, a) ? a : b;
         case OP_AND: return pylt_obj_istrue(state, a) ? b : a;
         case OP_IN:
-            if (pylt_obj_iterable(state, b)) {
-                return castobj(pylt_obj_has(state, b, a) ? &PyLiteTrue : &PyLiteFalse);
-            }
-            return NULL; 
+            ret = pylt_obj_has(state, b, a, &is_valid);
+            if (!is_valid) return NULL;
+            return castobj(ret ? &PyLiteTrue : &PyLiteFalse);
         case OP_IS: return castobj(a == b ? &PyLiteTrue : &PyLiteFalse);
         case OP_IS_NOT: return castobj(a != b ? &PyLiteTrue : &PyLiteFalse);
         case OP_LT: case OP_LE: case OP_GT: case OP_GE:

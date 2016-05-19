@@ -45,7 +45,7 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_USERCLASS, // 21
 };
 
-#define PYLT_OBJ_BUILTIN_TYPE_NUM PYLT_OBJ_TYPE_NONE
+#define PYLT_OBJ_BUILTIN_TYPE_NUM PYLT_OBJ_TYPE_EXCEPTION
 
 
 // Object methods
@@ -66,7 +66,7 @@ PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObje
 pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
 //PyLiteObject* pylt_obj_cslice(PyLiteState *state, PyLiteObject *obj);
 
-pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj);
+pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj, pl_bool_t *is_valid);
 
 PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj);
 PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, PyLiteObject *b);
@@ -126,6 +126,7 @@ struct PyLiteCustomObject;
 #define castcustom(i)   cast(struct PyLiteCustomObject*, (i))
 
 #define isstr(i)        (i->ob_type == PYLT_OBJ_TYPE_STR)
+#define isiter(i)       (i->ob_type == PYLT_OBJ_TYPE_ITER)
 #define isnum(i)        ((i->ob_type == PYLT_OBJ_TYPE_INT) || (i->ob_type == PYLT_OBJ_TYPE_FLOAT))
 
 void pylt_obj_free(PyLiteObject *obj);

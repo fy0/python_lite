@@ -1,6 +1,7 @@
 ﻿
 #include "iter.h"
 #include "../all.h"
+#include "../../state.h"
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
     PyLiteIterObject *iter;
@@ -44,6 +45,15 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
             iter->array.index = castrange(obj)->start;
             iter->iter_func = &pylt_obj_range_iternext;
             return iter;
+        default:
+            if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
+                PyLiteIterObject *iter;
+                PyLiteObject *obj_func = pylt_obj_getattr(state, obj, castobj(pl_static.str.__iter__), NULL);
+                if (obj_func) {
+                    iter = castiter(pylt_vm_call_method(state, obj, obj_func, 0, NULL));
+                    if (isiter(iter)) return iter;
+                }
+            }
     }
     return NULL;
 }
