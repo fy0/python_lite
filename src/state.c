@@ -75,7 +75,7 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
 
     pl_static.str.object = pylt_obj_str_new_from_c_str(state, "object", true);
     pl_static.str.int_ = pylt_obj_str_new_from_c_str(state, "int", true);
-    pl_static.str.float_ = pylt_obj_str_new_from_c_str(state, "float_", true);
+    pl_static.str.float_ = pylt_obj_str_new_from_c_str(state, "float", true);
     pl_static.str.bool_ = pylt_obj_str_new_from_c_str(state, "bool_", true);
     pl_static.str.str = pylt_obj_str_new_from_c_str(state, "str", true);
     pl_static.str.bytes = pylt_obj_str_new_from_c_str(state, "bytes", true);

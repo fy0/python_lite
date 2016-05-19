@@ -792,9 +792,68 @@ void parse_class(ParserState *ps) {
     write_ins(ps, BC_POP, 0, 0);
 }
 
+
+void value_assign_fix(ParserState *ps) {
+    PyLiteInstruction ins, last_ins = { 0 };
+
+    for (pl_int_t i = kv_size(ps->lval_check.bc_cache) - 1; i >= 0;) {
+        ins = kv_A(ps->lval_check.bc_cache, i);
+        switch (ins.code) {
+            case BC_GET_ITEM_EX:
+            case BC_GET_ATTR_EX:
+                kv_A(ps->lval_check.bc_cache, i).code = (ins.code == BC_GET_ITEM_EX) ? BC_SET_ITEM : BC_SET_ATTR;
+                i -= 1;
+                while (i >= 0) {
+                    ins = kv_A(ps->lval_check.bc_cache, i);
+                    if (ins.code == BC_LOAD_VAL_EX) {
+                        kv_A(ps->lval_check.bc_cache, i).code = BC_LOAD_VAL;
+                        i -= 1;
+                        break;
+                    }
+                    i -= 1;
+                }
+                break;
+            case BC_LOAD_VAL_EX:
+                kv_A(ps->lval_check.bc_cache, i--).code = BC_SET_VAL;
+                break;
+            default:
+                i--;
+        }
+    }
+}
+
+
+void parse_inplace_op(ParserState *ps, int op_val) {
+    pl_uint_t size;
+
+    next(ps);
+
+    if (!ps->lval_check.can_be_left_val)
+        error(ps, PYLT_ERR_PARSER_CANT_ASSIGN_TO_LITERAL);
+
+    size = kv_size(ps->info->code->opcodes) - ps->lval_check.startcode;
+
+    if (ps->lval_check.bc_cache.m < size) {
+        kv_resize(PyLiteInstruction, ps->lval_check.bc_cache, size);
+    }
+
+    ps->lval_check.bc_cache.n = size;
+    memcpy(ps->lval_check.bc_cache.a, ps->info->code->opcodes.a + ps->lval_check.startcode, sizeof(PyLiteInstruction) * size);
+
+    parse_expr(ps);
+    value_assign_fix(ps);
+
+    write_ins(ps, BC_OPERATOR, 0, op_val);
+
+    for (pl_uint_t i = 0; i < kv_size(ps->lval_check.bc_cache); ++i) {
+        kv_pushins(ps->info->code->opcodes, kv_A(ps->lval_check.bc_cache, i));
+    }
+
+    kv_clear(ps->lval_check.bc_cache);
+}
+
 void parse_value_assign(ParserState *ps) {
     pl_uint_t size;
-    PyLiteInstruction ins, last_ins = {0};
 
     //while (true) { ACCEPT(ps, '='); parse_expr(ps); break; }
     //return;
@@ -820,34 +879,7 @@ void parse_value_assign(ParserState *ps) {
         kv_popn(ps->info->code->opcodes, size);
 
         parse_expr(ps);
-
-        for (pl_int_t i = kv_size(ps->lval_check.bc_cache) - 1; i >= 0; ) {
-            ins = kv_A(ps->lval_check.bc_cache, i);
-            switch (ins.code) {
-                case BC_GET_ITEM_EX:
-                case BC_GET_ATTR_EX:
-                    kv_A(ps->lval_check.bc_cache, i).code = (ins.code == BC_GET_ITEM_EX) ? BC_SET_ITEM : BC_SET_ATTR;
-                    i -= 1;
-                    while (i >= 0) {
-                        ins = kv_A(ps->lval_check.bc_cache, i);
-                        /*if ((ins.code != BC_GET_ITEM_EX) && (ins.code != BC_GET_ATTR_EX) && (ins.code != BC_LOAD_VAL_EX)) {
-                            break;
-                        }*/
-                        if (ins.code == BC_LOAD_VAL_EX) {
-                            kv_A(ps->lval_check.bc_cache, i).code = BC_LOAD_VAL;
-                            i -= 1;
-                            break;
-                        }
-                        i -= 1;
-                    }
-                    break;
-                case BC_LOAD_VAL_EX:
-                    kv_A(ps->lval_check.bc_cache, i--).code = BC_SET_VAL;
-                    break;
-                default:
-                    i--;
-            }
-        }
+        value_assign_fix(ps);
 
         for (pl_uint_t i = 0; i < kv_size(ps->lval_check.bc_cache); ++i) {
             kv_pushins(ps->info->code->opcodes, kv_A(ps->lval_check.bc_cache, i));
@@ -1051,13 +1083,7 @@ void parse_stmt(ParserState *ps) {
                 case TK_DE_FLOORDIV_EQ: case TK_DE_MOD_EQ: case TK_DE_MATMUL_EQ:
                 case TK_DE_BITAND_EQ: case TK_DE_BITOR_EQ: case TK_DE_BITXOR_EQ:
                 case TK_DE_RSHIFT_EQ: case TK_DE_LSHIFT_EQ: case TK_DE_POW_EQ:
-                    // TODO: sth. wrong
-                    write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, obj));
-                    tmp = token_de_to_op_val(tk->val);
-                    next(ps);
-                    parse_expr(ps);
-                    write_ins(ps, BC_OPERATOR, 0, tmp);
-                    write_ins(ps, BC_SET_VAL, 0, store_const(ps, obj));
+                    parse_inplace_op(ps, token_de_to_op_val(tk->val));
                     break;
             }
 
@@ -1066,6 +1092,7 @@ void parse_stmt(ParserState *ps) {
     }
     ACCEPT(ps, TK_NEWLINE);
 }
+
 
 void parse_stmts(ParserState *ps) {
     while (ps->ls->token.val != TK_END && ps->ls->token.val != TK_DEDENT) {
