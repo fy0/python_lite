@@ -4,7 +4,7 @@
 #include "../state.h"
 #include "../api.h"
 
-PyLiteTypeObject* pylt_obj_type_new(PyLiteState *state, PyLiteStrObject *name, pl_uint32_t instance_type, pl_uint32_t base_type) {
+PyLiteTypeObject* pylt_obj_type_new_with_type(PyLiteState *state, PyLiteStrObject *name, pl_uint32_t instance_type, pl_uint32_t base_type) {
     PyLiteTypeObject *obj = pylt_realloc(NULL, sizeof(PyLiteTypeObject));
     obj->name = name;
     obj->ob_type = PYLT_OBJ_TYPE_TYPE;
@@ -14,8 +14,8 @@ PyLiteTypeObject* pylt_obj_type_new(PyLiteState *state, PyLiteStrObject *name, p
     return obj;
 }
 
-PyLiteTypeObject* pylt_obj_type_new_with_vars(PyLiteState *state, PyLiteStrObject *name, pl_uint32_t base_type, PyLiteDictObject *dict) {
-    PyLiteTypeObject *type = pylt_obj_type_new(state, name, ++state->class_num, base_type);
+PyLiteTypeObject* pylt_obj_type_new(PyLiteState *state, PyLiteStrObject *name, pl_uint32_t base_type, PyLiteDictObject *dict) {
+    PyLiteTypeObject *type = pylt_obj_type_new_with_type(state, name, ++state->class_num, base_type);
     type->ob_attrs = (dict) ? pylt_obj_dict_copy(state, dict) : pylt_obj_dict_new(state);
     return type;
 }

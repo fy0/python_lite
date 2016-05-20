@@ -84,6 +84,7 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.list = pylt_obj_str_new_from_c_str(state, "list", true);
     pl_static.str.tuple = pylt_obj_str_new_from_c_str(state, "tuple", true);
     pl_static.str.dict = pylt_obj_str_new_from_c_str(state, "dict", true);
+    pl_static.str.Exception = pylt_obj_str_new_from_c_str(state, "Exception", true);
 
     pl_static.str.module = pylt_obj_str_new_from_c_str(state, "module", true);
     pl_static.str.function = pylt_obj_str_new_from_c_str(state, "function", true);
