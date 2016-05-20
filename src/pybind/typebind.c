@@ -5,6 +5,81 @@
 #include "common.h"
 #include "extra.h"
 
+#define EXCEPTION_REGISTER(name, the_base) \
+    type = pylt_obj_type_new(state, pl_static.str.##name##, the_base, NULL); \
+    pylt_obj_type_register(state, type);
+
+void pylt_bind_exceptions(PyLiteState *state) {
+    PyLiteTypeObject *type;
+    pl_uint32_t base, base2;
+
+    EXCEPTION_REGISTER(SystemExit, PYLT_OBJ_TYPE_BASE_EXCEPTION);
+    EXCEPTION_REGISTER(KeyboardInterrupt, PYLT_OBJ_TYPE_BASE_EXCEPTION);
+    EXCEPTION_REGISTER(GeneratorExit, PYLT_OBJ_TYPE_BASE_EXCEPTION);
+
+    EXCEPTION_REGISTER(Exception, PYLT_OBJ_TYPE_BASE_EXCEPTION);
+    base = type->ob_base;
+    EXCEPTION_REGISTER(StopIteration, base);
+    EXCEPTION_REGISTER(StopAsyncIteration, base);
+    EXCEPTION_REGISTER(AssertionError, base);
+    EXCEPTION_REGISTER(AttributeError, base);
+    EXCEPTION_REGISTER(BufferError, base);
+    EXCEPTION_REGISTER(EOFError, base);
+    EXCEPTION_REGISTER(ImportError, base);
+    EXCEPTION_REGISTER(MemoryError, base);
+    EXCEPTION_REGISTER(NameError, base);
+    EXCEPTION_REGISTER(ReferenceError, base);
+    EXCEPTION_REGISTER(SystemError, base);
+    EXCEPTION_REGISTER(TypeError, base);
+    EXCEPTION_REGISTER(ValueError, base);
+
+    EXCEPTION_REGISTER(ArithmeticError, base);
+    base2 = type->ob_base;
+    EXCEPTION_REGISTER(FloatingPointError, base2);
+    EXCEPTION_REGISTER(OverflowError, base2);
+    EXCEPTION_REGISTER(ZeroDivisionError, base2);
+
+    EXCEPTION_REGISTER(LookupError, base);
+    base2 = type->ob_base;
+    EXCEPTION_REGISTER(IndexError, base2);
+    EXCEPTION_REGISTER(KeyError, base2);
+
+    EXCEPTION_REGISTER(OSError, base);
+    base2 = type->ob_base;
+    EXCEPTION_REGISTER(BlockingIOError, base2);
+    EXCEPTION_REGISTER(ChildProcessError, base2);
+    EXCEPTION_REGISTER(FileExistsError, base2);
+    EXCEPTION_REGISTER(FileNotFoundError, base2);
+    EXCEPTION_REGISTER(InterruptedError, base2);
+    EXCEPTION_REGISTER(IsADirectoryError, base2);
+    EXCEPTION_REGISTER(NotADirectoryError, base2);
+    EXCEPTION_REGISTER(PermissionError, base2);
+    EXCEPTION_REGISTER(ProcessLookupError, base2);
+    EXCEPTION_REGISTER(TimeoutError, base2);
+
+    EXCEPTION_REGISTER(RuntimeError, base);
+    base2 = type->ob_base;
+    EXCEPTION_REGISTER(NotImplementedError, base2);
+    EXCEPTION_REGISTER(RecursionError, base2);
+
+    EXCEPTION_REGISTER(SyntaxError, base);
+    base2 = type->ob_base;
+    EXCEPTION_REGISTER(IndentationError, base2);
+
+    EXCEPTION_REGISTER(Warning, base);
+    base2 = type->ob_base;
+    EXCEPTION_REGISTER(DeprecationWarning, base2);
+    EXCEPTION_REGISTER(PendingDeprecationWarning, base2);
+    EXCEPTION_REGISTER(RuntimeWarning, base2);
+    EXCEPTION_REGISTER(SyntaxWarning, base2);
+    EXCEPTION_REGISTER(UserWarning, base2);
+    EXCEPTION_REGISTER(FutureWarning, base2);
+    EXCEPTION_REGISTER(ImportWarning, base2);
+    EXCEPTION_REGISTER(UnicodeWarning, base2);
+    EXCEPTION_REGISTER(BytesWarning, base2);
+    EXCEPTION_REGISTER(ResourceWarning, base2);
+}
+
 
 void pylt_bind_all_types_register(PyLiteState *state) {
     PyLiteTypeObject *type;
@@ -114,8 +189,10 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     pylt_obj_type_register(state, type);
 
     // exception
-    type = pylt_obj_type_new_with_type(state, pl_static.str.Exception, PYLT_OBJ_TYPE_EXCEPTION, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new_with_type(state, pl_static.str.Exception, PYLT_OBJ_TYPE_BASE_EXCEPTION, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     state->class_num = PYLT_OBJ_BUILTIN_TYPE_NUM;
+
+    pylt_bind_exceptions(state);
 }

@@ -26,4 +26,6 @@
 
 #include "custom.h"
 
+#include "extra/exception.h"
+
 #endif
