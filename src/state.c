@@ -39,6 +39,7 @@ void pylt_state_run(PyLiteState *state) {
 void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.__init__ = pylt_obj_str_new_from_c_str(state, "__init__", true);
     pl_static.str.__new__ = pylt_obj_str_new_from_c_str(state, "__new__", true);
+    pl_static.str.__call__ = pylt_obj_str_new_from_c_str(state, "__call__", true);
     pl_static.str.__base__ = pylt_obj_str_new_from_c_str(state, "__base__", true);
     pl_static.str.__import__ = pylt_obj_str_new_from_c_str(state, "__import__", true);
 
@@ -124,6 +125,8 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
 
     pl_static.str.cls = pylt_obj_str_new_from_c_str(state, "cls", true);
     pl_static.str.self = pylt_obj_str_new_from_c_str(state, "self", true);
+    pl_static.str.args = pylt_obj_str_new_from_c_str(state, "args", true);
+    pl_static.str.kwargs = pylt_obj_str_new_from_c_str(state, "kwargs", true);
     pl_static.str.param1 = pylt_obj_str_new_from_c_str(state, "param1", true);
     pl_static.str.param2 = pylt_obj_str_new_from_c_str(state, "param2", true);
     pl_static.str.param3 = pylt_obj_str_new_from_c_str(state, "param3", true);

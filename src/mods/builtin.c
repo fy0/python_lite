@@ -133,20 +133,12 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     pylt_cfunc_register(state, mod, pl_static.str.super, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_super);
     pylt_cfunc_register(state, mod, pl_static.str.pow, _NT(state, 2, pl_static.str.x, pl_static.str.y), NULL, NULL, &pylt_mods_builtins_pow);
 
-    pylt_obj_mod_setattr(state, mod, pl_static.str.object, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_OBJ)));
-    pylt_obj_mod_setattr(state, mod, pl_static.str.int_, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_INT)));
-    pylt_obj_mod_setattr(state, mod, pl_static.str.float_, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_FLOAT)));
-    pylt_obj_mod_setattr(state, mod, pl_static.str.bool_, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_BOOL)));
-    pylt_obj_mod_setattr(state, mod, pl_static.str.str, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_STR)));
-    pylt_obj_mod_setattr(state, mod, pl_static.str.bytes, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_BYTES)));
-    pylt_obj_mod_setattr(state, mod, pl_static.str.set, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_SET)));
-    pylt_obj_mod_setattr(state, mod, pl_static.str.list, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_LIST)));
-    pylt_obj_mod_setattr(state, mod, pl_static.str.tuple, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_TUPLE)));
-    pylt_obj_mod_setattr(state, mod, pl_static.str.dict, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_DICT)));
-
-    pylt_obj_mod_setattr(state, mod, pl_static.str.type, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_TYPE)));
-    pylt_obj_mod_setattr(state, mod, pl_static.str.range, castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_RANGE)));
-
     pylt_obj_mod_setattr(state, mod, pl_static.str.None, castobj(&PyLiteNone));
+
+    for (pl_int_t i = PYLT_OBJ_TYPE_OBJ; i < state->class_num; ++i) {
+        PyLiteTypeObject *type = pylt_api_gettype(state, i);
+        pylt_obj_mod_setattr(state, mod, type->name, castobj(type));
+    }
+
     return mod;
 }

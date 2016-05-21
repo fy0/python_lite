@@ -81,7 +81,8 @@ PyLiteObject* pylt_cls_method_list_new(PyLiteState *state, int argc, PyLiteObjec
     } else {
         // error
     }
-    return castobj(lst);
+
+    return pylt_obj_typecast(state, casttype(args[0]), castobj(lst));
 }
 
 PyLiteObject* pylt_method_list_append(PyLiteState *state, int argc, PyLiteObject **args) {

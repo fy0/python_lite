@@ -121,7 +121,7 @@ void pylt_vm_load_code(PyLiteState* state, PyLiteCodeObject *code) {
 //  2 为当前的参数个数多于参数个数
 //  3 为参数的类型不符合
 // -1 当前对象并非函数类型
-int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLiteDictObject *kwargs, PyLiteObject **pfunc_obj, PyLiteFunctionInfo **pinfo) {
+int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLiteDictObject *kwargs, PyLiteObject **pfunc_obj, PyLiteFunctionInfo **pinfo, pl_int_t *pflag) {
     PyLiteFunctionInfo *info;
     PyLiteObject *obj, *defobj;
     PyLiteObject *insert_caller = NULL;
@@ -132,23 +132,28 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
 
     info = pylt_obj_func_get_info(state, tobj);
     if (info) {
+        if (pflag) *pflag = 0;
         if (pfunc_obj) *pfunc_obj = tobj;
     } else {
         if (tobj->ob_type == PYLT_OBJ_TYPE_TYPE) {
-            obj = pylt_obj_getattr(state, tobj, castobj(pylt_obj_str_new_from_c_str(state, "__new__", true)), &at_type);
+            // __new__
+            obj = pylt_obj_getattr(state, tobj, castobj(pl_static.str.__new__), &at_type);
 
             if (obj) {
                 info = pylt_obj_func_get_info(state, obj);
                 if (!info) return -1;
+                if (pflag) *pflag = 1;
             } else {
                 // not function
                 return -1;
             }
         } else {
-            obj = pylt_obj_getattr(state, tobj, castobj(pylt_obj_str_new_from_c_str(state, "__call__", true)), &at_type);
+            // __call__
+            obj = pylt_obj_getattr(state, tobj, castobj(pl_static.str.__call__), &at_type);
             if (obj) {
                 info = pylt_obj_func_get_info(state, obj);
                 if (!info) return -1;
+                if (pflag) *pflag = 2;
             } else return -1;
         }
 
@@ -285,8 +290,8 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
     PyLiteDictObject *locals;
     PyLiteInstruction ins;
 
-    pl_int_t tnum;
     pl_bool_t at_type;
+    pl_int_t tnum, tflag;
     PyLiteFunctionObject *tfunc;
     PyLiteObject *tobj, *tret, *ta, *tb, *tc;
 
@@ -439,7 +444,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
 
                 // check
                 PyLiteFunctionInfo *func_info;
-                if (tnum = func_call_check(state, tobj, params_num, castdict(ta), &tret, &func_info)) {
+                if (tnum = func_call_check(state, tobj, params_num, castdict(ta), &tret, &func_info, &tflag)) {
                     if (tnum == -1) {
                         printf("TypeError: ");
                         debug_print_obj(state, castobj(pylt_api_type_name(state, tobj->ob_type)));

@@ -405,6 +405,11 @@ PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, Py
     }
 }
 
+PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *type, PyLiteObject *obj) {
+    obj->ob_type = casttype(type)->ob_reftype;
+    return obj;
+}
+
 void pylt_obj_free(PyLiteObject *obj) {
     ;
 }

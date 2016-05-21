@@ -83,7 +83,7 @@ void pylt_bind_exceptions(PyLiteState *state) {
 
 void pylt_bind_all_types_register(PyLiteState *state) {
     PyLiteTypeObject *type;
-    kv_resize(PyLiteTypeObject*, state->cls_base, PYLT_OBJ_BUILTIN_TYPE_NUM + 10);
+    kv_resize(PyLiteTypeObject*, state->cls_base, PYLT_OBJ_BUILTIN_TYPE_NUM + 20);
 
     // object
     type = pylt_obj_type_new_with_type(state, pl_static.str.object, PYLT_OBJ_TYPE_OBJ, 0);
@@ -173,12 +173,16 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     pylt_cmethod_register(state, type, pl_static.str.__new__, _NST(state, 2, "cls", "object"), NULL, NULL, &pylt_cls_method_type_new);
     pylt_obj_type_register(state, type);
 
-    // iter
-    type = pylt_obj_type_new_with_type(state, pl_static.str.iterator, PYLT_OBJ_TYPE_ITER, PYLT_OBJ_TYPE_OBJ);
+    // prop
+    type = pylt_obj_type_new_with_type(state, pl_static.str.property_, PYLT_OBJ_TYPE_PROP, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // none
     type = pylt_obj_type_new_with_type(state, pl_static.str.none, PYLT_OBJ_TYPE_NONE, PYLT_OBJ_TYPE_OBJ);
+    pylt_obj_type_register(state, type);
+
+    // iter
+    type = pylt_obj_type_new_with_type(state, pl_static.str.iterator, PYLT_OBJ_TYPE_ITER, PYLT_OBJ_TYPE_OBJ);
     pylt_obj_type_register(state, type);
 
     // ============== 19 ==============
@@ -189,7 +193,8 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     pylt_obj_type_register(state, type);
 
     // exception
-    type = pylt_obj_type_new_with_type(state, pl_static.str.Exception, PYLT_OBJ_TYPE_BASE_EXCEPTION, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new_with_type(state, pl_static.str.BaseException, PYLT_OBJ_TYPE_BASE_EXCEPTION, PYLT_OBJ_TYPE_OBJ);
+    pylt_cmethod_register(state, type, pl_static.str.__new__, _NT(state, 2, _S(cls), _S(args)), _NT(state, 2, PARAM_NODEF, PARAM_ARGS), NULL, &pylt_cls_method_base_exception_new);
     pylt_obj_type_register(state, type);
 
     state->class_num = PYLT_OBJ_BUILTIN_TYPE_NUM;
