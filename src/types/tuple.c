@@ -21,3 +21,8 @@ PyLiteObject* pylt_obj_tuple_getitem(PyLiteState *state, PyLiteTupleObject *self
     if (index < 0 || index >= self->ob_size) return NULL;
     return self->ob_val[index];
 }
+
+void pylt_obj_tuple_free(PyLiteState *state, PyLiteTupleObject *self) {
+    pylt_free(self->ob_val);
+    pylt_free(self);
+}

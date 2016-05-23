@@ -34,5 +34,6 @@ PyLiteObject* pylt_obj_dict_itemvalue(PyLiteState *state, PyLiteDictObject *self
 void pylt_obj_dict_keyvalue(PyLiteState *state, PyLiteDictObject *self, pl_int_t k, PyLiteObject **key, PyLiteObject **val);
 
 PyLiteDictObject* pylt_obj_dict_new(PyLiteState *state);
+void pylt_obj_dict_free(PyLiteState *state, PyLiteDictObject *self);
 
 #endif

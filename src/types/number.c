@@ -378,3 +378,11 @@ PyLiteFloatObject* pylt_obj_float_new_from_cstr_full(PyLiteState *state, const c
     fret = _read_float(&rs, point_pos + 1);
     return pylt_obj_float_new(state, fret + iret);
 }
+
+void pylt_obj_int_free(PyLiteState *state, PyLiteIntObject *self) {
+    pylt_free(self);
+}
+
+void pylt_obj_float_free(PyLiteState *state, PyLiteFloatObject *self) {
+    pylt_free(self);
+}

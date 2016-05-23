@@ -60,4 +60,7 @@ PyLiteFloatObject* pylt_obj_float_new(PyLiteState *state, double val);
 PyLiteIntObject* pylt_obj_int_new_from_cstr_full(PyLiteState *state, const char *str, pl_int_t size, pl_int_t base_n);
 PyLiteFloatObject* pylt_obj_float_new_from_cstr_full(PyLiteState *state, const char *str, pl_int_t size, pl_int_t point_pos);
 
+void pylt_obj_int_free(PyLiteState *state, PyLiteIntObject *self);
+void pylt_obj_float_free(PyLiteState *state, PyLiteFloatObject *self);
+
 #endif

@@ -119,3 +119,8 @@ PyLiteSetObject* pylt_obj_set_new(PyLiteState *state) {
     obj->ob_val = kho_init(set_obj, state);
     return obj;
 }
+
+void pylt_obj_set_free(PyLiteState *state, PyLiteSetObject* self) {
+    kho_destroy(set_obj, self->ob_val);
+    pylt_free(self);
+}

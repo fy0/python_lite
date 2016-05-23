@@ -32,5 +32,6 @@ void pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t *k);
 PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int_t k);
 
 PyLiteSetObject* pylt_obj_set_new(PyLiteState *state);
+void pylt_obj_set_free(PyLiteState *state, PyLiteSetObject* self);
 
 #endif

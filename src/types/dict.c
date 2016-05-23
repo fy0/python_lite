@@ -120,3 +120,8 @@ PyLiteDictObject* pylt_obj_dict_new(PyLiteState *state) {
     obj->ob_val = kho_init(table, state);
     return obj;
 }
+
+void pylt_obj_dict_free(PyLiteState *state, PyLiteDictObject *self) {
+    kho_destroy(table, self->ob_val);
+    pylt_free(self);
+}
