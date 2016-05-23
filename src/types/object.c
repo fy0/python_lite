@@ -448,7 +448,18 @@ void pylt_obj_free(PyLiteState *state, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_TYPE:
             pylt_obj_type_free(state, casttype(obj));
             break;
-        default: return true;
+        case PYLT_OBJ_TYPE_ITER:
+            pylt_obj_iter_free(state, castiter(obj));
+            break;
+        case PYLT_OBJ_TYPE_PROP:
+            pylt_obj_property_free(state, castprop(obj));
+            break;
+        case PYLT_OBJ_TYPE_RANGE:
+            pylt_obj_range_free(state, castrange(obj));
+            break;
+        case PYLT_OBJ_TYPE_BASE_EXCEPTION:
+            //pylt_obj_base_exception_free(state, castrange(obj));
+            break;
     }
 }
 
