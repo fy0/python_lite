@@ -5,7 +5,7 @@
 
 PyLiteObject* pylt_cls_method_obj_new(PyLiteState *state, int argc, PyLiteObject **args) {
     PyLiteTypeObject *type = casttype(args[0]);
-    return pylt_obj_cutstom_new(state, type->ob_reftype);
+    return pylt_obj_cutstom_new(state, type->ob_reftype, NULL);
 }
 
 PyLiteObject* pylt_method_type_mro(PyLiteState *state, int argc, PyLiteObject **args) {

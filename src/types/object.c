@@ -410,6 +410,7 @@ PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *typ
     return obj;
 }
 
+
 void pylt_obj_free(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_OBJ:

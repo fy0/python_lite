@@ -3,11 +3,13 @@
 #include "type.h"
 #include "../api.h"
 
-PyLiteObject* pylt_obj_cutstom_new(PyLiteState *state, uint32_t ob_type) {
+PyLiteObject* pylt_obj_cutstom_new(PyLiteState *state, uint32_t ob_type, PyLiteObject *base_obj) {
     PyLiteCustomObject *obj = pylt_realloc(NULL, sizeof(PyLiteCustomObject));
+
     obj->ob_type = ob_type;
-    obj->base_obj = NULL;
     obj->ob_attrs = pylt_obj_dict_new(state);
+    obj->base_obj = base_obj;
+
     return castobj(obj);
 }
 

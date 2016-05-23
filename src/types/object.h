@@ -132,6 +132,7 @@ struct PyLiteCustomObject;
 #define isnum(i)        ((i->ob_type == PYLT_OBJ_TYPE_INT) || (i->ob_type == PYLT_OBJ_TYPE_FLOAT))
 
 PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *type, PyLiteObject *obj);
+
 void pylt_obj_free(PyLiteState *state, PyLiteObject *obj);
 
 // Others
