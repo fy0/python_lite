@@ -8,3 +8,9 @@ PyLiteCodeObject* pylt_obj_code_new(PyLiteState *state) {
     kv_init(obj->opcodes);
     return obj;
 }
+
+void pylt_obj_code_free(PyLiteState *state, PyLiteCodeObject* self) {
+    pylt_obj_list_free(state, self->const_val);
+    kv_destroy(self->opcodes);
+    pylt_free(self);
+}

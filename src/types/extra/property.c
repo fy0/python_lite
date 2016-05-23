@@ -8,3 +8,9 @@ PyLitePropertyObject* pylt_obj_property_new(PyLiteState *state, PyLiteObject *fg
     obj->fset.func = fset;
     return obj;
 }
+
+void pylt_obj_property_free(PyLiteState *state, PyLitePropertyObject *self) {
+    if (self->fget.func) pylt_obj_free(state, self->fget.func);
+    if (self->fset.func) pylt_obj_free(state, self->fset.func);
+    pylt_free(self);
+}

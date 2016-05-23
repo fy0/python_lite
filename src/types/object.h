@@ -116,6 +116,7 @@ struct PyLiteCustomObject;
 #define castmod(i)      cast(struct PyLiteModuleObject*, (i))
 #define castfunc(i)     cast(struct PyLiteFunctionObject*, (i))
 #define castcfunc(i)    cast(struct PyLiteCFunctionObject*, (i))
+#define castcode(i)      cast(struct PyLiteModuleObject*, (i))
 
 #define casttype(i)     cast(struct PyLiteTypeObject*, (i))
 #define castiter(i)     cast(struct PyLiteIterObject*, (i))
@@ -131,7 +132,7 @@ struct PyLiteCustomObject;
 #define isnum(i)        ((i->ob_type == PYLT_OBJ_TYPE_INT) || (i->ob_type == PYLT_OBJ_TYPE_FLOAT))
 
 PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *type, PyLiteObject *obj);
-void pylt_obj_free(PyLiteObject *obj);
+void pylt_obj_free(PyLiteState *state, PyLiteObject *obj);
 
 // Others
 

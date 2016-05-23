@@ -19,5 +19,6 @@ typedef struct PyLiteCodeObject {
 } PyLiteCodeObject;
 
 PyLiteCodeObject* pylt_obj_code_new(PyLiteState *state);
+void pylt_obj_code_free(PyLiteState *state, PyLiteCodeObject* self);
 
 #endif

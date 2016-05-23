@@ -17,3 +17,8 @@ void pylt_obj_mod_setattr(PyLiteState *state, PyLiteModuleObject *mod, PyLiteStr
 PyLiteObject* pylt_obj_mod_getattr(PyLiteState *state, PyLiteModuleObject *self, PyLiteObject *key) {
     return pylt_obj_dict_getitem(state, self->attrs, key);
 }
+
+void pylt_obj_module_free(PyLiteState *state, PyLiteModuleObject *self) {
+    pylt_obj_dict_free(state, self->attrs);
+    pylt_free(self);
+}

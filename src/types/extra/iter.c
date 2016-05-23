@@ -124,3 +124,7 @@ PyLiteObject* pylt_obj_range_iternext(PyLiteState *state, PyLiteIterObject *iter
     }
     return NULL;
 }
+
+void pylt_obj_iter_free(PyLiteState *state, PyLiteIterObject* self) {
+    pylt_free(self);
+}

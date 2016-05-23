@@ -32,4 +32,6 @@ PyLiteObject* pylt_obj_set_iternext(PyLiteState *state, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_dict_iternext(PyLiteState *state, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_range_iternext(PyLiteState *state, PyLiteIterObject *iter);
 
+void pylt_obj_iter_free(PyLiteState *state, PyLiteIterObject* self);
+
 #endif

@@ -410,8 +410,46 @@ PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *typ
     return obj;
 }
 
-void pylt_obj_free(PyLiteObject *obj) {
-    ;
+void pylt_obj_free(PyLiteState *state, PyLiteObject *obj) {
+    switch (obj->ob_type) {
+        case PYLT_OBJ_TYPE_OBJ:
+            pylt_free(obj);
+            break;
+        case PYLT_OBJ_TYPE_INT:
+            pylt_obj_int_free(state, castint(obj));
+            break;
+        case PYLT_OBJ_TYPE_FLOAT:
+            pylt_obj_float_free(state, castfloat(obj));
+            break;
+        case PYLT_OBJ_TYPE_STR:
+            pylt_obj_str_free(state, caststr(obj));
+            break;
+        case PYLT_OBJ_TYPE_BYTES:
+            pylt_obj_bytes_free(state, castbytes(obj));
+            break;
+        case PYLT_OBJ_TYPE_SET:
+            pylt_obj_set_free(state, castset(obj));
+            break;
+        case PYLT_OBJ_TYPE_LIST:
+            pylt_obj_list_free(state, castlist(obj));
+            break;
+        case PYLT_OBJ_TYPE_TUPLE:
+            pylt_obj_tuple_free(state, casttuple(obj));
+            break;
+        case PYLT_OBJ_TYPE_DICT:
+            pylt_obj_dict_free(state, castdict(obj));
+            break;
+        case PYLT_OBJ_TYPE_MODULE:
+            pylt_obj_tuple_free(state, castmod(obj));
+            break;
+        case PYLT_OBJ_TYPE_CODE:
+            pylt_obj_code_free(state, castcode(obj));
+            break;
+        case PYLT_OBJ_TYPE_TYPE:
+            pylt_obj_type_free(state, casttype(obj));
+            break;
+        default: return true;
+    }
 }
 
 pl_int_t pylt_obj_len(PyLiteState *state, PyLiteObject *obj) {
