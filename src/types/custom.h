@@ -10,6 +10,7 @@
 typedef struct PyLiteCustomObject {
     uint32_t ob_type;
     uint32_t ob_base;
+    PyLiteObject *base_obj;
     PyLiteDictObject *ob_attrs;
 } PyLiteCustomObject;
 
