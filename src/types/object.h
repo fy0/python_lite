@@ -116,7 +116,7 @@ struct PyLiteCustomObject;
 #define castmod(i)      cast(struct PyLiteModuleObject*, (i))
 #define castfunc(i)     cast(struct PyLiteFunctionObject*, (i))
 #define castcfunc(i)    cast(struct PyLiteCFunctionObject*, (i))
-#define castcode(i)      cast(struct PyLiteModuleObject*, (i))
+#define castcode(i)     cast(struct PyLiteCodeObject*, (i))
 
 #define casttype(i)     cast(struct PyLiteTypeObject*, (i))
 #define castiter(i)     cast(struct PyLiteIterObject*, (i))
@@ -127,11 +127,15 @@ struct PyLiteCustomObject;
 
 #define castcustom(i)   cast(struct PyLiteCustomObject*, (i))
 
+#define dcast(type, i)  cast##type##(pylt_obj_getbase(i))
+
 #define isstr(i)        (i->ob_type == PYLT_OBJ_TYPE_STR)
 #define isiter(i)       (i->ob_type == PYLT_OBJ_TYPE_ITER)
 #define isnum(i)        ((i->ob_type == PYLT_OBJ_TYPE_INT) || (i->ob_type == PYLT_OBJ_TYPE_FLOAT))
+#define iscustom(i)     (i->ob_type >= PYLT_OBJ_TYPE_USERCLASS)
 
 PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *type, PyLiteObject *obj);
+PyLiteObject* pylt_obj_getbase(PyLiteObject *obj);
 
 void pylt_obj_free(PyLiteState *state, PyLiteObject *obj);
 

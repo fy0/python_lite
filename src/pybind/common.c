@@ -4,14 +4,14 @@
 #include "../types/all.h"
 
 PyLiteObject* pylt_cls_method_obj_new(PyLiteState *state, int argc, PyLiteObject **args) {
-    PyLiteTypeObject *type = casttype(args[0]);
+    PyLiteTypeObject *type = dcast(type, args[0]);
     return pylt_obj_cutstom_new(state, type->ob_reftype, NULL);
 }
 
 PyLiteObject* pylt_method_type_mro(PyLiteState *state, int argc, PyLiteObject **args) {
     PyLiteTypeObject* type;
     PyLiteListObject *lst = pylt_obj_list_new(state);
-    pl_uint32_t ob_type = casttype(args[0])->ob_reftype;
+    pl_uint32_t ob_type = dcast(type, args[0])->ob_reftype;
 
     while (ob_type) {
         type = pylt_api_gettype(state, ob_type);
@@ -23,7 +23,7 @@ PyLiteObject* pylt_method_type_mro(PyLiteState *state, int argc, PyLiteObject **
 }
 
 PyLiteObject* pylt_prop_type_base_get(PyLiteState *state, int argc, PyLiteObject **args) {
-    PyLiteTypeObject *type = pylt_api_gettype(state, casttype(args[0])->ob_reftype);
+    PyLiteTypeObject *type = pylt_api_gettype(state, dcast(type, args[0])->ob_reftype);
     return castobj(pylt_api_gettype(state, type->ob_base));
 }
 
@@ -34,38 +34,39 @@ PyLiteObject* pylt_cls_method_type_new(PyLiteState *state, int argc, PyLiteObjec
 
 PyLiteObject* pylt_method_int_is_integer(PyLiteState *state, int argc, PyLiteObject **args) {
     double i;
-    PyLiteFloatObject *self = castfloat(args[0]);
+    PyLiteFloatObject *self = dcast(float, args[0]);
     return castobj((modf(self->ob_val, &i) == 0) ? &PyLiteTrue : &PyLiteFalse);
 }
 
 
 PyLiteObject* pylt_method_str_index(PyLiteState *state, int argc, PyLiteObject **args) {
-    pl_int_t ret = pylt_obj_str_index_full(state, caststr(args[0]), caststr(args[1]), castint(args[2])->ob_val, castint(args[3])->ob_val);
+    pl_int_t ret = pylt_obj_str_index_full(state, dcast(str, args[0]), dcast(str, args[1]), dcast(int, args[2])->ob_val, dcast(int, args[3])->ob_val);
     // TODO: -2
     return castobj(pylt_obj_int_new(state, ret));
 }
 
 
 PyLiteObject* pylt_method_set_add(PyLiteState *state, int argc, PyLiteObject **args) {
-    pylt_obj_set_add(state, castset(args[0]), args[1]);
+    pylt_obj_set_add(state, dcast(set, args[0]), args[1]);
     return NULL;
 }
 
 PyLiteObject* pylt_method_set_clear(PyLiteState *state, int argc, PyLiteObject **args) {
-    pylt_obj_set_clear(state, castset(args[0]));
+    pylt_obj_set_clear(state, dcast(set, args[0]));
     return NULL;
 }
 
 PyLiteObject* pylt_method_set_copy(PyLiteState *state, int argc, PyLiteObject **args) {
-    return castobj(pylt_obj_set_copy(state, castset(args[0])));
+    // 注：此处无问题，set的子类copy之后仍然返回set，cpy即如此。
+    return castobj(pylt_obj_set_copy(state, dcast(set, args[0])));
 }
 
 PyLiteObject* pylt_method_set_pop(PyLiteState *state, int argc, PyLiteObject **args) {
-    return pylt_obj_set_pop(state, castset(args[0]));
+    return pylt_obj_set_pop(state, dcast(set, args[0]));
 }
 
 PyLiteObject* pylt_method_set_remove(PyLiteState *state, int argc, PyLiteObject **args) {
-    pylt_obj_set_remove(state, castset(args[0]), args[1]);
+    pylt_obj_set_remove(state, dcast(set, args[0]), args[1]);
     return NULL;
 }
 
@@ -82,52 +83,52 @@ PyLiteObject* pylt_cls_method_list_new(PyLiteState *state, int argc, PyLiteObjec
         // error
     }
 
-    return pylt_obj_typecast(state, casttype(args[0]), castobj(lst));
+    return pylt_obj_typecast(state, dcast(type, args[0]), castobj(lst));
 }
 
 PyLiteObject* pylt_method_list_append(PyLiteState *state, int argc, PyLiteObject **args) {
-    pylt_obj_list_append(state, castlist(args[0]), args[1]);
+    pylt_obj_list_append(state, dcast(list, args[0]), args[1]);
     return NULL;
 }
 
 PyLiteObject* pylt_method_list_clear(PyLiteState *state, int argc, PyLiteObject **args) {
-    pylt_obj_list_clear(state, castlist(args[0]));
+    pylt_obj_list_clear(state, dcast(list, args[0]));
     return NULL;
 }
 
 PyLiteObject* pylt_method_list_copy(PyLiteState *state, int argc, PyLiteObject **args) {
-    return castobj(pylt_obj_list_copy(state, castlist(args[0])));
+    return castobj(pylt_obj_list_copy(state, dcast(list, args[0])));
 }
 
 PyLiteObject* pylt_method_list_count(PyLiteState *state, int argc, PyLiteObject **args) {
-    return castobj(pylt_obj_int_new(state, pylt_obj_list_count(state, castlist(args[0]))));
+    return castobj(pylt_obj_int_new(state, pylt_obj_list_count(state, dcast(list, args[0]))));
 }
 
 PyLiteObject* pylt_method_list_extend(PyLiteState *state, int argc, PyLiteObject **args) {
-    pylt_obj_list_extend(state, castlist(args[0]), castlist(args[1]));
+    pylt_obj_list_extend(state, dcast(list, args[0]), dcast(list, args[1]));
     return NULL;
 }
 
 PyLiteObject* pylt_method_list_index(PyLiteState *state, int argc, PyLiteObject **args) {
-    return castobj(pylt_obj_int_new(state, pylt_obj_list_index(state, castlist(args[0]), args[1])));
+    return castobj(pylt_obj_int_new(state, pylt_obj_list_index(state, dcast(list, args[0]), args[1])));
 }
 
 PyLiteObject* pylt_method_list_insert(PyLiteState *state, int argc, PyLiteObject **args) {
-    pylt_obj_list_insert(state, castlist(args[0]), castint(args[1])->ob_val, args[2]);
+    pylt_obj_list_insert(state, dcast(list, args[0]), dcast(int, args[1])->ob_val, args[2]);
     return NULL;
 }
 
 PyLiteObject* pylt_method_list_pop(PyLiteState *state, int argc, PyLiteObject **args) {
-    return pylt_obj_list_pop(state, castlist(args[0]));
+    return pylt_obj_list_pop(state, dcast(list, args[0]));
 }
 
 PyLiteObject* pylt_method_list_remove(PyLiteState *state, int argc, PyLiteObject **args) {
-    pylt_obj_list_remove(state, castlist(args[0]), args[1]);
+    pylt_obj_list_remove(state, dcast(list, args[0]), args[1]);
     return NULL;
 }
 
 PyLiteObject* pylt_method_list_reverse(PyLiteState *state, int argc, PyLiteObject **args) {
-    pylt_obj_list_reverse(state, castlist(args[0]));
+    pylt_obj_list_reverse(state, dcast(list, args[0]));
     return NULL;
 }
 

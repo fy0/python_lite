@@ -406,10 +406,12 @@ PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, Py
 }
 
 PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *type, PyLiteObject *obj) {
-    obj->ob_type = casttype(type)->ob_reftype;
-    return obj;
+    return pylt_obj_cutstom_new(state, type->ob_reftype, obj);
 }
 
+PyLiteObject* pylt_obj_getbase(PyLiteObject *obj) {
+    return (iscustom(obj)) ? castcustom(obj)->base_obj : obj;
+}
 
 void pylt_obj_free(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
@@ -441,7 +443,7 @@ void pylt_obj_free(PyLiteState *state, PyLiteObject *obj) {
             pylt_obj_dict_free(state, castdict(obj));
             break;
         case PYLT_OBJ_TYPE_MODULE:
-            pylt_obj_tuple_free(state, castmod(obj));
+            pylt_obj_module_free(state, castmod(obj));
             break;
         case PYLT_OBJ_TYPE_CODE:
             pylt_obj_code_free(state, castcode(obj));
