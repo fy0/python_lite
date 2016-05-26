@@ -49,6 +49,8 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *__eq__;
         PyLiteStrObject *__setattr__;
         PyLiteStrObject *__getattr__;
+        PyLiteStrObject *__setitem__;
+        PyLiteStrObject *__getitem__;
 
         PyLiteStrObject *id;
         PyLiteStrObject *dir;

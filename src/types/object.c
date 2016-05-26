@@ -307,6 +307,17 @@ PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObje
             }
         case PYLT_OBJ_TYPE_DICT:
             return pylt_obj_dict_getitem(state, castdict(obj), key);
+        default:
+            if (iscustom(obj)) {
+                PyLiteObject *method_func = pylt_obj_getattr(state, obj, castobj(pl_static.str.__getitem__), NULL);
+                if (method_func) {
+                    return pylt_vm_call_method(state, obj, method_func, 1, key);
+                } else {
+                    if (castcustom(obj)->base_obj) {
+                        return pylt_obj_getitem(state, castcustom(obj)->base_obj, key);
+                    }
+                }
+            }
     }
     return NULL;
 }

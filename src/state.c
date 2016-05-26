@@ -61,6 +61,8 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.__eq__ = pylt_obj_str_new_from_c_str(state, "__eq__", true);
     pl_static.str.__setattr__ = pylt_obj_str_new_from_c_str(state, "__setattr__", true);
     pl_static.str.__getattr__ = pylt_obj_str_new_from_c_str(state, "__getattr__", true);
+    pl_static.str.__setitem__ = pylt_obj_str_new_from_c_str(state, "__setitem__", true);
+    pl_static.str.__getitem__ = pylt_obj_str_new_from_c_str(state, "__getitem__", true);
 
     pl_static.str.id = pylt_obj_str_new_from_c_str(state, "id", true);
     pl_static.str.dir = pylt_obj_str_new_from_c_str(state, "dir", true);
