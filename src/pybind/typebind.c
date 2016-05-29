@@ -116,6 +116,7 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // set
     type = pylt_obj_type_new_with_type(state, pl_static.str.set, PYLT_OBJ_TYPE_SET, PYLT_OBJ_TYPE_OBJ);
+    pylt_cmethod_register(state, type, pl_static.str.__new__, _NT(state, 2, _S(cls), _S(object)), _NT(state, 2, PARAM_NODEF, pylt_obj_tuple_new(state, 0)), NULL, &pylt_cls_method_set_new);
     pylt_cmethod_register_1_args(state, type, pl_static.str.add, &pylt_method_set_add);
     pylt_cmethod_register_0_args(state, type, pl_static.str.clear, &pylt_method_set_clear);
     pylt_cmethod_register_0_args(state, type, pl_static.str.copy, &pylt_method_set_copy);

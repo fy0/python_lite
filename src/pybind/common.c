@@ -46,6 +46,22 @@ PyLiteObject* pylt_method_str_index(PyLiteState *state, int argc, PyLiteObject *
 }
 
 
+PyLiteObject* pylt_cls_method_set_new(PyLiteState *state, int argc, PyLiteObject **args) {
+    PyLiteObject *obj;
+    PyLiteSetObject *set = pylt_obj_set_new(state);
+
+    if (pylt_obj_iterable(state, args[1])) {
+        PyLiteIterObject *iter = pylt_obj_iter_new(state, args[1]);
+        for (obj = pylt_obj_iter_next(state, iter); obj; obj = pylt_obj_iter_next(state, iter)) {
+            pylt_obj_set_add(state, set, obj);
+        }
+    } else {
+        // error
+    }
+
+    return pylt_obj_typecast(state, dcast(type, args[0]), castobj(set));
+}
+
 PyLiteObject* pylt_method_set_add(PyLiteState *state, int argc, PyLiteObject **args) {
     pylt_obj_set_add(state, dcast(set, args[0]), args[1]);
     return NULL;

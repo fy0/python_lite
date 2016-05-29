@@ -14,6 +14,7 @@ PyLiteObject* pylt_method_int_is_integer(PyLiteState *state, int argc, PyLiteObj
 
 PyLiteObject* pylt_method_str_index(PyLiteState *state, int argc, PyLiteObject **args);
 
+PyLiteObject* pylt_cls_method_set_new(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_set_add(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_set_clear(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_set_copy(PyLiteState *state, int argc, PyLiteObject **args);
