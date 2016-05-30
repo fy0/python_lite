@@ -92,21 +92,25 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // int
     type = pylt_obj_type_new_with_type(state, pl_static.str.int_, PYLT_OBJ_TYPE_INT, PYLT_OBJ_TYPE_OBJ);
+    pylt_cclsmethod_register_0_args(state, type, _S(__new__), &pylt_cls_method_int_new);
     pylt_obj_type_register(state, type);
 
     // float
     type = pylt_obj_type_new_with_type(state, pl_static.str.float_, PYLT_OBJ_TYPE_FLOAT, PYLT_OBJ_TYPE_OBJ);
+    pylt_cclsmethod_register_0_args(state, type, _S(__new__), &pylt_cls_method_float_new);
     pylt_cmethod_register_0_args(state, type, _NS(state, "is_integer"), &pylt_method_int_is_integer);
     pylt_obj_type_register(state, type);
 
     // bool
     type = pylt_obj_type_new_with_type(state, pl_static.str.bool_, PYLT_OBJ_TYPE_BOOL, PYLT_OBJ_TYPE_OBJ);
+    pylt_cclsmethod_register(state, type, _S(__new__), _NT(state, 2, _S(cls), _S(object)), _NT(state, 2, PARAM_NODEF, &PyLiteFalse), NULL, &pylt_cls_method_bool_new);
     pylt_obj_type_register(state, type);
 
     // ============== 5 ==============
 
     // str
     type = pylt_obj_type_new_with_type(state, pl_static.str.str, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_OBJ);
+    pylt_cclsmethod_register_0_args(state, type, _S(__new__), &pylt_cls_method_str_new);
     pylt_cmethod_register(state, type, _S(index), _NT(state, 4, _S(self), _S(sub), _S(start), _S(end)), _NT(state, 4, PARAM_NODEF, PARAM_NODEF, _NI(0), _NI(-1)), _UINTS(4, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_INT, PYLT_OBJ_TYPE_INT), &pylt_method_str_index);
     pylt_obj_type_register(state, type);
 
@@ -116,7 +120,7 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // set
     type = pylt_obj_type_new_with_type(state, pl_static.str.set, PYLT_OBJ_TYPE_SET, PYLT_OBJ_TYPE_OBJ);
-    pylt_cmethod_register(state, type, pl_static.str.__new__, _NT(state, 2, _S(cls), _S(object)), _NT(state, 2, PARAM_NODEF, pylt_obj_tuple_new(state, 0)), NULL, &pylt_cls_method_set_new);
+    pylt_cclsmethod_register(state, type, _S(__new__), _NT(state, 2, _S(cls), _S(object)), _NT(state, 2, PARAM_NODEF, pylt_obj_tuple_new(state, 0)), NULL, &pylt_cls_method_set_new);
     pylt_cmethod_register_1_args(state, type, pl_static.str.add, &pylt_method_set_add);
     pylt_cmethod_register_0_args(state, type, pl_static.str.clear, &pylt_method_set_clear);
     pylt_cmethod_register_0_args(state, type, pl_static.str.copy, &pylt_method_set_copy);
@@ -126,7 +130,7 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // list
     type = pylt_obj_type_new_with_type(state, pl_static.str.list, PYLT_OBJ_TYPE_LIST, PYLT_OBJ_TYPE_OBJ);
-    pylt_cmethod_register(state, type, pl_static.str.__new__, _NST(state, 2, "cls", "obj"), _NT(state, 2, PARAM_NODEF, pylt_obj_tuple_new(state, 0)), NULL, &pylt_cls_method_list_new);
+    pylt_cclsmethod_register(state, type, pl_static.str.__new__, _NST(state, 2, "cls", "obj"), _NT(state, 2, PARAM_NODEF, pylt_obj_tuple_new(state, 0)), NULL, &pylt_cls_method_list_new);
     pylt_cmethod_register_1_args(state, type, pl_static.str.append, &pylt_method_list_append);
     pylt_cmethod_register_0_args(state, type, pl_static.str.clear, &pylt_method_list_clear);
     pylt_cmethod_register_0_args(state, type, pl_static.str.copy, &pylt_method_list_copy);

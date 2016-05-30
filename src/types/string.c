@@ -206,6 +206,10 @@ PyLiteStrObject* pylt_obj_str_new_from_c_str(PyLiteState *state, char *str, bool
     return obj;
 }
 
+PyLiteStrObject* pylt_obj_str_new_empty(PyLiteState *state) {
+    return pylt_obj_str_new(state, NULL, 0, true);
+}
+
 void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self) {
     pylt_free(self->ob_val);
     pylt_free(self);

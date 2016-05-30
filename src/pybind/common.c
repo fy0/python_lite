@@ -32,12 +32,36 @@ PyLiteObject* pylt_cls_method_type_new(PyLiteState *state, int argc, PyLiteObjec
 }
 
 
+PyLiteObject* pylt_cls_method_int_new(PyLiteState *state, int argc, PyLiteObject **args) {
+    // TODO: 从其他形式转换为数字
+    PyLiteIntObject *num = pylt_obj_int_new(state, 0);
+    return pylt_obj_typecast(state, dcast(type, args[0]), castobj(num));
+}
+
 PyLiteObject* pylt_method_int_is_integer(PyLiteState *state, int argc, PyLiteObject **args) {
     double i;
     PyLiteFloatObject *self = dcast(float, args[0]);
     return castobj((modf(self->ob_val, &i) == 0) ? &PyLiteTrue : &PyLiteFalse);
 }
 
+
+PyLiteObject* pylt_cls_method_float_new(PyLiteState *state, int argc, PyLiteObject **args) {
+    // TODO: 从其他形式转换为数字
+    PyLiteFloatObject *num = pylt_obj_float_new(state, 0);
+    return pylt_obj_typecast(state, dcast(type, args[0]), castobj(num));
+}
+
+
+PyLiteObject* pylt_cls_method_bool_new(PyLiteState *state, int argc, PyLiteObject **args) {
+    return pylt_obj_typecast(state, dcast(type, args[0]), castobj(pylt_obj_istrue(state, args[1]) ? &PyLiteTrue : &PyLiteFalse));
+}
+
+
+PyLiteObject* pylt_cls_method_str_new(PyLiteState *state, int argc, PyLiteObject **args) {
+    // TODO: 从其他形式转换为字符串
+    PyLiteSetObject *str = pylt_obj_str_new_empty(state);
+    return pylt_obj_typecast(state, dcast(type, args[0]), castobj(str));
+}
 
 PyLiteObject* pylt_method_str_index(PyLiteState *state, int argc, PyLiteObject **args) {
     pl_int_t ret = pylt_obj_str_index_full(state, dcast(str, args[0]), dcast(str, args[1]), dcast(int, args[2])->ob_val, dcast(int, args[3])->ob_val);

@@ -10,8 +10,14 @@ PyLiteObject* pylt_method_type_mro(PyLiteState *state, int argc, PyLiteObject **
 PyLiteObject* pylt_prop_type_base_get(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_cls_method_type_new(PyLiteState *state, int argc, PyLiteObject **args);
 
+PyLiteObject* pylt_cls_method_int_new(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_int_is_integer(PyLiteState *state, int argc, PyLiteObject **args);
 
+PyLiteObject* pylt_cls_method_float_new(PyLiteState *state, int argc, PyLiteObject **args);
+
+PyLiteObject* pylt_cls_method_bool_new(PyLiteState *state, int argc, PyLiteObject **args);
+
+PyLiteObject* pylt_cls_method_str_new(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_str_index(PyLiteState *state, int argc, PyLiteObject **args);
 
 PyLiteObject* pylt_cls_method_set_new(PyLiteState *state, int argc, PyLiteObject **args);
