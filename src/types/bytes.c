@@ -182,6 +182,10 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int s
     return hash_and_check_cache(state, obj);
 }
 
+PyLiteBytesObject* pylt_obj_bytes_new_empty(PyLiteState *state) {
+    return pylt_obj_bytes_new(state, NULL, 0, true);
+}
+
 void pylt_obj_bytes_free(PyLiteState *state, PyLiteBytesObject *self) {
     pylt_free(self->ob_val);
     pylt_free(self);

@@ -25,6 +25,7 @@ pl_int_t pylt_obj_bytes_index(PyLiteState *state, PyLiteBytesObject *self, PyLit
 pl_int_t pylt_obj_bytes_index_full(PyLiteState *state, PyLiteBytesObject *self, PyLiteBytesObject *sub, pl_int_t start, pl_int_t end);
 
 PyLiteBytesObject* pylt_obj_bytes_new(PyLiteState *state, const char* str, int size, bool is_raw);
+PyLiteBytesObject* pylt_obj_bytes_new_empty(PyLiteState *state);
 void pylt_obj_bytes_free(PyLiteState *state, PyLiteBytesObject *self);
 
 #endif

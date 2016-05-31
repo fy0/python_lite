@@ -59,7 +59,7 @@ PyLiteObject* pylt_cls_method_bool_new(PyLiteState *state, int argc, PyLiteObjec
 
 PyLiteObject* pylt_cls_method_str_new(PyLiteState *state, int argc, PyLiteObject **args) {
     // TODO: 从其他形式转换为字符串
-    PyLiteSetObject *str = pylt_obj_str_new_empty(state);
+    PyLiteStrObject *str = pylt_obj_str_new_empty(state);
     return pylt_obj_typecast(state, dcast(type, args[0]), castobj(str));
 }
 
@@ -67,6 +67,12 @@ PyLiteObject* pylt_method_str_index(PyLiteState *state, int argc, PyLiteObject *
     pl_int_t ret = pylt_obj_str_index_full(state, dcast(str, args[0]), dcast(str, args[1]), dcast(int, args[2])->ob_val, dcast(int, args[3])->ob_val);
     // TODO: -2
     return castobj(pylt_obj_int_new(state, ret));
+}
+
+
+PyLiteObject* pylt_cls_method_bytes_new(PyLiteState *state, int argc, PyLiteObject **args) {
+    PyLiteBytesObject *str = pylt_obj_bytes_new_empty(state);
+    return pylt_obj_typecast(state, dcast(type, args[0]), castobj(str));
 }
 
 
@@ -176,3 +182,36 @@ PyLiteObject* pylt_method_list_sort(PyLiteState *state, int argc, PyLiteObject *
     // TODO
     return NULL;
 }
+
+PyLiteObject* pylt_cls_method_tuple_new(PyLiteState *state, int argc, PyLiteObject **args) {
+    PyLiteObject *obj;
+    PyLiteIterObject *iter;
+    PyLiteTupleObject *tuple;
+    PyLiteListObject *lst = pylt_obj_list_new(state);
+
+    if (pylt_obj_iterable(state, args[1])) {
+        iter = pylt_obj_iter_new(state, args[1]);
+        for (obj = pylt_obj_iter_next(state, iter); obj; obj = pylt_obj_iter_next(state, iter)) {
+            pylt_obj_list_append(state, lst, obj);
+        }
+    } else {
+        // error
+    }
+
+    tuple = pylt_obj_tuple_new_with_data(state, pylt_obj_list_count(state, lst), (void*)lst->ob_val);
+    pylt_free(lst->ob_val);
+
+    return pylt_obj_typecast(state, dcast(type, args[0]), castobj(tuple));
+}
+
+PyLiteObject* pylt_cls_method_dict_new(PyLiteState *state, int argc, PyLiteObject **args) {
+    PyLiteDictObject *kwargs = dcast(dict, args[1]);
+    PyLiteDictObject *newdict = pylt_obj_dict_new(state);
+
+    for (pl_int_t it = pylt_obj_dict_begin(state, kwargs); it != pylt_obj_dict_end(state, kwargs); pylt_obj_dict_next(state, dcast(dict, args[1]), &it)) {
+        pylt_obj_dict_setitem(state, newdict, pylt_obj_dict_itemkey(state, kwargs, it), pylt_obj_dict_itemvalue(state, kwargs, it));
+    }
+
+    return pylt_obj_typecast(state, dcast(type, args[0]), castobj(newdict));
+}
+

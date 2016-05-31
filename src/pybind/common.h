@@ -20,6 +20,8 @@ PyLiteObject* pylt_cls_method_bool_new(PyLiteState *state, int argc, PyLiteObjec
 PyLiteObject* pylt_cls_method_str_new(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_str_index(PyLiteState *state, int argc, PyLiteObject **args);
 
+PyLiteObject* pylt_cls_method_bytes_new(PyLiteState *state, int argc, PyLiteObject **args);
+
 PyLiteObject* pylt_cls_method_set_new(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_set_add(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_set_clear(PyLiteState *state, int argc, PyLiteObject **args);
@@ -39,5 +41,9 @@ PyLiteObject* pylt_method_list_pop(PyLiteState *state, int argc, PyLiteObject **
 PyLiteObject* pylt_method_list_remove(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_list_reverse(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_list_sort(PyLiteState *state, int argc, PyLiteObject **args);
+
+PyLiteObject* pylt_cls_method_tuple_new(PyLiteState *state, int argc, PyLiteObject **args);
+
+PyLiteObject* pylt_cls_method_dict_new(PyLiteState *state, int argc, PyLiteObject **args);
 
 #endif
