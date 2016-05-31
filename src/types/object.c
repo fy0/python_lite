@@ -417,7 +417,10 @@ PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, Py
 }
 
 PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *type, PyLiteObject *obj) {
-    return pylt_obj_cutstom_new(state, type->ob_reftype, obj);
+    if (iscustom(obj) && (obj->ob_type != type->ob_reftype)) {
+        return pylt_obj_cutstom_new(state, type->ob_reftype, obj);
+    }
+    return obj;
 }
 
 PyLiteObject* pylt_obj_getbase(PyLiteObject *obj) {
