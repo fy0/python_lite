@@ -40,8 +40,11 @@ int main(int argc,char* argv[])
     putchar('\n');
 
     pylt_state_run(&state);
+    pylt_state_finalize(&state);
 
+#ifdef PLATFORM_WINDOWS
     system("pause");
+#endif
     return 0;
 }
 

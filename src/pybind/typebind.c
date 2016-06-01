@@ -6,7 +6,7 @@
 #include "extra.h"
 
 #define EXCEPTION_REGISTER(name, the_base) \
-    type = pylt_obj_type_new(state, pl_static.str.##name##, the_base, NULL); \
+    type = pylt_obj_type_new(state, pl_static.str.name, the_base, NULL); \
     pylt_obj_type_register(state, type);
 
 void pylt_bind_exceptions(PyLiteState *state) {
