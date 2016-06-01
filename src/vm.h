@@ -66,8 +66,6 @@ typedef struct PyLiteVM {
     kvec_t(PyLiteFrame) frames;
 } PyLiteVM;
 
-struct PyLiteState;
-
 #define kv_pushptr(v, x) kv_push(uintptr_t, (v), (uintptr_t)(x))
 
 void pylt_vm_load_func(PyLiteState* state, PyLiteFunctionObject *func);
@@ -77,7 +75,8 @@ const char* pylt_vm_get_op_name(int op);
 int token_to_op_val(uint32_t tk);
 int token_de_to_op_val(uint32_t tk);
 
-void pylt_vm_init(struct PyLiteState *state, PyLiteVM *vm);
+void pylt_vm_init(PyLiteState *state, PyLiteVM *vm);
+void pylt_vm_finalize(PyLiteState *state);
 void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code);
 
 PyLiteObject* pylt_vm_call_method(PyLiteState* state, PyLiteObject *self, PyLiteObject *callable, int argc, ...);

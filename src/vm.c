@@ -90,6 +90,11 @@ void pylt_vm_init(struct PyLiteState *state, PyLiteVM* vm) {
     kv_push(PyLiteDictObject*, frame->var_tables, pylt_obj_dict_new(state));
 }
 
+void pylt_vm_finalize(PyLiteState *state) {
+    kv_destroy(state->vm.stack);
+    kv_destroy(state->vm.frames);
+}
+
 void pylt_vm_load_func(PyLiteState* state, PyLiteFunctionObject *func) {
     PyLiteFrame *frame;
     PyLiteVM *vm = &state->vm;

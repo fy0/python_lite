@@ -1153,3 +1153,25 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
 
     func_push(ps);
 }
+
+void pylt_parser_finalize(PyLiteState* state, ParserState *ps) {
+    ParserInfo *info, *info2;
+
+    info = ps->info;
+    while (info) {
+        info2 = info->prev;
+        pylt_obj_code_free(state, info->code);
+        pylt_free(info);
+        info = info2;
+    }
+
+    info = ps->info_used;
+    while (info) {
+        info2 = info->prev;
+        pylt_obj_code_free(state, info->code);
+        pylt_free(info);
+        info = info2;
+    }
+
+    kv_destroy(ps->lval_check.bc_cache);
+}

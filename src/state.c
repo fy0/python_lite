@@ -12,7 +12,7 @@ PyLiteState* pylt_state_new() {
 }
 
 void pylt_state_free(PyLiteState *state) {
-    ;
+    pylt_state_finalize(state);
 }
 
 void pylt_state_init(PyLiteState *state) {
@@ -32,12 +32,18 @@ void pylt_state_init(PyLiteState *state) {
 }
 
 void pylt_state_finalize(PyLiteState *state) {
+    pylt_lex_finalize(state, state->lexer);
+    pylt_parser_finalize(state, state->parser);
+    pylt_vm_finalize(state);
+
     kv_destroy(state->cls_base);
     pylt_obj_dict_free(state, state->modules);
     pylt_obj_set_free(state, state->cache_str);
     pylt_obj_set_free(state, state->cache_bytes);
+    pylt_utils_static_objs_finalize(state);
 
-    pylt_lex_finalize(state, state->lexer);
+    pylt_free(state->lexer);
+    pylt_free(state->parser);
 }
 
 void pylt_state_load_stream(PyLiteState *state, StringStream *ss) {
