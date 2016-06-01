@@ -5,12 +5,14 @@
 #include "lexer.h"
 #include "parser.h"
 #include "vm.h"
+#include "gc.h"
 #include "lib/kvec.h"
 #include "types/set.h"
 #include "types/type.h"
 
 typedef struct PyLiteState {
     PyLiteVM vm;
+    PyLiteGC gc;
     LexState *lexer;
     ParserState *parser;
 
@@ -195,11 +197,15 @@ struct PyLiteStaticObjectsType {
 } pl_static;
 
 PyLiteState* pylt_state_new();
+void pylt_state_free(PyLiteState *state);
+
 void pylt_state_init(PyLiteState *state);
+void pylt_state_finalize(PyLiteState *state);
 void pylt_state_run(PyLiteState *state);
 void pylt_state_load_stream(PyLiteState *state, StringStream *ss);
 //void pylt_state_err(PyLiteState *state);
 
 void pylt_utils_static_objs_init(PyLiteState *state);
+void pylt_utils_static_objs_finalize(PyLiteState *state);
 
 #endif

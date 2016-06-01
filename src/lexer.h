@@ -84,6 +84,7 @@ typedef struct LexState {
 
 
 void pylt_lex_init(PyLiteState* state, LexState *ls, StringStream *ss);
+void pylt_lex_finalize(PyLiteState* state, LexState *ls);
 void pylt_lex_err(LexState *ls, int code);
 
 int pylt_lex_next(LexState *ls);

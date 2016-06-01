@@ -12,6 +12,7 @@ typedef struct PyLiteTypeObject {
     pl_uint32_t ob_reftype;
     pl_uint32_t ob_base;
     PyLiteDictObject *ob_attrs;
+    pl_bool_t allow_inherit;
 } PyLiteTypeObject;
 
 PyLiteTypeObject* pylt_obj_type_new_with_type(PyLiteState *state, PyLiteStrObject *name, pl_uint32_t instance_type, pl_uint32_t base_type);

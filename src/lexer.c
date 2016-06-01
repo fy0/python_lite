@@ -63,6 +63,27 @@ void pylt_lex_init(PyLiteState* state, LexState *ls, StringStream *ss) {
     ls->le.str.size = PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE;
 }
 
+void pylt_lex_finalize(PyLiteState* state, LexState *ls) {
+    IndentInfo *idt, *idt2;
+
+    idt = ls->indent;
+    while (idt) {
+        idt2 = idt->prev;
+        pylt_free(idt);
+        idt = idt2;
+    }
+
+    idt = ls->indent_used;
+    while (idt) {
+        idt2 = idt->prev;
+        pylt_free(idt);
+        idt = idt2;
+    }
+
+    pylt_free(ls->le.bytes.buf);
+    pylt_free(ls->le.str.buf);
+}
+
 
 /* read tokens: / /= // //=
                 * *= ** **=

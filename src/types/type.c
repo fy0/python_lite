@@ -11,6 +11,7 @@ PyLiteTypeObject* pylt_obj_type_new_with_type(PyLiteState *state, PyLiteStrObjec
     obj->ob_attrs = pylt_obj_dict_new(state);
     obj->ob_reftype = instance_type;
     obj->ob_base = base_type;
+    obj->allow_inherit = true;
     return obj;
 }
 

@@ -158,18 +158,22 @@ void pylt_bind_all_types_register(PyLiteState *state) {
 
     // module
     type = pylt_obj_type_new_with_type(state, pl_static.str.module, PYLT_OBJ_TYPE_MODULE, PYLT_OBJ_TYPE_OBJ);
+    type->allow_inherit = false;
     pylt_obj_type_register(state, type);
 
     // function
     type = pylt_obj_type_new_with_type(state, pl_static.str.function, PYLT_OBJ_TYPE_FUNCTION, PYLT_OBJ_TYPE_OBJ);
+    type->allow_inherit = false;
     pylt_obj_type_register(state, type);
 
     // cfunction
     type = pylt_obj_type_new_with_type(state, pl_static.str.cfunction, PYLT_OBJ_TYPE_CFUNCTION, PYLT_OBJ_TYPE_OBJ);
+    type->allow_inherit = false;
     pylt_obj_type_register(state, type);
 
     // code
     type = pylt_obj_type_new_with_type(state, pl_static.str.code, PYLT_OBJ_TYPE_CODE, PYLT_OBJ_TYPE_OBJ);
+    type->allow_inherit = false;
     pylt_obj_type_register(state, type);
 
     // ============== 15 ==============
@@ -179,18 +183,22 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     pylt_cmethod_register_0_args(state, type, pl_static.str.mro, &pylt_method_type_mro);
     pylt_cprop_register(state, type, pl_static.str.__base__, &pylt_prop_type_base_get, NULL);
     pylt_cmethod_register(state, type, pl_static.str.__new__, _NST(state, 2, "cls", "object"), NULL, NULL, &pylt_cls_method_type_new);
+    type->allow_inherit = false;
     pylt_obj_type_register(state, type);
 
     // prop
     type = pylt_obj_type_new_with_type(state, pl_static.str.property_, PYLT_OBJ_TYPE_PROP, PYLT_OBJ_TYPE_OBJ);
+    type->allow_inherit = false;
     pylt_obj_type_register(state, type);
 
     // none
     type = pylt_obj_type_new_with_type(state, pl_static.str.none, PYLT_OBJ_TYPE_NONE, PYLT_OBJ_TYPE_OBJ);
+    type->allow_inherit = false;
     pylt_obj_type_register(state, type);
 
     // iter
     type = pylt_obj_type_new_with_type(state, pl_static.str.iterator, PYLT_OBJ_TYPE_ITER, PYLT_OBJ_TYPE_OBJ);
+    type->allow_inherit = false;
     pylt_obj_type_register(state, type);
 
     // ============== 19 ==============
@@ -198,11 +206,13 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     // range
     type = pylt_obj_type_new_with_type(state, pl_static.str.range, PYLT_OBJ_TYPE_RANGE, PYLT_OBJ_TYPE_OBJ);
     pylt_cmethod_register(state, type, pl_static.str.__new__, _NST(state, 4, "cls", "start", "stop", "step"), _NT(state, 4, PARAM_NODEF, PARAM_NODEF, &PyLiteNone, pylt_obj_int_new(state, 1)), NULL, &pylt_cls_method_range_new);
+    type->allow_inherit = false;
     pylt_obj_type_register(state, type);
 
     // exception
     type = pylt_obj_type_new_with_type(state, pl_static.str.BaseException, PYLT_OBJ_TYPE_BASE_EXCEPTION, PYLT_OBJ_TYPE_OBJ);
     pylt_cmethod_register(state, type, pl_static.str.__new__, _NT(state, 2, _S(cls), _S(args)), _NT(state, 2, PARAM_NODEF, PARAM_ARGS), NULL, &pylt_cls_method_base_exception_new);
+    pylt_cprop_register(state, type, _S(args), &pylt_prop_base_exception_args_get, NULL);
     pylt_obj_type_register(state, type);
 
     state->class_num = PYLT_OBJ_BUILTIN_TYPE_NUM;

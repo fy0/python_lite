@@ -96,6 +96,7 @@ struct PyLitePropertyObject;
 struct PyLiteNoneObject;
 
 struct PyLiteRangeObject;
+struct PyLiteBaseExceptionObject;
 
 struct PyLiteCustomObject;
 
@@ -124,6 +125,7 @@ struct PyLiteCustomObject;
 #define castnone(i)     cast(struct PyLiteNoneObject*, (i))
 
 #define castrange(i)    cast(struct PyLiteRangeObject*, (i))
+#define castexcept(i)   cast(struct PyLiteBaseExceptionObject*, (i))
 
 #define castcustom(i)   cast(struct PyLiteCustomObject*, (i))
 

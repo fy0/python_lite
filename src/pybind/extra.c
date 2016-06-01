@@ -26,3 +26,7 @@ PyLiteObject* pylt_cls_method_base_exception_new(PyLiteState *state, int argc, P
         castobj(pylt_obj_base_exception_new(state, dcast(tuple, args[1])))
     );
 }
+
+PyLiteObject* pylt_prop_base_exception_args_get(PyLiteState *state, int argc, PyLiteObject **args) {
+    return castobj(dcast(except, args[1])->args);
+}
