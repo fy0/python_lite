@@ -194,6 +194,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *BytesWarning;
         PyLiteStrObject *ResourceWarning;
     } str;
+    PyLiteSetObject *objs;
 } pl_static;
 
 PyLiteState* pylt_state_new();
