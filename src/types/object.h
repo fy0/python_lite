@@ -140,6 +140,7 @@ PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *typ
 PyLiteObject* pylt_obj_getbase(PyLiteObject *obj);
 
 void pylt_obj_free(PyLiteState *state, PyLiteObject *obj);
+void pylt_obj_safefree(PyLiteState *state, PyLiteObject *obj);
 
 // Others
 

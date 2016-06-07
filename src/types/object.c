@@ -480,6 +480,12 @@ void pylt_obj_free(PyLiteState *state, PyLiteObject *obj) {
     }
 }
 
+void pylt_obj_safefree(PyLiteState *state, PyLiteObject *obj) {
+    if (!pylt_api_isstatic(state, obj)) {
+        pylt_obj_str_free(state, obj);
+    }
+}
+
 pl_int_t pylt_obj_len(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_BYTES: return castbytes(obj)->ob_size;

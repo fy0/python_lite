@@ -2,6 +2,7 @@
 #include "bool.h"
 #include "string.h"
 #include "../state.h"
+#include "../api.h"
 
 static PyLiteStrObject* hash_and_check_cache(PyLiteState *state, PyLiteStrObject *obj) {
     PyLiteStrObject *obj2;
@@ -213,6 +214,12 @@ PyLiteStrObject* pylt_obj_str_new_empty(PyLiteState *state) {
 void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self) {
     pylt_free(self->ob_val);
     pylt_free(self);
+}
+
+void pylt_obj_str_safefree(PyLiteState *state, PyLiteStrObject *self) {
+    if (!pylt_api_isstatic(state, castobj(self))) {
+        pylt_obj_str_free(state, self);
+    }
 }
 
 pl_int_t pylt_obj_str_index_full(PyLiteState *state, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end) {

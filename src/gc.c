@@ -4,6 +4,7 @@
 
 void pylt_gc_add(PyLiteState *state, PyLiteObject *obj) {
     pylt_obj_set_add(state, state->gc.g_new, obj);
+
 }
 
 void pylt_gc_init(PyLiteState *state) {
