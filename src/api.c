@@ -85,7 +85,3 @@ pl_bool_t pylt_api_isinstance(PyLiteState *state, PyLiteObject *obj, pl_uint32_t
 
     return false;
 }
-
-pl_bool_t pylt_api_isstatic(PyLiteState *state, PyLiteObject *obj) {
-    return pylt_obj_set_has(state, pl_static.objs, obj);
-}

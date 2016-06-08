@@ -23,7 +23,7 @@ PyLiteObject* pylt_cls_method_base_exception_new(PyLiteState *state, int argc, P
     return pylt_obj_typecast(
         state, 
         dcast(type, args[0]),
-        castobj(pylt_obj_base_exception_new(state, dcast(tuple, args[1])))
+        castobj(pylt_obj_exception_new(state, dcast(tuple, args[1])))
     );
 }
 

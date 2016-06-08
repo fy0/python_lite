@@ -475,14 +475,14 @@ void pylt_obj_free(PyLiteState *state, PyLiteObject *obj) {
             pylt_obj_range_free(state, castrange(obj));
             break;
         case PYLT_OBJ_TYPE_BASE_EXCEPTION:
-            //pylt_obj_base_exception_free(state, castrange(obj));
+            pylt_obj_exception_free(state, castrange(obj));
             break;
     }
 }
 
 void pylt_obj_safefree(PyLiteState *state, PyLiteObject *obj) {
-    if (!pylt_api_isstatic(state, obj)) {
-        pylt_obj_str_free(state, obj);
+    if (!pylt_gc_isstatic(state, obj)) {
+        pylt_obj_free(state, obj);
     }
 }
 

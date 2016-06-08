@@ -217,7 +217,7 @@ void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self) {
 }
 
 void pylt_obj_str_safefree(PyLiteState *state, PyLiteStrObject *self) {
-    if (!pylt_api_isstatic(state, castobj(self))) {
+    if (!pylt_gc_isstatic(state, castobj(self))) {
         pylt_obj_str_free(state, self);
     }
 }

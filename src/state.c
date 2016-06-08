@@ -13,6 +13,7 @@ PyLiteState* pylt_state_new() {
 
 void pylt_state_free(PyLiteState *state) {
     pylt_state_finalize(state);
+    pylt_free(state);
 }
 
 void pylt_state_init(PyLiteState *state) {
@@ -54,7 +55,7 @@ void pylt_state_finalize(PyLiteState *state) {
     pylt_obj_dict_free(state, state->modules);
     pylt_obj_set_free(state, state->cache_str);
     pylt_obj_set_free(state, state->cache_bytes);
-    pylt_utils_static_objs_finalize(state);
+    pylt_gc_finalize(state);
 
     pylt_free(state->lexer);
     pylt_free(state->parser);
@@ -234,340 +235,170 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.BytesWarning = pylt_obj_str_new_from_c_str(state, "BytesWarning", true);
     pl_static.str.ResourceWarning = pylt_obj_str_new_from_c_str(state, "ResourceWarning", true);
 
-    pl_static.objs = pylt_obj_set_new(state);
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__init__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__new__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__call__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__base__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__import__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__init__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__new__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__call__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__base__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__import__));
 
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__add__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__sub__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__mul__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__div__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__floordiv__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__pos__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__neg__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__pow__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__add__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__sub__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__mul__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__div__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__floordiv__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__pos__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__neg__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__pow__));
 
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__lshift__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__rshift__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__lshift__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__rshift__));
 
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__hash__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__iter__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__cmp__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__eq__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__setattr__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__getattr__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__setitem__));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.__getitem__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__hash__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__iter__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__cmp__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__eq__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__setattr__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__getattr__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__setitem__));
+    pylt_gc_static_add(state, castobj(pl_static.str.__getitem__));
 
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.id));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.dir));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.len));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.hash));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.iter));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.super));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.isinstance));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.print));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.pow));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.setattr));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.getattr));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.range));
+    pylt_gc_static_add(state, castobj(pl_static.str.id));
+    pylt_gc_static_add(state, castobj(pl_static.str.dir));
+    pylt_gc_static_add(state, castobj(pl_static.str.len));
+    pylt_gc_static_add(state, castobj(pl_static.str.hash));
+    pylt_gc_static_add(state, castobj(pl_static.str.iter));
+    pylt_gc_static_add(state, castobj(pl_static.str.super));
+    pylt_gc_static_add(state, castobj(pl_static.str.isinstance));
+    pylt_gc_static_add(state, castobj(pl_static.str.print));
+    pylt_gc_static_add(state, castobj(pl_static.str.pow));
+    pylt_gc_static_add(state, castobj(pl_static.str.setattr));
+    pylt_gc_static_add(state, castobj(pl_static.str.getattr));
+    pylt_gc_static_add(state, castobj(pl_static.str.range));
 
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.object));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.int_));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.float_));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.bool_));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.str));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.bytes));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.set));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.list));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.tuple));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.dict));
+    pylt_gc_static_add(state, castobj(pl_static.str.object));
+    pylt_gc_static_add(state, castobj(pl_static.str.int_));
+    pylt_gc_static_add(state, castobj(pl_static.str.float_));
+    pylt_gc_static_add(state, castobj(pl_static.str.bool_));
+    pylt_gc_static_add(state, castobj(pl_static.str.str));
+    pylt_gc_static_add(state, castobj(pl_static.str.bytes));
+    pylt_gc_static_add(state, castobj(pl_static.str.set));
+    pylt_gc_static_add(state, castobj(pl_static.str.list));
+    pylt_gc_static_add(state, castobj(pl_static.str.tuple));
+    pylt_gc_static_add(state, castobj(pl_static.str.dict));
 
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.module));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.function));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.cfunction));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.code));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.type));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.iterator));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.property_));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.none));
-
-    // object
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.mro));
-
-    // str
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.sub));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.start));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.end));
-
-    // int
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.is_integer));
-
-    // set
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.add));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.clear));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.copy));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.pop));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.remove));
-
-    // list
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.append));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.count));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.index));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.extend));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.insert));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.reverse));
-
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.None));
-
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.math));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.builtins));
-
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.cls));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.self));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.args));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.kwargs));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.param1));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.param2));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.param3));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.param4));
-
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.x));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.y));
-
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.BaseException));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.SystemExit));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.KeyboardInterrupt));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.GeneratorExit));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.Exception));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.StopIteration));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.StopAsyncIteration));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ArithmeticError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.FloatingPointError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.OverflowError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ZeroDivisionError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.AssertionError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.AttributeError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.BufferError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.EOFError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ImportError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.LookupError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.IndexError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.KeyError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.MemoryError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.NameError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.UnboundLocalError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.OSError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.BlockingIOError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ChildProcessError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ConnectionError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.BrokenPipeError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ConnectionAbortedError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ConnectionRefusedError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ConnectionResetError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.FileExistsError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.FileNotFoundError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.InterruptedError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.IsADirectoryError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.NotADirectoryError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.PermissionError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ProcessLookupError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.TimeoutError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ReferenceError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.RuntimeError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.NotImplementedError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.RecursionError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.SyntaxError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.IndentationError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.TabError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.SystemError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.TypeError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ValueError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.UnicodeError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.UnicodeDecodeError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.UnicodeEncodeError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.UnicodeTranslateError));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.Warning));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.DeprecationWarning));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.PendingDeprecationWarning));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.RuntimeWarning));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.SyntaxWarning));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.UserWarning));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.FutureWarning));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ImportWarning));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.UnicodeWarning));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.BytesWarning));
-    pylt_obj_set_add(state, pl_static.objs, castobj(pl_static.str.ResourceWarning));
-}
-
-void pylt_utils_static_objs_finalize(PyLiteState *state) {
-    pylt_obj_str_free(state, pl_static.str.__init__);
-    pylt_obj_str_free(state, pl_static.str.__new__);
-    pylt_obj_str_free(state, pl_static.str.__call__);
-    pylt_obj_str_free(state, pl_static.str.__base__);
-    pylt_obj_str_free(state, pl_static.str.__import__);
-
-    pylt_obj_str_free(state, pl_static.str.__add__);
-    pylt_obj_str_free(state, pl_static.str.__sub__);
-    pylt_obj_str_free(state, pl_static.str.__mul__);
-    pylt_obj_str_free(state, pl_static.str.__div__);
-    pylt_obj_str_free(state, pl_static.str.__floordiv__);
-    pylt_obj_str_free(state, pl_static.str.__pos__);
-    pylt_obj_str_free(state, pl_static.str.__neg__);
-    pylt_obj_str_free(state, pl_static.str.__pow__);
-
-    pylt_obj_str_free(state, pl_static.str.__lshift__);
-    pylt_obj_str_free(state, pl_static.str.__rshift__);
-
-    pylt_obj_str_free(state, pl_static.str.__hash__);
-    pylt_obj_str_free(state, pl_static.str.__iter__);
-    pylt_obj_str_free(state, pl_static.str.__cmp__);
-    pylt_obj_str_free(state, pl_static.str.__eq__);
-    pylt_obj_str_free(state, pl_static.str.__setattr__);
-    pylt_obj_str_free(state, pl_static.str.__getattr__);
-    pylt_obj_str_free(state, pl_static.str.__setitem__);
-    pylt_obj_str_free(state, pl_static.str.__getitem__);
-
-    pylt_obj_str_free(state, pl_static.str.id);
-    pylt_obj_str_free(state, pl_static.str.dir);
-    pylt_obj_str_free(state, pl_static.str.len);
-    pylt_obj_str_free(state, pl_static.str.hash);
-    pylt_obj_str_free(state, pl_static.str.iter);
-    pylt_obj_str_free(state, pl_static.str.super);
-    pylt_obj_str_free(state, pl_static.str.isinstance);
-    pylt_obj_str_free(state, pl_static.str.print);
-    pylt_obj_str_free(state, pl_static.str.pow);
-    pylt_obj_str_free(state, pl_static.str.setattr);
-    pylt_obj_str_free(state, pl_static.str.getattr);
-    pylt_obj_str_free(state, pl_static.str.range);
-
-    pylt_obj_str_free(state, pl_static.str.object);
-    pylt_obj_str_free(state, pl_static.str.int_);
-    pylt_obj_str_free(state, pl_static.str.float_);
-    pylt_obj_str_free(state, pl_static.str.bool_);
-    pylt_obj_str_free(state, pl_static.str.str);
-    pylt_obj_str_free(state, pl_static.str.bytes);
-    pylt_obj_str_free(state, pl_static.str.set);
-    pylt_obj_str_free(state, pl_static.str.list);
-    pylt_obj_str_free(state, pl_static.str.tuple);
-    pylt_obj_str_free(state, pl_static.str.dict);
-
-    pylt_obj_str_free(state, pl_static.str.module);
-    pylt_obj_str_free(state, pl_static.str.function);
-    pylt_obj_str_free(state, pl_static.str.cfunction);
-    pylt_obj_str_free(state, pl_static.str.code);
-    pylt_obj_str_free(state, pl_static.str.type);
-    pylt_obj_str_free(state, pl_static.str.iterator);
-    pylt_obj_str_free(state, pl_static.str.property_);
-    pylt_obj_str_free(state, pl_static.str.none);
+    pylt_gc_static_add(state, castobj(pl_static.str.module));
+    pylt_gc_static_add(state, castobj(pl_static.str.function));
+    pylt_gc_static_add(state, castobj(pl_static.str.cfunction));
+    pylt_gc_static_add(state, castobj(pl_static.str.code));
+    pylt_gc_static_add(state, castobj(pl_static.str.type));
+    pylt_gc_static_add(state, castobj(pl_static.str.iterator));
+    pylt_gc_static_add(state, castobj(pl_static.str.property_));
+    pylt_gc_static_add(state, castobj(pl_static.str.none));
 
     // object
-    pylt_obj_str_free(state, pl_static.str.mro);
+    pylt_gc_static_add(state, castobj(pl_static.str.mro));
 
     // str
-    pylt_obj_str_free(state, pl_static.str.sub);
-    pylt_obj_str_free(state, pl_static.str.start);
-    pylt_obj_str_free(state, pl_static.str.end);
+    pylt_gc_static_add(state, castobj(pl_static.str.sub));
+    pylt_gc_static_add(state, castobj(pl_static.str.start));
+    pylt_gc_static_add(state, castobj(pl_static.str.end));
 
     // int
-    pylt_obj_str_free(state, pl_static.str.is_integer);
+    pylt_gc_static_add(state, castobj(pl_static.str.is_integer));
 
     // set
-    pylt_obj_str_free(state, pl_static.str.add);
-    pylt_obj_str_free(state, pl_static.str.clear);
-    pylt_obj_str_free(state, pl_static.str.copy);
-    pylt_obj_str_free(state, pl_static.str.pop);
-    pylt_obj_str_free(state, pl_static.str.remove);
+    pylt_gc_static_add(state, castobj(pl_static.str.add));
+    pylt_gc_static_add(state, castobj(pl_static.str.clear));
+    pylt_gc_static_add(state, castobj(pl_static.str.copy));
+    pylt_gc_static_add(state, castobj(pl_static.str.pop));
+    pylt_gc_static_add(state, castobj(pl_static.str.remove));
 
     // list
-    pylt_obj_str_free(state, pl_static.str.append);
-    pylt_obj_str_free(state, pl_static.str.count);
-    pylt_obj_str_free(state, pl_static.str.index);
-    pylt_obj_str_free(state, pl_static.str.extend);
-    pylt_obj_str_free(state, pl_static.str.insert);
-    pylt_obj_str_free(state, pl_static.str.reverse);
+    pylt_gc_static_add(state, castobj(pl_static.str.append));
+    pylt_gc_static_add(state, castobj(pl_static.str.count));
+    pylt_gc_static_add(state, castobj(pl_static.str.index));
+    pylt_gc_static_add(state, castobj(pl_static.str.extend));
+    pylt_gc_static_add(state, castobj(pl_static.str.insert));
+    pylt_gc_static_add(state, castobj(pl_static.str.reverse));
 
-    pylt_obj_str_free(state, pl_static.str.None);
+    pylt_gc_static_add(state, castobj(pl_static.str.None));
 
-    pylt_obj_str_free(state, pl_static.str.math);
-    pylt_obj_str_free(state, pl_static.str.builtins);
+    pylt_gc_static_add(state, castobj(pl_static.str.math));
+    pylt_gc_static_add(state, castobj(pl_static.str.builtins));
 
-    pylt_obj_str_free(state, pl_static.str.cls);
-    pylt_obj_str_free(state, pl_static.str.self);
-    pylt_obj_str_free(state, pl_static.str.args);
-    pylt_obj_str_free(state, pl_static.str.kwargs);
-    pylt_obj_str_free(state, pl_static.str.param1);
-    pylt_obj_str_free(state, pl_static.str.param2);
-    pylt_obj_str_free(state, pl_static.str.param3);
-    pylt_obj_str_free(state, pl_static.str.param4);
+    pylt_gc_static_add(state, castobj(pl_static.str.cls));
+    pylt_gc_static_add(state, castobj(pl_static.str.self));
+    pylt_gc_static_add(state, castobj(pl_static.str.args));
+    pylt_gc_static_add(state, castobj(pl_static.str.kwargs));
+    pylt_gc_static_add(state, castobj(pl_static.str.param1));
+    pylt_gc_static_add(state, castobj(pl_static.str.param2));
+    pylt_gc_static_add(state, castobj(pl_static.str.param3));
+    pylt_gc_static_add(state, castobj(pl_static.str.param4));
 
-    pylt_obj_str_free(state, pl_static.str.x);
-    pylt_obj_str_free(state, pl_static.str.y);
+    pylt_gc_static_add(state, castobj(pl_static.str.x));
+    pylt_gc_static_add(state, castobj(pl_static.str.y));
 
-    pylt_obj_str_free(state, pl_static.str.BaseException);
-    pylt_obj_str_free(state, pl_static.str.SystemExit);
-    pylt_obj_str_free(state, pl_static.str.KeyboardInterrupt);
-    pylt_obj_str_free(state, pl_static.str.GeneratorExit);
-    pylt_obj_str_free(state, pl_static.str.Exception);
-    pylt_obj_str_free(state, pl_static.str.StopIteration);
-    pylt_obj_str_free(state, pl_static.str.StopAsyncIteration);
-    pylt_obj_str_free(state, pl_static.str.ArithmeticError);
-    pylt_obj_str_free(state, pl_static.str.FloatingPointError);
-    pylt_obj_str_free(state, pl_static.str.OverflowError);
-    pylt_obj_str_free(state, pl_static.str.ZeroDivisionError);
-    pylt_obj_str_free(state, pl_static.str.AssertionError);
-    pylt_obj_str_free(state, pl_static.str.AttributeError);
-    pylt_obj_str_free(state, pl_static.str.BufferError);
-    pylt_obj_str_free(state, pl_static.str.EOFError);
-    pylt_obj_str_free(state, pl_static.str.ImportError);
-    pylt_obj_str_free(state, pl_static.str.LookupError);
-    pylt_obj_str_free(state, pl_static.str.IndexError);
-    pylt_obj_str_free(state, pl_static.str.KeyError);
-    pylt_obj_str_free(state, pl_static.str.MemoryError);
-    pylt_obj_str_free(state, pl_static.str.NameError);
-    pylt_obj_str_free(state, pl_static.str.UnboundLocalError);
-    pylt_obj_str_free(state, pl_static.str.OSError);
-    pylt_obj_str_free(state, pl_static.str.BlockingIOError);
-    pylt_obj_str_free(state, pl_static.str.ChildProcessError);
-    pylt_obj_str_free(state, pl_static.str.ConnectionError);
-    pylt_obj_str_free(state, pl_static.str.BrokenPipeError);
-    pylt_obj_str_free(state, pl_static.str.ConnectionAbortedError);
-    pylt_obj_str_free(state, pl_static.str.ConnectionRefusedError);
-    pylt_obj_str_free(state, pl_static.str.ConnectionResetError);
-    pylt_obj_str_free(state, pl_static.str.FileExistsError);
-    pylt_obj_str_free(state, pl_static.str.FileNotFoundError);
-    pylt_obj_str_free(state, pl_static.str.InterruptedError);
-    pylt_obj_str_free(state, pl_static.str.IsADirectoryError);
-    pylt_obj_str_free(state, pl_static.str.NotADirectoryError);
-    pylt_obj_str_free(state, pl_static.str.PermissionError);
-    pylt_obj_str_free(state, pl_static.str.ProcessLookupError);
-    pylt_obj_str_free(state, pl_static.str.TimeoutError);
-    pylt_obj_str_free(state, pl_static.str.ReferenceError);
-    pylt_obj_str_free(state, pl_static.str.RuntimeError);
-    pylt_obj_str_free(state, pl_static.str.NotImplementedError);
-    pylt_obj_str_free(state, pl_static.str.RecursionError);
-    pylt_obj_str_free(state, pl_static.str.SyntaxError);
-    pylt_obj_str_free(state, pl_static.str.IndentationError);
-    pylt_obj_str_free(state, pl_static.str.TabError);
-    pylt_obj_str_free(state, pl_static.str.SystemError);
-    pylt_obj_str_free(state, pl_static.str.TypeError);
-    pylt_obj_str_free(state, pl_static.str.ValueError);
-    pylt_obj_str_free(state, pl_static.str.UnicodeError);
-    pylt_obj_str_free(state, pl_static.str.UnicodeDecodeError);
-    pylt_obj_str_free(state, pl_static.str.UnicodeEncodeError);
-    pylt_obj_str_free(state, pl_static.str.UnicodeTranslateError);
-    pylt_obj_str_free(state, pl_static.str.Warning);
-    pylt_obj_str_free(state, pl_static.str.DeprecationWarning);
-    pylt_obj_str_free(state, pl_static.str.PendingDeprecationWarning);
-    pylt_obj_str_free(state, pl_static.str.RuntimeWarning);
-    pylt_obj_str_free(state, pl_static.str.SyntaxWarning);
-    pylt_obj_str_free(state, pl_static.str.UserWarning);
-    pylt_obj_str_free(state, pl_static.str.FutureWarning);
-    pylt_obj_str_free(state, pl_static.str.ImportWarning);
-    pylt_obj_str_free(state, pl_static.str.UnicodeWarning);
-    pylt_obj_str_free(state, pl_static.str.BytesWarning);
-    pylt_obj_str_free(state, pl_static.str.ResourceWarning);
+    pylt_gc_static_add(state, castobj(pl_static.str.BaseException));
+    pylt_gc_static_add(state, castobj(pl_static.str.SystemExit));
+    pylt_gc_static_add(state, castobj(pl_static.str.KeyboardInterrupt));
+    pylt_gc_static_add(state, castobj(pl_static.str.GeneratorExit));
+    pylt_gc_static_add(state, castobj(pl_static.str.Exception));
+    pylt_gc_static_add(state, castobj(pl_static.str.StopIteration));
+    pylt_gc_static_add(state, castobj(pl_static.str.StopAsyncIteration));
+    pylt_gc_static_add(state, castobj(pl_static.str.ArithmeticError));
+    pylt_gc_static_add(state, castobj(pl_static.str.FloatingPointError));
+    pylt_gc_static_add(state, castobj(pl_static.str.OverflowError));
+    pylt_gc_static_add(state, castobj(pl_static.str.ZeroDivisionError));
+    pylt_gc_static_add(state, castobj(pl_static.str.AssertionError));
+    pylt_gc_static_add(state, castobj(pl_static.str.AttributeError));
+    pylt_gc_static_add(state, castobj(pl_static.str.BufferError));
+    pylt_gc_static_add(state, castobj(pl_static.str.EOFError));
+    pylt_gc_static_add(state, castobj(pl_static.str.ImportError));
+    pylt_gc_static_add(state, castobj(pl_static.str.LookupError));
+    pylt_gc_static_add(state, castobj(pl_static.str.IndexError));
+    pylt_gc_static_add(state, castobj(pl_static.str.KeyError));
+    pylt_gc_static_add(state, castobj(pl_static.str.MemoryError));
+    pylt_gc_static_add(state, castobj(pl_static.str.NameError));
+    pylt_gc_static_add(state, castobj(pl_static.str.UnboundLocalError));
+    pylt_gc_static_add(state, castobj(pl_static.str.OSError));
+    pylt_gc_static_add(state, castobj(pl_static.str.BlockingIOError));
+    pylt_gc_static_add(state, castobj(pl_static.str.ChildProcessError));
+    pylt_gc_static_add(state, castobj(pl_static.str.ConnectionError));
+    pylt_gc_static_add(state, castobj(pl_static.str.BrokenPipeError));
+    pylt_gc_static_add(state, castobj(pl_static.str.ConnectionAbortedError));
+    pylt_gc_static_add(state, castobj(pl_static.str.ConnectionRefusedError));
+    pylt_gc_static_add(state, castobj(pl_static.str.ConnectionResetError));
+    pylt_gc_static_add(state, castobj(pl_static.str.FileExistsError));
+    pylt_gc_static_add(state, castobj(pl_static.str.FileNotFoundError));
+    pylt_gc_static_add(state, castobj(pl_static.str.InterruptedError));
+    pylt_gc_static_add(state, castobj(pl_static.str.IsADirectoryError));
+    pylt_gc_static_add(state, castobj(pl_static.str.NotADirectoryError));
+    pylt_gc_static_add(state, castobj(pl_static.str.PermissionError));
+    pylt_gc_static_add(state, castobj(pl_static.str.ProcessLookupError));
+    pylt_gc_static_add(state, castobj(pl_static.str.TimeoutError));
+    pylt_gc_static_add(state, castobj(pl_static.str.ReferenceError));
+    pylt_gc_static_add(state, castobj(pl_static.str.RuntimeError));
+    pylt_gc_static_add(state, castobj(pl_static.str.NotImplementedError));
+    pylt_gc_static_add(state, castobj(pl_static.str.RecursionError));
+    pylt_gc_static_add(state, castobj(pl_static.str.SyntaxError));
+    pylt_gc_static_add(state, castobj(pl_static.str.IndentationError));
+    pylt_gc_static_add(state, castobj(pl_static.str.TabError));
+    pylt_gc_static_add(state, castobj(pl_static.str.SystemError));
+    pylt_gc_static_add(state, castobj(pl_static.str.TypeError));
+    pylt_gc_static_add(state, castobj(pl_static.str.ValueError));
+    pylt_gc_static_add(state, castobj(pl_static.str.UnicodeError));
+    pylt_gc_static_add(state, castobj(pl_static.str.UnicodeDecodeError));
+    pylt_gc_static_add(state, castobj(pl_static.str.UnicodeEncodeError));
+    pylt_gc_static_add(state, castobj(pl_static.str.UnicodeTranslateError));
+    pylt_gc_static_add(state, castobj(pl_static.str.Warning));
+    pylt_gc_static_add(state, castobj(pl_static.str.DeprecationWarning));
+    pylt_gc_static_add(state, castobj(pl_static.str.PendingDeprecationWarning));
+    pylt_gc_static_add(state, castobj(pl_static.str.RuntimeWarning));
+    pylt_gc_static_add(state, castobj(pl_static.str.SyntaxWarning));
+    pylt_gc_static_add(state, castobj(pl_static.str.UserWarning));
+    pylt_gc_static_add(state, castobj(pl_static.str.FutureWarning));
+    pylt_gc_static_add(state, castobj(pl_static.str.ImportWarning));
+    pylt_gc_static_add(state, castobj(pl_static.str.UnicodeWarning));
+    pylt_gc_static_add(state, castobj(pl_static.str.BytesWarning));
+    pylt_gc_static_add(state, castobj(pl_static.str.ResourceWarning));
 }

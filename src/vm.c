@@ -394,6 +394,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         tfunc->info.name = caststr(ta);
                         tfunc->info.params = castlist(tc)->ob_val;
 
+                        pylt_gc_local_add(state, tfunc);
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tfunc);
                         break;
                     case PYLT_OBJ_TYPE_SET:
@@ -401,6 +402,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         for (pl_int_t j = 0; j < ins.extra; ++j) {
                             pylt_obj_set_add(state, castset(tobj), castobj(kv_pop(state->vm.stack)));
                         }
+                        pylt_gc_local_add(state, tobj);
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tobj);
                         break;
                     case PYLT_OBJ_TYPE_LIST:
@@ -409,12 +411,14 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                             pylt_obj_list_append(state, castlist(tobj), castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - j)));
                         }
                         kv_popn(state->vm.stack, ins.extra);
+                        pylt_gc_local_add(state, tobj);
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tobj);
                         break;
                     case PYLT_OBJ_TYPE_TUPLE:
                         tobj = castobj(pylt_obj_tuple_new(state, ins.extra));
                         memcpy(casttuple(tobj)->ob_val, &kv_topn(vm->stack, ins.extra - 1), sizeof(PyLiteObject*) * ins.extra);
                         kv_popn(state->vm.stack, ins.extra);
+                        pylt_gc_local_add(state, tobj);
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tobj);
                         break;
                     case PYLT_OBJ_TYPE_DICT:
@@ -423,6 +427,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                             pylt_obj_dict_setitem(state, castdict(tobj), castobj(kv_topn(vm->stack, j * 2 - 1)), castobj(kv_topn(vm->stack, (j - 1) * 2)));
                         }
                         kv_popn(vm->stack, ins.extra * 2);
+                        pylt_gc_local_add(state, tobj);
                         kv_push(uintptr_t, vm->stack, (uintptr_t)tobj);
                         break;
                     case PYLT_OBJ_TYPE_TYPE:
@@ -433,6 +438,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         tb = (tb->ob_type == PYLT_OBJ_TYPE_NONE) ? castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_OBJ)) : tb;
                         PyLiteTypeObject *type = pylt_obj_type_new(state, caststr(ta), casttype(tb)->ob_reftype, castdict(tc));
                         pylt_obj_type_register(state, type);
+                        pylt_gc_local_add(state, type);
                         kv_pushptr(vm->stack, type);
                         break;
                 }

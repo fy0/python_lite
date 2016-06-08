@@ -88,7 +88,7 @@ PYLITE_EXCEPTION_DEFINE(UnicodeWarning);
 PYLITE_EXCEPTION_DEFINE(BytesWarning);
 PYLITE_EXCEPTION_DEFINE(ResourceWarning);
 
-PyLiteBaseExceptionObject* pylt_obj_base_exception_new(PyLiteState *state, PyLiteTupleObject *args);
+PyLiteBaseExceptionObject* pylt_obj_exception_new(PyLiteState *state, PyLiteTupleObject *args);
 void pylt_obj_exception_free(PyLiteState *state, PyLiteBaseExceptionObject* self);
 
 #endif
