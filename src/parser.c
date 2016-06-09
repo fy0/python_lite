@@ -701,6 +701,7 @@ void loop_control_replace(ParserState *ps, int start_pos) {
 void parse_func(ParserState *ps) {
     ParserInfo *info;
     PyLiteObject *name, *func_name;
+    PyLiteObject *args_name = NULL, *kwargs_name = NULL;
     Token *tk = &(ps->ls->token);
     bool old_disable_return;
     int defval_count = 0;
@@ -735,7 +736,9 @@ void parse_func(ParserState *ps) {
             // *args
             next(ps);
             if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+            if (args_name) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX); // TODO: error info fix
             pylt_obj_list_append(ps->state, lst, tk->obj);
+            args_name = tk->obj;
             next(ps);
             if (tk->val != ',') break;
             next(ps);
@@ -744,6 +747,7 @@ void parse_func(ParserState *ps) {
             next(ps);
             if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
             pylt_obj_list_append(ps->state, lst, tk->obj);
+            kwargs_name = tk->obj;
             next(ps);
             if (tk->val != ',') {
                 // TODO:ERROR
@@ -779,6 +783,10 @@ void parse_func(ParserState *ps) {
     sload_const(ps, castobj(info->code));
     // params
     sload_const(ps, castobj(lst));
+    // args_name
+    sload_const(ps, args_name ? args_name : castobj(&PyLiteNone));
+    // kwargs_name
+    sload_const(ps, kwargs_name ? kwargs_name : castobj(&PyLiteNone));
 
     write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_FUNCTION, 0);
     write_ins(ps, BC_SET_VAL, 0, store_const(ps, func_name));
@@ -830,6 +838,11 @@ void parse_class(ParserState *ps) {
     sload_const(ps, castobj(info->code));
     // params
     sload_const(ps, castobj(lst));
+    // args_name
+    sload_const(ps, castobj(&PyLiteNone));
+    // kwargs_name
+    sload_const(ps, castobj(&PyLiteNone));
+
     write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_FUNCTION, 0);
 
     write_ins(ps, BC_CALL, 0, 0);

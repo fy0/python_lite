@@ -298,7 +298,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
     pl_bool_t at_type;
     pl_int_t tnum, tflag;
     PyLiteFunctionObject *tfunc;
-    PyLiteObject *tobj, *tret, *ta, *tb, *tc, *td;
+    PyLiteObject *tobj, *tret, *ta, *tb, *tc, *td, *te, *tf;
 
     pl_uint_t params_num;
     pl_uint_t params_offset = 0;
@@ -386,10 +386,12 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tret);
                         break;
                     case PYLT_OBJ_TYPE_FUNCTION:
+                        te = castobj(kv_pop(state->vm.stack)); // kwargs_name
+                        td = castobj(kv_pop(state->vm.stack)); // args_name
                         tc = castobj(kv_pop(state->vm.stack)); // params
                         tb = castobj(kv_pop(state->vm.stack)); // code
                         ta = castobj(kv_pop(state->vm.stack)); // name
-                        td = castobj(kv_pop(state->vm.stack)); // defaults
+                        tf = castobj(kv_pop(state->vm.stack)); // defaults
 
                         tfunc = pylt_obj_func_new(state, (PyLiteCodeObject*)tb);
                         tfunc->info.length = castlist(tc)->ob_size;
