@@ -14,6 +14,10 @@ PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeObject *co
     return obj;
 }
 
+PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteState *state, PyLiteCodeObject *code, PyLiteDictObject *defaults, PyLiteStrObject *args, PyLiteStrObject **kwargs) {
+    return pylt_obj_func_new(state, code);
+}
+
 PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteState *state, PyLiteObject *func) {
     if (func->ob_type == PYLT_OBJ_TYPE_FUNCTION)
         return &castfunc(func)->info;

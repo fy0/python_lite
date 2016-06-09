@@ -5,6 +5,7 @@
 #include "../object.h"
 #include "../string.h"
 #include "../tuple.h"
+#include "../dict.h"
 #include "code.h"
 
 typedef struct PyLiteFunctionInfo {
@@ -33,6 +34,7 @@ typedef struct PyLiteCFunctionObject {
 
 
 PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeObject *code);
+PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteState *state, PyLiteCodeObject *code, PyLiteDictObject *defaults, PyLiteStrObject *args, PyLiteStrObject **kwargs);
 PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteState *state, PyLiteObject *func);
 
 PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteState *state, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc);

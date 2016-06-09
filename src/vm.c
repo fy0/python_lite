@@ -298,7 +298,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
     pl_bool_t at_type;
     pl_int_t tnum, tflag;
     PyLiteFunctionObject *tfunc;
-    PyLiteObject *tobj, *tret, *ta, *tb, *tc;
+    PyLiteObject *tobj, *tret, *ta, *tb, *tc, *td;
 
     pl_uint_t params_num;
     pl_uint_t params_offset = 0;
@@ -361,6 +361,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                             printf("\n");
                             return;
                         }
+                        pylt_gc_local_add(state, tret);
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tret);
                         break;
                     default:
@@ -372,6 +373,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                             printf("\n");
                             return;
                         }
+                        pylt_gc_local_add(state, tret);
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tret);
                         break;
                 }
@@ -387,6 +389,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         tc = castobj(kv_pop(state->vm.stack)); // params
                         tb = castobj(kv_pop(state->vm.stack)); // code
                         ta = castobj(kv_pop(state->vm.stack)); // name
+                        td = castobj(kv_pop(state->vm.stack)); // defaults
 
                         tfunc = pylt_obj_func_new(state, (PyLiteCodeObject*)tb);
                         tfunc->info.length = castlist(tc)->ob_size;
@@ -394,7 +397,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         tfunc->info.name = caststr(ta);
                         tfunc->info.params = castlist(tc)->ob_val;
 
-                        pylt_gc_local_add(state, tfunc);
+                        pylt_gc_local_add(state, castobj(tfunc));
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tfunc);
                         break;
                     case PYLT_OBJ_TYPE_SET:
@@ -438,7 +441,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         tb = (tb->ob_type == PYLT_OBJ_TYPE_NONE) ? castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_OBJ)) : tb;
                         PyLiteTypeObject *type = pylt_obj_type_new(state, caststr(ta), casttype(tb)->ob_reftype, castdict(tc));
                         pylt_obj_type_register(state, type);
-                        pylt_gc_local_add(state, type);
+                        pylt_gc_local_add(state, castobj(type));
                         kv_pushptr(vm->stack, type);
                         break;
                 }
@@ -490,6 +493,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 code = kv_top(vm->frames).code;
                 locals = kv_top(kv_top(vm->frames).var_tables);
                 i = kv_top(vm->frames).code_pointer_slot;
+                //pylt_gc_local_release(state);
                 break;
             case BC_TEST:
                 // TEST         0       jump_offset

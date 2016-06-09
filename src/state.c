@@ -26,6 +26,7 @@ void pylt_state_init(PyLiteState *state) {
     state->lexer = pylt_realloc(NULL, sizeof(LexState));
     state->parser = pylt_realloc(NULL, sizeof(ParserState));
 
+    pylt_gc_init(state);
     pylt_lex_init(state, state->lexer, NULL);
     pylt_parser_init(state, state->parser, state->lexer);
     pylt_utils_static_objs_init(state);

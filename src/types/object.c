@@ -475,7 +475,7 @@ void pylt_obj_free(PyLiteState *state, PyLiteObject *obj) {
             pylt_obj_range_free(state, castrange(obj));
             break;
         case PYLT_OBJ_TYPE_BASE_EXCEPTION:
-            pylt_obj_exception_free(state, castrange(obj));
+            pylt_obj_exception_free(state, castexcept(obj));
             break;
     }
 }
