@@ -1,5 +1,6 @@
 ﻿
 #include "function.h"
+#include "../../bind.h"
 
 PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeObject *code) {
     PyLiteFunctionObject *obj = pylt_realloc(NULL, sizeof(PyLiteFunctionObject));
@@ -14,8 +15,41 @@ PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeObject *co
     return obj;
 }
 
-PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteState *state, PyLiteCodeObject *code, PyLiteDictObject *defaults, PyLiteStrObject *args, PyLiteStrObject **kwargs) {
-    return pylt_obj_func_new(state, code);
+PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteState *state, PyLiteStrObject *name, PyLiteListObject *params, PyLiteCodeObject *code, PyLiteDictObject *defaults, PyLiteStrObject *args, PyLiteStrObject *kwargs) {
+    PyLiteFunctionObject *func = pylt_obj_func_new(state, code);
+
+    // set name and params
+    func->info.name = name;
+    func->info.length = params->ob_size;
+    func->info.params = pylt_realloc(NULL, params->ob_size * sizeof(PyLiteObject*));
+    memcpy(func->info.params, params->ob_val, params->ob_size * sizeof(PyLiteStrObject*));
+
+    // set default values
+    if (defaults || args || kwargs) {
+        pl_int_t minimal = -1;
+        PyLiteObject **defvals = pylt_realloc(NULL, params->ob_size * sizeof(PyLiteObject*));
+
+        for (int i = 0; i < params->ob_size; ++i) {
+            PyLiteStrObject *name = caststr(params->ob_val[i]);
+            if (name == args) {
+                if (minimal == -1) minimal = i;
+                defvals[i] = castobj(PARAM_ARGS);
+            } else if (name == kwargs) {
+                if (minimal == -1) minimal = i;
+                defvals[i] = castobj(PARAM_KWARGS);
+            } else if (pylt_obj_dict_has(state, defaults, castobj(name))) {
+                if (minimal == -1) minimal = i;
+                defvals[i] = pylt_obj_dict_getitem(state, defaults, castobj(name));
+            } else defvals[i] = NULL;
+        }
+
+        func->info.defaults = defvals;
+        func->info.minimal = minimal;
+    } else {
+        func->info.defaults = NULL;
+        func->info.minimal = params->ob_size;
+    }
+    return func;
 }
 
 PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteState *state, PyLiteObject *func) {

@@ -393,11 +393,15 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         ta = castobj(kv_pop(state->vm.stack)); // name
                         tf = castobj(kv_pop(state->vm.stack)); // defaults
 
-                        tfunc = pylt_obj_func_new(state, (PyLiteCodeObject*)tb);
-                        tfunc->info.length = castlist(tc)->ob_size;
-                        tfunc->info.minimal = castlist(tc)->ob_size;
-                        tfunc->info.name = caststr(ta);
-                        tfunc->info.params = castlist(tc)->ob_val;
+                        tfunc = pylt_obj_func_new_ex(
+                            state,
+                            caststr(ta), // name
+                            castlist(tc), // params
+                            (PyLiteCodeObject*)tb, // code
+                            castdict((tf != castobj(&PyLiteNone)) ? tf : NULL), // defaults
+                            caststr((td != castobj(&PyLiteNone)) ? td : NULL), // args_name
+                            caststr((te != castobj(&PyLiteNone)) ? te : NULL) // kwargs_name
+                        );
 
                         pylt_gc_local_add(state, castobj(tfunc));
                         kv_push(uintptr_t, state->vm.stack, (uintptr_t)tfunc);
