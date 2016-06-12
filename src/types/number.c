@@ -379,6 +379,39 @@ PyLiteFloatObject* pylt_obj_float_new_from_cstr_full(PyLiteState *state, const c
     return pylt_obj_float_new(state, fret + iret);
 }
 
+PyLiteStrObject* pylt_obj_int_to_str(PyLiteState *state, PyLiteIntObject *self) {
+    pl_int_t len;
+    pl_bool_t is_neg;
+    uint32_t *str_data;
+    pl_int_t pos = 0;
+    pl_int_t val = self->ob_val;
+    PyLiteStrObject *ret;
+    
+    // negative number
+    is_neg = (val < 0);
+    len = (is_neg) ? 1 : 0;
+    val = abs(val);
+
+    while (val > 0) {
+        len++;
+        val /= 10;
+    }
+
+    val = abs(self->ob_val);
+    str_data = pylt_realloc(NULL, len * sizeof(uint32_t));
+    if (is_neg) str_data[0] = '-';
+    pos = len - 1;
+
+    while (val > 0) {
+        str_data[pos--] = '0' + (val % 10);
+        val /= 10;
+    }
+
+    ret = pylt_obj_str_new(state, str_data, len, true);
+    pylt_free(str_data);
+    return ret;
+}
+
 void pylt_obj_int_free(PyLiteState *state, PyLiteIntObject *self) {
     pylt_free(self);
 }

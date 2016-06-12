@@ -54,6 +54,9 @@ PyLiteObject* pylt_obj_float_positive(PyLiteState *state, PyLiteFloatObject *sel
 PyLiteObject* pylt_obj_float_negative(PyLiteState *state, PyLiteFloatObject *self);
 PyLiteObject* pylt_obj_float_pow(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other);
 
+struct PyLiteStrObject* pylt_obj_int_to_str(PyLiteState *state, PyLiteIntObject *self);
+struct PyLiteStrObject* pylt_obj_float_to_str(PyLiteState *state);
+
 PyLiteIntObject* pylt_obj_int_new(PyLiteState *state, pl_int_t val);
 PyLiteFloatObject* pylt_obj_float_new(PyLiteState *state, double val);
 

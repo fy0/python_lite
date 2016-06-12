@@ -67,7 +67,6 @@ pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject*
 //PyLiteObject* pylt_obj_slice(PyLiteState *state, PyLiteObject *obj);
 
 pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj, pl_bool_t *is_valid);
-struct PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj);
 
 PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj);
 PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, PyLiteObject *b);
@@ -138,6 +137,7 @@ struct PyLiteCustomObject;
 
 PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *type, PyLiteObject *obj);
 PyLiteObject* pylt_obj_getbase(PyLiteObject *obj);
+struct PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj);
 
 void pylt_obj_free(PyLiteState *state, PyLiteObject *obj);
 void pylt_obj_safefree(PyLiteState *state, PyLiteObject *obj);

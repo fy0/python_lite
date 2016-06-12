@@ -27,6 +27,8 @@ pl_int_t pylt_obj_str_index_full(PyLiteState *state, PyLiteStrObject *self, PyLi
 PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, uint32_t* str, int size, bool is_raw);
 PyLiteStrObject* pylt_obj_str_new_from_c_str(PyLiteState *state, char* str, bool is_raw);
 PyLiteStrObject* pylt_obj_str_new_empty(PyLiteState *state);
+
+
 void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self);
 void pylt_obj_str_safefree(PyLiteState *state, PyLiteStrObject *self);
 

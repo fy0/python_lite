@@ -117,6 +117,11 @@ PyLiteObject* pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObj
 }
 
 
+PyLiteObject* pylt_mods_builtins_strtest(PyLiteState *state, int argc, PyLiteObject **args) {
+    return castobj(pylt_obj_to_str(state, args[0]));
+}
+
+
 PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     PyLiteModuleObject *mod = pylt_obj_module_new(state, NULL);
 
@@ -132,6 +137,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     pylt_cfunc_register(state, mod, pl_static.str.isinstance, _NST(state, 2, "object", "class_or_type_or_tuple"), NULL, NULL, &pylt_mods_builtins_isinstance);
     pylt_cfunc_register(state, mod, pl_static.str.super, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_super);
     pylt_cfunc_register(state, mod, pl_static.str.pow, _NT(state, 2, pl_static.str.x, pl_static.str.y), NULL, NULL, &pylt_mods_builtins_pow);
+    pylt_cfunc_register(state, mod, _NS(state, "strtest"), _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_strtest);
 
     pylt_obj_mod_setattr(state, mod, pl_static.str.None, castobj(&PyLiteNone));
 

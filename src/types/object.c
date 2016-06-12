@@ -427,6 +427,21 @@ PyLiteObject* pylt_obj_getbase(PyLiteObject *obj) {
     return (iscustom(obj)) ? castcustom(obj)->base_obj : obj;
 }
 
+PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj) {
+    switch (obj->ob_type) {
+        case PYLT_OBJ_TYPE_OBJ:
+            //<object object at 0x026604B8>
+            break;
+        case PYLT_OBJ_TYPE_INT:
+            return pylt_obj_int_to_str(state, castint(obj));
+        case PYLT_OBJ_TYPE_FLOAT: return NULL;
+        case PYLT_OBJ_TYPE_BOOL: return NULL;
+        case PYLT_OBJ_TYPE_BYTES: return NULL;
+        case PYLT_OBJ_TYPE_STR: return NULL;
+    }
+    return NULL;
+}
+
 void pylt_obj_free(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_OBJ:
