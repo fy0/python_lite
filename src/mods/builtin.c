@@ -118,6 +118,8 @@ PyLiteObject* pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObj
 
 
 PyLiteObject* pylt_mods_builtins_strtest(PyLiteState *state, int argc, PyLiteObject **args) {
+    return castobj(pylt_obj_str_new_from_format(state, _NS(state, "测试%d滑稽"), pylt_obj_int_new(state, 100)));
+    //return castobj(_NS(state, "测试 滑稽  END"));
     return castobj(pylt_obj_to_str(state, args[0]));
 }
 

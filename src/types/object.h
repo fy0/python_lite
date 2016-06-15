@@ -130,6 +130,8 @@ struct PyLiteCustomObject;
 
 #define dcast(type, i)  cast##type(pylt_obj_getbase(i))
 
+#define pl_isint(i)        (i->ob_type == PYLT_OBJ_TYPE_INT)
+
 #define isstr(i)        (i->ob_type == PYLT_OBJ_TYPE_STR)
 #define isiter(i)       (i->ob_type == PYLT_OBJ_TYPE_ITER)
 #define isnum(i)        ((i->ob_type == PYLT_OBJ_TYPE_INT) || (i->ob_type == PYLT_OBJ_TYPE_FLOAT))
