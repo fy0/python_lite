@@ -3,6 +3,7 @@
 #include "number.h"
 #include "bytes.h"
 #include "string.h"
+#include "../lib/fpconv/fpconv.h"
 
 pl_int_t pylt_obj_int_cmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
@@ -385,7 +386,7 @@ uint32_t* pylt_obj_int_to_ucs4(PyLiteState *state, PyLiteIntObject *self, pl_int
     uint32_t *str_data;
     pl_int_t pos = 0;
     pl_int_t val = self->ob_val;
-    
+
     // negative number
     is_neg = (val < 0);
     len = (is_neg) ? 1 : 0;
@@ -416,6 +417,29 @@ PyLiteStrObject* pylt_obj_int_to_str(PyLiteState *state, PyLiteIntObject *self) 
     uint32_t *str_data;
 
     str_data = pylt_obj_int_to_ucs4(state, self, &len);
+    ret = pylt_obj_str_new(state, str_data, len, true);
+    pylt_free(str_data);
+    return ret;
+}
+
+
+uint32_t* pylt_obj_float_to_ucs4(PyLiteState *state, PyLiteFloatObject *self, pl_int_t *plen) {
+	char buf[24 + 1];
+	pl_int_t len = fpconv_dtoa(self->ob_val, buf);
+	uint32_t *str_data = pylt_realloc(NULL, len * sizeof(uint32_t));
+	for (pl_int_t i = 0; i < len; ++i) {
+		str_data[i] = buf[i];
+	}
+    if (plen) *plen = len;
+    return str_data;
+}
+
+PyLiteStrObject* pylt_obj_float_to_str(PyLiteState *state, PyLiteFloatObject *self) {
+    pl_int_t len;
+    PyLiteStrObject *ret;
+    uint32_t *str_data;
+
+    str_data = pylt_obj_float_to_ucs4(state, self, &len);
     ret = pylt_obj_str_new(state, str_data, len, true);
     pylt_free(str_data);
     return ret;
