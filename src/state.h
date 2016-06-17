@@ -113,7 +113,9 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *insert;
         PyLiteStrObject *reverse;
 
-        PyLiteStrObject *None;
+		PyLiteStrObject *None;
+		PyLiteStrObject *True;
+		PyLiteStrObject *False;
 
         PyLiteStrObject *math;
         PyLiteStrObject *builtins;

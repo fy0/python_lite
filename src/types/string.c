@@ -337,8 +337,10 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObjec
 
     for (; writer.findex < format->ob_size;) {
         if (format->ob_val[writer.findex] == '%') {
+			pl_bool_t is_free = true;
             writer.findex++;
             obj = va_arg(args, PyLiteObject*);
+
             switch (format->ob_val[writer.findex]) {
                 case 'd': case 'D':
                     writer.findex++;
@@ -350,20 +352,24 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObjec
                     break;
                 case 'f': case 'F':
                     writer.findex++;
-                    if (pl_isint(obj)) {
-                        tmp = pylt_obj_int_to_ucs4(state, castint(obj), &slen);
+					if (pl_isflt(obj)) {
+                        tmp = pylt_obj_float_to_ucs4(state, castfloat(obj), &slen);
                     } else {
                         // Error
                     }
                     break;
                 case 's': case 'S':
                     writer.findex++;
-                    if (pl_isint(obj)) {
-                        tmp = pylt_obj_int_to_ucs4(state, castint(obj), &slen);
+					if (pl_isstr(obj)) {
+                        tmp = caststr(obj)->ob_val;
+						slen = caststr(obj)->ob_size;
+						is_free = false;
                     } else {
                         // Error
                     }
                     break;
+				case 'p': case 'P':
+					break;
                 default:
                     // ValueError: incomplete format
                     pylt_obj_str_free(state, str);
@@ -377,7 +383,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObjec
 
             memcpy(writer.dstr->ob_val + writer.dindex, tmp, sizeof(uint32_t)*slen);
             writer.dindex += slen;
-            pylt_free(tmp);
+			if (is_free) pylt_free(tmp);
         } else {
             str_escape_next(state, &writer);
         }

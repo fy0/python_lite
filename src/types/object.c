@@ -340,7 +340,7 @@ pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj
     if (is_valid) *is_valid = true;
     switch (self->ob_type) {
         case PYLT_OBJ_TYPE_STR:
-            if (isstr(obj)) {
+			if (pl_isstr(obj)) {
                 return pylt_obj_str_index(state, caststr(self), caststr(obj)) >= 0;
             } else {
                 if (is_valid) *is_valid = false;
@@ -430,14 +430,25 @@ PyLiteObject* pylt_obj_getbase(PyLiteObject *obj) {
 PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_OBJ:
+			//pylt_obj_str_new_from_format(state, "<%s object at %p>")
             //<object object at 0x026604B8>
             break;
         case PYLT_OBJ_TYPE_INT:
             return pylt_obj_int_to_str(state, castint(obj));
-        case PYLT_OBJ_TYPE_FLOAT: return NULL;
-        case PYLT_OBJ_TYPE_BOOL: return NULL;
-        case PYLT_OBJ_TYPE_BYTES: return NULL;
-        case PYLT_OBJ_TYPE_STR: return NULL;
+		case PYLT_OBJ_TYPE_FLOAT:
+			return pylt_obj_float_to_str(state, castfloat(obj));
+        case PYLT_OBJ_TYPE_BOOL:
+			return pylt_obj_bool_to_str(state, castbool(obj));
+		case PYLT_OBJ_TYPE_BYTES: return NULL;
+        case PYLT_OBJ_TYPE_STR:
+			return caststr(obj);
+		case PYLT_OBJ_TYPE_TYPE:
+			//pylt_obj_str_new_from_format(state, "<class '%s'>")
+			//pylt_api_gettype(state, obj->ob_type)->name;
+			return NULL;
+		default:
+			//pylt_obj_str_new_from_format(state, "<%s object at %p>")
+			break;
     }
     return NULL;
 }

@@ -155,7 +155,9 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.insert = pylt_obj_str_new_from_c_str(state, "insert", true);
     pl_static.str.reverse = pylt_obj_str_new_from_c_str(state, "reverse", true);
 
-    pl_static.str.None = pylt_obj_str_new_from_c_str(state, "None", true);
+	pl_static.str.None = pylt_obj_str_new_from_c_str(state, "None", true);
+	pl_static.str.True = pylt_obj_str_new_from_c_str(state, "True", true);
+	pl_static.str.False = pylt_obj_str_new_from_c_str(state, "False", true);
 
     pl_static.str.math = pylt_obj_str_new_from_c_str(state, "math", true);
     pl_static.str.builtins = pylt_obj_str_new_from_c_str(state, "builtins", true);
@@ -322,7 +324,9 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pylt_gc_static_add(state, castobj(pl_static.str.insert));
     pylt_gc_static_add(state, castobj(pl_static.str.reverse));
 
-    pylt_gc_static_add(state, castobj(pl_static.str.None));
+	pylt_gc_static_add(state, castobj(pl_static.str.None));
+	pylt_gc_static_add(state, castobj(pl_static.str.True));
+	pylt_gc_static_add(state, castobj(pl_static.str.False));
 
     pylt_gc_static_add(state, castobj(pl_static.str.math));
     pylt_gc_static_add(state, castobj(pl_static.str.builtins));

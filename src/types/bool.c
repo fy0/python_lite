@@ -1,6 +1,7 @@
 ﻿
 #include "bool.h"
 #include "number.h"
+#include "../state.h"
 
 PyLiteBoolObject PyLiteTrue = { PYLT_OBJ_TYPE_BOOL, -1 };
 PyLiteBoolObject PyLiteFalse = { PYLT_OBJ_TYPE_BOOL, 0 };
@@ -39,6 +40,10 @@ pl_bool_t pylt_obj_bool_eq(PyLiteState *state, PyLiteBoolObject *self, PyLiteObj
 
 pl_uint32_t pylt_obj_bool_hash(PyLiteState *state, PyLiteBoolObject *obj) {
     return obj->ob_val;
+}
+
+struct PyLiteStrObject* pylt_obj_bool_to_str(PyLiteState *state, PyLiteBoolObject *self) {
+	return (self->ob_val) ? pl_static.str.True : pl_static.str.False;
 }
 
 PyLiteBoolObject* pylt_obj_bool_new(PyLiteState *state, bool val) {
