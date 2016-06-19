@@ -16,7 +16,8 @@ PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObjec
         if (obj->ob_type == PYLT_OBJ_TYPE_STR) {
             pylt_api_output_str(state, caststr(obj));
         } else {
-            debug_print_obj(state, obj);
+			//debug_print_obj(state, obj);
+			pylt_api_output_str(state, pylt_obj_to_str(state, obj));
         }
         if (i != values->ob_size - 1) pylt_api_output_str(state, caststr(args[1]));
     }
@@ -118,7 +119,7 @@ PyLiteObject* pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObj
 
 
 PyLiteObject* pylt_mods_builtins_strtest(PyLiteState *state, int argc, PyLiteObject **args) {
-    return castobj(pylt_obj_str_new_from_format(state, _NS(state, "测试%d滑%f稽"), pylt_obj_int_new(state, 100), pylt_obj_float_new(state, 1.2113)));
+	return castobj(pylt_obj_str_new_from_format(state, _NS(state, "测试%d滑%f稽%p"), pylt_obj_int_new(state, 100), pylt_obj_float_new(state, 1.2113), pylt_obj_int_new(state, 100)));
     //return castobj(_NS(state, "测试 滑稽  END"));
     return castobj(pylt_obj_to_str(state, args[0]));
 }

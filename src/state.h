@@ -195,7 +195,11 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *UnicodeWarning;
         PyLiteStrObject *BytesWarning;
         PyLiteStrObject *ResourceWarning;
-    } str;
+
+		// template
+		PyLiteStrObject *TMPL_OBJECT_TO_STR;
+		PyLiteStrObject *TMPL_CLASS_TO_STR;
+	} str;
 } pl_static;
 
 PyLiteState* pylt_state_new();

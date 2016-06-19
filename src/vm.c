@@ -273,7 +273,7 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
 
         for (int i = 0; i < info->length; ++i) {
             if (!info->type_codes[i]) continue;
-			if (pylt_api_isinstance(state, args[i], info->type_codes[i])) {
+			if (!pylt_api_isinstance(state, args[i], info->type_codes[i])) {
                 // 类型不符合，报错
                 printf("TypeError: ");
                 debug_print_obj(state, castobj(info->params[i]));

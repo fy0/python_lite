@@ -319,7 +319,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObjec
     va_list args;
     va_start(args, format);
 
-    pl_int_t slen;
+	pl_int_t slen;
     uint32_t *tmp;
     PyLiteObject *obj;
     PyLiteStrObject *str = pylt_realloc(NULL, sizeof(PyLiteStrObject));
@@ -341,8 +341,19 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObjec
             writer.findex++;
             obj = va_arg(args, PyLiteObject*);
 
-            switch (format->ob_val[writer.findex]) {
-                case 'd': case 'D':
+			switch (format->ob_val[writer.findex]) {
+				case 'c':
+					// char
+					writer.findex++;
+					if (pl_isint(obj)) {
+						// 0 - 0x110000
+					} else if (pl_isstr(obj)) {
+						;
+					} else {
+						// Error
+					}
+					break;
+                case 'd':
                     writer.findex++;
                     if (pl_isint(obj)) {
                         tmp = pylt_obj_int_to_ucs4(state, castint(obj), &slen);
@@ -350,7 +361,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObjec
                         // Error
                     }
                     break;
-                case 'f': case 'F':
+				case 'f': case 'F': case 'g': case 'G':
                     writer.findex++;
 					if (pl_isflt(obj)) {
                         tmp = pylt_obj_float_to_ucs4(state, castfloat(obj), &slen);
@@ -358,7 +369,15 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObjec
                         // Error
                     }
                     break;
-                case 's': case 'S':
+				case 'o':
+					// TODO: oct number
+					writer.findex++;
+					break;
+				case 'x': case 'X':
+					// TODO: hex number
+					writer.findex++;
+					break;
+				case 's':
                     writer.findex++;
 					if (pl_isstr(obj)) {
                         tmp = caststr(obj)->ob_val;
@@ -368,8 +387,20 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObjec
                         // Error
                     }
                     break;
-				case 'p': case 'P':
+				case 'p': {
+					uint8_t tmp_bytes[MAX_LONG_LONG_CHARS];
+					slen = sprintf(tmp_bytes, "%p", obj) + 2;
+
+					tmp = pylt_realloc(NULL, slen*sizeof(uint32_t));
+					tmp[0] = '0';
+					tmp[1] = 'x';
+					for (int i = 2; i < slen; ++i) {
+						tmp[i] = tmp_bytes[i-2];
+					} 
+
+					writer.findex++;
 					break;
+				}
                 default:
                     // ValueError: incomplete format
                     pylt_obj_str_free(state, str);

@@ -122,8 +122,6 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.list = pylt_obj_str_new_from_c_str(state, "list", true);
     pl_static.str.tuple = pylt_obj_str_new_from_c_str(state, "tuple", true);
     pl_static.str.dict = pylt_obj_str_new_from_c_str(state, "dict", true);
-    pl_static.str.BaseException = pylt_obj_str_new_from_c_str(state, "BaseException", true);
-    pl_static.str.Exception = pylt_obj_str_new_from_c_str(state, "Exception", true);
 
     pl_static.str.module = pylt_obj_str_new_from_c_str(state, "module", true);
     pl_static.str.function = pylt_obj_str_new_from_c_str(state, "function", true);
@@ -237,6 +235,10 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.UnicodeWarning = pylt_obj_str_new_from_c_str(state, "UnicodeWarning", true);
     pl_static.str.BytesWarning = pylt_obj_str_new_from_c_str(state, "BytesWarning", true);
     pl_static.str.ResourceWarning = pylt_obj_str_new_from_c_str(state, "ResourceWarning", true);
+
+	pl_static.str.TMPL_OBJECT_TO_STR = pylt_obj_str_new_from_c_str(state, "<%s object at %p>", true);
+	pl_static.str.TMPL_CLASS_TO_STR = pylt_obj_str_new_from_c_str(state, "<class '%s'>", true);
+
 
     pylt_gc_static_add(state, castobj(pl_static.str.__init__));
     pylt_gc_static_add(state, castobj(pl_static.str.__new__));
@@ -406,4 +408,7 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pylt_gc_static_add(state, castobj(pl_static.str.UnicodeWarning));
     pylt_gc_static_add(state, castobj(pl_static.str.BytesWarning));
     pylt_gc_static_add(state, castobj(pl_static.str.ResourceWarning));
+
+	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_OBJECT_TO_STR));
+	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_CLASS_TO_STR));
 }
