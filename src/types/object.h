@@ -133,10 +133,9 @@ struct PyLiteCustomObject;
 #define pl_isint(i)        (i->ob_type == PYLT_OBJ_TYPE_INT)
 #define pl_isflt(i)        (i->ob_type == PYLT_OBJ_TYPE_FLOAT)
 #define pl_isstr(i)        (i->ob_type == PYLT_OBJ_TYPE_STR)
-
-#define isiter(i)       (i->ob_type == PYLT_OBJ_TYPE_ITER)
-#define isnum(i)        ((i->ob_type == PYLT_OBJ_TYPE_INT) || (i->ob_type == PYLT_OBJ_TYPE_FLOAT))
-#define iscustom(i)     (i->ob_type >= PYLT_OBJ_TYPE_USERCLASS)
+#define pl_isiter(i)       (i->ob_type == PYLT_OBJ_TYPE_ITER)
+#define pl_isnum(i)        ((i->ob_type == PYLT_OBJ_TYPE_INT) || (i->ob_type == PYLT_OBJ_TYPE_FLOAT))
+#define pl_iscustom(i)     (i->ob_type >= PYLT_OBJ_TYPE_USERCLASS)
 
 PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *type, PyLiteObject *obj);
 PyLiteObject* pylt_obj_getbase(PyLiteObject *obj);

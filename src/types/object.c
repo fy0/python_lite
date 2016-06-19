@@ -308,7 +308,7 @@ PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObje
         case PYLT_OBJ_TYPE_DICT:
             return pylt_obj_dict_getitem(state, castdict(obj), key);
         default:
-            if (iscustom(obj)) {
+            if (pl_iscustom(obj)) {
                 PyLiteObject *method_func = pylt_obj_getattr(state, obj, castobj(pl_static.str.__getitem__), NULL);
                 if (method_func) {
                     return pylt_vm_call_method(state, obj, method_func, 1, key);
@@ -417,14 +417,14 @@ PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, Py
 }
 
 PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *type, PyLiteObject *obj) {
-    if (iscustom(obj) && (obj->ob_type != type->ob_reftype)) {
+    if (pl_iscustom(obj) && (obj->ob_type != type->ob_reftype)) {
         return pylt_obj_cutstom_new(state, type->ob_reftype, obj);
     }
     return obj;
 }
 
 PyLiteObject* pylt_obj_getbase(PyLiteObject *obj) {
-    return (iscustom(obj)) ? castcustom(obj)->base_obj : obj;
+    return (pl_iscustom(obj)) ? castcustom(obj)->base_obj : obj;
 }
 
 PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj) {

@@ -44,7 +44,7 @@ PyLiteObject* pylt_mods_builtins_len(PyLiteState *state, int argc, PyLiteObject 
 #define get_numval(i) ((i)->ob_type == PYLT_OBJ_TYPE_FLOAT) ? (castfloat((i))->ob_val) : (castint((i))->ob_val)
 
 PyLiteObject* pylt_mods_builtins_pow(PyLiteState *state, int argc, PyLiteObject **args) {
-    if (isnum(args[0]) && isnum(args[1])) {
+	if (pl_isnum(args[0]) && pl_isnum(args[1])) {
         return castobj(pylt_obj_float_new(state, pow(get_numval(args[0]), get_numval(args[1]))));
     } else {
         // TODO

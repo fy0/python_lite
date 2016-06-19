@@ -51,7 +51,7 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
                 PyLiteObject *obj_func = pylt_obj_getattr(state, obj, castobj(pl_static.str.__iter__), NULL);
                 if (obj_func) {
                     iter = castiter(pylt_vm_call_method(state, obj, obj_func, 0, NULL));
-                    if (isiter(iter)) return iter;
+                    if (pl_isiter(iter)) return iter;
                 }
             }
     }
