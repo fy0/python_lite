@@ -332,7 +332,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObjec
 
         .dstr = str,
         .dindex = 0,
-        .dsize = format->ob_size + 1,
+        .dsize = format->ob_size,
     };
 
     for (; writer.findex < format->ob_size;) {
@@ -407,9 +407,10 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObjec
                     return NULL;
             }
 
-            if (writer.dsize < writer.dindex + slen + 1) {
-                writer.dstr->ob_val = pylt_realloc(writer.dstr->ob_val, sizeof(uint32_t) * (format->ob_size + slen + 1));
-                writer.dsize = format->ob_size + slen + 1;
+			pl_uint32_t rest = writer.fstr->ob_size - writer.findex;
+			if (writer.dindex + rest + slen + 1 > writer.dsize) {
+                writer.dstr->ob_val = pylt_realloc(writer.dstr->ob_val, sizeof(uint32_t) * (format->ob_size + rest + slen + 1));
+                writer.dsize = format->ob_size + rest + slen;
             }
 
             memcpy(writer.dstr->ob_val + writer.dindex, tmp, sizeof(uint32_t)*slen);
