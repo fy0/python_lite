@@ -31,6 +31,8 @@ void pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t *k);
 // 存在则取值 否则为空
 PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int_t k);
 
+struct PyLiteStrObject* pylt_obj_set_to_str(PyLiteState *state, PyLiteSetObject *self);
+
 PyLiteSetObject* pylt_obj_set_new(PyLiteState *state);
 void pylt_obj_set_free(PyLiteState *state, PyLiteSetObject* self);
 

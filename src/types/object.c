@@ -440,7 +440,7 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj) {
 		case PYLT_OBJ_TYPE_BYTES:
 			return pylt_obj_bytes_to_str(state, castbytes(obj));
 		case PYLT_OBJ_TYPE_SET:
-			;
+			return pylt_obj_set_to_str(state, castset(obj));
 		case PYLT_OBJ_TYPE_LIST:
 			;
 		case PYLT_OBJ_TYPE_TUPLE:

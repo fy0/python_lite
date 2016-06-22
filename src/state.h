@@ -199,6 +199,7 @@ struct PyLiteStaticObjectsType {
 		// template
 		PyLiteStrObject *TMPL_OBJECT_TO_STR;
 		PyLiteStrObject *TMPL_CLASS_TO_STR;
+		PyLiteStrObject *TMPL_EMPTY_SET;
 	} str;
 } pl_static;
 

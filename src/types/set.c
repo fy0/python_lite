@@ -1,6 +1,7 @@
 ﻿
 #include "set.h"
 #include "../debug.h"
+#include "../state.h"
 
 pl_int_t pylt_obj_set_cmp(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *other) {
     if (other->ob_type == PYLT_OBJ_TYPE_SET) {
@@ -111,6 +112,46 @@ void pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t *k) {
         }
     }
     *k = kho_end(self->ob_val);
+}
+
+struct PyLiteStrObject* pylt_obj_set_to_str(PyLiteState *state, PyLiteSetObject *self) {
+	int index = 0;
+	PyLiteStrObject *str;
+	PyLiteStrObject **strlst = NULL;
+	pl_int_t slen = pylt_obj_set_len(state, self);
+
+	if (slen == 0) {
+		return pl_static.str.TMPL_EMPTY_SET; // {}
+	}
+
+	pl_uint32_t *data;
+	pl_uint32_t comma_num = slen - 1;
+	pl_uint32_t data_len = 2 + comma_num * 2; // {} + ', '
+	strlst = realloc(NULL, slen * sizeof(PyLiteStrObject*));
+
+    for (pl_int_t k = pylt_obj_set_begin(state, self); k != pylt_obj_set_end(state, self); pylt_obj_set_next(state, self, &k)) {
+		str = pylt_obj_to_str(state, pylt_obj_set_itemvalue(state, self, k));
+		data_len += str->ob_size;
+		strlst[index++] = str;
+    }
+
+	data = pylt_realloc(NULL, data_len * sizeof(uint32_t));
+	data[0] = '{';
+	index = 1;
+	for (pl_uint_t i = 0; i < slen; ++i) {
+		memcpy(data + index, strlst[i]->ob_val, strlst[i]->ob_size * sizeof(uint32_t));
+		index += strlst[i]->ob_size;
+		if (i != slen - 1) {
+			data[index++] = ',';
+			data[index++] = ' ';
+		}
+	}
+	data[data_len - 1] = '}';
+
+	str = pylt_obj_str_new(state, data, data_len, true);
+	pylt_free(data);
+	pylt_free(strlst);
+	return str;
 }
 
 PyLiteSetObject* pylt_obj_set_new(PyLiteState *state) {
