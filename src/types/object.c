@@ -435,9 +435,30 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj) {
 			return pylt_obj_float_to_str(state, castfloat(obj));
         case PYLT_OBJ_TYPE_BOOL:
 			return pylt_obj_bool_to_str(state, castbool(obj));
-		case PYLT_OBJ_TYPE_BYTES: return NULL;
-        case PYLT_OBJ_TYPE_STR:
-			return caststr(obj); 
+		case PYLT_OBJ_TYPE_STR:
+			return caststr(obj);
+		case PYLT_OBJ_TYPE_BYTES:
+			return pylt_obj_bytes_to_str(state, castbytes(obj));
+		case PYLT_OBJ_TYPE_SET:
+			;
+		case PYLT_OBJ_TYPE_LIST:
+			;
+		case PYLT_OBJ_TYPE_TUPLE:
+			;
+		case PYLT_OBJ_TYPE_DICT:
+			;
+		case PYLT_OBJ_TYPE_MODULE:
+			;
+		case PYLT_OBJ_TYPE_FUNCTION:
+			;
+		case PYLT_OBJ_TYPE_CFUNCTION:
+			;
+		case PYLT_OBJ_TYPE_NONE:
+			;
+		case PYLT_OBJ_TYPE_RANGE:
+			;
+		case PYLT_OBJ_TYPE_BASE_EXCEPTION:
+			;
 		case PYLT_OBJ_TYPE_TYPE:
 			return pylt_obj_str_new_from_format(state, pl_static.str.TMPL_CLASS_TO_STR, pylt_api_type_name(state, casttype(obj)->ob_reftype));
 		default:
