@@ -238,7 +238,14 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
 
 	pl_static.str.TMPL_OBJECT_TO_STR = pylt_obj_str_new_from_c_str(state, "<%s object at %p>", true);
 	pl_static.str.TMPL_CLASS_TO_STR = pylt_obj_str_new_from_c_str(state, "<class '%s'>", true);
-	pl_static.str.TMPL_EMPTY_SET = pylt_obj_str_new_from_c_str(state, "{}", true);
+	pl_static.str.TMPL_MODULE_TO_STR = pylt_obj_str_new_from_c_str(state, "<module '%s'>", true);
+	pl_static.str.TMPL_FUNCTION_TO_STR = pylt_obj_str_new_from_c_str(state, "<function %s at %p>", true);
+	pl_static.str.TMPL_CFUNCTION_TO_STR = pylt_obj_str_new_from_c_str(state, "<cfunction %s at %p>", true);
+
+	pl_static.str.TMPL_EMPTY_SET = pylt_obj_str_new_from_c_str(state, "set()", true);
+	pl_static.str.TMPL_EMPTY_LIST = pylt_obj_str_new_from_c_str(state, "[]", true);
+	pl_static.str.TMPL_EMPTY_TUPLE = pylt_obj_str_new_from_c_str(state, "()", true);
+	pl_static.str.TMPL_EMPTY_DICT = pylt_obj_str_new_from_c_str(state, "{}", true);
 
     pylt_gc_static_add(state, castobj(pl_static.str.__init__));
     pylt_gc_static_add(state, castobj(pl_static.str.__new__));
@@ -411,5 +418,12 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
 
 	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_OBJECT_TO_STR));
 	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_CLASS_TO_STR));
+	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_MODULE_TO_STR));
+	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_FUNCTION_TO_STR));
+	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_CFUNCTION_TO_STR));
+
 	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_SET));
+	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_LIST));
+	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_TUPLE));
+	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_DICT));
 }

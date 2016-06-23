@@ -448,20 +448,17 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj) {
 		case PYLT_OBJ_TYPE_DICT:
 			;
 		case PYLT_OBJ_TYPE_MODULE:
-			;
+			return pylt_obj_str_new_from_format(state, pl_static.str.TMPL_MODULE_TO_STR, pl_static.str.None);
 		case PYLT_OBJ_TYPE_FUNCTION:
-			;
+			return pylt_obj_str_new_from_format(state, pl_static.str.TMPL_FUNCTION_TO_STR, castfunc(obj)->info.name, obj);
 		case PYLT_OBJ_TYPE_CFUNCTION:
-			;
+			return pylt_obj_str_new_from_format(state, pl_static.str.TMPL_CFUNCTION_TO_STR, castfunc(obj)->info.name, obj);
 		case PYLT_OBJ_TYPE_NONE:
-			;
-		case PYLT_OBJ_TYPE_RANGE:
-			;
-		case PYLT_OBJ_TYPE_BASE_EXCEPTION:
-			;
+			return pl_static.str.None; 
 		case PYLT_OBJ_TYPE_TYPE:
 			return pylt_obj_str_new_from_format(state, pl_static.str.TMPL_CLASS_TO_STR, pylt_api_type_name(state, casttype(obj)->ob_reftype));
 		default:
+			// custom/range/exception 需要特别处理
 			return pylt_obj_str_new_from_format(state, pl_static.str.TMPL_OBJECT_TO_STR, pylt_api_type_name(state, obj->ob_type), obj);
     }
     return NULL;
