@@ -1,5 +1,7 @@
 ﻿
 #include "dict.h"
+#include "string.h"
+#include "../state.h"
 
 pl_int_t pylt_obj_dict_cmp(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *other) {
     return 2;
@@ -112,6 +114,10 @@ PyLiteDictObject* pylt_obj_dict_copy(PyLiteState *state, PyLiteDictObject *self)
     }
 
     return obj;
+}
+
+struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteState *state, PyLiteDictObject *self) {
+	;
 }
 
 PyLiteDictObject* pylt_obj_dict_new(PyLiteState *state) {

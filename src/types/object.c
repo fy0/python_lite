@@ -442,11 +442,11 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj) {
 		case PYLT_OBJ_TYPE_SET:
 			return pylt_obj_set_to_str(state, castset(obj));
 		case PYLT_OBJ_TYPE_LIST:
-			;
+			return pylt_obj_list_to_str(state, castlist(obj));
 		case PYLT_OBJ_TYPE_TUPLE:
-			;
+			return pylt_obj_tuple_to_str(state, casttuple(obj));
 		case PYLT_OBJ_TYPE_DICT:
-			;
+			return pylt_obj_dict_to_str(state, castdict(obj));
 		case PYLT_OBJ_TYPE_MODULE:
 			return pylt_obj_str_new_from_format(state, pl_static.str.TMPL_MODULE_TO_STR, pl_static.str.None);
 		case PYLT_OBJ_TYPE_FUNCTION:

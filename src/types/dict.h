@@ -32,6 +32,7 @@ void pylt_obj_dict_next(PyLiteState *state, PyLiteDictObject *self, pl_int_t *k)
 PyLiteObject* pylt_obj_dict_itemkey(PyLiteState *state, PyLiteDictObject *self, pl_int_t k);
 PyLiteObject* pylt_obj_dict_itemvalue(PyLiteState *state, PyLiteDictObject *self, pl_int_t k);
 void pylt_obj_dict_keyvalue(PyLiteState *state, PyLiteDictObject *self, pl_int_t k, PyLiteObject **key, PyLiteObject **val);
+struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteState *state, PyLiteDictObject *self);
 
 PyLiteDictObject* pylt_obj_dict_new(PyLiteState *state);
 void pylt_obj_dict_free(PyLiteState *state, PyLiteDictObject *self);

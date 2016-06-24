@@ -1,5 +1,7 @@
 ﻿
 #include "list.h"
+#include "string.h"
+#include "../state.h"
 
 PyLiteListObject* pylt_obj_list_new(PyLiteState *state) {
     PyLiteListObject *obj = pylt_realloc(NULL, sizeof(PyLiteListObject));
@@ -143,4 +145,44 @@ pl_bool_t pylt_obj_list_setitem(PyLiteState *state, PyLiteListObject *self, int 
 
 pl_bool_t pylt_obj_list_has(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
     return pylt_obj_list_index(state, self, obj) != -1;
+}
+
+struct PyLiteStrObject* pylt_obj_list_to_str(PyLiteState *state, PyLiteListObject *self) {
+	int index = 0;
+	PyLiteStrObject *str;
+	PyLiteStrObject **strlst = NULL;
+	pl_int_t llen = pylt_obj_list_count(state, self);
+
+	if (llen == 0) {
+		return pl_static.str.TMPL_EMPTY_LIST; // []
+	}
+
+	pl_uint32_t *data;
+	pl_uint32_t comma_num = llen - 1;
+	pl_uint32_t data_len = 2 + comma_num * 2; // [] + ', '
+	strlst = realloc(NULL, llen * sizeof(PyLiteStrObject*));
+
+	for (pl_int_t i = 0; i < llen; ++i) {
+		str = pylt_obj_to_str(state, self->ob_val[i]);
+		data_len += str->ob_size;
+		strlst[index++] = str;
+	}
+
+	data = pylt_realloc(NULL, data_len * sizeof(uint32_t));
+	data[0] = '[';
+	index = 1;
+	for (pl_uint_t i = 0; i < llen; ++i) {
+		memcpy(data + index, strlst[i]->ob_val, strlst[i]->ob_size * sizeof(uint32_t));
+		index += strlst[i]->ob_size;
+		if (i != llen - 1) {
+			data[index++] = ',';
+			data[index++] = ' ';
+		}
+	}
+	data[data_len - 1] = ']';
+
+	str = pylt_obj_str_new(state, data, data_len, true);
+	pylt_free(data);
+	pylt_free(strlst);
+	return str;
 }

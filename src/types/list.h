@@ -28,6 +28,7 @@ PyLiteObject* pylt_obj_list_getitem(PyLiteState *state, PyLiteListObject *self, 
 pl_bool_t pylt_obj_list_setitem(PyLiteState *state, PyLiteListObject *self, int index, PyLiteObject* obj);
 
 pl_bool_t pylt_obj_list_has(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
+struct PyLiteStrObject* pylt_obj_list_to_str(PyLiteState *state, PyLiteListObject *self);
 
 PyLiteListObject* pylt_obj_list_new(PyLiteState *state);
 PyLiteListObject* pylt_obj_list_new_with_size(PyLiteState *state, pl_uint_t size);

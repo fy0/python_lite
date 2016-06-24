@@ -10,6 +10,8 @@ typedef struct PyLiteTupleObject {
     PyLiteObject **ob_val;
 } PyLiteTupleObject;
 
+struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteState *state, PyLiteTupleObject *self);
+
 PyLiteTupleObject* pylt_obj_tuple_new(PyLiteState *state, pl_int_t size);
 PyLiteObject* pylt_obj_tuple_getitem(PyLiteState *state, PyLiteTupleObject *self, int index);
 PyLiteTupleObject* pylt_obj_tuple_new_with_data(PyLiteState *state, pl_int_t len, void *data);
