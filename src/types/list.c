@@ -151,7 +151,7 @@ struct PyLiteStrObject* pylt_obj_list_to_str(PyLiteState *state, PyLiteListObjec
 	int index = 0;
 	PyLiteStrObject *str;
 	PyLiteStrObject **strlst = NULL;
-	pl_int_t llen = pylt_obj_list_count(state, self);
+	pl_uint_t llen = pylt_obj_list_count(state, self);
 
 	if (llen == 0) {
 		return pl_static.str.TMPL_EMPTY_LIST; // []
@@ -162,7 +162,7 @@ struct PyLiteStrObject* pylt_obj_list_to_str(PyLiteState *state, PyLiteListObjec
 	pl_uint32_t data_len = 2 + comma_num * 2; // [] + ', '
 	strlst = realloc(NULL, llen * sizeof(PyLiteStrObject*));
 
-	for (pl_int_t i = 0; i < llen; ++i) {
+	for (pl_uint_t i = 0; i < llen; ++i) {
 		str = pylt_obj_to_str(state, self->ob_val[i]);
 		data_len += str->ob_size;
 		strlst[index++] = str;

@@ -7,7 +7,7 @@ struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteState *state, PyLiteTupleObj
 	int index = 0;
 	PyLiteStrObject *str;
 	PyLiteStrObject **strlst = NULL;
-	pl_int_t tlen = self->ob_size;
+	pl_uint_t tlen = self->ob_size;
 
 	if (tlen == 0) {
 		return pl_static.str.TMPL_EMPTY_TUPLE; // ()
@@ -18,7 +18,7 @@ struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteState *state, PyLiteTupleObj
 	pl_uint32_t data_len = 2 + comma_num * 2; // () + ', '
 	strlst = realloc(NULL, tlen * sizeof(PyLiteStrObject*));
 
-	for (pl_int_t i = 0; i < tlen; ++i) {
+	for (pl_uint_t i = 0; i < tlen; ++i) {
 		str = pylt_obj_to_str(state, self->ob_val[i]);
 		data_len += str->ob_size;
 		strlst[index++] = str;

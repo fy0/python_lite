@@ -118,7 +118,7 @@ struct PyLiteStrObject* pylt_obj_set_to_str(PyLiteState *state, PyLiteSetObject 
 	int index = 0;
 	PyLiteStrObject *str;
 	PyLiteStrObject **strlst = NULL;
-	pl_int_t slen = pylt_obj_set_len(state, self);
+	pl_uint_t slen = pylt_obj_set_len(state, self);
 
 	if (slen == 0) {
 		return pl_static.str.TMPL_EMPTY_SET; // {}
