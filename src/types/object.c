@@ -464,6 +464,41 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj) {
     return NULL;
 }
 
+struct PyLiteStrObject* pylt_obj_to_repr(PyLiteState *state, PyLiteObject *obj) {
+	switch (obj->ob_type) {
+		case PYLT_OBJ_TYPE_STR: {
+			uint32_t *data;
+			pl_uint_t i, j = 0;
+			int quote_count = 0;
+			PyLiteStrObject *self = caststr(obj);
+
+			for (i = 0; i < self->ob_size; ++i) {
+				if (self->ob_val[i] == '\'') quote_count++;
+			}
+
+			data = pylt_realloc(NULL, (self->ob_size + quote_count + 2) * sizeof(uint32_t));
+			data[0] = '\'';
+			j = 1;
+
+			for (i = 0; i < self->ob_size; ++i) {
+				if (self->ob_val[i] == '\'') {
+					data[j++] = '\\';
+				}
+				data[j++] = self->ob_val[i];
+			}
+
+			data[j++] = '\'';
+
+			PyLiteStrObject *str = pylt_obj_str_new(state, data, j, true);
+			pylt_free(data);
+			return str;
+		}
+		default:
+			return pylt_obj_to_str(state, obj);
+	}
+	return NULL;
+}
+
 void pylt_obj_free(PyLiteState *state, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_OBJ:

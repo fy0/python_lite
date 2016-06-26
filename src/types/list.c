@@ -163,7 +163,7 @@ struct PyLiteStrObject* pylt_obj_list_to_str(PyLiteState *state, PyLiteListObjec
 	strlst = realloc(NULL, llen * sizeof(PyLiteStrObject*));
 
 	for (pl_uint_t i = 0; i < llen; ++i) {
-		str = pylt_obj_to_str(state, self->ob_val[i]);
+		str = pylt_obj_to_repr(state, self->ob_val[i]);
 		data_len += str->ob_size;
 		strlst[index++] = str;
 	}

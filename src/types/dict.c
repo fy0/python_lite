@@ -132,11 +132,11 @@ struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteState *state, PyLiteDictObjec
 	strlst = realloc(NULL, dlen * 2 * sizeof(PyLiteStrObject*));
 
 	for (pl_int_t k = pylt_obj_dict_begin(state, self); k != pylt_obj_dict_end(state, self); pylt_obj_dict_next(state, self, &k)) {
-		str = pylt_obj_to_str(state, pylt_obj_dict_itemkey(state, self, k));
+		str = pylt_obj_to_repr(state, pylt_obj_dict_itemkey(state, self, k));
 		data_len += str->ob_size;
 		strlst[index++] = str;
 
-		str = pylt_obj_to_str(state, pylt_obj_dict_itemvalue(state, self, k));
+		str = pylt_obj_to_repr(state, pylt_obj_dict_itemvalue(state, self, k));
 		data_len += str->ob_size;
 		strlst[index++] = str;
 	}

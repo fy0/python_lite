@@ -234,9 +234,10 @@ struct PyLiteStrObject* pylt_obj_bytes_to_str(PyLiteState *state, PyLiteBytesObj
 		if (self->ob_val[i] == '\'') quote_count++;
 	}
 
-	data = pylt_realloc(NULL, self->ob_size + quote_count + 3);
+	data = pylt_realloc(NULL, (self->ob_size + quote_count + 3) * sizeof(uint32_t));
 	data[0] = 'b';
 	data[1] = '\'';
+	j = 2;
 
 	for (i = 0; i < self->ob_size; ++i) {
 		if (self->ob_val[i] == '\'') {

@@ -57,8 +57,9 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *id;
         PyLiteStrObject *dir;
         PyLiteStrObject *len;
-        PyLiteStrObject *hash;
-        PyLiteStrObject *iter;
+		PyLiteStrObject *hash;
+		PyLiteStrObject *iter;
+		PyLiteStrObject *repr;
         PyLiteStrObject *super;
         PyLiteStrObject *isinstance;
         PyLiteStrObject *print;

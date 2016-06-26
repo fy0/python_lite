@@ -19,7 +19,7 @@ struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteState *state, PyLiteTupleObj
 	strlst = realloc(NULL, tlen * sizeof(PyLiteStrObject*));
 
 	for (pl_uint_t i = 0; i < tlen; ++i) {
-		str = pylt_obj_to_str(state, self->ob_val[i]);
+		str = pylt_obj_to_repr(state, self->ob_val[i]);
 		data_len += str->ob_size;
 		strlst[index++] = str;
 	}

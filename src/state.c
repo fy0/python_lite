@@ -102,8 +102,9 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.id = pylt_obj_str_new_from_c_str(state, "id", true);
     pl_static.str.dir = pylt_obj_str_new_from_c_str(state, "dir", true);
     pl_static.str.len = pylt_obj_str_new_from_c_str(state, "len", true);
-    pl_static.str.hash = pylt_obj_str_new_from_c_str(state, "hash", true);
-    pl_static.str.iter = pylt_obj_str_new_from_c_str(state, "iter", true);
+	pl_static.str.hash = pylt_obj_str_new_from_c_str(state, "hash", true);
+	pl_static.str.iter = pylt_obj_str_new_from_c_str(state, "iter", true);
+	pl_static.str.repr = pylt_obj_str_new_from_c_str(state, "repr", true);
     pl_static.str.super = pylt_obj_str_new_from_c_str(state, "super", true);
     pl_static.str.isinstance = pylt_obj_str_new_from_c_str(state, "isinstance", true);
     pl_static.str.print = pylt_obj_str_new_from_c_str(state, "print", true);
@@ -279,7 +280,8 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pylt_gc_static_add(state, castobj(pl_static.str.len));
     pylt_gc_static_add(state, castobj(pl_static.str.hash));
     pylt_gc_static_add(state, castobj(pl_static.str.iter));
-    pylt_gc_static_add(state, castobj(pl_static.str.super));
+	pylt_gc_static_add(state, castobj(pl_static.str.repr));
+	pylt_gc_static_add(state, castobj(pl_static.str.super));
     pylt_gc_static_add(state, castobj(pl_static.str.isinstance));
     pylt_gc_static_add(state, castobj(pl_static.str.print));
     pylt_gc_static_add(state, castobj(pl_static.str.pow));
