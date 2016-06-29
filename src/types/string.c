@@ -1,6 +1,7 @@
 ﻿
 #include "bool.h"
 #include "string.h"
+#include "list.h"
 #include "../state.h"
 #include "../api.h"
 
@@ -313,6 +314,51 @@ pl_int_t pylt_obj_str_index_full(PyLiteState *state, PyLiteStrObject *self, PyLi
 
 pl_int_t pylt_obj_str_index(PyLiteState *state, PyLiteStrObject *self, PyLiteStrObject *sub) {
     return pylt_obj_str_index_full(state, self, sub, 0, self->ob_size);
+}
+
+PyLiteStrObject* pylt_obj_str_join(PyLiteState *state, PyLiteStrObject *separator, PyLiteObject *seq) {
+	if (pylt_obj_iterable(state, seq)) {
+		pl_uint32_t data_len = 0;
+		PyLiteIterObject *iter = pylt_obj_iter_new(state, seq);
+		PyLiteListObject *strlst = pylt_obj_list_new(state);
+
+		for (PyLiteObject *obj = pylt_obj_iter_next(state, iter); obj; obj = pylt_obj_iter_next(state, iter)) {
+			if (!pl_isstr(obj)) {
+				pylt_obj_list_free(state, strlst);
+				return NULL;
+			}
+			data_len += caststr(obj)->ob_size;
+			pylt_obj_list_append(state, strlst, obj);
+		}
+
+		if (strlst->ob_size == 0) {
+			pylt_obj_list_free(state, strlst);
+			return pl_static.str.TMPL_EMPTY_STR;
+		}
+
+		int index = 0;
+		pl_uint32_t *data;
+		PyLiteStrObject *str;
+
+		data_len += (strlst->ob_size - 1) * separator->ob_size;
+		data = pylt_realloc(NULL, data_len * sizeof(uint32_t));
+
+		for (pl_uint_t i = 0; i < strlst->ob_size; ++i) {
+			str = caststr(strlst->ob_val[i]);
+			memcpy(data + index, str->ob_val, str->ob_size * sizeof(uint32_t));
+			index += str->ob_size;
+			if (i != strlst->ob_size - 1) {
+				memcpy(data + index, separator->ob_val, separator->ob_size * sizeof(uint32_t));
+				index += separator->ob_size;
+			}
+		}
+
+		str = pylt_obj_str_new(state, data, data_len, true);
+		pylt_free(data);
+		pylt_obj_list_free(state, strlst);
+		return str;
+	}
+	return NULL;
 }
 
 PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObject *format, ...) {

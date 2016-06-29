@@ -23,6 +23,7 @@ PyLiteObject* pylt_obj_str_plus(PyLiteState *state, PyLiteStrObject *self, PyLit
 
 pl_int_t pylt_obj_str_index(PyLiteState *state, PyLiteStrObject *self, PyLiteStrObject *sub);
 pl_int_t pylt_obj_str_index_full(PyLiteState *state, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end);
+PyLiteStrObject* pylt_obj_str_join(PyLiteState *state, PyLiteStrObject *separator, PyLiteObject *seq);
 
 PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, uint32_t *str, int size, bool is_raw);
 PyLiteStrObject* pylt_obj_str_new_from_c_str(PyLiteState *state, char *str, bool is_raw);

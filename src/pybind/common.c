@@ -69,6 +69,10 @@ PyLiteObject* pylt_method_str_index(PyLiteState *state, int argc, PyLiteObject *
     return castobj(pylt_obj_int_new(state, ret));
 }
 
+PyLiteObject* pylt_method_str_join(PyLiteState *state, int argc, PyLiteObject **args) {
+	return castobj(pylt_obj_str_join(state, dcast(str, args[0]), args[1]));
+}
+
 
 PyLiteObject* pylt_cls_method_bytes_new(PyLiteState *state, int argc, PyLiteObject **args) {
     PyLiteBytesObject *str = pylt_obj_bytes_new_empty(state);

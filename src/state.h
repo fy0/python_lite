@@ -111,8 +111,9 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *count;
         PyLiteStrObject *index;
         PyLiteStrObject *extend;
-        PyLiteStrObject *insert;
-        PyLiteStrObject *reverse;
+		PyLiteStrObject *insert;
+		PyLiteStrObject *join;
+		PyLiteStrObject *reverse;
 
 		PyLiteStrObject *None;
 		PyLiteStrObject *True;
@@ -204,6 +205,7 @@ struct PyLiteStaticObjectsType {
 		PyLiteStrObject *TMPL_FUNCTION_TO_STR;
 		PyLiteStrObject *TMPL_CFUNCTION_TO_STR;
 
+		PyLiteStrObject *TMPL_EMPTY_STR;
 		PyLiteStrObject *TMPL_EMPTY_SET;
 		PyLiteStrObject *TMPL_EMPTY_LIST;
 		PyLiteStrObject *TMPL_EMPTY_TUPLE;

@@ -19,6 +19,7 @@ PyLiteObject* pylt_cls_method_bool_new(PyLiteState *state, int argc, PyLiteObjec
 
 PyLiteObject* pylt_cls_method_str_new(PyLiteState *state, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_str_index(PyLiteState *state, int argc, PyLiteObject **args);
+PyLiteObject* pylt_method_str_join(PyLiteState *state, int argc, PyLiteObject **args);
 
 PyLiteObject* pylt_cls_method_bytes_new(PyLiteState *state, int argc, PyLiteObject **args);
 
