@@ -17,7 +17,7 @@ PyLiteListObject* pylt_obj_list_new_with_size(PyLiteState *state, pl_uint_t size
     obj->ob_type = PYLT_OBJ_TYPE_LIST;
     obj->ob_size = 0;
     obj->ob_maxsize = size;
-    obj->ob_val = pylt_realloc(NULL, size * sizeof(PyLiteObject*));
+	obj->ob_val = (size) ? pylt_realloc(NULL, size * sizeof(PyLiteObject*)) : NULL;
     return obj;
 }
 
@@ -28,7 +28,9 @@ void pylt_obj_list_free(PyLiteState *state, PyLiteListObject *self) {
 
 pl_int_t pylt_obj_list_append(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
     if (self->ob_size >= self->ob_maxsize) {
-        self->ob_maxsize *= 2;
+		// sometimes new with size 0
+		if (self->ob_maxsize == 0) self->ob_maxsize = 4;
+		else self->ob_maxsize *= 2;
         self->ob_val = pylt_realloc(self->ob_val, self->ob_maxsize * sizeof(PyLiteObject*));
     }
     self->ob_val[self->ob_size++] = obj;
