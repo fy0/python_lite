@@ -117,58 +117,58 @@ PyLiteDictObject* pylt_obj_dict_copy(PyLiteState *state, PyLiteDictObject *self)
 }
 
 struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteState *state, PyLiteDictObject *self) {
-	int index = 0;
-	PyLiteStrObject *str;
-	PyLiteStrObject **strlst = NULL;
-	pl_uint_t dlen = pylt_obj_dict_len(state, self);
+    int index = 0;
+    PyLiteStrObject *str;
+    PyLiteStrObject **strlst = NULL;
+    pl_uint_t dlen = pylt_obj_dict_len(state, self);
 
-	if (dlen == 0) {
-		return pl_static.str.TMPL_EMPTY_DICT; // []
-	}
+    if (dlen == 0) {
+        return pl_static.str.TMPL_EMPTY_DICT; // []
+    }
 
-	pl_uint32_t *data;
-	pl_uint32_t comma_num = dlen - 1;
-	pl_uint32_t data_len = 2 + comma_num * 2 + dlen * 2; // {} + ', ' + ': '
-	strlst = realloc(NULL, dlen * 2 * sizeof(PyLiteStrObject*));
+    pl_uint32_t *data;
+    pl_uint32_t comma_num = dlen - 1;
+    pl_uint32_t data_len = 2 + comma_num * 2 + dlen * 2; // {} + ', ' + ': '
+    strlst = realloc(NULL, dlen * 2 * sizeof(PyLiteStrObject*));
 
-	for (pl_int_t k = pylt_obj_dict_begin(state, self); k != pylt_obj_dict_end(state, self); pylt_obj_dict_next(state, self, &k)) {
-		str = pylt_obj_to_repr(state, pylt_obj_dict_itemkey(state, self, k));
-		data_len += str->ob_size;
-		strlst[index++] = str;
+    for (pl_int_t k = pylt_obj_dict_begin(state, self); k != pylt_obj_dict_end(state, self); pylt_obj_dict_next(state, self, &k)) {
+        str = pylt_obj_to_repr(state, pylt_obj_dict_itemkey(state, self, k));
+        data_len += str->ob_size;
+        strlst[index++] = str;
 
-		str = pylt_obj_to_repr(state, pylt_obj_dict_itemvalue(state, self, k));
-		data_len += str->ob_size;
-		strlst[index++] = str;
-	}
+        str = pylt_obj_to_repr(state, pylt_obj_dict_itemvalue(state, self, k));
+        data_len += str->ob_size;
+        strlst[index++] = str;
+    }
 
-	data = pylt_realloc(NULL, data_len * sizeof(uint32_t));
-	data[0] = '{';
-	index = 1;
-	for (pl_uint_t i = 0; i < dlen*2; ++i) {
-		// key
-		memcpy(data + index, strlst[i]->ob_val, strlst[i]->ob_size * sizeof(uint32_t));
-		index += strlst[i]->ob_size;
+    data = pylt_realloc(NULL, data_len * sizeof(uint32_t));
+    data[0] = '{';
+    index = 1;
+    for (pl_uint_t i = 0; i < dlen*2; ++i) {
+        // key
+        memcpy(data + index, strlst[i]->ob_val, strlst[i]->ob_size * sizeof(uint32_t));
+        index += strlst[i]->ob_size;
 
-		// : 
-		data[index++] = ':';
-		data[index++] = ' ';
-		++i;
+        // : 
+        data[index++] = ':';
+        data[index++] = ' ';
+        ++i;
 
-		// value
-		memcpy(data + index, strlst[i]->ob_val, strlst[i]->ob_size * sizeof(uint32_t));
-		index += strlst[i]->ob_size;
+        // value
+        memcpy(data + index, strlst[i]->ob_val, strlst[i]->ob_size * sizeof(uint32_t));
+        index += strlst[i]->ob_size;
 
-		if (i != dlen*2 - 1) {
-			data[index++] = ',';
-			data[index++] = ' ';
-		}
-	}
-	data[data_len - 1] = '}';
+        if (i != dlen*2 - 1) {
+            data[index++] = ',';
+            data[index++] = ' ';
+        }
+    }
+    data[data_len - 1] = '}';
 
-	str = pylt_obj_str_new(state, data, data_len, true);
-	pylt_free(data);
-	pylt_free(strlst);
-	return str;
+    str = pylt_obj_str_new(state, data, data_len, true);
+    pylt_free(data);
+    pylt_free(strlst);
+    return str;
 }
 
 PyLiteDictObject* pylt_obj_dict_new(PyLiteState *state) {

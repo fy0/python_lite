@@ -57,9 +57,9 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *id;
         PyLiteStrObject *dir;
         PyLiteStrObject *len;
-		PyLiteStrObject *hash;
-		PyLiteStrObject *iter;
-		PyLiteStrObject *repr;
+        PyLiteStrObject *hash;
+        PyLiteStrObject *iter;
+        PyLiteStrObject *repr;
         PyLiteStrObject *super;
         PyLiteStrObject *isinstance;
         PyLiteStrObject *print;
@@ -92,6 +92,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *mro;
 
         // str
+        PyLiteStrObject *join;
         PyLiteStrObject *sub;
         PyLiteStrObject *start;
         PyLiteStrObject *end;
@@ -111,13 +112,12 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *count;
         PyLiteStrObject *index;
         PyLiteStrObject *extend;
-		PyLiteStrObject *insert;
-		PyLiteStrObject *join;
-		PyLiteStrObject *reverse;
+        PyLiteStrObject *insert;
+        PyLiteStrObject *reverse;
 
-		PyLiteStrObject *None;
-		PyLiteStrObject *True;
-		PyLiteStrObject *False;
+        PyLiteStrObject *None;
+        PyLiteStrObject *True;
+        PyLiteStrObject *False;
 
         PyLiteStrObject *math;
         PyLiteStrObject *builtins;
@@ -198,19 +198,19 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *BytesWarning;
         PyLiteStrObject *ResourceWarning;
 
-		// template
-		PyLiteStrObject *TMPL_OBJECT_TO_STR;
-		PyLiteStrObject *TMPL_CLASS_TO_STR;
-		PyLiteStrObject *TMPL_MODULE_TO_STR;
-		PyLiteStrObject *TMPL_FUNCTION_TO_STR;
-		PyLiteStrObject *TMPL_CFUNCTION_TO_STR;
+        // template
+        PyLiteStrObject *TMPL_OBJECT_TO_STR;
+        PyLiteStrObject *TMPL_CLASS_TO_STR;
+        PyLiteStrObject *TMPL_MODULE_TO_STR;
+        PyLiteStrObject *TMPL_FUNCTION_TO_STR;
+        PyLiteStrObject *TMPL_CFUNCTION_TO_STR;
 
-		PyLiteStrObject *TMPL_EMPTY_STR;
-		PyLiteStrObject *TMPL_EMPTY_SET;
-		PyLiteStrObject *TMPL_EMPTY_LIST;
-		PyLiteStrObject *TMPL_EMPTY_TUPLE;
-		PyLiteStrObject *TMPL_EMPTY_DICT;
-	} str;
+        PyLiteStrObject *TMPL_EMPTY_STR;
+        PyLiteStrObject *TMPL_EMPTY_SET;
+        PyLiteStrObject *TMPL_EMPTY_LIST;
+        PyLiteStrObject *TMPL_EMPTY_TUPLE;
+        PyLiteStrObject *TMPL_EMPTY_DICT;
+    } str;
 } pl_static;
 
 PyLiteState* pylt_state_new();

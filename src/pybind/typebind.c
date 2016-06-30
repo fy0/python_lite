@@ -112,8 +112,8 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     type = pylt_obj_type_new_with_type(state, pl_static.str.str, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_OBJ);
     pylt_cclsmethod_register_0_args(state, type, _S(__new__), &pylt_cls_method_str_new);
     pylt_cmethod_register(state, type, _S(index), _NT(state, 4, _S(self), _S(sub), _S(start), _S(end)), _NT(state, 4, PARAM_NODEF, PARAM_NODEF, _NI(0), _NI(-1)), _UINTS(4, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_INT, PYLT_OBJ_TYPE_INT), &pylt_method_str_index);
-	pylt_cmethod_register(state, type, _S(join), _NST(state, 2, "self", "sequence"), NULL, _UINTS(2, PYLT_OBJ_TYPE_STR, PARAM_NODEF), &pylt_method_str_join);
-	pylt_obj_type_register(state, type);
+    pylt_cmethod_register(state, type, _S(join), _NST(state, 2, "self", "sequence"), NULL, _UINTS(2, PYLT_OBJ_TYPE_STR, PARAM_NODEF), &pylt_method_str_join);
+    pylt_obj_type_register(state, type);
 
     // bytes
     type = pylt_obj_type_new_with_type(state, pl_static.str.bytes, PYLT_OBJ_TYPE_BYTES, PYLT_OBJ_TYPE_OBJ);

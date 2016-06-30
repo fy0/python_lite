@@ -43,7 +43,7 @@ pl_uint32_t pylt_obj_bool_hash(PyLiteState *state, PyLiteBoolObject *obj) {
 }
 
 struct PyLiteStrObject* pylt_obj_bool_to_str(PyLiteState *state, PyLiteBoolObject *self) {
-	return (self->ob_val) ? pl_static.str.True : pl_static.str.False;
+    return (self->ob_val) ? pl_static.str.True : pl_static.str.False;
 }
 
 PyLiteBoolObject* pylt_obj_bool_new(PyLiteState *state, bool val) {

@@ -16,8 +16,8 @@ PyLiteObject* pylt_mods_builtins_print(PyLiteState *state, int argc, PyLiteObjec
         if (obj->ob_type == PYLT_OBJ_TYPE_STR) {
             pylt_api_output_str(state, caststr(obj));
         } else {
-			//debug_print_obj(state, obj);
-			pylt_api_output_str(state, pylt_obj_to_str(state, obj));
+            //debug_print_obj(state, obj);
+            pylt_api_output_str(state, pylt_obj_to_str(state, obj));
         }
         if (i != values->ob_size - 1) pylt_api_output_str(state, caststr(args[1]));
     }
@@ -45,7 +45,7 @@ PyLiteObject* pylt_mods_builtins_len(PyLiteState *state, int argc, PyLiteObject 
 #define get_numval(i) ((i)->ob_type == PYLT_OBJ_TYPE_FLOAT) ? (castfloat((i))->ob_val) : (castint((i))->ob_val)
 
 PyLiteObject* pylt_mods_builtins_pow(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0]) && pl_isnum(args[1])) {
+    if (pl_isnum(args[0]) && pl_isnum(args[1])) {
         return castobj(pylt_obj_float_new(state, pow(get_numval(args[0]), get_numval(args[1]))));
     } else {
         // TODO
@@ -108,7 +108,7 @@ PyLiteObject* pylt_mods_builtins_import(PyLiteState *state, int argc, PyLiteObje
 }
 
 PyLiteObject* pylt_mods_builtins_repr(PyLiteState *state, int argc, PyLiteObject **args) {
-	return castobj(pylt_obj_to_repr(state, args[0]));
+    return castobj(pylt_obj_to_repr(state, args[0]));
 }
 
 
@@ -124,7 +124,7 @@ PyLiteObject* pylt_mods_builtins_setattr(PyLiteState *state, int argc, PyLiteObj
 
 
 PyLiteObject* pylt_mods_builtins_strtest(PyLiteState *state, int argc, PyLiteObject **args) {
-	return castobj(pylt_obj_str_new_from_format(state, _NS(state, "测试%d滑%f稽%p"), pylt_obj_int_new(state, 100), pylt_obj_float_new(state, 1.2113), pylt_obj_int_new(state, 100)));
+    return castobj(pylt_obj_str_new_from_format(state, _NS(state, "测试%d滑%f稽%p"), pylt_obj_int_new(state, 100), pylt_obj_float_new(state, 1.2113), pylt_obj_int_new(state, 100)));
     //return castobj(_NS(state, "测试 滑稽  END"));
     return castobj(pylt_obj_to_str(state, args[0]));
 }
@@ -143,10 +143,10 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state) {
     pylt_cfunc_register(state, mod, pl_static.str.hash, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_hash);
     pylt_cfunc_register(state, mod, pl_static.str.iter, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_iter);
     pylt_cfunc_register(state, mod, pl_static.str.isinstance, _NST(state, 2, "object", "class_or_type_or_tuple"), NULL, NULL, &pylt_mods_builtins_isinstance);
-	pylt_cfunc_register(state, mod, pl_static.str.repr, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_repr);
-	pylt_cfunc_register(state, mod, pl_static.str.super, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_super);
+    pylt_cfunc_register(state, mod, pl_static.str.repr, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_repr);
+    pylt_cfunc_register(state, mod, pl_static.str.super, _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_super);
     pylt_cfunc_register(state, mod, pl_static.str.pow, _NT(state, 2, pl_static.str.x, pl_static.str.y), NULL, NULL, &pylt_mods_builtins_pow);
-	pylt_cfunc_register(state, mod, _NS(state, "strtest"), _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_strtest);
+    pylt_cfunc_register(state, mod, _NS(state, "strtest"), _NT(state, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_strtest);
 
     pylt_obj_mod_setattr(state, mod, pl_static.str.None, castobj(&PyLiteNone));
 

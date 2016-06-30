@@ -102,9 +102,9 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.id = pylt_obj_str_new_from_c_str(state, "id", true);
     pl_static.str.dir = pylt_obj_str_new_from_c_str(state, "dir", true);
     pl_static.str.len = pylt_obj_str_new_from_c_str(state, "len", true);
-	pl_static.str.hash = pylt_obj_str_new_from_c_str(state, "hash", true);
-	pl_static.str.iter = pylt_obj_str_new_from_c_str(state, "iter", true);
-	pl_static.str.repr = pylt_obj_str_new_from_c_str(state, "repr", true);
+    pl_static.str.hash = pylt_obj_str_new_from_c_str(state, "hash", true);
+    pl_static.str.iter = pylt_obj_str_new_from_c_str(state, "iter", true);
+    pl_static.str.repr = pylt_obj_str_new_from_c_str(state, "repr", true);
     pl_static.str.super = pylt_obj_str_new_from_c_str(state, "super", true);
     pl_static.str.isinstance = pylt_obj_str_new_from_c_str(state, "isinstance", true);
     pl_static.str.print = pylt_obj_str_new_from_c_str(state, "print", true);
@@ -135,6 +135,7 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
 
     pl_static.str.mro = pylt_obj_str_new_from_c_str(state, "mro", true);
 
+    pl_static.str.join = pylt_obj_str_new_from_c_str(state, "join", true);
     pl_static.str.sub = pylt_obj_str_new_from_c_str(state, "sub", true);
     pl_static.str.start = pylt_obj_str_new_from_c_str(state, "start", true);
     pl_static.str.end = pylt_obj_str_new_from_c_str(state, "end", true);
@@ -150,14 +151,13 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.append = pylt_obj_str_new_from_c_str(state, "append", true);
     pl_static.str.count = pylt_obj_str_new_from_c_str(state, "count", true);
     pl_static.str.index = pylt_obj_str_new_from_c_str(state, "index", true);
-	pl_static.str.extend = pylt_obj_str_new_from_c_str(state, "extend", true);
-	pl_static.str.insert = pylt_obj_str_new_from_c_str(state, "insert", true);
-	pl_static.str.join = pylt_obj_str_new_from_c_str(state, "join", true);
+    pl_static.str.extend = pylt_obj_str_new_from_c_str(state, "extend", true);
+    pl_static.str.insert = pylt_obj_str_new_from_c_str(state, "insert", true);
     pl_static.str.reverse = pylt_obj_str_new_from_c_str(state, "reverse", true);
 
-	pl_static.str.None = pylt_obj_str_new_from_c_str(state, "None", true);
-	pl_static.str.True = pylt_obj_str_new_from_c_str(state, "True", true);
-	pl_static.str.False = pylt_obj_str_new_from_c_str(state, "False", true);
+    pl_static.str.None = pylt_obj_str_new_from_c_str(state, "None", true);
+    pl_static.str.True = pylt_obj_str_new_from_c_str(state, "True", true);
+    pl_static.str.False = pylt_obj_str_new_from_c_str(state, "False", true);
 
     pl_static.str.math = pylt_obj_str_new_from_c_str(state, "math", true);
     pl_static.str.builtins = pylt_obj_str_new_from_c_str(state, "builtins", true);
@@ -238,17 +238,17 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pl_static.str.BytesWarning = pylt_obj_str_new_from_c_str(state, "BytesWarning", true);
     pl_static.str.ResourceWarning = pylt_obj_str_new_from_c_str(state, "ResourceWarning", true);
 
-	pl_static.str.TMPL_OBJECT_TO_STR = pylt_obj_str_new_from_c_str(state, "<%s object at %p>", true);
-	pl_static.str.TMPL_CLASS_TO_STR = pylt_obj_str_new_from_c_str(state, "<class '%s'>", true);
-	pl_static.str.TMPL_MODULE_TO_STR = pylt_obj_str_new_from_c_str(state, "<module '%s'>", true);
-	pl_static.str.TMPL_FUNCTION_TO_STR = pylt_obj_str_new_from_c_str(state, "<function %s at %p>", true);
-	pl_static.str.TMPL_CFUNCTION_TO_STR = pylt_obj_str_new_from_c_str(state, "<cfunction %s at %p>", true);
+    pl_static.str.TMPL_OBJECT_TO_STR = pylt_obj_str_new_from_c_str(state, "<%s object at %p>", true);
+    pl_static.str.TMPL_CLASS_TO_STR = pylt_obj_str_new_from_c_str(state, "<class '%s'>", true);
+    pl_static.str.TMPL_MODULE_TO_STR = pylt_obj_str_new_from_c_str(state, "<module '%s'>", true);
+    pl_static.str.TMPL_FUNCTION_TO_STR = pylt_obj_str_new_from_c_str(state, "<function %s at %p>", true);
+    pl_static.str.TMPL_CFUNCTION_TO_STR = pylt_obj_str_new_from_c_str(state, "<cfunction %s at %p>", true);
 
-	pl_static.str.TMPL_EMPTY_STR = pylt_obj_str_new_from_c_str(state, "", true);
-	pl_static.str.TMPL_EMPTY_SET = pylt_obj_str_new_from_c_str(state, "set()", true);
-	pl_static.str.TMPL_EMPTY_LIST = pylt_obj_str_new_from_c_str(state, "[]", true);
-	pl_static.str.TMPL_EMPTY_TUPLE = pylt_obj_str_new_from_c_str(state, "()", true);
-	pl_static.str.TMPL_EMPTY_DICT = pylt_obj_str_new_from_c_str(state, "{}", true);
+    pl_static.str.TMPL_EMPTY_STR = pylt_obj_str_new_from_c_str(state, "", true);
+    pl_static.str.TMPL_EMPTY_SET = pylt_obj_str_new_from_c_str(state, "set()", true);
+    pl_static.str.TMPL_EMPTY_LIST = pylt_obj_str_new_from_c_str(state, "[]", true);
+    pl_static.str.TMPL_EMPTY_TUPLE = pylt_obj_str_new_from_c_str(state, "()", true);
+    pl_static.str.TMPL_EMPTY_DICT = pylt_obj_str_new_from_c_str(state, "{}", true);
 
     pylt_gc_static_add(state, castobj(pl_static.str.__init__));
     pylt_gc_static_add(state, castobj(pl_static.str.__new__));
@@ -282,8 +282,8 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pylt_gc_static_add(state, castobj(pl_static.str.len));
     pylt_gc_static_add(state, castobj(pl_static.str.hash));
     pylt_gc_static_add(state, castobj(pl_static.str.iter));
-	pylt_gc_static_add(state, castobj(pl_static.str.repr));
-	pylt_gc_static_add(state, castobj(pl_static.str.super));
+    pylt_gc_static_add(state, castobj(pl_static.str.repr));
+    pylt_gc_static_add(state, castobj(pl_static.str.super));
     pylt_gc_static_add(state, castobj(pl_static.str.isinstance));
     pylt_gc_static_add(state, castobj(pl_static.str.print));
     pylt_gc_static_add(state, castobj(pl_static.str.pow));
@@ -315,6 +315,7 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pylt_gc_static_add(state, castobj(pl_static.str.mro));
 
     // str
+    pylt_gc_static_add(state, castobj(pl_static.str.join));
     pylt_gc_static_add(state, castobj(pl_static.str.sub));
     pylt_gc_static_add(state, castobj(pl_static.str.start));
     pylt_gc_static_add(state, castobj(pl_static.str.end));
@@ -334,13 +335,12 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pylt_gc_static_add(state, castobj(pl_static.str.count));
     pylt_gc_static_add(state, castobj(pl_static.str.index));
     pylt_gc_static_add(state, castobj(pl_static.str.extend));
-	pylt_gc_static_add(state, castobj(pl_static.str.insert));
-	pylt_gc_static_add(state, castobj(pl_static.str.join));
-	pylt_gc_static_add(state, castobj(pl_static.str.reverse));
+    pylt_gc_static_add(state, castobj(pl_static.str.insert));
+    pylt_gc_static_add(state, castobj(pl_static.str.reverse));
 
-	pylt_gc_static_add(state, castobj(pl_static.str.None));
-	pylt_gc_static_add(state, castobj(pl_static.str.True));
-	pylt_gc_static_add(state, castobj(pl_static.str.False));
+    pylt_gc_static_add(state, castobj(pl_static.str.None));
+    pylt_gc_static_add(state, castobj(pl_static.str.True));
+    pylt_gc_static_add(state, castobj(pl_static.str.False));
 
     pylt_gc_static_add(state, castobj(pl_static.str.math));
     pylt_gc_static_add(state, castobj(pl_static.str.builtins));
@@ -421,15 +421,15 @@ void pylt_utils_static_objs_init(PyLiteState *state) {
     pylt_gc_static_add(state, castobj(pl_static.str.BytesWarning));
     pylt_gc_static_add(state, castobj(pl_static.str.ResourceWarning));
 
-	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_OBJECT_TO_STR));
-	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_CLASS_TO_STR));
-	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_MODULE_TO_STR));
-	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_FUNCTION_TO_STR));
-	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_CFUNCTION_TO_STR));
+    pylt_gc_static_add(state, castobj(pl_static.str.TMPL_OBJECT_TO_STR));
+    pylt_gc_static_add(state, castobj(pl_static.str.TMPL_CLASS_TO_STR));
+    pylt_gc_static_add(state, castobj(pl_static.str.TMPL_MODULE_TO_STR));
+    pylt_gc_static_add(state, castobj(pl_static.str.TMPL_FUNCTION_TO_STR));
+    pylt_gc_static_add(state, castobj(pl_static.str.TMPL_CFUNCTION_TO_STR));
 
-	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_STR));
-	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_SET));
-	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_LIST));
-	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_TUPLE));
-	pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_DICT));
+    pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_STR));
+    pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_SET));
+    pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_LIST));
+    pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_TUPLE));
+    pylt_gc_static_add(state, castobj(pl_static.str.TMPL_EMPTY_DICT));
 }

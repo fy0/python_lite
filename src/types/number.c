@@ -424,12 +424,12 @@ PyLiteStrObject* pylt_obj_int_to_str(PyLiteState *state, PyLiteIntObject *self) 
 
 
 uint32_t* pylt_obj_float_to_ucs4(PyLiteState *state, PyLiteFloatObject *self, pl_int_t *plen) {
-	char buf[24 + 1];
-	pl_int_t len = fpconv_dtoa(self->ob_val, buf);
-	uint32_t *str_data = pylt_realloc(NULL, len * sizeof(uint32_t));
-	for (pl_int_t i = 0; i < len; ++i) {
-		str_data[i] = buf[i];
-	}
+    char buf[24 + 1];
+    pl_int_t len = fpconv_dtoa(self->ob_val, buf);
+    uint32_t *str_data = pylt_realloc(NULL, len * sizeof(uint32_t));
+    for (pl_int_t i = 0; i < len; ++i) {
+        str_data[i] = buf[i];
+    }
     if (plen) *plen = len;
     return str_data;
 }

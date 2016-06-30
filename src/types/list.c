@@ -17,7 +17,7 @@ PyLiteListObject* pylt_obj_list_new_with_size(PyLiteState *state, pl_uint_t size
     obj->ob_type = PYLT_OBJ_TYPE_LIST;
     obj->ob_size = 0;
     obj->ob_maxsize = size;
-	obj->ob_val = (size) ? pylt_realloc(NULL, size * sizeof(PyLiteObject*)) : NULL;
+    obj->ob_val = (size) ? pylt_realloc(NULL, size * sizeof(PyLiteObject*)) : NULL;
     return obj;
 }
 
@@ -28,9 +28,9 @@ void pylt_obj_list_free(PyLiteState *state, PyLiteListObject *self) {
 
 pl_int_t pylt_obj_list_append(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj) {
     if (self->ob_size >= self->ob_maxsize) {
-		// sometimes new with size 0
-		if (self->ob_maxsize == 0) self->ob_maxsize = 4;
-		else self->ob_maxsize *= 2;
+        // sometimes new with size 0
+        if (self->ob_maxsize == 0) self->ob_maxsize = 4;
+        else self->ob_maxsize *= 2;
         self->ob_val = pylt_realloc(self->ob_val, self->ob_maxsize * sizeof(PyLiteObject*));
     }
     self->ob_val[self->ob_size++] = obj;
@@ -150,41 +150,41 @@ pl_bool_t pylt_obj_list_has(PyLiteState *state, PyLiteListObject *self, PyLiteOb
 }
 
 struct PyLiteStrObject* pylt_obj_list_to_str(PyLiteState *state, PyLiteListObject *self) {
-	int index = 0;
-	PyLiteStrObject *str;
-	PyLiteStrObject **strlst = NULL;
-	pl_uint_t llen = pylt_obj_list_count(state, self);
+    int index = 0;
+    PyLiteStrObject *str;
+    PyLiteStrObject **strlst = NULL;
+    pl_uint_t llen = pylt_obj_list_count(state, self);
 
-	if (llen == 0) {
-		return pl_static.str.TMPL_EMPTY_LIST; // []
-	}
+    if (llen == 0) {
+        return pl_static.str.TMPL_EMPTY_LIST; // []
+    }
 
-	pl_uint32_t *data;
-	pl_uint32_t comma_num = llen - 1;
-	pl_uint32_t data_len = 2 + comma_num * 2; // [] + ', '
-	strlst = realloc(NULL, llen * sizeof(PyLiteStrObject*));
+    pl_uint32_t *data;
+    pl_uint32_t comma_num = llen - 1;
+    pl_uint32_t data_len = 2 + comma_num * 2; // [] + ', '
+    strlst = realloc(NULL, llen * sizeof(PyLiteStrObject*));
 
-	for (pl_uint_t i = 0; i < llen; ++i) {
-		str = pylt_obj_to_repr(state, self->ob_val[i]);
-		data_len += str->ob_size;
-		strlst[index++] = str;
-	}
+    for (pl_uint_t i = 0; i < llen; ++i) {
+        str = pylt_obj_to_repr(state, self->ob_val[i]);
+        data_len += str->ob_size;
+        strlst[index++] = str;
+    }
 
-	data = pylt_realloc(NULL, data_len * sizeof(uint32_t));
-	data[0] = '[';
-	index = 1;
-	for (pl_uint_t i = 0; i < llen; ++i) {
-		memcpy(data + index, strlst[i]->ob_val, strlst[i]->ob_size * sizeof(uint32_t));
-		index += strlst[i]->ob_size;
-		if (i != llen - 1) {
-			data[index++] = ',';
-			data[index++] = ' ';
-		}
-	}
-	data[data_len - 1] = ']';
+    data = pylt_realloc(NULL, data_len * sizeof(uint32_t));
+    data[0] = '[';
+    index = 1;
+    for (pl_uint_t i = 0; i < llen; ++i) {
+        memcpy(data + index, strlst[i]->ob_val, strlst[i]->ob_size * sizeof(uint32_t));
+        index += strlst[i]->ob_size;
+        if (i != llen - 1) {
+            data[index++] = ',';
+            data[index++] = ' ';
+        }
+    }
+    data[data_len - 1] = ']';
 
-	str = pylt_obj_str_new(state, data, data_len, true);
-	pylt_free(data);
-	pylt_free(strlst);
-	return str;
+    str = pylt_obj_str_new(state, data, data_len, true);
+    pylt_free(data);
+    pylt_free(strlst);
+    return str;
 }

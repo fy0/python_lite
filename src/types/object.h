@@ -100,7 +100,7 @@ struct PyLiteBaseExceptionObject;
 struct PyLiteCustomObject;
 
 
-#define cast(t, exp)	((t)(exp))
+#define cast(t, exp)    ((t)(exp))
 #define castobj(i)      cast(struct PyLiteObject*, (i))
 #define castint(i)      cast(struct PyLiteIntObject*, (i))
 #define castfloat(i)    cast(struct PyLiteFloatObject*, (i))

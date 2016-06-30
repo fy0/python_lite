@@ -11,7 +11,7 @@ const char* get_op_name(uint32_t val) {
 }
 
 void debug_print_obj(PyLiteState *state, PyLiteObject *obj) {
-	pylt_api_output_str(state, pylt_obj_to_repr(state, obj));
+    pylt_api_output_str(state, pylt_obj_to_repr(state, obj));
 }
 
 void debug_print_const_vals(PyLiteState *state, ParserState *ps) {

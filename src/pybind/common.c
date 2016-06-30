@@ -70,7 +70,7 @@ PyLiteObject* pylt_method_str_index(PyLiteState *state, int argc, PyLiteObject *
 }
 
 PyLiteObject* pylt_method_str_join(PyLiteState *state, int argc, PyLiteObject **args) {
-	return castobj(pylt_obj_str_join(state, dcast(str, args[0]), args[1]));
+    return castobj(pylt_obj_str_join(state, dcast(str, args[0]), args[1]));
 }
 
 

@@ -75,6 +75,8 @@ const char* pylt_vm_get_op_name(int op);
 int token_to_op_val(uint32_t tk);
 int token_de_to_op_val(uint32_t tk);
 
+PyLiteFrame* pylt_vm_curframe(PyLiteState* state);
+
 void pylt_vm_init(PyLiteState *state, PyLiteVM *vm);
 void pylt_vm_finalize(PyLiteState *state);
 void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code);

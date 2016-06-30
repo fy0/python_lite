@@ -226,29 +226,29 @@ pl_int_t pylt_obj_bytes_index(PyLiteState *state, PyLiteBytesObject *self, PyLit
 }
 
 struct PyLiteStrObject* pylt_obj_bytes_to_str(PyLiteState *state, PyLiteBytesObject *self) {
-	uint32_t *data;
-	pl_uint_t i, j = 0;
-	int quote_count = 0;
+    uint32_t *data;
+    pl_uint_t i, j = 0;
+    int quote_count = 0;
 
-	for (i = 0; i < self->ob_size; ++i) {
-		if (self->ob_val[i] == '\'') quote_count++;
-	}
+    for (i = 0; i < self->ob_size; ++i) {
+        if (self->ob_val[i] == '\'') quote_count++;
+    }
 
-	data = pylt_realloc(NULL, (self->ob_size + quote_count + 3) * sizeof(uint32_t));
-	data[0] = 'b';
-	data[1] = '\'';
-	j = 2;
+    data = pylt_realloc(NULL, (self->ob_size + quote_count + 3) * sizeof(uint32_t));
+    data[0] = 'b';
+    data[1] = '\'';
+    j = 2;
 
-	for (i = 0; i < self->ob_size; ++i) {
-		if (self->ob_val[i] == '\'') {
-			data[j++] = '\\';
-		}
-		data[j++] = self->ob_val[i];
-	}
+    for (i = 0; i < self->ob_size; ++i) {
+        if (self->ob_val[i] == '\'') {
+            data[j++] = '\\';
+        }
+        data[j++] = self->ob_val[i];
+    }
 
-	data[j++] = '\'';
+    data[j++] = '\'';
 
-	PyLiteStrObject *str = pylt_obj_str_new(state, data, j, true);
-	pylt_free(data);
-	return str;
+    PyLiteStrObject *str = pylt_obj_str_new(state, data, j, true);
+    pylt_free(data);
+    return str;
 }

@@ -6,10 +6,10 @@
 #include "types/set.h"
 
 typedef struct PyLiteGC {
-    PyLiteSetObject *g_old;
-    PyLiteSetObject *g_new;
-    PyLiteSetObject *g_local;
-    PyLiteSetObject *g_static;
+    PyLiteSetObject *white;
+    PyLiteSetObject *grey;
+    PyLiteSetObject *black;
+    PyLiteSetObject *statics;
 } PyLiteGC;
 
 void pylt_gc_init(PyLiteState *state);

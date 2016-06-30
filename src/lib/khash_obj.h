@@ -198,181 +198,181 @@ void* my_malloc(size_t size);
 static const double __ac_HASH_UPPER = 0.77;
 
 #define __KHASHO_TYPE(name, khkey_t, khval_t) \
-	typedef struct kho_##name##_s { \
-		khint_t n_buckets, size, n_occupied, upper_bound; \
-		khint32_t *flags; \
-		khkey_t *keys; \
-		khval_t *vals; \
+    typedef struct kho_##name##_s { \
+        khint_t n_buckets, size, n_occupied, upper_bound; \
+        khint32_t *flags; \
+        khkey_t *keys; \
+        khval_t *vals; \
         PyLiteState *state; \
-	} kho_##name##_t;
+    } kho_##name##_t;
 
-#define __KHASHO_PROTOTYPES(name, khkey_t, khval_t)	 					\
-	extern kho_##name##_t *kho_init_##name(PyLiteState *state);							\
-	extern void kho_destroy_##name(kho_##name##_t *h);					\
-	extern void kho_clear_##name(kho_##name##_t *h);						\
-	extern khint_t kho_get_##name(const kho_##name##_t *h, khkey_t key); 	\
-	extern int kho_resize_##name(kho_##name##_t *h, khint_t new_n_buckets); \
-	extern khint_t kho_put_##name(kho_##name##_t *h, khkey_t key, int *ret); \
-	extern void kho_del_##name(kho_##name##_t *h, khint_t x);
+#define __KHASHO_PROTOTYPES(name, khkey_t, khval_t)                         \
+    extern kho_##name##_t *kho_init_##name(PyLiteState *state);                            \
+    extern void kho_destroy_##name(kho_##name##_t *h);                    \
+    extern void kho_clear_##name(kho_##name##_t *h);                        \
+    extern khint_t kho_get_##name(const kho_##name##_t *h, khkey_t key);     \
+    extern int kho_resize_##name(kho_##name##_t *h, khint_t new_n_buckets); \
+    extern khint_t kho_put_##name(kho_##name##_t *h, khkey_t key, int *ret); \
+    extern void kho_del_##name(kho_##name##_t *h, khint_t x);
 
 #define __KHASHO_IMPL(name, SCOPE, khkey_t, khval_t, kho_is_map, __hash_func, __hash_equal) \
-	SCOPE kho_##name##_t *kho_init_##name(PyLiteState *state) {							\
-		kho_##name##_t* ret = (kho_##name##_t*)kcalloc(1, sizeof(kho_##name##_t));		\
+    SCOPE kho_##name##_t *kho_init_##name(PyLiteState *state) {                            \
+        kho_##name##_t* ret = (kho_##name##_t*)kcalloc(1, sizeof(kho_##name##_t));        \
         ret->state = state; \
         return ret; \
-	}																	\
-	SCOPE void kho_destroy_##name(kho_##name##_t *h)						\
-	{																	\
-		if (h) {														\
-			kfree((void *)h->keys); kfree(h->flags);					\
-			kfree((void *)h->vals);										\
-			kfree(h);													\
-        		}																\
-	}																	\
-	SCOPE void kho_clear_##name(kho_##name##_t *h)						\
-	{																	\
-		if (h && h->flags) {											\
-			memset(h->flags, 0xaa, __ac_fsize(h->n_buckets) * sizeof(khint32_t)); \
-			h->size = h->n_occupied = 0;								\
-        		}																\
-	}																	\
-	SCOPE khint_t kho_get_##name(const kho_##name##_t *h, khkey_t key) 	\
-	{																	\
-		if (h->n_buckets) {												\
-			khint_t k, i, last, mask, step = 0; \
-			mask = h->n_buckets - 1;									\
-			k = __hash_func(h->state,key); i = k & mask;							\
-			last = i; \
-            			while (!__ac_isempty(h->flags, i) && (__ac_isdel(h->flags, i) || !__hash_equal(h->state, h->keys[i], key))) { \
-				i = (i + (++step)) & mask; \
-				if (i == last) return h->n_buckets;						\
-                        			}															\
-			return __ac_iseither(h->flags, i)? h->n_buckets : i;		\
-        		} else return 0;												\
-	}																	\
-	SCOPE int kho_resize_##name(kho_##name##_t *h, khint_t new_n_buckets) \
-	{ /* This function uses 0.25*n_buckets bytes of working space instead of [sizeof(key_t+val_t)+.25]*n_buckets. */ \
-		khint32_t *new_flags = 0;										\
-		khint_t j = 1;													\
-		{																\
-			kroundup32(new_n_buckets); 									\
-			if (new_n_buckets < 4) new_n_buckets = 4;					\
-			if (h->size >= (khint_t)(new_n_buckets * __ac_HASH_UPPER + 0.5)) j = 0;	/* requested size is too small */ \
-            			else { /* hash table size to be changed (shrink or expand); rehash */ \
-				new_flags = (khint32_t*)kmalloc(__ac_fsize(new_n_buckets) * sizeof(khint32_t));	\
-				if (!new_flags) return -1;								\
-				memset(new_flags, 0xaa, __ac_fsize(new_n_buckets) * sizeof(khint32_t)); \
-				if (h->n_buckets < new_n_buckets) {	/* expand */		\
-					khkey_t *new_keys = (khkey_t*)krealloc((void *)h->keys, new_n_buckets * sizeof(khkey_t)); \
-					if (!new_keys) { kfree(new_flags); return -1; }		\
-					h->keys = new_keys;									\
-					if (kho_is_map) {									\
-						khval_t *new_vals = (khval_t*)krealloc((void *)h->vals, new_n_buckets * sizeof(khval_t)); \
-						if (!new_vals) { kfree(new_flags); return -1; }	\
-						h->vals = new_vals;								\
-                    					}													\
-                				} /* otherwise shrink */								\
-			}															\
-		}																\
-		if (j) { /* rehashing is needed */								\
-			for (j = 0; j != h->n_buckets; ++j) {						\
-				if (__ac_iseither(h->flags, j) == 0) {					\
-					khkey_t key = h->keys[j];							\
-					khval_t val;										\
-					khint_t new_mask;									\
-					new_mask = new_n_buckets - 1; 						\
-					if (kho_is_map) val = h->vals[j];					\
-					__ac_set_isdel_true(h->flags, j);					\
-                    					while (1) { /* kick-out process; sort of like in Cuckoo hashing */ \
-						khint_t k, i, step = 0; \
-						k = __hash_func(h->state, key);							\
-						i = k & new_mask;								\
-                        						while (!__ac_isempty(new_flags, i)) i = (i + (++step)) & new_mask; \
-						__ac_set_isempty_false(new_flags, i);			\
-						if (i < h->n_buckets && __ac_iseither(h->flags, i) == 0) { /* kick out the existing element */ \
-                        							{ khkey_t tmp = h->keys[i]; h->keys[i] = key; key = tmp; } \
-							if (kho_is_map) { khval_t tmp = h->vals[i]; h->vals[i] = val; val = tmp; } \
-							__ac_set_isdel_true(h->flags, i); /* mark it as deleted in the old hash table */ \
-                        						} else { /* write the element and jump out of the loop */ \
-							h->keys[i] = key;							\
-							if (kho_is_map) h->vals[i] = val;			\
-							break;										\
-                        						}												\
-                                        					}													\
-                				}														\
-            			}															\
-			if (h->n_buckets > new_n_buckets) { /* shrink the hash table */ \
-				h->keys = (khkey_t*)krealloc((void *)h->keys, new_n_buckets * sizeof(khkey_t)); \
-				if (kho_is_map) h->vals = (khval_t*)krealloc((void *)h->vals, new_n_buckets * sizeof(khval_t)); \
-            			}															\
-			kfree(h->flags); /* free the working space */				\
-			h->flags = new_flags;										\
-			h->n_buckets = new_n_buckets;								\
-			h->n_occupied = h->size;									\
-			h->upper_bound = (khint_t)(h->n_buckets * __ac_HASH_UPPER + 0.5); \
-        		}																\
-		return 0;														\
-	}																	\
-	SCOPE khint_t kho_put_##name(kho_##name##_t *h, khkey_t key, int *ret) \
-	{																	\
-		khint_t x;														\
-		if (h->n_occupied >= h->upper_bound) { /* update the hash table */ \
-			if (h->n_buckets > (h->size<<1)) {							\
-				if (kho_resize_##name(h, h->n_buckets - 1) < 0) { /* clear "deleted" elements */ \
-					*ret = -1; return h->n_buckets;						\
-                				}														\
-            			} else if (kho_resize_##name(h, h->n_buckets + 1) < 0) { /* expand the hash table */ \
-				*ret = -1; return h->n_buckets;							\
-			}															\
-        		} /* TODO: to implement automatically shrinking; resize() already support shrinking */ \
-        		{																\
-			khint_t k, i, site, last, mask = h->n_buckets - 1, step = 0; \
-			x = site = h->n_buckets; k = __hash_func(h->state, key); i = k & mask; \
-			if (__ac_isempty(h->flags, i)) x = i; /* for speed up */	\
-            			else {														\
-				last = i; \
-                				while (!__ac_isempty(h->flags, i) && (__ac_isdel(h->flags, i) || !__hash_equal(h->state, h->keys[i], key))) { \
-					if (__ac_isdel(h->flags, i)) site = i;				\
-					i = (i + (++step)) & mask; \
-					if (i == last) { x = site; break; }					\
-                                				}														\
-				if (x == h->n_buckets) {								\
-					if (__ac_isempty(h->flags, i) && site != h->n_buckets) x = site; \
-                    					else x = i;											\
-                				}														\
-			}															\
-        		}																\
-		if (__ac_isempty(h->flags, x)) { /* not present at all */		\
-			h->keys[x] = key;											\
-			__ac_set_isboth_false(h->flags, x);							\
-			++h->size; ++h->n_occupied;									\
-			*ret = 1;													\
-        		} else if (__ac_isdel(h->flags, x)) { /* deleted */				\
-			h->keys[x] = key;											\
-			__ac_set_isboth_false(h->flags, x);							\
-			++h->size;													\
-			*ret = 2;													\
-		} else *ret = 0; /* Don't touch h->keys[x] if present and not deleted */ \
-		return x;														\
-	}																	\
-	SCOPE void kho_del_##name(kho_##name##_t *h, khint_t x)				\
-	{																	\
-		if (x != h->n_buckets && !__ac_iseither(h->flags, x)) {			\
-			__ac_set_isdel_true(h->flags, x);							\
-			--h->size;													\
-        		}																\
-	}
+    }                                                                    \
+    SCOPE void kho_destroy_##name(kho_##name##_t *h)                        \
+    {                                                                    \
+        if (h) {                                                        \
+            kfree((void *)h->keys); kfree(h->flags);                    \
+            kfree((void *)h->vals);                                        \
+            kfree(h);                                                    \
+                }                                                                \
+    }                                                                    \
+    SCOPE void kho_clear_##name(kho_##name##_t *h)                        \
+    {                                                                    \
+        if (h && h->flags) {                                            \
+            memset(h->flags, 0xaa, __ac_fsize(h->n_buckets) * sizeof(khint32_t)); \
+            h->size = h->n_occupied = 0;                                \
+                }                                                                \
+    }                                                                    \
+    SCOPE khint_t kho_get_##name(const kho_##name##_t *h, khkey_t key)     \
+    {                                                                    \
+        if (h->n_buckets) {                                                \
+            khint_t k, i, last, mask, step = 0; \
+            mask = h->n_buckets - 1;                                    \
+            k = __hash_func(h->state,key); i = k & mask;                            \
+            last = i; \
+                        while (!__ac_isempty(h->flags, i) && (__ac_isdel(h->flags, i) || !__hash_equal(h->state, h->keys[i], key))) { \
+                i = (i + (++step)) & mask; \
+                if (i == last) return h->n_buckets;                        \
+                                    }                                                            \
+            return __ac_iseither(h->flags, i)? h->n_buckets : i;        \
+                } else return 0;                                                \
+    }                                                                    \
+    SCOPE int kho_resize_##name(kho_##name##_t *h, khint_t new_n_buckets) \
+    { /* This function uses 0.25*n_buckets bytes of working space instead of [sizeof(key_t+val_t)+.25]*n_buckets. */ \
+        khint32_t *new_flags = 0;                                        \
+        khint_t j = 1;                                                    \
+        {                                                                \
+            kroundup32(new_n_buckets);                                     \
+            if (new_n_buckets < 4) new_n_buckets = 4;                    \
+            if (h->size >= (khint_t)(new_n_buckets * __ac_HASH_UPPER + 0.5)) j = 0;    /* requested size is too small */ \
+                        else { /* hash table size to be changed (shrink or expand); rehash */ \
+                new_flags = (khint32_t*)kmalloc(__ac_fsize(new_n_buckets) * sizeof(khint32_t));    \
+                if (!new_flags) return -1;                                \
+                memset(new_flags, 0xaa, __ac_fsize(new_n_buckets) * sizeof(khint32_t)); \
+                if (h->n_buckets < new_n_buckets) {    /* expand */        \
+                    khkey_t *new_keys = (khkey_t*)krealloc((void *)h->keys, new_n_buckets * sizeof(khkey_t)); \
+                    if (!new_keys) { kfree(new_flags); return -1; }        \
+                    h->keys = new_keys;                                    \
+                    if (kho_is_map) {                                    \
+                        khval_t *new_vals = (khval_t*)krealloc((void *)h->vals, new_n_buckets * sizeof(khval_t)); \
+                        if (!new_vals) { kfree(new_flags); return -1; }    \
+                        h->vals = new_vals;                                \
+                                        }                                                    \
+                                } /* otherwise shrink */                                \
+            }                                                            \
+        }                                                                \
+        if (j) { /* rehashing is needed */                                \
+            for (j = 0; j != h->n_buckets; ++j) {                        \
+                if (__ac_iseither(h->flags, j) == 0) {                    \
+                    khkey_t key = h->keys[j];                            \
+                    khval_t val;                                        \
+                    khint_t new_mask;                                    \
+                    new_mask = new_n_buckets - 1;                         \
+                    if (kho_is_map) val = h->vals[j];                    \
+                    __ac_set_isdel_true(h->flags, j);                    \
+                                        while (1) { /* kick-out process; sort of like in Cuckoo hashing */ \
+                        khint_t k, i, step = 0; \
+                        k = __hash_func(h->state, key);                            \
+                        i = k & new_mask;                                \
+                                                while (!__ac_isempty(new_flags, i)) i = (i + (++step)) & new_mask; \
+                        __ac_set_isempty_false(new_flags, i);            \
+                        if (i < h->n_buckets && __ac_iseither(h->flags, i) == 0) { /* kick out the existing element */ \
+                                                    { khkey_t tmp = h->keys[i]; h->keys[i] = key; key = tmp; } \
+                            if (kho_is_map) { khval_t tmp = h->vals[i]; h->vals[i] = val; val = tmp; } \
+                            __ac_set_isdel_true(h->flags, i); /* mark it as deleted in the old hash table */ \
+                                                } else { /* write the element and jump out of the loop */ \
+                            h->keys[i] = key;                            \
+                            if (kho_is_map) h->vals[i] = val;            \
+                            break;                                        \
+                                                }                                                \
+                                                            }                                                    \
+                                }                                                        \
+                        }                                                            \
+            if (h->n_buckets > new_n_buckets) { /* shrink the hash table */ \
+                h->keys = (khkey_t*)krealloc((void *)h->keys, new_n_buckets * sizeof(khkey_t)); \
+                if (kho_is_map) h->vals = (khval_t*)krealloc((void *)h->vals, new_n_buckets * sizeof(khval_t)); \
+                        }                                                            \
+            kfree(h->flags); /* free the working space */                \
+            h->flags = new_flags;                                        \
+            h->n_buckets = new_n_buckets;                                \
+            h->n_occupied = h->size;                                    \
+            h->upper_bound = (khint_t)(h->n_buckets * __ac_HASH_UPPER + 0.5); \
+                }                                                                \
+        return 0;                                                        \
+    }                                                                    \
+    SCOPE khint_t kho_put_##name(kho_##name##_t *h, khkey_t key, int *ret) \
+    {                                                                    \
+        khint_t x;                                                        \
+        if (h->n_occupied >= h->upper_bound) { /* update the hash table */ \
+            if (h->n_buckets > (h->size<<1)) {                            \
+                if (kho_resize_##name(h, h->n_buckets - 1) < 0) { /* clear "deleted" elements */ \
+                    *ret = -1; return h->n_buckets;                        \
+                                }                                                        \
+                        } else if (kho_resize_##name(h, h->n_buckets + 1) < 0) { /* expand the hash table */ \
+                *ret = -1; return h->n_buckets;                            \
+            }                                                            \
+                } /* TODO: to implement automatically shrinking; resize() already support shrinking */ \
+                {                                                                \
+            khint_t k, i, site, last, mask = h->n_buckets - 1, step = 0; \
+            x = site = h->n_buckets; k = __hash_func(h->state, key); i = k & mask; \
+            if (__ac_isempty(h->flags, i)) x = i; /* for speed up */    \
+                        else {                                                        \
+                last = i; \
+                                while (!__ac_isempty(h->flags, i) && (__ac_isdel(h->flags, i) || !__hash_equal(h->state, h->keys[i], key))) { \
+                    if (__ac_isdel(h->flags, i)) site = i;                \
+                    i = (i + (++step)) & mask; \
+                    if (i == last) { x = site; break; }                    \
+                                                }                                                        \
+                if (x == h->n_buckets) {                                \
+                    if (__ac_isempty(h->flags, i) && site != h->n_buckets) x = site; \
+                                        else x = i;                                            \
+                                }                                                        \
+            }                                                            \
+                }                                                                \
+        if (__ac_isempty(h->flags, x)) { /* not present at all */        \
+            h->keys[x] = key;                                            \
+            __ac_set_isboth_false(h->flags, x);                            \
+            ++h->size; ++h->n_occupied;                                    \
+            *ret = 1;                                                    \
+                } else if (__ac_isdel(h->flags, x)) { /* deleted */                \
+            h->keys[x] = key;                                            \
+            __ac_set_isboth_false(h->flags, x);                            \
+            ++h->size;                                                    \
+            *ret = 2;                                                    \
+        } else *ret = 0; /* Don't touch h->keys[x] if present and not deleted */ \
+        return x;                                                        \
+    }                                                                    \
+    SCOPE void kho_del_##name(kho_##name##_t *h, khint_t x)                \
+    {                                                                    \
+        if (x != h->n_buckets && !__ac_iseither(h->flags, x)) {            \
+            __ac_set_isdel_true(h->flags, x);                            \
+            --h->size;                                                    \
+                }                                                                \
+    }
 
-#define KHASHO_DECLARE(name, khkey_t, khval_t)		 					\
-	__KHASHO_TYPE(name, khkey_t, khval_t) 								\
-	__KHASHO_PROTOTYPES(name, khkey_t, khval_t)
+#define KHASHO_DECLARE(name, khkey_t, khval_t)                             \
+    __KHASHO_TYPE(name, khkey_t, khval_t)                                 \
+    __KHASHO_PROTOTYPES(name, khkey_t, khval_t)
 
 #define KHASHO_INIT2(name, SCOPE, khkey_t, khval_t, kho_is_map, __hash_func, __hash_equal) \
-	__KHASHO_TYPE(name, khkey_t, khval_t) 								\
-	__KHASHO_IMPL(name, SCOPE, khkey_t, khval_t, kho_is_map, __hash_func, __hash_equal)
+    __KHASHO_TYPE(name, khkey_t, khval_t)                                 \
+    __KHASHO_IMPL(name, SCOPE, khkey_t, khval_t, kho_is_map, __hash_func, __hash_equal)
 
 #define KHASHO_INIT(name, khkey_t, khval_t, kho_is_map, __hash_func, __hash_equal) \
-	KHASHO_INIT2(name, static kho_inline klib_unused, khkey_t, khval_t, kho_is_map, __hash_func, __hash_equal)
+    KHASHO_INIT2(name, static kho_inline klib_unused, khkey_t, khval_t, kho_is_map, __hash_func, __hash_equal)
 
 /* Other convenient macros... */
 
@@ -506,13 +506,13 @@ the bucket has been deleted [int*]
 @param  vvar  Variable to which value will be assigned
 @param  code  Block of code to execute
 */
-#define kho_foreach(h, kvar, vvar, code) { khint_t __i;		\
-	for (__i = kho_begin(h); __i != kho_end(h); ++__i) {		\
-		if (!kho_exist(h,__i)) continue;						\
-		(kvar) = kho_key(h,__i);								\
-		(vvar) = kho_val(h,__i);								\
-		code;												\
-    	} }
+#define kho_foreach(h, kvar, vvar, code) { khint_t __i;        \
+    for (__i = kho_begin(h); __i != kho_end(h); ++__i) {        \
+        if (!kho_exist(h,__i)) continue;                        \
+        (kvar) = kho_key(h,__i);                                \
+        (vvar) = kho_val(h,__i);                                \
+        code;                                                \
+        } }
 
 /*! @function
 @abstract     Iterate over the values in the hash table
@@ -520,11 +520,11 @@ the bucket has been deleted [int*]
 @param  vvar  Variable to which value will be assigned
 @param  code  Block of code to execute
 */
-#define kho_foreach_value(h, vvar, code) { khint_t __i;		\
-	for (__i = kho_begin(h); __i != kho_end(h); ++__i) {		\
-		if (!kho_exist(h,__i)) continue;						\
-		(vvar) = kho_val(h,__i);								\
-		code;												\
-    	} }
+#define kho_foreach_value(h, vvar, code) { khint_t __i;        \
+    for (__i = kho_begin(h); __i != kho_end(h); ++__i) {        \
+        if (!kho_exist(h,__i)) continue;                        \
+        (vvar) = kho_val(h,__i);                                \
+        code;                                                \
+        } }
 
 #endif /* __AC_KHASHO_H */

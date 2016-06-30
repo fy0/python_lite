@@ -12,7 +12,7 @@
 
 
 PyLiteObject* pylt_mods_math_acos(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, acos(get_val(args[0]))));
     } else {
         // TODO
@@ -22,7 +22,7 @@ PyLiteObject* pylt_mods_math_acos(PyLiteState *state, int argc, PyLiteObject **a
 
 
 PyLiteObject* pylt_mods_math_acosh(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, acosh(get_val(args[0]))));
     } else {
         // TODO
@@ -32,7 +32,7 @@ PyLiteObject* pylt_mods_math_acosh(PyLiteState *state, int argc, PyLiteObject **
 
 
 PyLiteObject* pylt_mods_math_asin(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, asin(get_val(args[0]))));
     } else {
         // TODO
@@ -42,7 +42,7 @@ PyLiteObject* pylt_mods_math_asin(PyLiteState *state, int argc, PyLiteObject **a
 
 
 PyLiteObject* pylt_mods_math_asinh(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, asinh(get_val(args[0]))));
     } else {
         // TODO
@@ -53,7 +53,7 @@ PyLiteObject* pylt_mods_math_asinh(PyLiteState *state, int argc, PyLiteObject **
 
 
 PyLiteObject* pylt_mods_math_atan(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, atan(get_val(args[0]))));
     } else {
         // TODO
@@ -63,7 +63,7 @@ PyLiteObject* pylt_mods_math_atan(PyLiteState *state, int argc, PyLiteObject **a
 
 
 PyLiteObject* pylt_mods_math_atan2(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0]) && pl_isnum(args[1])) {
+    if (pl_isnum(args[0]) && pl_isnum(args[1])) {
         return castobj(pylt_obj_float_new(state, atan2(get_val(args[0]), get_val(args[1]))));
     } else {
         // TODO
@@ -73,7 +73,7 @@ PyLiteObject* pylt_mods_math_atan2(PyLiteState *state, int argc, PyLiteObject **
 
 
 PyLiteObject* pylt_mods_math_atanh(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, atanh(get_val(args[0]))));
     } else {
         // TODO
@@ -83,7 +83,7 @@ PyLiteObject* pylt_mods_math_atanh(PyLiteState *state, int argc, PyLiteObject **
 
 
 PyLiteObject* pylt_mods_math_ceil(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, ceil(get_val(args[0]))));
     } else {
         // TODO
@@ -93,7 +93,7 @@ PyLiteObject* pylt_mods_math_ceil(PyLiteState *state, int argc, PyLiteObject **a
 
 
 PyLiteObject* pylt_mods_math_copysign(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0]) && pl_isnum(args[1])) {
+    if (pl_isnum(args[0]) && pl_isnum(args[1])) {
         return castobj(pylt_obj_float_new(state, copysign(get_val(args[0]), get_val(args[1]))));
     } else {
         // TODO
@@ -103,7 +103,7 @@ PyLiteObject* pylt_mods_math_copysign(PyLiteState *state, int argc, PyLiteObject
 
 
 PyLiteObject* pylt_mods_math_cos(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, cos(get_val(args[0]))));
     } else {
         // TODO
@@ -113,7 +113,7 @@ PyLiteObject* pylt_mods_math_cos(PyLiteState *state, int argc, PyLiteObject **ar
 
 
 PyLiteObject* pylt_mods_math_cosh(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, cosh(get_val(args[0]))));
     } else {
         // TODO
@@ -122,7 +122,7 @@ PyLiteObject* pylt_mods_math_cosh(PyLiteState *state, int argc, PyLiteObject **a
 }
 
 PyLiteObject* pylt_mods_math_degrees(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, get_val(args[0]) * 180.0 / MATH_PI));
     } else {
         // TODO
@@ -132,7 +132,7 @@ PyLiteObject* pylt_mods_math_degrees(PyLiteState *state, int argc, PyLiteObject 
 
 
 PyLiteObject* pylt_mods_math_erf(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, erf(get_val(args[0]))));
     } else {
         // TODO
@@ -142,7 +142,7 @@ PyLiteObject* pylt_mods_math_erf(PyLiteState *state, int argc, PyLiteObject **ar
 
 
 PyLiteObject* pylt_mods_math_erfc(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, erfc(get_val(args[0]))));
     } else {
         // TODO
@@ -152,7 +152,7 @@ PyLiteObject* pylt_mods_math_erfc(PyLiteState *state, int argc, PyLiteObject **a
 
 
 PyLiteObject* pylt_mods_math_exp(PyLiteState *state, int argc, PyLiteObject **args) {
-	if (pl_isnum(args[0])) {
+    if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(state, exp(get_val(args[0]))));
     } else {
         // TODO
