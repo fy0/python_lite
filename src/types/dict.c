@@ -1,7 +1,7 @@
 ﻿
 #include "dict.h"
 #include "string.h"
-#include "../state.h"
+#include "../misc.h"
 
 pl_int_t pylt_obj_dict_cmp(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *other) {
     return 2;

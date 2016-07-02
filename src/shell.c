@@ -1,5 +1,5 @@
 ﻿
-#include "misc.h"
+#include "config.h"
 #include "lexer.h"
 #include "parser.h"
 #include "io.h"

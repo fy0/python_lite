@@ -1,7 +1,7 @@
 ﻿
 #include "tuple.h"
 #include "string.h"
-#include "../state.h"
+#include "../misc.h"
 
 struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteState *state, PyLiteTupleObject *self) {
     int index = 0;

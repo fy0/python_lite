@@ -1,7 +1,7 @@
 ﻿
 #include "bool.h"
 #include "number.h"
-#include "../state.h"
+#include "../misc.h"
 
 PyLiteBoolObject PyLiteTrue = { PYLT_OBJ_TYPE_BOOL, -1 };
 PyLiteBoolObject PyLiteFalse = { PYLT_OBJ_TYPE_BOOL, 0 };

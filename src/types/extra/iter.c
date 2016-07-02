@@ -1,7 +1,7 @@
 ﻿
 #include "iter.h"
 #include "../all.h"
-#include "../../state.h"
+#include "../../misc.h"
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
     PyLiteIterObject *iter;

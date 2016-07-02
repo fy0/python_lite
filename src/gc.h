@@ -2,7 +2,7 @@
 #ifndef PYLITE_GC_H
 #define PYLITE_GC_H
 
-#include "misc.h"
+#include "config.h"
 #include "types/set.h"
 
 #define up_hash_func(state, key) (pl_uint32_t)(key)

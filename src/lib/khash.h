@@ -176,7 +176,7 @@ typedef khint_t khiter_t;
 #define kroundup32(x) (--(x), (x)|=(x)>>1, (x)|=(x)>>2, (x)|=(x)>>4, (x)|=(x)>>8, (x)|=(x)>>16, ++(x))
 #endif
 
-#include "../misc.h"
+#include "../config.h"
 
 #ifndef kcalloc
 void* my_malloc(size_t size);

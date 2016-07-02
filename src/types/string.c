@@ -2,7 +2,7 @@
 #include "bool.h"
 #include "string.h"
 #include "list.h"
-#include "../state.h"
+#include "../misc.h"
 #include "../api.h"
 
 static PyLiteStrObject* hash_and_check_cache(PyLiteState *state, PyLiteStrObject *obj) {

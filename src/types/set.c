@@ -1,7 +1,7 @@
 ﻿
 #include "set.h"
 #include "../debug.h"
-#include "../state.h"
+#include "../misc.h"
 
 pl_int_t pylt_obj_set_cmp(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *other) {
     if (other->ob_type == PYLT_OBJ_TYPE_SET) {

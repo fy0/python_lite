@@ -1,7 +1,7 @@
 ﻿
 #include "list.h"
 #include "string.h"
-#include "../state.h"
+#include "../misc.h"
 
 PyLiteListObject* pylt_obj_list_new(PyLiteState *state) {
     PyLiteListObject *obj = pylt_realloc(NULL, sizeof(PyLiteListObject));
