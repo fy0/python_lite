@@ -34,6 +34,7 @@ void pylt_state_init(PyLiteState *state) {
 }
 
 void pylt_state_finalize(PyLiteState *state) {
+    pylt_gc_collect(state);
     pylt_lex_finalize(state, state->lexer);
     pylt_parser_finalize(state, state->parser);
     pylt_vm_finalize(state);

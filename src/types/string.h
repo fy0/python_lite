@@ -28,7 +28,8 @@ PyLiteStrObject* pylt_obj_str_join(PyLiteState *state, PyLiteStrObject *separato
 PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, uint32_t *str, int size, bool is_raw);
 PyLiteStrObject* pylt_obj_str_new_from_c_str(PyLiteState *state, char *str, bool is_raw);
 PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObject *format, ...);
-//PyLiteStrObject* pylt_obj_str_new_from_c_format(PyLiteState *state, const char *format, ...);
+#define pylt_obj_str_new_from_cformat(state, cformat, ...) \
+    pylt_obj_str_new_from_format(state, pylt_obj_str_new_from_c_str(state, (cformat), false), __VA_ARGS__)
 PyLiteStrObject* pylt_obj_str_new_empty(PyLiteState *state);
 
 

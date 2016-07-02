@@ -5,22 +5,26 @@
 #include "misc.h"
 #include "types/set.h"
 
+#define up_hash_func(state, key) (pl_uint32_t)(key)
+#define up_hash_equal(state, a, b) ((a) == (b))
+
+KHASHO_INIT(unique_ptr, PyLiteObject*, char, 0, up_hash_func, up_hash_equal);
+typedef khasho_t(unique_ptr) PyLiteUPSet;
+
+
 typedef struct PyLiteGC {
-    PyLiteSetObject *white;
-    PyLiteSetObject *grey;
-    PyLiteSetObject *black;
-    PyLiteSetObject *statics;
+    PyLiteUPSet *white;
+    PyLiteUPSet *grey;
+    PyLiteUPSet *black;
+    PyLiteUPSet *statics;
 } PyLiteGC;
 
 void pylt_gc_init(PyLiteState *state);
 void pylt_gc_finalize(PyLiteState *state);
 void pylt_gc_add(PyLiteState *state, PyLiteObject *obj);
-void pylt_gc_local_add(PyLiteState *state, PyLiteObject *obj);
+void pylt_gc_collect(PyLiteState *state);
+
 void pylt_gc_static_add(PyLiteState *state, PyLiteObject *obj);
-
-void pylt_gc_local_release(PyLiteState *state);
 void pylt_gc_static_release(PyLiteState *state);
-
-pl_bool_t pylt_gc_isstatic(PyLiteState *state, PyLiteObject *obj);
 
 #endif

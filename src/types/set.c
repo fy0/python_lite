@@ -82,8 +82,9 @@ PyLiteObject* pylt_obj_set_pop(PyLiteState *state, PyLiteSetObject *self) {
     if (kho_size(self->ob_val) == 0)
         return NULL;
     k = pylt_obj_set_begin(state, self);
+    PyLiteObject *obj = pylt_obj_set_itemvalue(state, self, k);
     kho_del(set_obj, self->ob_val, k);
-    return pylt_obj_set_itemvalue(state, self, k);
+    return obj;
 }
 
 pl_int_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self) {
@@ -121,7 +122,7 @@ struct PyLiteStrObject* pylt_obj_set_to_str(PyLiteState *state, PyLiteSetObject 
     pl_uint_t slen = pylt_obj_set_len(state, self);
 
     if (slen == 0) {
-        return pl_static.str.TMPL_EMPTY_SET; // {}
+        return pl_static.str.TMPL_EMPTY_SET; // set()
     }
 
     pl_uint32_t *data;

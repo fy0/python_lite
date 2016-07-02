@@ -277,9 +277,8 @@ void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self) {
 }
 
 void pylt_obj_str_safefree(PyLiteState *state, PyLiteStrObject *self) {
-    if (!pylt_gc_isstatic(state, castobj(self))) {
-        pylt_obj_str_free(state, self);
-    }
+    // TODO: remove
+    pylt_obj_str_free(state, self);
 }
 
 pl_int_t pylt_obj_str_index_full(PyLiteState *state, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end) {
