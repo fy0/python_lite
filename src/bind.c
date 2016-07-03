@@ -31,7 +31,7 @@ PyLiteTupleObject* _NST(PyLiteState *state, int n, ...) {
     obj = pylt_obj_tuple_new(state, n);
 
     for (int i = 0; i < n; ++i) {
-        obj->ob_val[i] = castobj(pylt_obj_str_new_from_c_str(state, va_arg(args, char*), true));
+        obj->ob_val[i] = castobj(pylt_obj_str_new_from_cstr(state, va_arg(args, char*), true));
     }
     va_end(args);
     return obj;

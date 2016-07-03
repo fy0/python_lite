@@ -1,5 +1,6 @@
 ﻿
 #include "state.h"
+#include "misc.h"
 
 void pylt_state_err(PyLiteState *state) {
     exit(-1);
@@ -19,8 +20,6 @@ void pylt_state_free(PyLiteState *state) {
 void pylt_state_init(PyLiteState *state) {
     kv_init(state->cls_base);
     state->modules = pylt_obj_dict_new(state);
-    state->cache_str = pylt_obj_set_new(state);
-    state->cache_bytes = pylt_obj_set_new(state);
     state->error_code = 0;
 
     state->lexer = pylt_realloc(NULL, sizeof(LexState));
@@ -55,8 +54,6 @@ void pylt_state_finalize(PyLiteState *state) {
     }
  
     pylt_obj_dict_free(state, state->modules);
-    pylt_obj_set_free(state, state->cache_str);
-    pylt_obj_set_free(state, state->cache_bytes);
     pylt_gc_finalize(state);
 
     pylt_free(state->lexer);

@@ -133,7 +133,7 @@ pl_int_t pylt_obj_cmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b) {
         case PYLT_OBJ_TYPE_DICT: return pylt_obj_dict_cmp(state, castdict(a), b);
         default:
             if (a->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                PyLiteObject *hash_func = pylt_obj_getattr(state, a, castobj(pylt_obj_str_new_from_c_str(state, "__cmp__", true)), NULL);
+                PyLiteObject *hash_func = pylt_obj_getattr(state, a, castobj(pl_static.str.__cmp__), NULL);
                 if (hash_func) {
                     PyLiteObject *ret = pylt_vm_call_method(state, a, hash_func, 1, b);
                     if (ret->ob_type == PYLT_OBJ_TYPE_INT) {

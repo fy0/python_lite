@@ -26,10 +26,13 @@ pl_int_t pylt_obj_str_index_full(PyLiteState *state, PyLiteStrObject *self, PyLi
 PyLiteStrObject* pylt_obj_str_join(PyLiteState *state, PyLiteStrObject *separator, PyLiteObject *seq);
 
 PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, uint32_t *str, int size, bool is_raw);
-PyLiteStrObject* pylt_obj_str_new_from_c_str(PyLiteState *state, char *str, bool is_raw);
+PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObject *format, va_list args);
+
+PyLiteStrObject* pylt_obj_str_new_from_cstr(PyLiteState *state, const char *str, bool is_raw);
+PyLiteStrObject* pylt_obj_str_new_from_cstr_static(PyLiteState *state, const char *str, bool is_raw);
 PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObject *format, ...);
-#define pylt_obj_str_new_from_cformat(state, cformat, ...) \
-    pylt_obj_str_new_from_format(state, pylt_obj_str_new_from_c_str(state, (cformat), false), __VA_ARGS__)
+PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteState *state, const char *format, ...);
+PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteState *state, const char *format, ...);
 PyLiteStrObject* pylt_obj_str_new_empty(PyLiteState *state);
 
 

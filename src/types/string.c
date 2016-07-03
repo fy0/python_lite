@@ -6,18 +6,8 @@
 #include "../api.h"
 
 static PyLiteStrObject* hash_and_check_cache(PyLiteState *state, PyLiteStrObject *obj) {
-    PyLiteStrObject *obj2;
     obj->ob_hash = pylt_obj_str_forcehash(state, obj);
-    if (state) {
-        obj2 = caststr(pylt_obj_set_has(state, state->cache_str, castobj(obj)));
-        if (obj2) {
-            pylt_obj_str_free(state, obj);
-            return obj2;
-        } else {
-            pylt_obj_set_add(state, state->cache_str, castobj(obj));
-        }
-    }
-    return obj;
+    return (state) ? pylt_gc_cache_str_add(state, obj) : obj;
 }
 
 pl_int_t pylt_obj_str_cmp(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other) {
@@ -247,7 +237,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, uint32_t *str, int size, b
     return hash_and_check_cache(state, obj);
 }
 
-PyLiteStrObject* pylt_obj_str_new_from_c_str(PyLiteState *state, char *str, bool is_raw) {
+PyLiteStrObject* pylt_obj_str_new_from_cstr(PyLiteState *state, const char *str, bool is_raw) {
     uint32_t code;
     PyLiteStrObject *obj;
     const char *p = (const char *)str;
@@ -360,10 +350,7 @@ PyLiteStrObject* pylt_obj_str_join(PyLiteState *state, PyLiteStrObject *separato
     return NULL;
 }
 
-PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObject *format, ...) {
-    va_list args;
-    va_start(args, format);
-
+PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObject *format, va_list args) {
     pl_int_t slen;
     uint32_t *tmp;
     PyLiteObject *obj;
@@ -469,6 +456,36 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObjec
     str->ob_val[writer.dindex] = '\0';
     //str->ob_val = pylt_realloc(str->ob_val, sizeof(uint32_t) * (str_size + 1));
 
-    va_end(args);
     return hash_and_check_cache(state, str);
+}
+
+PyLiteStrObject* pylt_obj_str_new_from_cstr_static(PyLiteState *state, const char *str, bool is_raw) {
+    PyLiteStrObject *ret = pylt_obj_str_new_from_cstr(state, str, is_raw);
+    pylt_gc_make_str_static(state, castobj(ret));
+    return ret;
+}
+
+PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObject *format, ...) {
+    va_list args;
+    va_start(args, format);
+    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(state, format, args);
+    va_end(args);
+    return str;
+}
+
+PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteState *state, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(state, pylt_obj_str_new_from_cstr(state, format, true), args);
+    va_end(args);
+    return str;
+}
+
+PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteState *state, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(state, pylt_obj_str_new_from_cstr(state, format, true), args);
+    pylt_gc_make_str_static(state, castobj(str));
+    va_end(args);
+    return str;
 }

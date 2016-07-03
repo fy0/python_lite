@@ -5,16 +5,8 @@
 #include "../state.h"
 
 static PyLiteBytesObject* hash_and_check_cache(PyLiteState *state, PyLiteBytesObject *obj) {
-    PyLiteBytesObject *obj2;
     obj->ob_hash = pylt_obj_bytes_forcehash(state, obj);
-    obj2 = castbytes(pylt_obj_set_has(state, state->cache_bytes, castobj(obj)));
-    if (obj2) {
-        pylt_obj_bytes_free(state, obj);
-        return obj2;
-    } else {
-        pylt_obj_set_add(state, state->cache_bytes, castobj(obj));
-    }
-    return obj;
+    return (state) ? pylt_gc_cache_bytes_add(state, obj) : obj;
 }
 
 pl_int_t pylt_obj_bytes_cmp(PyLiteState *state, PyLiteBytesObject *self, PyLiteObject *other) {

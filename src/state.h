@@ -17,8 +17,6 @@ typedef struct PyLiteState {
     ParserState *parser;
 
     kvec_t(PyLiteTypeObject*) cls_base;
-    PyLiteSetObject *cache_str;
-    PyLiteSetObject *cache_bytes;
     PyLiteDictObject *modules;
     pl_int_t class_num;
     int error_code;

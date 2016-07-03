@@ -23,7 +23,7 @@ PyLiteObject* upset_has(PyLiteUPSet *upset, PyLiteObject *obj) {
 
 pl_int_t upset_remove(PyLiteUPSet *upset, PyLiteObject *obj) {
     khiter_t x = kho_get(unique_ptr, upset, obj);
-    if (kho_exist(upset, x) != 1) return -1;
+    if (!(upset->flags && (kho_exist(upset, x)))) return -1;
     kho_del(unique_ptr, upset, x);
     return 0;
 }
@@ -66,10 +66,17 @@ void pylt_gc_add(PyLiteState *state, PyLiteObject *obj) {
     upset_add(state->gc.white, obj);
 }
 
+void pylt_gc_remove(PyLiteState *state, PyLiteObject *obj) {
+    upset_remove(state->gc.white, obj);
+}
+
 void pylt_gc_init(PyLiteState *state) {
     state->gc.white = upset_new(state);
     state->gc.grey = upset_new(state);
     state->gc.black = upset_new(state);
+
+    state->gc.str_static = pylt_obj_set_new(state);
+    state->gc.str_cached = pylt_obj_set_new(state);
 }
 
 void pylt_gc_collect(PyLiteState *state) {
@@ -154,8 +161,10 @@ void pylt_gc_collect(PyLiteState *state) {
         PyLiteObject *obj = upset_item(white, k);
         pylt_api_output_str(state, pylt_obj_str_new_from_cformat(state, "gc free %p %s\n", obj, pylt_obj_to_str(state, obj)));
 
-        //printf("gc free 0x%p\n", obj);
-        pylt_obj_free(state, upset_item(white, k));
+        // check static before free
+        if (!((pl_isstr(obj) || pl_isbytes(obj)) && pylt_obj_set_has(state, state->gc.str_static, obj))) {
+            pylt_obj_free(state, upset_item(white, k));
+        }
     }
     upset_clear(white);
 
@@ -165,14 +174,41 @@ void pylt_gc_collect(PyLiteState *state) {
 }
 
 void pylt_gc_finalize(PyLiteState *state) {
-    //pylt_gc_static_release(state);
     upset_free(state->gc.white);
     upset_free(state->gc.grey);
     upset_free(state->gc.black);
+    pylt_obj_set_free(state, state->gc.str_static);
+    pylt_obj_set_free(state, state->gc.str_cached);
 }
 
-void pylt_gc_static_add(PyLiteState *state, PyLiteObject *obj) {
-    //upset_add(state, state->gc.g_static, obj);
+PyLiteObject* _pylt_gc_cache_add(PyLiteState *state, PyLiteObject *key) {
+    PyLiteSetObject *cache = state->gc.str_cached;
+    PyLiteObject *ret = pylt_obj_set_has(state, cache, key);
+    if (!ret) pylt_obj_set_add(state, cache, key);
+    return ret;
+}
+
+PyLiteStrObject* pylt_gc_cache_str_add(PyLiteState *state, PyLiteStrObject *key) {
+    PyLiteStrObject* ret = caststr(_pylt_gc_cache_add(state, castobj(key)));
+    if (ret) {
+        pylt_obj_str_free(state, key);
+        return ret;
+    }
+    return key;
+}
+
+void pylt_gc_make_str_static(PyLiteState *state, PyLiteObject *obj) {
+    upset_remove(state->gc.white, obj);
+    pylt_obj_set_add(state, state->gc.str_static, obj);
+}
+
+PyLiteBytesObject* pylt_gc_cache_bytes_add(PyLiteState *state, PyLiteBytesObject *key) {
+    PyLiteBytesObject* ret = castbytes(_pylt_gc_cache_add(state, castobj(key)));
+    if (ret) {
+        pylt_obj_bytes_free(state, key);
+        return ret;
+    }
+    return key;
 }
 
 void pylt_gc_static_release(PyLiteState *state) {

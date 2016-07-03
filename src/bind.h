@@ -16,7 +16,7 @@ PyLiteCFunctionObject* pylt_cclsmethod_register_0_args(PyLiteState *state, PyLit
 void pylt_cprop_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *key, PyLiteCFunctionPtr cfget, PyLiteCFunctionPtr cfset);
 void pylt_attr_register(PyLiteState *state, PyLiteTypeObject *type, PyLiteStrObject *key, PyLiteObject *value);
 
-#define _NS(state, str) pylt_obj_str_new_from_c_str(state, str, true)
+#define _NS(state, str) pylt_obj_str_new_from_cstr(state, str, true)
 #define _NI(_int_val) pylt_obj_int_new(state, (_int_val))
 
 // static string
@@ -27,7 +27,6 @@ PyLiteTupleObject* _NST(PyLiteState *state, int n, ...);
 
 pl_uint_t* _UINTS(pl_uint_t n, ...);
 
-//#define NS(str) pylt_obj_str_new_from_c_str(state, str, true)
 
 #define PARAM_NODEF  0
 #define PARAM_ARGS   1
