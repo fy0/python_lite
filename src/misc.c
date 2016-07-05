@@ -85,6 +85,9 @@ void pylt_misc_static_objs_init(PyLiteState *state) {
     pl_static.str.insert = pylt_obj_str_new_from_cstr_static(state, "insert", true);
     pl_static.str.reverse = pylt_obj_str_new_from_cstr_static(state, "reverse", true);
 
+    pl_static.str.fget = pylt_obj_str_new_from_cstr_static(state, "fget", true);
+    pl_static.str.fset = pylt_obj_str_new_from_cstr_static(state, "fset", true);
+
     pl_static.str.None = pylt_obj_str_new_from_cstr_static(state, "None", true);
     pl_static.str.True = pylt_obj_str_new_from_cstr_static(state, "True", true);
     pl_static.str.False = pylt_obj_str_new_from_cstr_static(state, "False", true);

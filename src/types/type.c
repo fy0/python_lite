@@ -52,7 +52,7 @@ pl_uint32_t pylt_obj_type_hash(PyLiteState *state, PyLiteTypeObject *self) {
 }
 
 void pylt_obj_type_free(PyLiteState *state, PyLiteTypeObject *self) {
-    pylt_obj_str_safefree(state, self->name);
+    pylt_obj_str_free(state, self->name);
     pylt_obj_dict_free(state, self->ob_attrs);
     pylt_free(self);
 }

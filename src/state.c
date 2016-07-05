@@ -39,7 +39,7 @@ void pylt_state_finalize(PyLiteState *state) {
     pylt_vm_finalize(state);
 
     // free types
-    for (pl_uint_t i = 0; i < kv_size(state->cls_base); ++i) {
+    for (pl_uint_t i = 1; i < kv_size(state->cls_base); ++i) {
         pylt_obj_type_free(state, kv_A(state->cls_base, i));
     }
     kv_destroy(state->cls_base);

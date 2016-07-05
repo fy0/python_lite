@@ -95,6 +95,10 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *insert;
         PyLiteStrObject *reverse;
 
+        // prop
+        PyLiteStrObject *fget;
+        PyLiteStrObject *fset;
+
         PyLiteStrObject *None;
         PyLiteStrObject *True;
         PyLiteStrObject *False;

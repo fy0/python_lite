@@ -4,11 +4,12 @@
 #include "debug.h"
 #include "api.h"
 #include "bind.h"
+#include "types/all.h"
 
 int __upset_ret;
 #define upset_new(state) kho_init(unique_ptr, (state));
 #define upset_free(upset) kho_destroy(unique_ptr, (upset));
-#define upset_add(upset, obj) kho_put(unique_ptr, (upset), (obj), &__upset_ret);
+#define upset_add(upset, __obj) kho_put(unique_ptr, (upset), (__obj), &__upset_ret);
 #define upset_len(upset) (pl_int_t)kho_size((upset))
 #define upset_clear(upset) kho_clear_unique_ptr((upset))
 
@@ -63,7 +64,14 @@ PyLiteObject* upset_pop(PyLiteUPSet *upset) {
 }
 
 void pylt_gc_add(PyLiteState *state, PyLiteObject *obj) {
-    upset_add(state->gc.white, obj);
+    if (!obj) return;
+    if (!(pl_isstrkind(obj) && pylt_obj_set_has(state, state->gc.str_static, obj))) {
+        if (obj == NULL)
+            printf("123\n");
+        if (obj->ob_type == PYLT_OBJ_TYPE_CODE)
+            printf("123\n");
+        upset_add(state->gc.white, obj);
+    }
 }
 
 void pylt_gc_remove(PyLiteState *state, PyLiteObject *obj) {
@@ -85,16 +93,18 @@ void pylt_gc_collect(PyLiteState *state) {
     PyLiteUPSet *grey = state->gc.grey;
     PyLiteFrame *frame = pylt_vm_curframe(state);
 
-    /*for (pl_int_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
-        printf("GC: ");
-        debug_print_obj(state, upset_item(white, k));
-        putchar('\n');
-    }*/
+    for (pl_int_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
+        //printf("GC: ");
+        //debug_print_obj(state, upset_item(white, k));
+        //putchar('\n');
+        if (upset_item(white, k) == NULL)
+            printf("11111111111111\n");
+    }
 
 #define MOVE_WHITE(__obj) \
-    if (upset_has(white, (__obj))) { \
-        upset_remove(white, (__obj)); \
-        upset_add(grey, (__obj)); \
+    if (upset_has(white, castobj(__obj))) { \
+        upset_remove(white, castobj(__obj)); \
+        upset_add(grey, castobj(__obj)); \
     }
 
     // 将被引用到的对象从 White 放到 Grey 集合中
@@ -103,12 +113,27 @@ void pylt_gc_collect(PyLiteState *state) {
 
         for (pl_int_t it = pylt_obj_dict_begin(state, scope); it != pylt_obj_dict_end(state, scope); pylt_obj_dict_next(state, scope, &it)) {
             pylt_obj_dict_keyvalue(state, scope, it, &k, &v);
+            MOVE_WHITE(k);
             MOVE_WHITE(v);
         }
+
+        MOVE_WHITE(frame->func);
+        MOVE_WHITE(frame->code);
+        //printf("11111111111111 %p\n", frame->code->const_val->ob_val[2]);
     }
     for (pl_uint_t i = 0; i < kv_size(state->vm.stack); ++i) {
         PyLiteObject *obj = castobj(kv_A(state->vm.stack, i));
         MOVE_WHITE(obj);
+    }
+    for (pl_uint_t i = 1; i < kv_size(state->cls_base); ++i) {
+        PyLiteDictObject *dict = kv_A(state->cls_base, i)->ob_attrs;
+        PyLiteTypeObject *type = pylt_api_gettype(state, i);
+        MOVE_WHITE(type->name);
+        for (pl_int_t it = pylt_obj_dict_begin(state, dict); it != pylt_obj_dict_end(state, dict); pylt_obj_dict_next(state, dict, &it)) {
+            pylt_obj_dict_keyvalue(state, dict, it, &k, &v);
+            MOVE_WHITE(k);
+            MOVE_WHITE(v);
+        }
     }
 
     while (upset_len(grey)) {
@@ -126,18 +151,56 @@ void pylt_gc_collect(PyLiteState *state) {
             case PYLT_OBJ_TYPE_STR:
             case PYLT_OBJ_TYPE_BYTES:
 
-            case PYLT_OBJ_TYPE_MODULE:
-            case PYLT_OBJ_TYPE_FUNCTION:
-            case PYLT_OBJ_TYPE_CFUNCTION:
-            case PYLT_OBJ_TYPE_CODE:
-
             case PYLT_OBJ_TYPE_TYPE:
             case PYLT_OBJ_TYPE_ITER:
-            case PYLT_OBJ_TYPE_PROP:
             case PYLT_OBJ_TYPE_NONE:
             case PYLT_OBJ_TYPE_RANGE:
             case PYLT_OBJ_TYPE_BASE_EXCEPTION:
                 break;
+            case PYLT_OBJ_TYPE_MODULE: {
+                // attr
+                PyLiteDictObject *dict = castmod(obj)->attrs;
+                for (pl_int_t it = pylt_obj_dict_begin(state, dict); it != pylt_obj_dict_end(state, dict); pylt_obj_dict_next(state, dict, &it)) {
+                    pylt_obj_dict_keyvalue(state, dict, it, &k, &v);
+                    MOVE_WHITE(k);
+                    MOVE_WHITE(v);
+                }
+                // code
+                PyLiteListObject *lst = castcode(obj)->const_val;
+                for (pl_int_t i = 0; i < lst->ob_size; ++i) {
+                    MOVE_WHITE(lst->ob_val[i]);
+                }
+                break;
+            }
+            case PYLT_OBJ_TYPE_FUNCTION: {
+                PyLiteListObject *lst = castfunc(obj)->code.const_val;
+                for (pl_int_t i = 0; i < lst->ob_size; ++i) {
+                    MOVE_WHITE(lst->ob_val[i]);
+                }
+            }
+            case PYLT_OBJ_TYPE_CFUNCTION:
+                MOVE_WHITE(castfunc(obj)->info.name);
+                MOVE_WHITE(castfunc(obj)->info.doc);
+
+                for (pl_int_t i = 0; i < castfunc(obj)->info.length; ++i) {
+                    MOVE_WHITE(castfunc(obj)->info.params[i]);
+                }
+
+                if (castfunc(obj)->info.defaults) {
+                    for (pl_int_t i = 0; i < castfunc(obj)->info.length; ++i) {
+                        if (castfunc(obj)->info.defaults[i] > PARAM_KWARGS) {
+                            MOVE_WHITE(castfunc(obj)->info.defaults[i]);
+                        }
+                    }
+                }
+                break;
+            case PYLT_OBJ_TYPE_CODE: {
+                PyLiteListObject *lst = castcode(obj)->const_val;
+                for (pl_int_t i = 0; i < lst->ob_size; ++i) {
+                    MOVE_WHITE(lst->ob_val[i]);
+                }
+                break;
+            }
             case PYLT_OBJ_TYPE_LIST:
             case PYLT_OBJ_TYPE_SET:
             case PYLT_OBJ_TYPE_TUPLE: {
@@ -145,8 +208,20 @@ void pylt_gc_collect(PyLiteState *state) {
                 for (PyLiteObject *item = pylt_obj_iter_next(state, iter); item; item = pylt_obj_iter_next(state, iter)) {
                     MOVE_WHITE(item);
                 }
+                break;
             }
-            //case PYLT_OBJ_TYPE_DICT: 
+            case PYLT_OBJ_TYPE_DICT: {
+                for (pl_int_t it = pylt_obj_dict_begin(state, castdict(obj)); it != pylt_obj_dict_end(state, castdict(obj)); pylt_obj_dict_next(state, castdict(obj), &it)) {
+                    pylt_obj_dict_keyvalue(state, castdict(obj), it, &k, &v);
+                    MOVE_WHITE(k);
+                    MOVE_WHITE(v);
+                }
+                break;
+            }
+            case PYLT_OBJ_TYPE_PROP:
+                MOVE_WHITE(castprop(obj)->fget.func);
+                MOVE_WHITE(castprop(obj)->fset.func);
+                break;
             default:
                 if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                     ;
@@ -159,11 +234,12 @@ void pylt_gc_collect(PyLiteState *state) {
     // 将未标记对象全部释放
     for (pl_int_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
         PyLiteObject *obj = upset_item(white, k);
-        pylt_api_output_str(state, pylt_obj_str_new_from_cformat(state, "gc free %p %s\n", obj, pylt_obj_to_str(state, obj)));
 
         // check static before free
-        if (!((pl_isstr(obj) || pl_isbytes(obj)) && pylt_obj_set_has(state, state->gc.str_static, obj))) {
-            pylt_obj_free(state, upset_item(white, k));
+        if (!(pl_isstrkind(obj) && pylt_obj_set_has(state, state->gc.str_static, obj))) {
+            pylt_api_output_str(state, pylt_obj_str_new_from_cformat(state, "gc free %p %s ", obj, pylt_obj_to_str(state, obj)));
+            printf("[%d]\n", obj->ob_type);
+            pylt_obj_free(state, obj);
         }
     }
     upset_clear(white);
@@ -185,6 +261,7 @@ PyLiteObject* _pylt_gc_cache_add(PyLiteState *state, PyLiteObject *key) {
     PyLiteSetObject *cache = state->gc.str_cached;
     PyLiteObject *ret = pylt_obj_set_has(state, cache, key);
     if (!ret) pylt_obj_set_add(state, cache, key);
+    pylt_gc_add(state, ret ? ret : key);
     return ret;
 }
 

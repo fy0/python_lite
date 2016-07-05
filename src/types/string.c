@@ -262,6 +262,10 @@ PyLiteStrObject* pylt_obj_str_new_empty(PyLiteState *state) {
 }
 
 void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self) {
+    if (state) {
+        if (pylt_obj_set_has(state, state->gc.str_static, castobj(self))) return;
+        pylt_obj_set_remove(state, state->gc.str_cached, castobj(self));
+    }
     pylt_free(self->ob_val);
     pylt_free(self);
 }

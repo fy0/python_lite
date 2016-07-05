@@ -67,6 +67,7 @@ PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteState *state, PyLiteStrObject *n
     func->info.minimal = func->info.length - (defaults ? defaults->ob_size : 0);
 
     func->info.name = name;
+    func->info.doc = NULL;
     func->info.params = param_names ? (PyLiteStrObject**)param_names->ob_val : NULL;
     func->info.defaults = defaults ? defaults->ob_val : NULL;
     func->info.type_codes = types;
