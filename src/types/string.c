@@ -262,16 +262,15 @@ PyLiteStrObject* pylt_obj_str_new_empty(PyLiteState *state) {
 }
 
 void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self) {
-    if (state) {
-        if (pylt_obj_set_has(state, state->gc.str_static, castobj(self))) return;
-        pylt_obj_set_remove(state, state->gc.str_cached, castobj(self));
-    }
     pylt_free(self->ob_val);
     pylt_free(self);
 }
 
 void pylt_obj_str_safefree(PyLiteState *state, PyLiteStrObject *self) {
-    // TODO: remove
+    if (state) {
+        if (pylt_obj_set_has(state, state->gc.str_static, castobj(self))) return;
+        pylt_obj_set_remove(state, state->gc.str_cached, castobj(self));
+    }
     pylt_obj_str_free(state, self);
 }
 
@@ -444,9 +443,9 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
             }
 
             pl_uint32_t rest = writer.fstr->ob_size - writer.findex;
-            if (writer.dindex + rest + slen + 1 > writer.dsize) {
-                writer.dstr->ob_val = pylt_realloc(writer.dstr->ob_val, sizeof(uint32_t) * (format->ob_size + rest + slen + 1));
-                writer.dsize = format->ob_size + rest + slen;
+            if (writer.dindex + rest + slen > writer.dsize) {
+                writer.dstr->ob_val = pylt_realloc(writer.dstr->ob_val, sizeof(uint32_t) * (writer.dindex + rest + slen + 1));
+                writer.dsize = writer.dindex + rest + slen;
             }
 
             memcpy(writer.dstr->ob_val + writer.dindex, tmp, sizeof(uint32_t)*slen);

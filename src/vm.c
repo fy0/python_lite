@@ -309,7 +309,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
 
     for (pl_uint_t i = 0; ; ++i) {
         ins = kv_A(code->opcodes, i);
-        if (i % 25 == 0) pylt_gc_collect(state);
+        if (i && (i % 25 == 0)) pylt_gc_collect(state);
 
         switch (ins.code) {
             case BC_LOADCONST:

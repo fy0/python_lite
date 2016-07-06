@@ -93,18 +93,26 @@ void pylt_gc_collect(PyLiteState *state) {
     PyLiteUPSet *grey = state->gc.grey;
     PyLiteFrame *frame = pylt_vm_curframe(state);
 
-    for (pl_int_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
+    /*for (pl_int_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
         //printf("GC: ");
         //debug_print_obj(state, upset_item(white, k));
         //putchar('\n');
-        if (upset_item(white, k) == NULL)
-            printf("11111111111111\n");
-    }
+    }*/
 
 #define MOVE_WHITE(__obj) \
     if (upset_has(white, castobj(__obj))) { \
         upset_remove(white, castobj(__obj)); \
         upset_add(grey, castobj(__obj)); \
+    }
+
+    for (pl_uint_t i = 0; i < kv_size(state->vm.frames); ++i) {
+        PyLiteFrame *f = &kv_A(state->vm.frames, i);
+        if (f->code) {
+            PyLiteListObject *lst = castcode(f->code)->const_val;
+            for (pl_int_t i = 0; i < lst->ob_size; ++i) {
+                MOVE_WHITE(lst->ob_val[i]);
+            }
+        }
     }
 
     // 将被引用到的对象从 White 放到 Grey 集合中
@@ -239,6 +247,9 @@ void pylt_gc_collect(PyLiteState *state) {
         if (!(pl_isstrkind(obj) && pylt_obj_set_has(state, state->gc.str_static, obj))) {
             pylt_api_output_str(state, pylt_obj_str_new_from_cformat(state, "gc free %p %s ", obj, pylt_obj_to_str(state, obj)));
             printf("[%d]\n", obj->ob_type);
+            if (pl_isstrkind(obj)) {
+                pylt_obj_set_remove(state, state->gc.str_cached, obj);
+            }
             pylt_obj_free(state, obj);
         }
     }
