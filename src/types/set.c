@@ -72,7 +72,7 @@ PyLiteObject* pylt_obj_set_has(PyLiteState *state, PyLiteSetObject *self, PyLite
 
 pl_int_t pylt_obj_set_remove(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *obj) {
     khiter_t x = kho_get(set_obj, self->ob_val, obj);
-    if (kho_exist(self->ob_val, x) != 1) return -1;
+    if (!(self->ob_val->flags && (kho_exist(self->ob_val, x)))) return -1;
     kho_del(set_obj, self->ob_val, x);
     return 0;
 }

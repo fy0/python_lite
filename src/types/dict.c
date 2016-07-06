@@ -49,7 +49,7 @@ pl_bool_t pylt_obj_dict_has(PyLiteState *state, PyLiteDictObject *self, PyLiteOb
 
 pl_bool_t pylt_obj_dict_remove(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key) {
     khiter_t k = kho_get(table, self->ob_val, key);
-    if (k == kho_end(self->ob_val)) return false;
+    if (!(self->ob_val->flags && (kho_exist(self->ob_val, k)))) return false;
     else kho_del(table, self->ob_val, k);
     return true;
 }
