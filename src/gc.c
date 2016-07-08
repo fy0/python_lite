@@ -105,16 +105,6 @@ void pylt_gc_collect(PyLiteState *state) {
         upset_add(grey, castobj(__obj)); \
     }
 
-    for (pl_uint_t i = 0; i < kv_size(state->vm.frames); ++i) {
-        PyLiteFrame *f = &kv_A(state->vm.frames, i);
-        if (f->code) {
-            PyLiteListObject *lst = castcode(f->code)->const_val;
-            for (pl_int_t i = 0; i < lst->ob_size; ++i) {
-                MOVE_WHITE(lst->ob_val[i]);
-            }
-        }
-    }
-
     // 将被引用到的对象从 White 放到 Grey 集合中
     for (int i = kv_size(frame->var_tables) - 1; i >= 0; --i) {
         PyLiteDictObject *scope = kv_A(frame->var_tables, i);
@@ -126,8 +116,6 @@ void pylt_gc_collect(PyLiteState *state) {
         }
 
         MOVE_WHITE(frame->func);
-        MOVE_WHITE(frame->code);
-        //printf("11111111111111 %p\n", frame->code->const_val->ob_val[2]);
     }
     for (pl_uint_t i = 0; i < kv_size(state->vm.stack); ++i) {
         PyLiteObject *obj = castobj(kv_A(state->vm.stack, i));
@@ -142,6 +130,11 @@ void pylt_gc_collect(PyLiteState *state) {
             MOVE_WHITE(k);
             MOVE_WHITE(v);
         }
+    }
+    PyLiteSetObject *strset = state->parser->strset;
+    for (pl_int_t k = pylt_obj_set_begin(state, strset); k != pylt_obj_set_end(state, strset); pylt_obj_set_next(state, strset, &k)) {
+        PyLiteObject *obj = pylt_obj_set_itemvalue(state, strset, k);
+        MOVE_WHITE(obj);
     }
 
     while (upset_len(grey)) {
@@ -172,11 +165,6 @@ void pylt_gc_collect(PyLiteState *state) {
                     pylt_obj_dict_keyvalue(state, dict, it, &k, &v);
                     MOVE_WHITE(k);
                     MOVE_WHITE(v);
-                }
-                // code
-                PyLiteListObject *lst = castcode(obj)->const_val;
-                for (pl_int_t i = 0; i < lst->ob_size; ++i) {
-                    MOVE_WHITE(lst->ob_val[i]);
                 }
                 break;
             }
