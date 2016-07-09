@@ -452,7 +452,7 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_FUNCTION:
             return pylt_obj_str_new_from_format(state, pl_static.str.TMPL_FUNCTION_TO_STR, castfunc(obj)->info.name, obj);
         case PYLT_OBJ_TYPE_CFUNCTION:
-            return pylt_obj_str_new_from_format(state, pl_static.str.TMPL_CFUNCTION_TO_STR, castfunc(obj)->info.name, obj);
+            return pylt_obj_str_new_from_format(state, pl_static.str.TMPL_CFUNCTION_TO_STR, castcfunc(obj)->info.name, obj);
         case PYLT_OBJ_TYPE_NONE:
             return pl_static.str.None; 
         case PYLT_OBJ_TYPE_TYPE:

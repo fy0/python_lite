@@ -220,7 +220,13 @@ void pylt_gc_collect(PyLiteState *state) {
                 break;
             default:
                 if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                    ;
+                    // attr
+                    PyLiteDictObject *dict = castcustom(obj)->ob_attrs;
+                    for (pl_int_t it = pylt_obj_dict_begin(state, dict); it != pylt_obj_dict_end(state, dict); pylt_obj_dict_next(state, dict, &it)) {
+                        pylt_obj_dict_keyvalue(state, dict, it, &k, &v);
+                        MOVE_WHITE(k);
+                        MOVE_WHITE(v);
+                    }
                 }
         }
     }
@@ -254,6 +260,28 @@ void pylt_gc_finalize(PyLiteState *state) {
     upset_free(state->gc.black);
     pylt_obj_set_free(state, state->gc.str_static);
     pylt_obj_set_free(state, state->gc.str_cached);
+}
+
+void pylt_gc_freeall(PyLiteState *state) {
+    PyLiteUPSet *white = state->gc.white;
+    PyLiteSetObject *strset = state->gc.str_cached;
+    for (pl_int_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
+        PyLiteObject *obj = upset_item(white, k);
+        /*printf("[%d] ", obj->ob_type);
+        if (obj->ob_type == 5) pylt_api_output_str(state, obj);
+        putchar('\n'); */
+        pylt_obj_free(state, upset_item(white, k));
+    }
+
+    for (pl_int_t k = pylt_obj_set_begin(state, strset); k != pylt_obj_set_end(state, strset); pylt_obj_set_next(state, strset, &k)) {
+        PyLiteObject *obj = pylt_obj_set_itemvalue(state, strset, k);
+        if (!upset_has(white, obj)) {
+            /*printf("[%d] ", obj->ob_type);
+            if (obj->ob_type == 5) pylt_api_output_str(state, obj);
+            putchar('\n');*/
+            pylt_obj_free(state, obj);
+        }
+    }
 }
 
 PyLiteObject* _pylt_gc_cache_add(PyLiteState *state, PyLiteObject *key) {

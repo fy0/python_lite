@@ -1241,5 +1241,6 @@ void pylt_parser_finalize(PyLiteState* state, ParserState *ps) {
         info = info2;
     }
 
+    pylt_obj_set_free(state, ps->strset);
     kv_destroy(ps->lval_check.bc_cache);
 }

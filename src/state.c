@@ -39,21 +39,22 @@ void pylt_state_finalize(PyLiteState *state) {
     pylt_vm_finalize(state);
 
     // free types
-    for (pl_uint_t i = 1; i < kv_size(state->cls_base); ++i) {
+    /*for (pl_uint_t i = 1; i < kv_size(state->cls_base); ++i) {
         pylt_obj_type_free(state, kv_A(state->cls_base, i));
-    }
+    }*/
     kv_destroy(state->cls_base);
 
     // free modules
-    PyLiteDictObject *dict = state->modules;
+    /*PyLiteDictObject *dict = state->modules;
     for (pl_int_t it = pylt_obj_dict_begin(state, dict); it != pylt_obj_dict_end(state, dict); pylt_obj_dict_next(state, dict, &it)) {
         PyLiteObject *k, *v;
         pylt_obj_dict_keyvalue(state, dict, it, &k, &v);
         pylt_obj_safefree(state, k);
         pylt_obj_safefree(state, v);
-    }
+    }*/
  
-    pylt_obj_dict_free(state, state->modules);
+    //pylt_obj_dict_free(state, state->modules);
+    pylt_gc_freeall(state);
     pylt_gc_finalize(state);
 
     pylt_free(state->lexer);

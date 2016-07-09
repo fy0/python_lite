@@ -27,6 +27,7 @@ typedef struct PyLiteGC {
 
 void pylt_gc_init(PyLiteState *state);
 void pylt_gc_finalize(PyLiteState *state);
+void pylt_gc_freeall(PyLiteState *state);
 void pylt_gc_add(PyLiteState *state, PyLiteObject *obj);
 void pylt_gc_remove(PyLiteState *state, PyLiteObject *obj);
 void pylt_gc_collect(PyLiteState *state);
