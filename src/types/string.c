@@ -266,14 +266,6 @@ void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self) {
     pylt_free(self);
 }
 
-void pylt_obj_str_safefree(PyLiteState *state, PyLiteStrObject *self) {
-    if (state) {
-        if (pylt_obj_set_has(state, state->gc.str_static, castobj(self))) return;
-        pylt_obj_set_remove(state, state->gc.str_cached, castobj(self));
-    }
-    pylt_obj_str_free(state, self);
-}
-
 pl_int_t pylt_obj_str_index_full(PyLiteState *state, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end) {
     pl_int_t i, j, k;
     pl_int_t len_self = (pl_int_t)self->ob_size;

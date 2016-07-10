@@ -37,6 +37,5 @@ PyLiteStrObject* pylt_obj_str_new_empty(PyLiteState *state);
 
 
 void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self);
-void pylt_obj_str_safefree(PyLiteState *state, PyLiteStrObject *self);
 
 #endif

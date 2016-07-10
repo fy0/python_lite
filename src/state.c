@@ -49,8 +49,8 @@ void pylt_state_finalize(PyLiteState *state) {
     for (pl_int_t it = pylt_obj_dict_begin(state, dict); it != pylt_obj_dict_end(state, dict); pylt_obj_dict_next(state, dict, &it)) {
         PyLiteObject *k, *v;
         pylt_obj_dict_keyvalue(state, dict, it, &k, &v);
-        pylt_obj_safefree(state, k);
-        pylt_obj_safefree(state, v);
+        pylt_obj_free(state, k);
+        pylt_obj_free(state, v);
     }*/
  
     //pylt_obj_dict_free(state, state->modules);
