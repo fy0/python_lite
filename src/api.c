@@ -85,3 +85,13 @@ pl_bool_t pylt_api_isinstance(PyLiteState *state, PyLiteObject *obj, pl_uint32_t
 
     return false;
 }
+
+void pl_print(PyLiteState *state, const char *format, ...) {
+    va_list args;
+    PyLiteStrObject *str;
+
+    va_start(args, format);
+    str = pylt_obj_str_new_from_vformat(state, pylt_obj_str_new_from_cstr(state, format, true), args);
+    va_end(args);
+    pylt_api_output_str(state, str);
+}

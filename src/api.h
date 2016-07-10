@@ -14,6 +14,6 @@ PyLiteTypeObject* pylt_api_gettype(PyLiteState *state, pl_uint32_t type_code);
 pl_uint32_t pylt_api_get_base_typecode(PyLiteState *state, pl_uint32_t type_code);
 pl_bool_t pylt_api_isinstance(PyLiteState *state, PyLiteObject *obj, pl_uint32_t type_code);
 
-pl_bool_t pylt_api_isstatic(PyLiteState *state, PyLiteObject *obj);
+void pl_print(PyLiteState *state, const char *format, ...);
 
 #endif
