@@ -1137,6 +1137,9 @@ void parse_stmt(ParserState *ps) {
             parse_expr(ps);
             write_ins(ps, BC_ASSERT, 0, 0);
             break;
+        case TK_NEWLINE:
+            // empty file
+            break;
         default:
             ps->lval_check.enable = true;
             ps->lval_check.can_be_left_val = true;
