@@ -1171,12 +1171,15 @@ void parse_stmts(ParserState *ps) {
     }
 }
 
-void pylt_parser_parse(ParserState *ps) {
+PyLiteCodeObject* pylt_parser_parse(ParserState *ps) {
+    PyLiteCodeObject *ret;
     next(ps);
     parse_stmts(ps);
     write_ins(ps, BC_PRINT, 0, 0);
     write_ins(ps, BC_HALT, 0, 0);
-    save_string(ps, ps->info);
+    ret = ps->info->code;
+    func_pop(ps);
+    return ret;
 }
 
 void func_push(ParserState *ps) {

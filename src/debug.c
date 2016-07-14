@@ -14,18 +14,17 @@ void debug_print_obj(PyLiteState *state, PyLiteObject *obj) {
     pylt_api_output_str(state, pylt_obj_to_repr(state, obj));
 }
 
-void debug_print_const_vals(PyLiteState *state, ParserState *ps) {
+void debug_print_const_vals(PyLiteState *state, PyLiteCodeObject *code) {
     printf("CONST VALS:\n");
-    for (unsigned int i = 0; i < pylt_obj_list_count(state, ps->info->code->const_val); i++) {
-        PyLiteObject *obj = pylt_obj_list_getitem(state, ps->info->code->const_val, i);
+    for (unsigned int i = 0; i < pylt_obj_list_count(state, code->const_val); i++) {
+        PyLiteObject *obj = pylt_obj_list_getitem(state, code->const_val, i);
         printf("   %-4d %-8s ", i, pylt_api_type_name_cstr(state, obj->ob_type));
         debug_print_obj(state, obj);
         putchar('\n');
     }
 }
 
-void debug_print_opcodes(PyLiteState *state, ParserState *ps) {
-    PyLiteCodeObject *code = ps->info->code;
+void debug_print_opcodes(PyLiteState *state, PyLiteCodeObject *code) {
     PyLiteInstruction ins;
 
     printf("OPCODES:\n");

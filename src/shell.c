@@ -33,10 +33,11 @@ int main(int argc,char* argv[])
     return 0;*/
 
     pylt_state_load_stream(&state, ss);
+    PyLiteCodeObject *code = kv_top(state.vm.frames).code;
 
     putchar('\n');
-    debug_print_const_vals(&state, state.parser);
-    debug_print_opcodes(&state, state.parser);
+    debug_print_const_vals(&state, code);
+    debug_print_opcodes(&state, code);
     putchar('\n');
 
     pylt_state_run(&state);

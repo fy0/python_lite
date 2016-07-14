@@ -303,8 +303,10 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
     pl_uint_t params_num;
     pl_uint_t params_offset = 0;
 
-    if (!code) return;
-    pylt_vm_load_code(state, code);
+    if (code) pylt_vm_load_code(state, code);
+    else if (!kv_top(vm->frames).code) return;
+    code = kv_top(vm->frames).code;
+
     locals = kv_top(kv_top(vm->frames).var_tables);
 
     for (pl_uint_t i = 0; ; ++i) {

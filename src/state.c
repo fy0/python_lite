@@ -62,10 +62,12 @@ void pylt_state_finalize(PyLiteState *state) {
 }
 
 void pylt_state_load_stream(PyLiteState *state, StringStream *ss) {
+    PyLiteCodeObject *code;
     state->lexer->ss = ss;
-    pylt_parser_parse(state->parser);
+    code = pylt_parser_parse(state->parser);
+    pylt_vm_load_code(state, code);
 }
 
 void pylt_state_run(PyLiteState *state) {
-    pylt_vm_run(state, state->parser->info->code);
+    pylt_vm_run(state, NULL);
 }
