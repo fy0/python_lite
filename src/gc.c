@@ -106,6 +106,7 @@ void pylt_gc_collect(PyLiteState *state) {
     }
 
     // 将被引用到的对象从 White 放到 Grey 集合中
+    // 1. locals
     for (int i = kv_size(frame->var_tables) - 1; i >= 0; --i) {
         PyLiteDictObject *scope = kv_A(frame->var_tables, i);
 
@@ -117,10 +118,12 @@ void pylt_gc_collect(PyLiteState *state) {
 
         MOVE_WHITE(frame->func);
     }
+    // 2. stack
     for (pl_uint_t i = 0; i < kv_size(state->vm.stack); ++i) {
         PyLiteObject *obj = castobj(kv_A(state->vm.stack, i));
         MOVE_WHITE(obj);
     }
+    // 3. types
     for (pl_uint_t i = 1; i < kv_size(state->cls_base); ++i) {
         PyLiteDictObject *dict = kv_A(state->cls_base, i)->ob_attrs;
         PyLiteTypeObject *type = pylt_api_gettype(state, i);
@@ -131,11 +134,8 @@ void pylt_gc_collect(PyLiteState *state) {
             MOVE_WHITE(v);
         }
     }
-    PyLiteSetObject *strset = state->parser->strset;
-    for (pl_int_t k = pylt_obj_set_begin(state, strset); k != pylt_obj_set_end(state, strset); pylt_obj_set_next(state, strset, &k)) {
-        PyLiteObject *obj = pylt_obj_set_itemvalue(state, strset, k);
-        MOVE_WHITE(obj);
-    }
+    // 4. frame code
+    MOVE_WHITE(frame->code);
 
     while (upset_len(grey)) {
         // 从 Grey 集合中移除一个对象O，并将O设置成Black状态
@@ -169,6 +169,7 @@ void pylt_gc_collect(PyLiteState *state) {
                 break;
             }
             case PYLT_OBJ_TYPE_FUNCTION: {
+                // 这里不甚合理
                 PyLiteListObject *lst = castfunc(obj)->code.const_val;
                 for (pl_int_t i = 0; i < lst->ob_size; ++i) {
                     MOVE_WHITE(lst->ob_val[i]);
@@ -264,23 +265,12 @@ void pylt_gc_finalize(PyLiteState *state) {
 
 void pylt_gc_freeall(PyLiteState *state) {
     PyLiteUPSet *white = state->gc.white;
-    PyLiteSetObject *strset = state->gc.str_cached;
     for (pl_int_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
         PyLiteObject *obj = upset_item(white, k);
         /*printf("[%d] ", obj->ob_type);
         if (obj->ob_type == 5) pylt_api_output_str(state, obj);
         putchar('\n'); */
         pylt_obj_free(state, upset_item(white, k));
-    }
-
-    for (pl_int_t k = pylt_obj_set_begin(state, strset); k != pylt_obj_set_end(state, strset); pylt_obj_set_next(state, strset, &k)) {
-        PyLiteObject *obj = pylt_obj_set_itemvalue(state, strset, k);
-        if (!upset_has(white, obj)) {
-            /*printf("[%d] ", obj->ob_type);
-            if (obj->ob_type == 5) pylt_api_output_str(state, obj);
-            putchar('\n');*/
-            pylt_obj_free(state, obj);
-        }
     }
 }
 

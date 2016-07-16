@@ -29,9 +29,6 @@ typedef struct ParserState {
 
     bool disable_expr_tuple_parse;
     bool disable_return_parse;
-
-    /** save strings used by parser */
-    PyLiteSetObject *strset;
 } ParserState;
  
 #define kv_pushobj(v, x) kv_push(PyLiteObject*, (v), (PyLiteObject*)(x))

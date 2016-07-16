@@ -106,6 +106,9 @@ void pylt_vm_load_func(PyLiteState* state, PyLiteFunctionObject *func) {
     frame->code = &func->code;
     kv_init(frame->var_tables);
 
+    pylt_gc_add(state, castobj(func));
+    //pylt_gc_add(state, castobj(func->code));
+
     if (index) {
         kv_copy1(PyLiteDictObject*, frame->var_tables, kv_A(vm->frames, index - 1).var_tables);
     }
@@ -119,6 +122,7 @@ void pylt_vm_load_code(PyLiteState* state, PyLiteCodeObject *code) {
     PyLiteFrame *frame = &kv_top(vm->frames);
     frame->func = NULL;
     frame->code = code;
+    pylt_gc_add(state, castobj(code));
 }
 
 // 函数调用检查

@@ -74,13 +74,6 @@ void sload_const(ParserState *ps, PyLiteObject *obj) {
     write_ins(ps, BC_LOADCONST, 0, store_const(ps, obj));
 }
 
-void save_string(ParserState *ps, ParserInfo *pi) {
-    PyLiteListObject *lst = pi->code->const_val;
-    for (pl_int_t i = 0; i < lst->ob_size; ++i) {
-        pylt_obj_set_add(ps->state, ps->strset, lst->ob_val[i]);
-    }
-}
-
 void error(ParserState *ps, int code) {
     Token *tk = &(ps->ls->token);
     printf("ERROR at line [%d]\n", ps->ls->linenumber);
@@ -1206,7 +1199,6 @@ ParserInfo* func_pop(ParserState *ps) {
 
     info->prev = ps->info_used;
     ps->info_used = info;
-    save_string(ps, info);
     return info;
 }
 
@@ -1224,7 +1216,6 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
     ps->disable_expr_tuple_parse = false;
     ps->disable_return_parse = true;
 
-    ps->strset = pylt_obj_set_new(state);
     func_push(ps);
 }
 
@@ -1247,6 +1238,5 @@ void pylt_parser_finalize(PyLiteState* state, ParserState *ps) {
         info = info2;
     }
 
-    pylt_obj_set_free(state, ps->strset);
     kv_destroy(ps->lval_check.bc_cache);
 }
