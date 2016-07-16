@@ -61,7 +61,7 @@ void pylt_misc_static_objs_init(PyLiteState *state) {
     pl_static.str.type = pylt_obj_str_new_from_cstr_static(state, "type", true);
     pl_static.str.iterator = pylt_obj_str_new_from_cstr_static(state, "iterator", true);
     pl_static.str.property_ = pylt_obj_str_new_from_cstr_static(state, "property", true);
-    pl_static.str.none = pylt_obj_str_new_from_cstr_static(state, "none", true);
+    pl_static.str.NoneType = pylt_obj_str_new_from_cstr_static(state, "NoneType", true);
 
     pl_static.str.mro = pylt_obj_str_new_from_cstr_static(state, "mro", true);
 

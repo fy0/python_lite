@@ -392,14 +392,18 @@ uint32_t* pylt_obj_int_to_ucs4(PyLiteState *state, PyLiteIntObject *self, pl_int
     len = (is_neg) ? 1 : 0;
     val = abs(val);
 
-    while (val > 0) {
-        len++;
-        val /= 10;
+    if (val == 0) len = 1;
+    else {
+        while (val > 0) {
+            len++;
+            val /= 10;
+        }
     }
 
     val = abs(self->ob_val);
     str_data = pylt_realloc(NULL, len * sizeof(uint32_t));
     if (is_neg) str_data[0] = '-';
+    if (val == 0) str_data[0] = '0';
     pos = len - 1;
 
     while (val > 0) {

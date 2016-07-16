@@ -66,10 +66,6 @@ PyLiteObject* upset_pop(PyLiteUPSet *upset) {
 void pylt_gc_add(PyLiteState *state, PyLiteObject *obj) {
     if (!obj) return;
     if (!(pl_isstrkind(obj) && pylt_obj_set_has(state, state->gc.str_static, obj))) {
-        if (obj == NULL)
-            printf("123\n");
-        if (obj->ob_type == PYLT_OBJ_TYPE_CODE)
-            printf("123\n");
         upset_add(state->gc.white, obj);
     }
 }

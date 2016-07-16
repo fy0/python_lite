@@ -18,9 +18,10 @@ void debug_print_const_vals(PyLiteState *state, PyLiteCodeObject *code) {
     printf("CONST VALS:\n");
     for (unsigned int i = 0; i < pylt_obj_list_count(state, code->const_val); i++) {
         PyLiteObject *obj = pylt_obj_list_getitem(state, code->const_val, i);
-        printf("   %-4d %-8s ", i, pylt_api_type_name_cstr(state, obj->ob_type));
+        /*printf("    %-4d %-12s ", i, pylt_api_type_name_cstr(state, obj->ob_type));
         debug_print_obj(state, obj);
-        putchar('\n');
+        putchar('\n');*/
+        pl_print(state, "   %-4d %-12s %s\n", pylt_obj_int_new(state, i), pylt_api_type_name(state, obj->ob_type), pylt_obj_to_repr(state, obj));
     }
 }
 

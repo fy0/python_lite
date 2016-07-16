@@ -3,6 +3,10 @@
 #include "state.h"
 
 void pylt_api_output_str(PyLiteState *state, PyLiteStrObject *obj) {
+    if (!obj) {
+        printf("bad str\n");
+        return;
+    }
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_BYTES:
             printf("%s", castbytes(obj)->ob_size, castbytes(obj)->ob_val);

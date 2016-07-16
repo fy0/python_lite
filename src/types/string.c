@@ -346,9 +346,9 @@ PyLiteStrObject* pylt_obj_str_join(PyLiteState *state, PyLiteStrObject *separato
 }
 
 PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObject *format, va_list args) {
-    pl_int_t slen;
     uint32_t *tmp;
     PyLiteObject *obj;
+    pl_int_t slen, rlen; // string length, real length
     PyLiteStrObject *str = pylt_realloc(NULL, sizeof(PyLiteStrObject));
     str->ob_type = PYLT_OBJ_TYPE_STR;
     str->ob_val = pylt_realloc(NULL, sizeof(uint32_t) * (format->ob_size + 1));
@@ -365,13 +365,50 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
     for (; writer.findex < format->ob_size;) {
         if (format->ob_val[writer.findex] == '%') {
             pl_bool_t is_free = true;
-            writer.findex++;
+            pl_bool_t left_pad = true;
+            pl_bool_t pad_with_zero = false;
+            pl_int_t cstate = 0; // default state
+            pl_int_t limitAll = 0, limitFloat = 0; // "%0.0d"
+            uint32_t ch = format->ob_val[++writer.findex];
             obj = va_arg(args, PyLiteObject*);
+
+            // flag check
+            while (true) {
+                if (ch == '0') pad_with_zero = true;
+                else if (ch == '-') left_pad = false;
+                else break;
+                ch = format->ob_val[++writer.findex];
+            }
+
+            // minimal length
+            if (isdigit(ch)) cstate = 1;
+            else if (ch == '.') cstate = 2;
+
+            // state 1: num
+            if (cstate == 1) {
+                while (isdigit(ch)) {
+                    limitAll *= 10;
+                    limitAll += ch - '0';
+                    ch = format->ob_val[++writer.findex];
+                }
+                if (ch == '.') cstate = 2;
+            }
+
+            // state 2: float (dot found)
+            if (cstate == 2) {
+                ch = format->ob_val[++writer.findex];
+                while (isdigit(ch)) {
+                    limitFloat *= 10;
+                    limitFloat += ch - '0';
+                    ch = format->ob_val[++writer.findex];
+                }
+            }
 
             switch (format->ob_val[writer.findex]) {
                 case 'c':
                     // char
                     writer.findex++;
+                    pad_with_zero = false;
                     if (pl_isint(obj)) {
                         // 0 - 0x110000
                     } else if (pl_isstr(obj)) {
@@ -392,6 +429,14 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
                     writer.findex++;
                     if (pl_isflt(obj)) {
                         tmp = pylt_obj_float_to_ucs4(state, castfloat(obj), &slen);
+                        if (limitFloat) {
+                            for (pl_int_t i = slen - 1; i >= 0; --i) {
+                                if (tmp[i] == '.') {
+                                    slen = i + 1 + limitFloat;
+                                    break;
+                                }
+                            }
+                        }
                     } else {
                         // Error
                     }
@@ -406,9 +451,11 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
                     break;
                 case 's':
                     writer.findex++;
+                    pad_with_zero = false;
                     if (pl_isstr(obj)) {
-                        tmp = caststr(obj)->ob_val;
-                        slen = caststr(obj)->ob_size;
+                        PyLiteStrObject *tmpstr = pylt_obj_to_str(state, obj);
+                        tmp = tmpstr->ob_val;
+                        slen = tmpstr->ob_size;
                         is_free = false;
                     } else {
                         // Error
@@ -423,7 +470,7 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
                     tmp[1] = 'x';
                     for (int i = 2; i < slen; ++i) {
                         tmp[i] = tmp_bytes[i-2];
-                    } 
+                    }
 
                     writer.findex++;
                     break;
@@ -434,15 +481,31 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
                     return NULL;
             }
 
+            rlen = (slen > limitAll) ? slen : limitAll;
+            pl_int_t pad_len = rlen - slen;
+
             pl_uint32_t rest = writer.fstr->ob_size - writer.findex;
-            if (writer.dindex + rest + slen > writer.dsize) {
-                writer.dstr->ob_val = pylt_realloc(writer.dstr->ob_val, sizeof(uint32_t) * (writer.dindex + rest + slen + 1));
-                writer.dsize = writer.dindex + rest + slen;
+            if (writer.dindex + rest + rlen > writer.dsize) {
+                writer.dstr->ob_val = pylt_realloc(writer.dstr->ob_val, sizeof(uint32_t) * (writer.dindex + rest + rlen + 1));
+                writer.dsize = writer.dindex + rest + rlen;
+            }
+
+            if (left_pad && pad_len) {
+                ch = pad_with_zero ? '0' : ' ';
+                for (pl_int_t i = 0; i < pad_len; ++i) {
+                    writer.dstr->ob_val[writer.dindex++] = ch;
+                }
             }
 
             memcpy(writer.dstr->ob_val + writer.dindex, tmp, sizeof(uint32_t)*slen);
             writer.dindex += slen;
             if (is_free) pylt_free(tmp);
+
+            if ((!left_pad) && pad_len) {
+                for (pl_int_t i = 0; i < pad_len; ++i) {
+                    writer.dstr->ob_val[writer.dindex++] = ' ';
+                }
+            }
         } else {
             str_escape_next(state, &writer);
         }

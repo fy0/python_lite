@@ -66,7 +66,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *type;
         PyLiteStrObject *iterator;
         PyLiteStrObject *property_;
-        PyLiteStrObject *none;
+        PyLiteStrObject *NoneType;
 
         // object
         PyLiteStrObject *mro;

@@ -193,7 +193,7 @@ void pylt_bind_all_types_register(PyLiteState *state) {
     pylt_obj_type_register(state, type);
 
     // none
-    type = pylt_obj_type_new_with_type(state, pl_static.str.none, PYLT_OBJ_TYPE_NONE, PYLT_OBJ_TYPE_OBJ);
+    type = pylt_obj_type_new_with_type(state, pl_static.str.NoneType, PYLT_OBJ_TYPE_NONE, PYLT_OBJ_TYPE_OBJ);
     type->allow_inherit = false;
     pylt_obj_type_register(state, type);
 
