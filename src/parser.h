@@ -37,6 +37,7 @@ typedef struct ParserState {
 PyLiteCodeObject* pylt_parser_parse(ParserState *ps);
 void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls);
 void pylt_parser_finalize(PyLiteState* state, ParserState *ps);
+void pylt_parser_crash_finalize(PyLiteState* state, ParserState *ps);
 
 // SyntaxError: invalid syntax
 #define PYLT_ERR_PARSER_INVALID_SYNTAX -1

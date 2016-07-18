@@ -1219,12 +1219,20 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
     func_push(ps);
 }
 
-void pylt_parser_finalize(PyLiteState* state, ParserState *ps) {
+// release memory if compile failed
+void pylt_parser_crash_finalize(PyLiteState* state, ParserState *ps) {
     ParserInfo *info, *info2;
 
     info = ps->info;
     while (info) {
         info2 = info->prev;
+
+        // free const vals
+        PyLiteListObject *lst = info->code->const_val;
+        for (pl_int_t i = 0; i < lst->ob_size; ++i) {
+            pylt_free(lst->ob_val[i]);
+        }
+
         pylt_obj_code_free(state, info->code);
         pylt_free(info);
         info = info2;
@@ -1233,7 +1241,19 @@ void pylt_parser_finalize(PyLiteState* state, ParserState *ps) {
     info = ps->info_used;
     while (info) {
         info2 = info->prev;
-        pylt_obj_code_free(state, info->code);
+        pylt_free(info);
+        info = info2;
+    }
+
+    kv_destroy(ps->lval_check.bc_cache);
+}
+
+void pylt_parser_finalize(PyLiteState* state, ParserState *ps) {
+    ParserInfo *info, *info2;
+
+    info = ps->info_used;
+    while (info) {
+        info2 = info->prev;
         pylt_free(info);
         info = info2;
     }
