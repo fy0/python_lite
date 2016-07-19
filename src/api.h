@@ -8,7 +8,6 @@
 void pylt_api_output_str(PyLiteState *state, PyLiteStrObject *obj);
 
 PyLiteStrObject* pylt_api_type_name(PyLiteState *state, int ob_type);
-const char* pylt_api_type_name_cstr(PyLiteState *state, int ob_type);
 
 PyLiteTypeObject* pylt_api_gettype(PyLiteState *state, pl_uint32_t type_code);
 pl_uint32_t pylt_api_get_base_typecode(PyLiteState *state, pl_uint32_t type_code);

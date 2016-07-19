@@ -20,43 +20,10 @@ void pylt_api_output_str(PyLiteState *state, PyLiteStrObject *obj) {
 }
 
 
-
-const char* pylt_obj_basetypes[] = {
-    NULL, // 0
-    "object",
-    "int",
-    "float",
-    "bool",
-
-    "str",
-    "bytes",
-    "set",
-    "list",
-    "tuple",
-    "dict",
-
-    "module",
-    "function",
-    "cfunction",
-    "code",
-
-    "type",
-    "iter",
-    "property",
-    "none",
-};
-
 PyLiteStrObject* pylt_api_type_name(PyLiteState *state, int ob_type) {
     return kv_A(state->cls_base, ob_type)->name;
 }
 
-const char* pylt_api_type_name_cstr(PyLiteState *state, int ob_type) {
-    if (ob_type <= PYLT_OBJ_BUILTIN_TYPE_NUM) {
-        return pylt_obj_basetypes[ob_type];
-    } else {
-        return "custom class";
-    }
-}
 
 PyLiteTypeObject* pylt_api_gettype(PyLiteState *state, pl_uint32_t type_code) {
     return kv_A(state->cls_base, type_code);
