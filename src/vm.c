@@ -281,7 +281,7 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
                 // 类型不符合，报错
                 printf("TypeError: ");
                 debug_print_obj(state, castobj(info->params[i]));
-                printf(" must be %s\n", pylt_api_type_name_cstr(state, info->type_codes[i]));
+                pl_print(state, " must be %s\n", pylt_api_type_name(state, info->type_codes[i]));
                 return 3;
             }
         }

@@ -262,8 +262,8 @@ void pylt_gc_finalize(PyLiteState *state) {
 void pylt_gc_freeall(PyLiteState *state) {
     PyLiteUPSet *white = state->gc.white;
     for (pl_int_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
-        PyLiteObject *obj = upset_item(white, k);
-        /*printf("[%d] ", obj->ob_type);
+        /*PyLiteObject *obj = upset_item(white, k);
+        printf("[%d] ", obj->ob_type);
         if (obj->ob_type == 5) pylt_api_output_str(state, obj);
         putchar('\n'); */
         pylt_obj_free(state, upset_item(white, k));

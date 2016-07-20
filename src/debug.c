@@ -56,7 +56,9 @@ void debug_print_opcodes(PyLiteState *state, PyLiteCodeObject *code) {
                 printf("   %-15s\n", "LOADLOCALS");
                 break;
             case BC_NEW_OBJ:
-                printf("   %-15s %s %d\n", "NEW_OBJ", pylt_api_type_name_cstr(NULL, ins.exarg), ins.extra);
+                printf("   %-15s ", "NEW_OBJ");
+                pylt_api_output_str(state, pylt_api_type_name(state, ins.exarg));
+                printf(" %d\n", ins.extra);
                 break;
             case BC_CALL:
                 printf("   %-15s %d", "CALL", ins.extra);

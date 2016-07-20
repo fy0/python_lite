@@ -65,6 +65,7 @@ void pylt_state_load_stream(PyLiteState *state, StringStream *ss) {
     PyLiteCodeObject *code;
     state->lexer->ss = ss;
     code = pylt_parser_parse(state->parser);
+    pylt_obj_code_add_to_gc(state, code);
     pylt_vm_load_code(state, code);
 }
 
