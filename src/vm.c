@@ -130,6 +130,12 @@ void pylt_vm_load_code(PyLiteState* state, PyLiteCodeObject *code) {
 //  2 为当前的参数个数多于参数个数
 //  3 为参数的类型不符合
 // -1 当前对象并非函数类型
+//
+// pflag: the kind of the callable object，such as ...
+//  0 tobj is a function or cfunction object
+//  1 tobj is a class, pfunc_obj is tobj.__new__
+//  2 tobj is a object with __call__ attribute, pfunc_obj is tobj.__call__
+
 int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLiteDictObject *kwargs, PyLiteObject **pfunc_obj, PyLiteFunctionInfo **pinfo, pl_int_t *pflag) {
     PyLiteFunctionInfo *info;
     PyLiteObject *obj, *defobj;
@@ -282,6 +288,7 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
                 printf("TypeError: ");
                 debug_print_obj(state, castobj(info->params[i]));
                 pl_print(state, " must be %s\n", pylt_api_type_name(state, info->type_codes[i]));
+                //PyLiteETypeErrorObject()
                 return 3;
             }
         }
@@ -315,7 +322,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
 
     for (pl_uint_t i = 0; ; ++i) {
         ins = kv_A(code->opcodes, i);
-        if (i && (i % 25 == 0)) pylt_gc_collect(state);
+        //if (i && (i % 25 == 0)) pylt_gc_collect(state);
 
         switch (ins.code) {
             case BC_LOADCONST:
@@ -480,7 +487,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                     return;
                 }
 
-                // set locals
+                // set locals and execute
                 if (tret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
                     kv_top(vm->frames).code_pointer_slot = i;
                     pylt_vm_load_func(state, castfunc(tret));
@@ -498,6 +505,16 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                     kv_popn(vm->stack, func_info->length + 1);
                     if (tret) kv_pushptr(state->vm.stack, tret);
                     else kv_pushptr(state->vm.stack, (uintptr_t)pylt_obj_none_new(state));
+                }
+
+                // if new instance created
+                if (tflag == 1) {
+                    // pack custom object
+                    if (pl_iscustomtype(tobj)) {
+                        tret = kv_pop(vm->stack);
+                        kv_pushptr(vm->stack, pylt_obj_cutstom_new(state, casttype(tobj)->ob_reftype, tret));
+                    }
+                    // call __init__
                 }
                 break;
             case BC_RET:

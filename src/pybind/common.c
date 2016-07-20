@@ -34,6 +34,7 @@ PyLiteObject* pylt_cls_method_type_new(PyLiteState *state, int argc, PyLiteObjec
 
 PyLiteObject* pylt_cls_method_int_new(PyLiteState *state, int argc, PyLiteObject **args) {
     // TODO: 从其他形式转换为数字
+    // 奇怪。。。我当时想要干什么来着？？？好奇怪的写法
     PyLiteIntObject *num = pylt_obj_int_new(state, 0);
     return pylt_obj_typecast(state, dcast(type, args[0]), castobj(num));
 }
