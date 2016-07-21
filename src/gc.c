@@ -24,7 +24,7 @@ PyLiteObject* upset_has(PyLiteUPSet *upset, PyLiteObject *obj) {
 
 pl_int_t upset_remove(PyLiteUPSet *upset, PyLiteObject *obj) {
     khiter_t x = kho_get(unique_ptr, upset, obj);
-    if (!(upset->flags && (kho_exist(upset, x)))) return -1;
+    if (x == kho_end(upset)) return -1;
     kho_del(unique_ptr, upset, x);
     return 0;
 }
@@ -273,8 +273,10 @@ void pylt_gc_freeall(PyLiteState *state) {
 PyLiteObject* _pylt_gc_cache_add(PyLiteState *state, PyLiteObject *key) {
     PyLiteSetObject *cache = state->gc.str_cached;
     PyLiteObject *ret = pylt_obj_set_has(state, cache, key);
-    if (!ret) pylt_obj_set_add(state, cache, key);
-    pylt_gc_add(state, ret ? ret : key);
+    if (!ret) {
+        pylt_gc_add(state, key);
+        pylt_obj_set_add(state, cache, key);
+    }
     return ret;
 }
 

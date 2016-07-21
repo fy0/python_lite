@@ -463,15 +463,21 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
                     break;
                 case 'p': {
                     uint8_t tmp_bytes[MAX_LONG_LONG_CHARS];
+#ifdef PLATFORM_WINDOWS
                     slen = sprintf(tmp_bytes, "%p", obj) + 2;
-
                     tmp = pylt_realloc(NULL, slen*sizeof(uint32_t));
                     tmp[0] = '0';
                     tmp[1] = 'x';
                     for (int i = 2; i < slen; ++i) {
                         tmp[i] = tmp_bytes[i-2];
                     }
-
+#else
+                    slen = sprintf(tmp_bytes, "%p", obj);
+                    tmp = pylt_realloc(NULL, slen*sizeof(uint32_t));
+                    for (int i = 0; i < slen; ++i) {
+                        tmp[i] = tmp_bytes[i];
+                    }
+#endif
                     writer.findex++;
                     break;
                 }
