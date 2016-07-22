@@ -17,7 +17,7 @@ pl_bool_t pylt_obj_dict_eq(PyLiteState *state, PyLiteDictObject *self, PyLiteObj
         if (pylt_obj_dict_len(state, a) != pylt_obj_dict_len(state, b))
             return false;
 
-        for (pl_int_t it = pylt_obj_dict_begin(state, a); it != pylt_obj_dict_end(state, a); pylt_obj_dict_next(state, a, &it)) {
+        for (pl_int32_t it = pylt_obj_dict_begin(state, a); it != pylt_obj_dict_end(state, a); pylt_obj_dict_next(state, a, &it)) {
             PyLiteObject *_a, *_b;
             _a = pylt_obj_dict_getitem(state, b, pylt_obj_dict_itemkey(state, a, it));
             _b = pylt_obj_dict_itemvalue(state, a, it);
@@ -63,8 +63,8 @@ PyLiteObject* pylt_obj_dict_pop(PyLiteState *state, PyLiteDictObject *self, PyLi
     return NULL;
 }
 
-pl_int_t pylt_obj_dict_begin(PyLiteState *state, PyLiteDictObject *self) {
-    pl_int_t k = kho_begin(self->ob_val);
+pl_int32_t pylt_obj_dict_begin(PyLiteState *state, PyLiteDictObject *self) {
+    pl_int32_t k = kho_begin(self->ob_val);
     while (k != kho_end(self->ob_val)) {
         if (kho_exist(self->ob_val, k)) return k;
         ++k;
@@ -72,12 +72,12 @@ pl_int_t pylt_obj_dict_begin(PyLiteState *state, PyLiteDictObject *self) {
     return kho_end(self->ob_val);
 }
 
-pl_int_t pylt_obj_dict_end(PyLiteState *state, PyLiteDictObject *self) {
+pl_int32_t pylt_obj_dict_end(PyLiteState *state, PyLiteDictObject *self) {
     return kho_end(self->ob_val);
 }
 
-void pylt_obj_dict_next(PyLiteState *state, PyLiteDictObject *self, pl_int_t *k) {
-    pl_int_t key = *k;
+void pylt_obj_dict_next(PyLiteState *state, PyLiteDictObject *self, pl_int32_t *k) {
+    pl_int32_t key = *k;
     while (++key != kho_end(self->ob_val)) {
         if (kho_exist(self->ob_val, key)) {
             *k = key;
@@ -87,15 +87,15 @@ void pylt_obj_dict_next(PyLiteState *state, PyLiteDictObject *self, pl_int_t *k)
     *k = kho_end(self->ob_val);
 }
 
-PyLiteObject* pylt_obj_dict_itemkey(PyLiteState *state, PyLiteDictObject *self, pl_int_t k) {
+PyLiteObject* pylt_obj_dict_itemkey(PyLiteState *state, PyLiteDictObject *self, pl_int32_t k) {
     return (kho_exist(self->ob_val, k)) ? castobj(kho_key(self->ob_val, k)) : NULL;
 }
 
-PyLiteObject* pylt_obj_dict_itemvalue(PyLiteState *state, PyLiteDictObject *self, pl_int_t k) {
+PyLiteObject* pylt_obj_dict_itemvalue(PyLiteState *state, PyLiteDictObject *self, pl_int32_t k) {
     return (kho_exist(self->ob_val, k)) ? castobj(kho_val(self->ob_val, k)) : NULL;
 }
 
-void pylt_obj_dict_keyvalue(PyLiteState *state, PyLiteDictObject *self, pl_int_t k, PyLiteObject **pkey, PyLiteObject **pval) {
+void pylt_obj_dict_keyvalue(PyLiteState *state, PyLiteDictObject *self, pl_int32_t k, PyLiteObject **pkey, PyLiteObject **pval) {
     if (kho_exist(self->ob_val, k)) {
         *pkey = castobj(kho_key(self->ob_val, k));
         *pval = castobj(kho_val(self->ob_val, k));
@@ -109,7 +109,7 @@ PyLiteDictObject* pylt_obj_dict_copy(PyLiteState *state, PyLiteDictObject *self)
     PyLiteDictObject *obj = pylt_obj_dict_new(state);
     kho_resize(table, obj->ob_val, pylt_obj_dict_len(state, self));
 
-    for (pl_int_t k = pylt_obj_dict_begin(state, self); k != pylt_obj_dict_end(state, self); pylt_obj_dict_next(state, self, &k)) {
+    for (pl_int32_t k = pylt_obj_dict_begin(state, self); k != pylt_obj_dict_end(state, self); pylt_obj_dict_next(state, self, &k)) {
         pylt_obj_dict_setitem(state, obj, pylt_obj_dict_itemkey(state, self, k), pylt_obj_dict_itemvalue(state, self, k));
     }
 
@@ -131,7 +131,7 @@ struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteState *state, PyLiteDictObjec
     pl_uint32_t data_len = 2 + comma_num * 2 + dlen * 2; // {} + ', ' + ': '
     strlst = realloc(NULL, dlen * 2 * sizeof(PyLiteStrObject*));
 
-    for (pl_int_t k = pylt_obj_dict_begin(state, self); k != pylt_obj_dict_end(state, self); pylt_obj_dict_next(state, self, &k)) {
+    for (pl_int32_t k = pylt_obj_dict_begin(state, self); k != pylt_obj_dict_end(state, self); pylt_obj_dict_next(state, self, &k)) {
         str = pylt_obj_to_repr(state, pylt_obj_dict_itemkey(state, self, k));
         data_len += str->ob_size;
         strlst[index++] = str;

@@ -21,6 +21,7 @@ typedef struct RawString {
 
 typedef intptr_t pl_int_t;
 typedef uintptr_t pl_uint_t;
+typedef int32_t pl_int32_t;
 typedef uint32_t pl_uint32_t;
 typedef double pl_float_t;
 typedef bool pl_bool_t;

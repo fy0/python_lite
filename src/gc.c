@@ -13,12 +13,12 @@ int __upset_ret;
 #define upset_len(upset) (pl_int_t)kho_size((upset))
 #define upset_clear(upset) kho_clear_unique_ptr((upset))
 
-PyLiteObject* upset_item(PyLiteUPSet *upset, pl_int_t k) {
+PyLiteObject* upset_item(PyLiteUPSet *upset, pl_int32_t k) {
     return (kho_exist(upset, k)) ? castobj(kho_key(upset, k)) : NULL;
 }
 
 PyLiteObject* upset_has(PyLiteUPSet *upset, PyLiteObject *obj) {
-    khiter_t x = kho_get(unique_ptr, upset, obj);
+    pl_uint32_t x = kho_get(unique_ptr, upset, obj);
     return (x != kho_end(upset)) ? kho_key(upset, x) : NULL;
 }
 
@@ -29,8 +29,8 @@ pl_int_t upset_remove(PyLiteUPSet *upset, PyLiteObject *obj) {
     return 0;
 }
 
-pl_int_t upset_begin(PyLiteUPSet *upset) {
-    pl_int_t k = kho_begin(upset);
+pl_int32_t upset_begin(PyLiteUPSet *upset) {
+    pl_int32_t k = kho_begin(upset);
     while (k != kho_end(upset)) {
         if (kho_exist(upset, k)) return k;
         ++k;
@@ -38,12 +38,12 @@ pl_int_t upset_begin(PyLiteUPSet *upset) {
     return kho_end(upset);
 }
 
-pl_int_t upset_end(PyLiteUPSet *upset) {
+pl_uint32_t upset_end(PyLiteUPSet *upset) {
     return kho_end(upset);
 }
 
-void upset_next(PyLiteUPSet *upset, pl_int_t *k) {
-    pl_int_t key = *k;
+void upset_next(PyLiteUPSet *upset, pl_int32_t *k) {
+    pl_int32_t key = *k;
     while (++key != kho_end(upset)) {
         if (kho_exist(upset, key)) {
             *k = key;
@@ -106,7 +106,7 @@ void pylt_gc_collect(PyLiteState *state) {
     for (int i = kv_size(frame->var_tables) - 1; i >= 0; --i) {
         PyLiteDictObject *scope = kv_A(frame->var_tables, i);
 
-        for (pl_int_t it = pylt_obj_dict_begin(state, scope); it != pylt_obj_dict_end(state, scope); pylt_obj_dict_next(state, scope, &it)) {
+        for (pl_int32_t it = pylt_obj_dict_begin(state, scope); it != pylt_obj_dict_end(state, scope); pylt_obj_dict_next(state, scope, &it)) {
             pylt_obj_dict_keyvalue(state, scope, it, &k, &v);
             MOVE_WHITE(k);
             MOVE_WHITE(v);
@@ -124,7 +124,7 @@ void pylt_gc_collect(PyLiteState *state) {
         PyLiteDictObject *dict = kv_A(state->cls_base, i)->ob_attrs;
         PyLiteTypeObject *type = pylt_api_gettype(state, i);
         MOVE_WHITE(type->name);
-        for (pl_int_t it = pylt_obj_dict_begin(state, dict); it != pylt_obj_dict_end(state, dict); pylt_obj_dict_next(state, dict, &it)) {
+        for (pl_int32_t it = pylt_obj_dict_begin(state, dict); it != pylt_obj_dict_end(state, dict); pylt_obj_dict_next(state, dict, &it)) {
             pylt_obj_dict_keyvalue(state, dict, it, &k, &v);
             MOVE_WHITE(k);
             MOVE_WHITE(v);
@@ -157,7 +157,7 @@ void pylt_gc_collect(PyLiteState *state) {
             case PYLT_OBJ_TYPE_MODULE: {
                 // attr
                 PyLiteDictObject *dict = castmod(obj)->attrs;
-                for (pl_int_t it = pylt_obj_dict_begin(state, dict); it != pylt_obj_dict_end(state, dict); pylt_obj_dict_next(state, dict, &it)) {
+                for (pl_int32_t it = pylt_obj_dict_begin(state, dict); it != pylt_obj_dict_end(state, dict); pylt_obj_dict_next(state, dict, &it)) {
                     pylt_obj_dict_keyvalue(state, dict, it, &k, &v);
                     MOVE_WHITE(k);
                     MOVE_WHITE(v);
@@ -204,7 +204,7 @@ void pylt_gc_collect(PyLiteState *state) {
                 break;
             }
             case PYLT_OBJ_TYPE_DICT: {
-                for (pl_int_t it = pylt_obj_dict_begin(state, castdict(obj)); it != pylt_obj_dict_end(state, castdict(obj)); pylt_obj_dict_next(state, castdict(obj), &it)) {
+                for (pl_int32_t it = pylt_obj_dict_begin(state, castdict(obj)); it != pylt_obj_dict_end(state, castdict(obj)); pylt_obj_dict_next(state, castdict(obj), &it)) {
                     pylt_obj_dict_keyvalue(state, castdict(obj), it, &k, &v);
                     MOVE_WHITE(k);
                     MOVE_WHITE(v);
@@ -219,7 +219,7 @@ void pylt_gc_collect(PyLiteState *state) {
                 if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                     // attr
                     PyLiteDictObject *dict = castcustom(obj)->ob_attrs;
-                    for (pl_int_t it = pylt_obj_dict_begin(state, dict); it != pylt_obj_dict_end(state, dict); pylt_obj_dict_next(state, dict, &it)) {
+                    for (pl_int32_t it = pylt_obj_dict_begin(state, dict); it != pylt_obj_dict_end(state, dict); pylt_obj_dict_next(state, dict, &it)) {
                         pylt_obj_dict_keyvalue(state, dict, it, &k, &v);
                         MOVE_WHITE(k);
                         MOVE_WHITE(v);
@@ -231,7 +231,7 @@ void pylt_gc_collect(PyLiteState *state) {
     printf("gc collect %dw %db\n", upset_len(white), upset_len(state->gc.black));
 
     // 将未标记对象全部释放
-    for (pl_int_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
+    for (pl_uint32_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
         PyLiteObject *obj = upset_item(white, k);
 
         // check static before free

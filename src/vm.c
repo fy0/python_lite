@@ -511,7 +511,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 if (tflag == 1) {
                     // pack custom object
                     if (pl_iscustomtype(tobj)) {
-                        tret = kv_pop(vm->stack);
+                        tret = castobj(kv_pop(vm->stack));
                         kv_pushptr(vm->stack, pylt_obj_cutstom_new(state, casttype(tobj)->ob_reftype, tret));
                     }
                     // call __init__

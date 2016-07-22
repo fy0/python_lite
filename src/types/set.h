@@ -24,12 +24,12 @@ PyLiteObject* pylt_obj_set_has(PyLiteState *state, PyLiteSetObject *self, PyLite
 pl_int_t pylt_obj_set_remove(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *obj);
 PyLiteObject* pylt_obj_set_pop(PyLiteState *state, PyLiteSetObject *self);
 
-pl_int_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self);
-pl_int_t pylt_obj_set_end(PyLiteState *state, PyLiteSetObject *self);
-void pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t *k);
+pl_int32_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self);
+pl_int32_t pylt_obj_set_end(PyLiteState *state, PyLiteSetObject *self);
+void pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int32_t *k);
 
 // 存在则取值 否则为空
-PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int_t k);
+PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int32_t k);
 
 struct PyLiteStrObject* pylt_obj_set_to_str(PyLiteState *state, PyLiteSetObject *self);
 

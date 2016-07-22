@@ -213,7 +213,7 @@ PyLiteObject* pylt_cls_method_dict_new(PyLiteState *state, int argc, PyLiteObjec
     PyLiteDictObject *kwargs = dcast(dict, args[1]);
     PyLiteDictObject *newdict = pylt_obj_dict_new(state);
 
-    for (pl_int_t it = pylt_obj_dict_begin(state, kwargs); it != pylt_obj_dict_end(state, kwargs); pylt_obj_dict_next(state, dcast(dict, args[1]), &it)) {
+    for (pl_int32_t it = pylt_obj_dict_begin(state, kwargs); it != pylt_obj_dict_end(state, kwargs); pylt_obj_dict_next(state, dcast(dict, args[1]), &it)) {
         pylt_obj_dict_setitem(state, newdict, pylt_obj_dict_itemkey(state, kwargs, it), pylt_obj_dict_itemvalue(state, kwargs, it));
     }
 

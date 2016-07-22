@@ -16,7 +16,7 @@ typedef struct PyLiteIterObject {
         } array;
         struct {
             pl_int_t count;
-            pl_uint_t k;
+            pl_int32_t k;
         } hashmap;
     };
 } PyLiteIterObject;

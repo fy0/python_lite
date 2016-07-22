@@ -58,7 +58,7 @@ PyLiteSetObject* pylt_obj_set_copy(PyLiteState *state, PyLiteSetObject *self) {
     PyLiteSetObject *obj = pylt_obj_set_new(state);
     kho_resize(set_obj, obj->ob_val, pylt_obj_set_len(state, self));
 
-    for (pl_int_t k = pylt_obj_set_begin(state, self); k != pylt_obj_set_end(state, self); pylt_obj_set_next(state, self, &k)) {
+    for (pl_int32_t k = pylt_obj_set_begin(state, self); k != pylt_obj_set_end(state, self); pylt_obj_set_next(state, self, &k)) {
         pylt_obj_set_add(state, obj, pylt_obj_set_itemvalue(state, self, k));
     }
 
@@ -87,8 +87,8 @@ PyLiteObject* pylt_obj_set_pop(PyLiteState *state, PyLiteSetObject *self) {
     return obj;
 }
 
-pl_int_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self) {
-    pl_int_t k = kho_begin(self->ob_val);
+pl_int32_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self) {
+    pl_int32_t k = kho_begin(self->ob_val);
     while (k != kho_end(self->ob_val)) {
         if (kho_exist(self->ob_val, k)) return k;
         ++k;
@@ -96,16 +96,16 @@ pl_int_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self) {
     return kho_end(self->ob_val);
 }
 
-pl_int_t pylt_obj_set_end(PyLiteState *state, PyLiteSetObject *self) {
+pl_int32_t pylt_obj_set_end(PyLiteState *state, PyLiteSetObject *self) {
     return kho_end(self->ob_val);
 }
 
-PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int_t k) {
+PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int32_t k) {
     return (kho_exist(self->ob_val, k)) ? castobj(kho_key(self->ob_val, k)) : NULL;
 }
 
-void pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int_t *k) {
-    pl_int_t key = *k;
+void pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int32_t *k) {
+    pl_int32_t key = *k;
     while (++key != kho_end(self->ob_val)) {
         if (kho_exist(self->ob_val, key)) {
             *k = key;
@@ -130,7 +130,7 @@ struct PyLiteStrObject* pylt_obj_set_to_str(PyLiteState *state, PyLiteSetObject 
     pl_uint32_t data_len = 2 + comma_num * 2; // {} + ', '
     strlst = realloc(NULL, slen * sizeof(PyLiteStrObject*));
 
-    for (pl_int_t k = pylt_obj_set_begin(state, self); k != pylt_obj_set_end(state, self); pylt_obj_set_next(state, self, &k)) {
+    for (pl_int32_t k = pylt_obj_set_begin(state, self); k != pylt_obj_set_end(state, self); pylt_obj_set_next(state, self, &k)) {
         str = pylt_obj_to_repr(state, pylt_obj_set_itemvalue(state, self, k));
         data_len += str->ob_size;
         strlst[index++] = str;
