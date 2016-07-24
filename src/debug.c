@@ -4,28 +4,28 @@
 #include "lexer.h"
 #include "vm.h"
 #include "api.h"
-#include "state.h"
+#include "intp.h"
 
 const char* get_op_name(uint32_t val) {
     return pylt_vm_get_op_name(val);
 }
 
-void debug_print_obj(PyLiteState *state, PyLiteObject *obj) {
-    pylt_api_output_str(state, pylt_obj_to_repr(state, obj));
+void debug_print_obj(PyLiteInterpreter *I, PyLiteObject *obj) {
+    pylt_api_output_str(I, pylt_obj_to_repr(I, obj));
 }
 
-void debug_print_const_vals(PyLiteState *state, PyLiteCodeObject *code) {
+void debug_print_const_vals(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     printf("CONST VALS:\n");
-    for (unsigned int i = 0; i < pylt_obj_list_count(state, code->const_val); i++) {
-        PyLiteObject *obj = pylt_obj_list_getitem(state, code->const_val, i);
-        /*printf("    %-4d %-12s ", i, pylt_api_type_name_cstr(state, obj->ob_type));
-        debug_print_obj(state, obj);
+    for (unsigned int i = 0; i < pylt_obj_list_count(I, code->const_val); i++) {
+        PyLiteObject *obj = pylt_obj_list_getitem(I, code->const_val, i);
+        /*printf("    %-4d %-12s ", i, pylt_api_type_name_cstr(I, obj->ob_type));
+        debug_print_obj(I, obj);
         putchar('\n');*/
-        pl_print(state, "   %-4d %-12s %s\n", pylt_obj_int_new(state, i), pylt_api_type_name(state, obj->ob_type), pylt_obj_to_repr(state, obj));
+        pl_print(I, "   %-4d %-12s %s\n", pylt_obj_int_new(I, i), pylt_api_type_name(I, obj->ob_type), pylt_obj_to_repr(I, obj));
     }
 }
 
-void debug_print_opcodes(PyLiteState *state, PyLiteCodeObject *code) {
+void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     PyLiteInstruction ins;
 
     printf("OPCODES:\n");
@@ -38,7 +38,7 @@ void debug_print_opcodes(PyLiteState *state, PyLiteCodeObject *code) {
                 break;
             case BC_SET_VAL:
                 printf("   %-15s %d", "SET_VAL", ins.extra);
-                //debug_print_obj(state, castobj(kv_A(code->opcodes, ++i)));
+                //debug_print_obj(I, castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;
             case BC_LOAD_VAL:
@@ -57,12 +57,12 @@ void debug_print_opcodes(PyLiteState *state, PyLiteCodeObject *code) {
                 break;
             case BC_NEW_OBJ:
                 printf("   %-15s ", "NEW_OBJ");
-                pylt_api_output_str(state, pylt_api_type_name(state, ins.exarg));
+                pylt_api_output_str(I, pylt_api_type_name(I, ins.exarg));
                 printf(" %d\n", ins.extra);
                 break;
             case BC_CALL:
                 printf("   %-15s %d", "CALL", ins.extra);
-                //debug_print_obj(state, castobj(kv_A(code->opcodes, ++i)));
+                //debug_print_obj(I, castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;
             case BC_RET:
@@ -124,37 +124,37 @@ void debug_print_opcodes(PyLiteState *state, PyLiteCodeObject *code) {
     }
 }
 
-void debug_test_lexer(PyLiteState *state, StringStream *ss) {
-    state->lexer->ss = ss;
+void debug_test_lexer(PyLiteInterpreter *I, StringStream *ss) {
+    I->lexer->ss = ss;
 
     for (;;) {
-        int code = pylt_lex_next(state->lexer);
+        int code = pylt_lex_next(I->lexer);
         if (code) {
             printf("ERROR: %d\n", code);
             break;
         }
-        if (state->lexer->token.val < FIRST_TOKEN) printf("[%d] %c\n", state->lexer->linenumber, state->lexer->token.val);
+        if (I->lexer->token.val < FIRST_TOKEN) printf("[%d] %c\n", I->lexer->linenumber, I->lexer->token.val);
         else {
-            switch (state->lexer->token.val) {
+            switch (I->lexer->token.val) {
                 case TK_INT: case TK_FLOAT:
-                    printf("[%d] %s: ", state->lexer->linenumber, pylt_lex_get_token_name(state->lexer->token.val));
-                    debug_print_obj(state, state->lexer->token.obj);
-                    //raw_str_print(&state->lexer->token.str);
+                    printf("[%d] %s: ", I->lexer->linenumber, pylt_lex_get_token_name(I->lexer->token.val));
+                    debug_print_obj(I, I->lexer->token.obj);
+                    //raw_str_print(&I->lexer->token.str);
                     putchar('\n');
                     break;
                 case TK_BYTES: case TK_STRING: case TK_NAME:
-                    printf("[%d] %s: ", state->lexer->linenumber, pylt_lex_get_token_name(state->lexer->token.val));
-                    //raw_str_print(&state->lexer->token.str);
-                    debug_print_obj(state, state->lexer->token.obj);
+                    printf("[%d] %s: ", I->lexer->linenumber, pylt_lex_get_token_name(I->lexer->token.val));
+                    //raw_str_print(&I->lexer->token.str);
+                    debug_print_obj(I, I->lexer->token.obj);
                     putchar('\n');
                     break;
                 case TK_INDENT: case TK_DEDENT:
-                    printf("[%d] %s: %d\n", state->lexer->linenumber, pylt_lex_get_token_name(state->lexer->token.val), state->lexer->current_indent);
+                    printf("[%d] %s: %d\n", I->lexer->linenumber, pylt_lex_get_token_name(I->lexer->token.val), I->lexer->current_indent);
                     break;
                 default:
-                    printf("[%d] %s\n", state->lexer->linenumber, pylt_lex_get_token_name(state->lexer->token.val));
+                    printf("[%d] %s\n", I->lexer->linenumber, pylt_lex_get_token_name(I->lexer->token.val));
             }
         }
-        if (state->lexer->token.val == TK_END) break;
+        if (I->lexer->token.val == TK_END) break;
     }
 }

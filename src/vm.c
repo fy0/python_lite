@@ -1,7 +1,7 @@
 ﻿
 #include "vm.h"
 #include "api.h"
-#include "state.h"
+#include "intp.h"
 #include "debug.h"
 #include "bind.h"
 #include "lib/kvec.h"
@@ -67,7 +67,7 @@ int token_de_to_op_val(uint32_t tk) {
     return 0;
 }
 
-void pylt_vm_init(struct PyLiteState *state, PyLiteVM* vm) {
+void pylt_vm_init(struct PyLiteInterpreter *I, PyLiteVM* vm) {
     PyLiteFrame *frame;
     PyLiteModuleObject *mod;
 
@@ -81,23 +81,23 @@ void pylt_vm_init(struct PyLiteState *state, PyLiteVM* vm) {
     kv_init(frame->var_tables);
 
     // built-in
-    pylt_bind_all_types_register(state);
+    pylt_bind_all_types_register(I);
 
-    mod = pylt_mods_builtins_register(state);
+    mod = pylt_mods_builtins_register(I);
     kv_push(PyLiteDictObject*, frame->var_tables, mod->attrs);
 
     // first local
-    kv_push(PyLiteDictObject*, frame->var_tables, pylt_obj_dict_new(state));
+    kv_push(PyLiteDictObject*, frame->var_tables, pylt_obj_dict_new(I));
 }
 
-void pylt_vm_finalize(PyLiteState *state) {
-    kv_destroy(state->vm.stack);
-    kv_destroy(state->vm.frames);
+void pylt_vm_finalize(PyLiteInterpreter *I) {
+    kv_destroy(I->vm.stack);
+    kv_destroy(I->vm.frames);
 }
 
-void pylt_vm_load_func(PyLiteState* state, PyLiteFunctionObject *func) {
+void pylt_vm_load_func(PyLiteInterpreter *I, PyLiteFunctionObject *func) {
     PyLiteFrame *frame;
-    PyLiteVM *vm = &state->vm;
+    PyLiteVM *vm = &I->vm;
     int index = kv_size(vm->frames);
 
     kv_pushp(PyLiteFrame, vm->frames);
@@ -106,23 +106,23 @@ void pylt_vm_load_func(PyLiteState* state, PyLiteFunctionObject *func) {
     frame->code = &func->code;
     kv_init(frame->var_tables);
 
-    pylt_gc_add(state, castobj(func));
-    //pylt_gc_add(state, castobj(func->code));
+    pylt_gc_add(I, castobj(func));
+    //pylt_gc_add(I, castobj(func->code));
 
     if (index) {
         kv_copy1(PyLiteDictObject*, frame->var_tables, kv_A(vm->frames, index - 1).var_tables);
     }
 
-    kv_push(PyLiteDictObject*, frame->var_tables, pylt_obj_dict_new(state));
+    kv_push(PyLiteDictObject*, frame->var_tables, pylt_obj_dict_new(I));
 }
 
 
-void pylt_vm_load_code(PyLiteState* state, PyLiteCodeObject *code) {
-    PyLiteVM *vm = &state->vm;
+void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
+    PyLiteVM *vm = &I->vm;
     PyLiteFrame *frame = &kv_top(vm->frames);
     frame->func = NULL;
     frame->code = code;
-    pylt_gc_add(state, castobj(code));
+    pylt_gc_add(I, castobj(code));
 }
 
 // 函数调用检查
@@ -136,7 +136,7 @@ void pylt_vm_load_code(PyLiteState* state, PyLiteCodeObject *code) {
 //  1 tobj is a class, pfunc_obj is tobj.__new__
 //  2 tobj is a object with __call__ attribute, pfunc_obj is tobj.__call__
 
-int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLiteDictObject *kwargs, PyLiteObject **pfunc_obj, PyLiteFunctionInfo **pinfo, pl_int_t *pflag) {
+int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, PyLiteDictObject *kwargs, PyLiteObject **pfunc_obj, PyLiteFunctionInfo **pinfo, pl_int_t *pflag) {
     PyLiteFunctionInfo *info;
     PyLiteObject *obj, *defobj;
     PyLiteObject *insert_caller = NULL;
@@ -145,17 +145,17 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
     int args_i;
     bool at_type;
 
-    info = pylt_obj_func_get_info(state, tobj);
+    info = pylt_obj_func_get_info(I, tobj);
     if (info) {
         if (pflag) *pflag = 0;
         if (pfunc_obj) *pfunc_obj = tobj;
     } else {
         if (tobj->ob_type == PYLT_OBJ_TYPE_TYPE) {
             // __new__
-            obj = pylt_obj_getattr(state, tobj, castobj(pl_static.str.__new__), &at_type);
+            obj = pylt_obj_getattr(I, tobj, castobj(pl_static.str.__new__), &at_type);
 
             if (obj) {
-                info = pylt_obj_func_get_info(state, obj);
+                info = pylt_obj_func_get_info(I, obj);
                 if (!info) return -1;
                 if (pflag) *pflag = 1;
             } else {
@@ -164,20 +164,20 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
             }
         } else {
             // __call__
-            obj = pylt_obj_getattr(state, tobj, castobj(pl_static.str.__call__), &at_type);
+            obj = pylt_obj_getattr(I, tobj, castobj(pl_static.str.__call__), &at_type);
             if (obj) {
-                info = pylt_obj_func_get_info(state, obj);
+                info = pylt_obj_func_get_info(I, obj);
                 if (!info) return -1;
                 if (pflag) *pflag = 2;
             } else return -1;
         }
 
         // 插入首个参数
-        if (params_num == 0) kv_pushptr(state->vm.stack, tobj); // __new__(cls, ...) __call__(self, ...)
+        if (params_num == 0) kv_pushptr(I->vm.stack, tobj); // __new__(cls, ...) __call__(self, ...)
         else {
-            kv_pushptr(state->vm.stack, NULL);
-            memcpy(&kv_topn(state->vm.stack, params_num-1), &kv_topn(state->vm.stack, params_num), sizeof(uintptr_t) * params_num);
-            kv_topn(state->vm.stack, params_num) = (uintptr_t)tobj;
+            kv_pushptr(I->vm.stack, NULL);
+            memcpy(&kv_topn(I->vm.stack, params_num-1), &kv_topn(I->vm.stack, params_num), sizeof(uintptr_t) * params_num);
+            kv_topn(I->vm.stack, params_num) = (uintptr_t)tobj;
         }
         params_num++;
 
@@ -188,19 +188,19 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
         // 极简情况，调用时不用字典调用，函数本身也没有默认值、*args和**kwargs
         if (params_num < info->length) {
             printf("TypeError: ");
-            debug_print_obj(state, castobj(info->name));
+            debug_print_obj(I, castobj(info->name));
             printf("() missing %d required positional argument\n", (info->minimal - params_num));
             return 1;
         }
 
         if (params_num > info->minimal) {
             printf("TypeError: ");
-            debug_print_obj(state, castobj(info->name));
+            debug_print_obj(I, castobj(info->name));
             printf("() takes %d positional arguments but %d were given\n", info->length, params_num);
             return 1;
         }
     } else {
-        args = (PyLiteObject**)(&kv_topn(state->vm.stack, params_num - 1));
+        args = (PyLiteObject**)(&kv_topn(I->vm.stack, params_num - 1));
         args_i = 0;
 
         for (int i = 0; i < info->length; ++i) {
@@ -217,15 +217,15 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
                     }
 
                     if (kwargs) {
-                        obj = pylt_obj_dict_pop(state, kwargs, (PyLiteObject*)info->params[i]);
+                        obj = pylt_obj_dict_pop(I, kwargs, (PyLiteObject*)info->params[i]);
                         if (obj) {
-                            kv_pushptr(state->vm.stack, obj);
+                            kv_pushptr(I->vm.stack, obj);
                             break;
                         }
                     }
 
                     printf("TypeError: ");
-                    debug_print_obj(state, castobj(info->name));
+                    debug_print_obj(I, castobj(info->name));
                     printf("() missing %d required positional argument (%d given)\n", (info->minimal - params_num), i);
                     return 1;
                 case PARAM_ARGS:
@@ -233,19 +233,19 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
                     // 如果没有，压入一个空 tuple
                     if (args_i != params_num) {
                         int args_len = params_num - args_i;
-                        PyLiteTupleObject *tuple = pylt_obj_tuple_new_with_data(state, args_len, args + args_i);
-                        kv_popn(state->vm.stack, args_len);
-                        kv_pushptr(state->vm.stack, tuple);
+                        PyLiteTupleObject *tuple = pylt_obj_tuple_new_with_data(I, args_len, args + args_i);
+                        kv_popn(I->vm.stack, args_len);
+                        kv_pushptr(I->vm.stack, tuple);
                         params_num -= args_len;
                     } else {
-                        PyLiteTupleObject *tuple = pylt_obj_tuple_new(state, 0);
-                        kv_pushptr(state->vm.stack, tuple);
+                        PyLiteTupleObject *tuple = pylt_obj_tuple_new(I, 0);
+                        kv_pushptr(I->vm.stack, tuple);
                     }
                     break;
                 case PARAM_KWARGS:
                     // 必定为最后一个参数，如果有 kwargs，压入
                     // 如果没有 压入一个空字典
-                    kv_pushptr(state->vm.stack, (kwargs) ? kwargs : pylt_obj_dict_new(state));
+                    kv_pushptr(I->vm.stack, (kwargs) ? kwargs : pylt_obj_dict_new(I));
                     break;
                 default:
                     // 如果栈中还有参数，试图填充
@@ -257,21 +257,21 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
                     }
 
                     if (kwargs) {
-                        obj = pylt_obj_dict_pop(state, kwargs, (PyLiteObject*)info->params[i]);
+                        obj = pylt_obj_dict_pop(I, kwargs, (PyLiteObject*)info->params[i]);
                         if (obj) {
-                            kv_pushptr(state->vm.stack, obj);
+                            kv_pushptr(I->vm.stack, obj);
                             break;
                         }
                     }
 
-                    kv_pushptr(state->vm.stack, defobj);
+                    kv_pushptr(I->vm.stack, defobj);
                     break;
             }
         }
         // 如果 args_i != params_num 那么参数多出来了，报错
         if (args_i != params_num) {
             printf("TypeError: ");
-            debug_print_obj(state, castobj(info->name));
+            debug_print_obj(I, castobj(info->name));
             printf("() takes %d positional arguments but %d were given\n", info->length, params_num);
             return 1;
         }
@@ -279,15 +279,15 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
 
     // type check
     if (info->type_codes) {
-        args = (PyLiteObject**)(&kv_topn(state->vm.stack, info->length - 1));
+        args = (PyLiteObject**)(&kv_topn(I->vm.stack, info->length - 1));
 
         for (int i = 0; i < info->length; ++i) {
             if (!info->type_codes[i]) continue;
-            if (!pylt_api_isinstance(state, args[i], info->type_codes[i])) {
+            if (!pylt_api_isinstance(I, args[i], info->type_codes[i])) {
                 // 类型不符合，报错
                 printf("TypeError: ");
-                debug_print_obj(state, castobj(info->params[i]));
-                pl_print(state, " must be %s\n", pylt_api_type_name(state, info->type_codes[i]));
+                debug_print_obj(I, castobj(info->params[i]));
+                pl_print(I, " must be %s\n", pylt_api_type_name(I, info->type_codes[i]));
                 //PyLiteETypeErrorObject()
                 return 3;
             }
@@ -298,11 +298,11 @@ int func_call_check(PyLiteState* state, PyLiteObject *tobj, int params_num, PyLi
     return 0;
 }
 
-#define const_obj(__index) pylt_obj_list_getitem(state, code->const_val, (__index))
+#define const_obj(__index) pylt_obj_list_getitem(I, code->const_val, (__index))
 
 
-void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
-    PyLiteVM *vm = &state->vm;
+void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
+    PyLiteVM *vm = &I->vm;
     PyLiteDictObject *locals;
     PyLiteInstruction ins;
 
@@ -314,7 +314,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
     pl_uint_t params_num;
     pl_uint_t params_offset = 0;
 
-    if (code) pylt_vm_load_code(state, code);
+    if (code) pylt_vm_load_code(I, code);
     else if (!kv_top(vm->frames).code) return;
     code = kv_top(vm->frames).code;
 
@@ -322,7 +322,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
 
     for (pl_uint_t i = 0; ; ++i) {
         ins = kv_A(code->opcodes, i);
-        //if (i && (i % 25 == 0)) pylt_gc_collect(state);
+        //if (i && (i % 25 == 0)) pylt_gc_collect(I);
 
         switch (ins.code) {
             case BC_LOADCONST:
@@ -335,27 +335,27 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 break;
             case BC_SET_VAL:
                 // SET_VAL      0       const_id
-                pylt_obj_dict_setitem(state, locals, const_obj(ins.extra), castobj(kv_top(state->vm.stack)));
+                pylt_obj_dict_setitem(I, locals, const_obj(ins.extra), castobj(kv_top(I->vm.stack)));
                 break;
             case BC_LOAD_VAL:
             case BC_LOAD_VAL_EX:
                 // LOAD_VAL     0       const_id
-                tobj = pylt_obj_dict_getitem(state, locals, const_obj(ins.extra));
+                tobj = pylt_obj_dict_getitem(I, locals, const_obj(ins.extra));
 
                 if (!tobj) {
                     for (int j = kv_size(kv_top(vm->frames).var_tables) - 2; j >= 0; --j) {
-                        tobj = pylt_obj_dict_getitem(state, kv_A(kv_top(vm->frames).var_tables, j), const_obj(ins.extra));
+                        tobj = pylt_obj_dict_getitem(I, kv_A(kv_top(vm->frames).var_tables, j), const_obj(ins.extra));
                         if (tobj) break;
                     }
                 }
 
                 if (!tobj) {
                     printf("NameError: name '");
-                    pylt_api_output_str(state, caststr(const_obj(ins.extra)));
+                    pylt_api_output_str(I, caststr(const_obj(ins.extra)));
                     printf("' is not defined\n");
                     return;
                 }
-                kv_push(uintptr_t, state->vm.stack, (uintptr_t)tobj);
+                kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
                 break;
             case BC_OPERATOR:
                 // OPERATOR     0       op
@@ -364,31 +364,31 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                     case OP_LT: case OP_LE: case OP_GT: case OP_GE: case OP_NE: case OP_EQ:
                     case OP_BITOR: case OP_BITXOR: case OP_BITAND: case OP_LSHIFT: case OP_RSHIFT:
                     case OP_PLUS: case OP_MINUS: case OP_MUL: case OP_MATMUL: case OP_DIV: case OP_FLOORDIV: case OP_MOD: case OP_POW:
-                        tb = castobj(kv_pop(state->vm.stack));
-                        ta = castobj(kv_pop(state->vm.stack));
-                        tret = pylt_obj_op_binary(state, ins.extra, ta, tb);
+                        tb = castobj(kv_pop(I->vm.stack));
+                        ta = castobj(kv_pop(I->vm.stack));
+                        tret = pylt_obj_op_binary(I, ins.extra, ta, tb);
                         if (!tret) {
                             printf("TypeError: unsupported operand type(s) for %s: ", pylt_vm_get_op_name(ins.extra));
-                            debug_print_obj(state, castobj(pylt_api_type_name(state, ta->ob_type)));
+                            debug_print_obj(I, castobj(pylt_api_type_name(I, ta->ob_type)));
                             printf(" and ");
-                            debug_print_obj(state, castobj(pylt_api_type_name(state, tb->ob_type)));
+                            debug_print_obj(I, castobj(pylt_api_type_name(I, tb->ob_type)));
                             printf("\n");
                             return;
                         }
-                        pylt_gc_add(state, tret);
-                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)tret);
+                        pylt_gc_add(I, tret);
+                        kv_push(uintptr_t, I->vm.stack, (uintptr_t)tret);
                         break;
                     default:
-                        ta = castobj(kv_pop(state->vm.stack));
-                        tret = pylt_obj_op_unary(state, ins.extra, ta);
+                        ta = castobj(kv_pop(I->vm.stack));
+                        tret = pylt_obj_op_unary(I, ins.extra, ta);
                         if (!tret) {
                             printf("TypeError: bad operand type for unary '%s': ", pylt_vm_get_op_name(ins.extra));
-                            debug_print_obj(state, castobj(pylt_api_type_name(state, tobj->ob_type)));
+                            debug_print_obj(I, castobj(pylt_api_type_name(I, tobj->ob_type)));
                             printf("\n");
                             return;
                         }
-                        pylt_gc_add(state, tret);
-                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)tret);
+                        pylt_gc_add(I, tret);
+                        kv_push(uintptr_t, I->vm.stack, (uintptr_t)tret);
                         break;
                 }
                 break;
@@ -396,19 +396,19 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 // NEW_OBJ      type    extra
                 switch (ins.exarg) {
                     case PYLT_OBJ_TYPE_ITER:
-                        tret = castobj(pylt_obj_iter_new(state, castobj(kv_pop(state->vm.stack))));
-                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)tret);
+                        tret = castobj(pylt_obj_iter_new(I, castobj(kv_pop(I->vm.stack))));
+                        kv_push(uintptr_t, I->vm.stack, (uintptr_t)tret);
                         break;
                     case PYLT_OBJ_TYPE_FUNCTION:
-                        te = castobj(kv_pop(state->vm.stack)); // kwargs_name
-                        td = castobj(kv_pop(state->vm.stack)); // args_name
-                        tc = castobj(kv_pop(state->vm.stack)); // params
-                        tb = castobj(kv_pop(state->vm.stack)); // code
-                        ta = castobj(kv_pop(state->vm.stack)); // name
-                        tf = castobj(kv_pop(state->vm.stack)); // defaults
+                        te = castobj(kv_pop(I->vm.stack)); // kwargs_name
+                        td = castobj(kv_pop(I->vm.stack)); // args_name
+                        tc = castobj(kv_pop(I->vm.stack)); // params
+                        tb = castobj(kv_pop(I->vm.stack)); // code
+                        ta = castobj(kv_pop(I->vm.stack)); // name
+                        tf = castobj(kv_pop(I->vm.stack)); // defaults
 
                         tfunc = pylt_obj_func_new_ex(
-                            state,
+                            I,
                             caststr(ta), // name
                             castlist(tc), // params
                             (PyLiteCodeObject*)tb, // code
@@ -417,40 +417,40 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                             caststr((te != castobj(&PyLiteNone)) ? te : NULL) // kwargs_name
                         );
 
-                        pylt_gc_add(state, castobj(tfunc));
-                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)tfunc);
+                        pylt_gc_add(I, castobj(tfunc));
+                        kv_push(uintptr_t, I->vm.stack, (uintptr_t)tfunc);
                         break;
                     case PYLT_OBJ_TYPE_SET:
-                        tobj = castobj(pylt_obj_set_new(state));
+                        tobj = castobj(pylt_obj_set_new(I));
                         for (pl_int_t j = 0; j < ins.extra; ++j) {
-                            pylt_obj_set_add(state, castset(tobj), castobj(kv_pop(state->vm.stack)));
+                            pylt_obj_set_add(I, castset(tobj), castobj(kv_pop(I->vm.stack)));
                         }
-                        pylt_gc_add(state, tobj);
-                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)tobj);
+                        pylt_gc_add(I, tobj);
+                        kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
                         break;
                     case PYLT_OBJ_TYPE_LIST:
-                        tobj = castobj(pylt_obj_list_new_with_size(state, ins.extra));
+                        tobj = castobj(pylt_obj_list_new_with_size(I, ins.extra));
                         for (pl_uint_t j = ins.extra; j > 0; --j) {
-                            pylt_obj_list_append(state, castlist(tobj), castobj(kv_A(state->vm.stack, kv_size(state->vm.stack) - j)));
+                            pylt_obj_list_append(I, castlist(tobj), castobj(kv_A(I->vm.stack, kv_size(I->vm.stack) - j)));
                         }
-                        kv_popn(state->vm.stack, ins.extra);
-                        pylt_gc_add(state, tobj);
-                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)tobj);
+                        kv_popn(I->vm.stack, ins.extra);
+                        pylt_gc_add(I, tobj);
+                        kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
                         break;
                     case PYLT_OBJ_TYPE_TUPLE:
-                        tobj = castobj(pylt_obj_tuple_new(state, ins.extra));
+                        tobj = castobj(pylt_obj_tuple_new(I, ins.extra));
                         memcpy(casttuple(tobj)->ob_val, &kv_topn(vm->stack, ins.extra - 1), sizeof(PyLiteObject*) * ins.extra);
-                        kv_popn(state->vm.stack, ins.extra);
-                        pylt_gc_add(state, tobj);
-                        kv_push(uintptr_t, state->vm.stack, (uintptr_t)tobj);
+                        kv_popn(I->vm.stack, ins.extra);
+                        pylt_gc_add(I, tobj);
+                        kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
                         break;
                     case PYLT_OBJ_TYPE_DICT:
-                        tobj = castobj(pylt_obj_dict_new(state));
+                        tobj = castobj(pylt_obj_dict_new(I));
                         for (pl_uint_t j = ins.extra; j > 0; j--) {
-                            pylt_obj_dict_setitem(state, castdict(tobj), castobj(kv_topn(vm->stack, j * 2 - 1)), castobj(kv_topn(vm->stack, (j - 1) * 2)));
+                            pylt_obj_dict_setitem(I, castdict(tobj), castobj(kv_topn(vm->stack, j * 2 - 1)), castobj(kv_topn(vm->stack, (j - 1) * 2)));
                         }
                         kv_popn(vm->stack, ins.extra * 2);
-                        pylt_gc_add(state, tobj);
+                        pylt_gc_add(I, tobj);
                         kv_push(uintptr_t, vm->stack, (uintptr_t)tobj);
                         break;
                     case PYLT_OBJ_TYPE_TYPE:
@@ -458,10 +458,10 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                         tb = castobj(kv_pop(vm->stack)); // base type
                         tc = castobj(kv_pop(vm->stack)); // class vars
 
-                        tb = (tb->ob_type == PYLT_OBJ_TYPE_NONE) ? castobj(pylt_api_gettype(state, PYLT_OBJ_TYPE_OBJ)) : tb;
-                        PyLiteTypeObject *type = pylt_obj_type_new(state, caststr(ta), casttype(tb)->ob_reftype, castdict(tc));
-                        pylt_obj_type_register(state, type);
-                        pylt_gc_add(state, castobj(type));
+                        tb = (tb->ob_type == PYLT_OBJ_TYPE_NONE) ? castobj(pylt_api_gettype(I, PYLT_OBJ_TYPE_OBJ)) : tb;
+                        PyLiteTypeObject *type = pylt_obj_type_new(I, caststr(ta), casttype(tb)->ob_reftype, castdict(tc));
+                        pylt_obj_type_register(I, type);
+                        pylt_gc_add(I, castobj(type));
                         kv_pushptr(vm->stack, type);
                         break;
                 }
@@ -478,10 +478,10 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
 
                 // check
                 PyLiteFunctionInfo *func_info;
-                if (tnum = func_call_check(state, tobj, params_num, castdict(ta), &tret, &func_info, &tflag)) {
+                if (tnum = func_call_check(I, tobj, params_num, castdict(ta), &tret, &func_info, &tflag)) {
                     if (tnum == -1) {
                         printf("TypeError: ");
-                        debug_print_obj(state, castobj(pylt_api_type_name(state, tobj->ob_type)));
+                        debug_print_obj(I, castobj(pylt_api_type_name(I, tobj->ob_type)));
                         printf(" object is not callable\n");
                     }
                     return;
@@ -490,21 +490,21 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 // set locals and execute
                 if (tret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
                     kv_top(vm->frames).code_pointer_slot = i;
-                    pylt_vm_load_func(state, castfunc(tret));
+                    pylt_vm_load_func(I, castfunc(tret));
                     code = kv_top(vm->frames).code;
                     locals = kv_top(kv_top(vm->frames).var_tables);
                     if (func_info->length > 0) {
                         for (int k = func_info->length - 1; k >= 0; --k) {
-                            pylt_obj_dict_setitem(state, locals, castobj(castfunc(tret)->info.params[k]), castobj(kv_pop(state->vm.stack)));
+                            pylt_obj_dict_setitem(I, locals, castobj(castfunc(tret)->info.params[k]), castobj(kv_pop(I->vm.stack)));
                         }
                     }
                     kv_pop(vm->stack); // pop func obj
                     i = -1;
                 } else if (tret->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
-                    tret = castcfunc(tret)->code(state, func_info->length, (PyLiteObject**)(&kv_topn(vm->stack, func_info->length - 1)));
+                    tret = castcfunc(tret)->code(I, func_info->length, (PyLiteObject**)(&kv_topn(vm->stack, func_info->length - 1)));
                     kv_popn(vm->stack, func_info->length + 1);
-                    if (tret) kv_pushptr(state->vm.stack, tret);
-                    else kv_pushptr(state->vm.stack, (uintptr_t)pylt_obj_none_new(state));
+                    if (tret) kv_pushptr(I->vm.stack, tret);
+                    else kv_pushptr(I->vm.stack, (uintptr_t)pylt_obj_none_new(I));
                 }
 
                 // if new instance created
@@ -512,7 +512,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                     // pack custom object
                     if (pl_iscustomtype(tobj)) {
                         tret = castobj(kv_pop(vm->stack));
-                        kv_pushptr(vm->stack, pylt_obj_cutstom_new(state, casttype(tobj)->ob_reftype, tret));
+                        kv_pushptr(vm->stack, pylt_obj_cutstom_new(I, casttype(tobj)->ob_reftype, tret));
                     }
                     // call __init__
                 }
@@ -523,11 +523,11 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 code = kv_top(vm->frames).code;
                 locals = kv_top(kv_top(vm->frames).var_tables);
                 i = kv_top(vm->frames).code_pointer_slot;
-                //pylt_gc_local_release(state);
+                //pylt_gc_local_release(I);
                 break;
             case BC_TEST:
                 // TEST         0       jump_offset
-                if (!pylt_obj_istrue(state, castobj(kv_pop(state->vm.stack)))) {
+                if (!pylt_obj_istrue(I, castobj(kv_pop(I->vm.stack)))) {
                     i += ins.extra;
                 }
                 break;
@@ -541,39 +541,39 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 break;
             case BC_FORITER:
                 // FORITER      0       jump_offset
-                ta = pylt_obj_iter_next(state, castiter(kv_top(state->vm.stack)));
+                ta = pylt_obj_iter_next(I, castiter(kv_top(I->vm.stack)));
                 if (ta == NULL) i += ins.extra - 1;
-                else kv_push(uintptr_t, state->vm.stack, (uintptr_t)ta);
+                else kv_push(uintptr_t, I->vm.stack, (uintptr_t)ta);
                 break;
             case BC_DEL_FORCE:
                 // DEL_FORCE    0       0
-                pylt_free(castobj(kv_pop(state->vm.stack)));
+                pylt_free(castobj(kv_pop(I->vm.stack)));
                 break;
             case BC_POP:
                 // POP          0       0
-                kv_pop(state->vm.stack);
+                kv_pop(I->vm.stack);
                 break;
             case BC_GET_ITEM:
             case BC_GET_ITEM_EX:
                 // GET_ITEM     0       0
-                tb = castobj(kv_pop(state->vm.stack));
-                ta = castobj(kv_pop(state->vm.stack));
-                tobj = pylt_obj_getitem(state, ta, tb);
+                tb = castobj(kv_pop(I->vm.stack));
+                ta = castobj(kv_pop(I->vm.stack));
+                tobj = pylt_obj_getitem(I, ta, tb);
                 if (!tobj) {
                     printf("KeyError: ");
-                    debug_print_obj(state, tb);
+                    debug_print_obj(I, tb);
                     putchar('\n');
                     return;
                 } else {
-                    kv_push(uintptr_t, state->vm.stack, (uintptr_t)tobj);
+                    kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
                 }
                 break;
             case BC_SET_ITEM:
                 // SET_ITEM     0       0
-                ta = castobj(kv_pop(state->vm.stack));
-                tobj = castobj(kv_pop(state->vm.stack));
-                tb = castobj(kv_pop(state->vm.stack));
-                if (!pylt_obj_setitem(state, tobj, ta, tb)) {
+                ta = castobj(kv_pop(I->vm.stack));
+                tobj = castobj(kv_pop(I->vm.stack));
+                tb = castobj(kv_pop(I->vm.stack));
+                if (!pylt_obj_setitem(I, tobj, ta, tb)) {
                     printf("IndexError: list assignment index out of range\n");
                     return;
                 }
@@ -582,12 +582,12 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
             case BC_GET_ATTR:
             case BC_GET_ATTR_EX:
                 // GET_ATTR     0/1     const_id
-                tobj = castobj(kv_pop(state->vm.stack));
-                tret = pylt_obj_getattr(state, tobj, const_obj(ins.extra), &at_type);
+                tobj = castobj(kv_pop(I->vm.stack));
+                tret = pylt_obj_getattr(I, tobj, const_obj(ins.extra), &at_type);
                 if (!tret) {
                     // TODO
                     printf("AttributeError: ");
-                    debug_print_obj(state, castobj(pylt_api_type_name(state, tobj->ob_type)));
+                    debug_print_obj(I, castobj(pylt_api_type_name(I, tobj->ob_type)));
                     printf(" object has no this attribute\n");
                     return;
                 }
@@ -613,11 +613,11 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 break;
             case BC_SET_ATTR:
                 // SET_ATTR     0       const_id
-                tobj = castobj(kv_pop(state->vm.stack));
-                tb = castobj(kv_pop(state->vm.stack));
-                if (!pylt_obj_setattr(state, tobj, const_obj(ins.extra), tb)) {
+                tobj = castobj(kv_pop(I->vm.stack));
+                tb = castobj(kv_pop(I->vm.stack));
+                if (!pylt_obj_setattr(I, tobj, const_obj(ins.extra), tb)) {
                     printf("TypeError: can't set attributes of built-in/extension type ");
-                    debug_print_obj(state, castobj(pylt_api_type_name(state, tobj->ob_type)));
+                    debug_print_obj(I, castobj(pylt_api_type_name(I, tobj->ob_type)));
                     printf("\n");
                     return;
                 }
@@ -625,7 +625,7 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 break;
             case BC_ASSERT:
                 // ASSERT       0       0
-                if (!pylt_obj_istrue(state, castobj(kv_pop(state->vm.stack)))) {
+                if (!pylt_obj_istrue(I, castobj(kv_pop(I->vm.stack)))) {
                     printf("AssertionError\n");
                     return;
                 }
@@ -634,21 +634,21 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
                 // IMPORT_NAME  0       N
                 tobj = castobj(kv_topn(vm->stack, ins.extra - 1)); // name
                 if (tobj == castobj(pl_static.str.math)) {
-                    pylt_obj_dict_setitem(state, locals, castobj(pl_static.str.math), castobj(pylt_mods_math_register(state)));
+                    pylt_obj_dict_setitem(I, locals, castobj(pl_static.str.math), castobj(pylt_mods_math_register(I)));
                 } else if (tobj == castobj(pl_static.str.builtins)) {
-                    pylt_obj_dict_setitem(state, locals, castobj(pl_static.str.builtins), castobj(pylt_mods_builtins_register(state)));
+                    pylt_obj_dict_setitem(I, locals, castobj(pl_static.str.builtins), castobj(pylt_mods_builtins_register(I)));
                 } else {
                     // TODO
                 }
                 kv_popn(vm->stack, ins.extra);
                 break;
             case BC_PRINT:
-                if (kv_size(state->vm.stack) != 0) {
-                    debug_print_obj(state, castobj(kv_top(state->vm.stack)));
+                if (kv_size(I->vm.stack) != 0) {
+                    debug_print_obj(I, castobj(kv_top(I->vm.stack)));
                     putchar('\n');
                 }
                 printf("locals: ");
-                debug_print_obj(state, castobj(locals));
+                debug_print_obj(I, castobj(locals));
                 putchar('\n');
             case BC_HALT:
                 goto _end;
@@ -658,53 +658,53 @@ void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code) {
 _end:;
 }
 
-PyLiteFrame* pylt_vm_curframe(PyLiteState* state) {
-    return &kv_top(state->vm.frames);
+PyLiteFrame* pylt_vm_curframe(PyLiteInterpreter *I) {
+    return &kv_top(I->vm.frames);
 }
 
-PyLiteObject* pylt_vm_call_func(PyLiteState* state, PyLiteObject *callable, int argc, ...) {
+PyLiteObject* pylt_vm_call_func(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ...) {
     PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc };
     PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
-    PyLiteCodeObject *code = pylt_obj_code_new(state);
-    PyLiteFrame frame_bak = kv_top(state->vm.frames);
+    PyLiteCodeObject *code = pylt_obj_code_new(I);
+    PyLiteFrame frame_bak = kv_top(I->vm.frames);
     va_list args;
 
-    kv_pushptr(state->vm.stack, callable);
+    kv_pushptr(I->vm.stack, callable);
 
     va_start(args, argc);
     for (pl_int_t i = 0; i < argc; ++i) {
-        kv_pushptr(state->vm.stack, va_arg(args, PyLiteObject*));
+        kv_pushptr(I->vm.stack, va_arg(args, PyLiteObject*));
     }
     va_end(args);
 
     kv_pushins(code->opcodes, bc_call);
     kv_pushins(code->opcodes, bc_halt);
-    pylt_vm_run(state, code);
+    pylt_vm_run(I, code);
 
-    kv_top(state->vm.frames) = frame_bak;
-    return castobj(kv_pop(state->vm.stack));
+    kv_top(I->vm.frames) = frame_bak;
+    return castobj(kv_pop(I->vm.stack));
 }
 
-PyLiteObject* pylt_vm_call_method(PyLiteState* state, PyLiteObject *self, PyLiteObject *callable, int argc, ...) {
+PyLiteObject* pylt_vm_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, int argc, ...) {
     PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc + 1 };
     PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
-    PyLiteCodeObject *code = pylt_obj_code_new(state);
-    PyLiteFrame frame_bak = kv_top(state->vm.frames);
+    PyLiteCodeObject *code = pylt_obj_code_new(I);
+    PyLiteFrame frame_bak = kv_top(I->vm.frames);
     va_list args;
 
-    kv_pushptr(state->vm.stack, callable);
-    kv_pushptr(state->vm.stack, self);
+    kv_pushptr(I->vm.stack, callable);
+    kv_pushptr(I->vm.stack, self);
 
     va_start(args, argc);
     for (pl_int_t i = 0; i < argc; ++i) {
-        kv_pushptr(state->vm.stack, va_arg(args, PyLiteObject*));
+        kv_pushptr(I->vm.stack, va_arg(args, PyLiteObject*));
     }
     va_end(args);
 
     kv_pushins(code->opcodes, bc_call);
     kv_pushins(code->opcodes, bc_halt);
-    pylt_vm_run(state, code);
+    pylt_vm_run(I, code);
 
-    kv_top(state->vm.frames) = frame_bak;
-    return castobj(kv_pop(state->vm.stack));
+    kv_top(I->vm.frames) = frame_bak;
+    return castobj(kv_pop(I->vm.stack));
 }

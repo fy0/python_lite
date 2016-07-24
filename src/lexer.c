@@ -37,9 +37,9 @@ const char* pylt_lex_get_token_name(uint32_t token) {
     return NULL;
 }
 
-void pylt_lex_init(PyLiteState* state, LexState *ls, StringStream *ss) {
+void pylt_lex_init(PyLiteInterpreter *I, LexState *ls, StringStream *ss) {
     IndentInfo *idt;
-    ls->state = state;
+    ls->I = I;
     ls->linenumber = 1;
     ls->ss = ss;
     ls->current_indent = -1;
@@ -63,7 +63,7 @@ void pylt_lex_init(PyLiteState* state, LexState *ls, StringStream *ss) {
     ls->le.str.size = PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE;
 }
 
-void pylt_lex_finalize(PyLiteState* state, LexState *ls) {
+void pylt_lex_finalize(PyLiteInterpreter *I, LexState *ls) {
     IndentInfo *idt, *idt2;
 
     idt = ls->indent;
@@ -258,8 +258,8 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
     return false;
 
 the_end:
-    ls->token.obj = (is_str_type) ? castobj(pylt_obj_str_new(ls->state, ls->le.str.buf, ls->le.str.pos, is_raw)) :
-                                    castobj(pylt_obj_bytes_new(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, is_raw));
+    ls->token.obj = (is_str_type) ? castobj(pylt_obj_str_new(ls->I, ls->le.str.buf, ls->le.str.pos, is_raw)) :
+                                    castobj(pylt_obj_bytes_new(ls->I, ls->le.bytes.buf, ls->le.bytes.pos, is_raw));
     if (!ls->token.obj) return false;
     return true;
 }
@@ -579,7 +579,7 @@ indent_end:
                 }
 
                 ls->token.val = TK_INT;
-                ls->token.obj = castobj(pylt_obj_int_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, tmp));
+                ls->token.obj = castobj(pylt_obj_int_new_from_cstr_full(ls->I, ls->le.bytes.buf, ls->le.bytes.pos, tmp));
                 return 0;
             case '1': case '2': case '3': case '4':
             case '5': case '6': case '7': case '8': case '9':
@@ -595,10 +595,10 @@ indent_end:
                     ss_nextc(ss);
                     while (lex_isdec(ss->current)) { bytes_next(ls, ss->current); ss_nextc(ss); }
                     ls->token.val = TK_FLOAT;
-                    ls->token.obj = castobj(pylt_obj_float_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, tmp2));
+                    ls->token.obj = castobj(pylt_obj_float_new_from_cstr_full(ls->I, ls->le.bytes.buf, ls->le.bytes.pos, tmp2));
                 } else {
                     ls->token.val = TK_INT;
-                    ls->token.obj = castobj(pylt_obj_int_new_from_cstr_full(ls->state, ls->le.bytes.buf, ls->le.bytes.pos, 0));
+                    ls->token.obj = castobj(pylt_obj_int_new_from_cstr_full(ls->I, ls->le.bytes.buf, ls->le.bytes.pos, 0));
                 }
 
                 return 0;
@@ -637,7 +637,7 @@ indent_end:
                     do { str_next(ls, ss->current); ss_nextc(ss); }
                     while (lex_isidentletter(ss->current));
                     ls->token.val = read_kw_or_id(ls);
-                    ls->token.obj = castobj(pylt_obj_str_new(ls->state, ls->le.str.buf, ls->le.str.pos, true));
+                    ls->token.obj = castobj(pylt_obj_str_new(ls->I, ls->le.str.buf, ls->le.str.pos, true));
                     return 0;
                 }
                 return PYLT_ERR_LEX_INVALID_CHARACTER;

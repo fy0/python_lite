@@ -3,7 +3,7 @@
 #include "../all.h"
 #include "../../misc.h"
 
-PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
+PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
     PyLiteIterObject *iter;
 
     if (obj->ob_type == PYLT_OBJ_TYPE_ITER) return castiter(obj);
@@ -34,23 +34,23 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
             iter->array.index = 0;
             return iter;
         case PYLT_OBJ_TYPE_SET:
-            iter->hashmap.count = pylt_obj_set_len(state, castset(obj));
-            iter->hashmap.k = pylt_obj_set_begin(state, castset(obj));
+            iter->hashmap.count = pylt_obj_set_len(I, castset(obj));
+            iter->hashmap.k = pylt_obj_set_begin(I, castset(obj));
             iter->iter_func = &pylt_obj_set_iternext;
             return iter;
         case PYLT_OBJ_TYPE_DICT:
             break;
         case PYLT_OBJ_TYPE_RANGE:
-            iter->array.count = pylt_obj_range_itertimes(state, castrange(obj));
+            iter->array.count = pylt_obj_range_itertimes(I, castrange(obj));
             iter->array.index = castrange(obj)->start;
             iter->iter_func = &pylt_obj_range_iternext;
             return iter;
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 PyLiteIterObject *iter;
-                PyLiteObject *obj_func = pylt_obj_getattr(state, obj, castobj(pl_static.str.__iter__), NULL);
+                PyLiteObject *obj_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__iter__), NULL);
                 if (obj_func) {
-                    iter = castiter(pylt_vm_call_method(state, obj, obj_func, 0, NULL));
+                    iter = castiter(pylt_vm_call_method(I, obj, obj_func, 0, NULL));
                     if (pl_isiter(iter)) return iter;
                 }
             }
@@ -58,33 +58,33 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj) {
     return NULL;
 }
 
-PyLiteObject* pylt_obj_iter_next(PyLiteState *state, PyLiteIterObject *iter) {
-    return (*iter->iter_func)(state, iter);
+PyLiteObject* pylt_obj_iter_next(PyLiteInterpreter *I, PyLiteIterObject *iter) {
+    return (*iter->iter_func)(I, iter);
 }
 
-PyLiteObject* pylt_obj_bytes_iternext(PyLiteState *state, PyLiteIterObject *iter) {
+PyLiteObject* pylt_obj_bytes_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
     char buf[1];
     int len = castbytes(iter->base)->ob_size;
     if (iter->array.index == len) return NULL;
     else {
         buf[0] = castbytes(iter->base)->ob_val[iter->array.index++];
-        return castobj(pylt_obj_bytes_new(state, buf, 1, true));
+        return castobj(pylt_obj_bytes_new(I, buf, 1, true));
     }
     return NULL;
 }
 
-PyLiteObject* pylt_obj_str_iternext(PyLiteState *state, PyLiteIterObject *iter) {
+PyLiteObject* pylt_obj_str_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
     uint32_t buf[1];
     int len = caststr(iter->base)->ob_size;
     if (iter->array.index == len) return NULL;
     else {
         buf[0] = caststr(iter->base)->ob_val[iter->array.index++];
-        return castobj(pylt_obj_str_new(state, buf, 1, true));
+        return castobj(pylt_obj_str_new(I, buf, 1, true));
     }
     return NULL;
 }
 
-PyLiteObject* pylt_obj_tuple_iternext(PyLiteState *state, PyLiteIterObject *iter) {
+PyLiteObject* pylt_obj_tuple_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
     int len = casttuple(iter->base)->ob_size;
     if (iter->array.index < len) {
         return casttuple(iter->base)->ob_val[iter->array.index++];
@@ -92,7 +92,7 @@ PyLiteObject* pylt_obj_tuple_iternext(PyLiteState *state, PyLiteIterObject *iter
     return NULL;
 }
 
-PyLiteObject* pylt_obj_list_iternext(PyLiteState *state, PyLiteIterObject *iter) {
+PyLiteObject* pylt_obj_list_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
     int len = castlist(iter->base)->ob_size;
     if (iter->array.index < len) {
         return castlist(iter->base)->ob_val[iter->array.index++];
@@ -100,31 +100,31 @@ PyLiteObject* pylt_obj_list_iternext(PyLiteState *state, PyLiteIterObject *iter)
     return NULL;
 }
 
-PyLiteObject* pylt_obj_set_iternext(PyLiteState *state, PyLiteIterObject *iter) {
+PyLiteObject* pylt_obj_set_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
     PyLiteObject *ret;
 
-    if (pylt_obj_set_len(state, castset(iter->base)) != iter->hashmap.count)
+    if (pylt_obj_set_len(I, castset(iter->base)) != iter->hashmap.count)
         return NULL;
 
-    ret = pylt_obj_set_itemvalue(state, castset(iter->base), iter->hashmap.k);
-    pylt_obj_set_next(state, castset(iter->base), &(iter->hashmap.k));
+    ret = pylt_obj_set_itemvalue(I, castset(iter->base), iter->hashmap.k);
+    pylt_obj_set_next(I, castset(iter->base), &(iter->hashmap.k));
     return ret;
 }
 
-PyLiteObject* pylt_obj_dict_iternext(PyLiteState *state, PyLiteIterObject *iter) {
+PyLiteObject* pylt_obj_dict_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
     return NULL;
 }
 
-PyLiteObject* pylt_obj_range_iternext(PyLiteState *state, PyLiteIterObject *iter) {
+PyLiteObject* pylt_obj_range_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
     PyLiteRangeObject *range = castrange(iter->base);
     pl_int_t index = iter->array.index;
     if ((index >= range->start) && (index < range->stop)) {
         iter->array.index += range->step;
-        return castobj(pylt_obj_int_new(state, index));
+        return castobj(pylt_obj_int_new(I, index));
     }
     return NULL;
 }
 
-void pylt_obj_iter_free(PyLiteState *state, PyLiteIterObject* self) {
+void pylt_obj_iter_free(PyLiteInterpreter *I, PyLiteIterObject* self) {
     pylt_free(self);
 }

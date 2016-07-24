@@ -12,29 +12,29 @@ typedef struct PyLiteDictObject {
 } PyLiteDictObject;
 
 
-pl_int_t pylt_obj_dict_cmp(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *other);
-pl_bool_t pylt_obj_dict_eq(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *other);
+pl_int_t pylt_obj_dict_cmp(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *other);
+pl_bool_t pylt_obj_dict_eq(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *other);
 
 
-PyLiteObject* pylt_obj_dict_getitem(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key);
-void pylt_obj_dict_setitem(PyLiteState *state, PyLiteDictObject *self, PyLiteObject* key, PyLiteObject* value);
+PyLiteObject* pylt_obj_dict_getitem(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *key);
+void pylt_obj_dict_setitem(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject* key, PyLiteObject* value);
 
-pl_int_t pylt_obj_dict_len(PyLiteState *state, PyLiteDictObject *self);
-PyLiteDictObject* pylt_obj_dict_copy(PyLiteState *state, PyLiteDictObject *self);
-pl_bool_t pylt_obj_dict_has(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *obj);
-pl_bool_t pylt_obj_dict_remove(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *key);
-PyLiteObject* pylt_obj_dict_pop(PyLiteState *state, PyLiteDictObject *self, PyLiteObject *obj);
+pl_int_t pylt_obj_dict_len(PyLiteInterpreter *I, PyLiteDictObject *self);
+PyLiteDictObject* pylt_obj_dict_copy(PyLiteInterpreter *I, PyLiteDictObject *self);
+pl_bool_t pylt_obj_dict_has(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *obj);
+pl_bool_t pylt_obj_dict_remove(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *key);
+PyLiteObject* pylt_obj_dict_pop(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *obj);
 
-pl_int32_t pylt_obj_dict_begin(PyLiteState *state, PyLiteDictObject *self);
-pl_int32_t pylt_obj_dict_end(PyLiteState *state, PyLiteDictObject *self);
-void pylt_obj_dict_next(PyLiteState *state, PyLiteDictObject *self, pl_int32_t *k);
+pl_int32_t pylt_obj_dict_begin(PyLiteInterpreter *I, PyLiteDictObject *self);
+pl_int32_t pylt_obj_dict_end(PyLiteInterpreter *I, PyLiteDictObject *self);
+void pylt_obj_dict_next(PyLiteInterpreter *I, PyLiteDictObject *self, pl_int32_t *k);
 
-PyLiteObject* pylt_obj_dict_itemkey(PyLiteState *state, PyLiteDictObject *self, pl_int32_t k);
-PyLiteObject* pylt_obj_dict_itemvalue(PyLiteState *state, PyLiteDictObject *self, pl_int32_t k);
-void pylt_obj_dict_keyvalue(PyLiteState *state, PyLiteDictObject *self, pl_int32_t k, PyLiteObject **key, PyLiteObject **val);
-struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteState *state, PyLiteDictObject *self);
+PyLiteObject* pylt_obj_dict_itemkey(PyLiteInterpreter *I, PyLiteDictObject *self, pl_int32_t k);
+PyLiteObject* pylt_obj_dict_itemvalue(PyLiteInterpreter *I, PyLiteDictObject *self, pl_int32_t k);
+void pylt_obj_dict_keyvalue(PyLiteInterpreter *I, PyLiteDictObject *self, pl_int32_t k, PyLiteObject **key, PyLiteObject **val);
+struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteInterpreter *I, PyLiteDictObject *self);
 
-PyLiteDictObject* pylt_obj_dict_new(PyLiteState *state);
-void pylt_obj_dict_free(PyLiteState *state, PyLiteDictObject *self);
+PyLiteDictObject* pylt_obj_dict_new(PyLiteInterpreter *I);
+void pylt_obj_dict_free(PyLiteInterpreter *I, PyLiteDictObject *self);
 
 #endif

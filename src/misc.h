@@ -3,7 +3,7 @@
 #define PYLITE_MISC_H
 
 #include "types/all.h"
-#include "state.h"
+#include "intp.h"
 
 struct PyLiteStaticObjectsType {
     struct {
@@ -197,7 +197,7 @@ struct PyLiteStaticObjectsType {
     } str;
 } pl_static;
 
-void pylt_misc_static_objs_init(PyLiteState *state);
+void pylt_misc_static_objs_init(PyLiteInterpreter *I);
 
 
 #endif

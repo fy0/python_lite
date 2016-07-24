@@ -11,29 +11,29 @@ typedef struct PyLiteSetObject {
     khasho_t(set_obj) *ob_val;
 } PyLiteSetObject;
 
-pl_int_t pylt_obj_set_cmp(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *other);
-pl_bool_t pylt_obj_set_eq(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *other);
+pl_int_t pylt_obj_set_cmp(PyLiteInterpreter *I, PyLiteSetObject *self, PyLiteObject *other);
+pl_bool_t pylt_obj_set_eq(PyLiteInterpreter *I, PyLiteSetObject *self, PyLiteObject *other);
 
-pl_int_t pylt_obj_set_len(PyLiteState *state, PyLiteSetObject *self);
-pl_int_t pylt_obj_set_add(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *obj);
-void pylt_obj_set_clear(PyLiteState *state, PyLiteSetObject *self);
-PyLiteSetObject* pylt_obj_set_copy(PyLiteState *state, PyLiteSetObject *self);
-pl_bool_t pylt_obj_set_contains(PyLiteState *state, PyLiteSetObject *self, PyLiteSetObject *other);
-PyLiteObject* pylt_obj_set_has(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *obj);
+pl_int_t pylt_obj_set_len(PyLiteInterpreter *I, PyLiteSetObject *self);
+pl_int_t pylt_obj_set_add(PyLiteInterpreter *I, PyLiteSetObject *self, PyLiteObject *obj);
+void pylt_obj_set_clear(PyLiteInterpreter *I, PyLiteSetObject *self);
+PyLiteSetObject* pylt_obj_set_copy(PyLiteInterpreter *I, PyLiteSetObject *self);
+pl_bool_t pylt_obj_set_contains(PyLiteInterpreter *I, PyLiteSetObject *self, PyLiteSetObject *other);
+PyLiteObject* pylt_obj_set_has(PyLiteInterpreter *I, PyLiteSetObject *self, PyLiteObject *obj);
 
-pl_int_t pylt_obj_set_remove(PyLiteState *state, PyLiteSetObject *self, PyLiteObject *obj);
-PyLiteObject* pylt_obj_set_pop(PyLiteState *state, PyLiteSetObject *self);
+pl_int_t pylt_obj_set_remove(PyLiteInterpreter *I, PyLiteSetObject *self, PyLiteObject *obj);
+PyLiteObject* pylt_obj_set_pop(PyLiteInterpreter *I, PyLiteSetObject *self);
 
-pl_int32_t pylt_obj_set_begin(PyLiteState *state, PyLiteSetObject *self);
-pl_int32_t pylt_obj_set_end(PyLiteState *state, PyLiteSetObject *self);
-void pylt_obj_set_next(PyLiteState *state, PyLiteSetObject *self, pl_int32_t *k);
+pl_int32_t pylt_obj_set_begin(PyLiteInterpreter *I, PyLiteSetObject *self);
+pl_int32_t pylt_obj_set_end(PyLiteInterpreter *I, PyLiteSetObject *self);
+void pylt_obj_set_next(PyLiteInterpreter *I, PyLiteSetObject *self, pl_int32_t *k);
 
 // 存在则取值 否则为空
-PyLiteObject* pylt_obj_set_itemvalue(PyLiteState *state, PyLiteSetObject *self, pl_int32_t k);
+PyLiteObject* pylt_obj_set_itemvalue(PyLiteInterpreter *I, PyLiteSetObject *self, pl_int32_t k);
 
-struct PyLiteStrObject* pylt_obj_set_to_str(PyLiteState *state, PyLiteSetObject *self);
+struct PyLiteStrObject* pylt_obj_set_to_str(PyLiteInterpreter *I, PyLiteSetObject *self);
 
-PyLiteSetObject* pylt_obj_set_new(PyLiteState *state);
-void pylt_obj_set_free(PyLiteState *state, PyLiteSetObject* self);
+PyLiteSetObject* pylt_obj_set_new(PyLiteInterpreter *I);
+void pylt_obj_set_free(PyLiteInterpreter *I, PyLiteSetObject* self);
 
 #endif

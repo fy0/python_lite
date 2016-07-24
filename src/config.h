@@ -29,7 +29,7 @@ typedef bool pl_bool_t;
 #define max(a,b)    (((a) > (b)) ? (a) : (b))
 #define min(a,b)    (((a) < (b)) ? (a) : (b))
 
-typedef struct PyLiteState PyLiteState;
+typedef struct PyLiteInterpreter PyLiteInterpreter;
 
 #define PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE 64
 #define PYLT_LEX_BYTES_DEFAULT_BUFFER_INC_STEP 32

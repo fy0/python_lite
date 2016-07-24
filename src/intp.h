@@ -10,7 +10,7 @@
 #include "types/set.h"
 #include "types/type.h"
 
-typedef struct PyLiteState {
+typedef struct PyLiteInterpreter {
     PyLiteVM vm;
     PyLiteGC gc;
     LexState *lexer;
@@ -20,15 +20,15 @@ typedef struct PyLiteState {
     PyLiteDictObject *modules;
     pl_int_t class_num;
     int error_code;
-} PyLiteState;
+} PyLiteInterpreter;
 
-PyLiteState* pylt_state_new();
-void pylt_state_free(PyLiteState *state);
+PyLiteInterpreter* pylt_intp_new();
+void pylt_intp_free(PyLiteInterpreter *I);
 
-void pylt_state_init(PyLiteState *state);
-void pylt_state_finalize(PyLiteState *state);
-void pylt_state_run(PyLiteState *state);
-void pylt_state_load_stream(PyLiteState *state, StringStream *ss);
-//void pylt_state_err(PyLiteState *state);
+void pylt_intp_init(PyLiteInterpreter *I);
+void pylt_intp_finalize(PyLiteInterpreter *I);
+void pylt_intp_run(PyLiteInterpreter *I);
+void pylt_intp_load_stream(PyLiteInterpreter *I, StringStream *ss);
+//void pylt_intp_err(PyLiteInterpreter *I);
 
 #endif

@@ -7,8 +7,8 @@
 #include "types/bytes.h"
 #include "types/string.h"
 
-#define up_hash_func(state, key) (pl_uint32_t)(key)
-#define up_hash_equal(state, a, b) ((a) == (b))
+#define up_hash_func(I, key) (pl_uint32_t)(key)
+#define up_hash_equal(I, a, b) ((a) == (b))
 
 KHASHO_INIT(unique_ptr, PyLiteObject*, char, 0, up_hash_func, up_hash_equal);
 typedef khasho_t(unique_ptr) PyLiteUPSet;
@@ -25,17 +25,17 @@ typedef struct PyLiteGC {
     PyLiteSetObject *str_cached;
 } PyLiteGC;
 
-void pylt_gc_init(PyLiteState *state);
-void pylt_gc_finalize(PyLiteState *state);
-void pylt_gc_freeall(PyLiteState *state);
-void pylt_gc_add(PyLiteState *state, PyLiteObject *obj);
-void pylt_gc_remove(PyLiteState *state, PyLiteObject *obj);
-void pylt_gc_collect(PyLiteState *state);
+void pylt_gc_init(PyLiteInterpreter *I);
+void pylt_gc_finalize(PyLiteInterpreter *I);
+void pylt_gc_freeall(PyLiteInterpreter *I);
+void pylt_gc_add(PyLiteInterpreter *I, PyLiteObject *obj);
+void pylt_gc_remove(PyLiteInterpreter *I, PyLiteObject *obj);
+void pylt_gc_collect(PyLiteInterpreter *I);
 
-PyLiteStrObject* pylt_gc_cache_str_add(PyLiteState *state, PyLiteStrObject *key);
-PyLiteBytesObject* pylt_gc_cache_bytes_add(PyLiteState *state, PyLiteBytesObject *key);
-void pylt_gc_make_str_static(PyLiteState *state, PyLiteObject *obj);
+PyLiteStrObject* pylt_gc_cache_str_add(PyLiteInterpreter *I, PyLiteStrObject *key);
+PyLiteBytesObject* pylt_gc_cache_bytes_add(PyLiteInterpreter *I, PyLiteBytesObject *key);
+void pylt_gc_make_str_static(PyLiteInterpreter *I, PyLiteObject *obj);
 
-void pylt_gc_static_release(PyLiteState *state);
+void pylt_gc_static_release(PyLiteInterpreter *I);
 
 #endif

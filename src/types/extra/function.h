@@ -33,11 +33,11 @@ typedef struct PyLiteCFunctionObject {
 } PyLiteCFunctionObject;
 
 
-PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeObject *code);
-PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteState *state, PyLiteStrObject *name, PyLiteListObject *params, PyLiteCodeObject *code, PyLiteDictObject *defaults, PyLiteStrObject *args, PyLiteStrObject *kwargs);
-PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteState *state, PyLiteObject *func);
+PyLiteFunctionObject* pylt_obj_func_new(PyLiteInterpreter *I, PyLiteCodeObject *code);
+PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteInterpreter *I, PyLiteStrObject *name, PyLiteListObject *params, PyLiteCodeObject *code, PyLiteDictObject *defaults, PyLiteStrObject *args, PyLiteStrObject *kwargs);
+PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteInterpreter *I, PyLiteObject *func);
 
-PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteState *state, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc);
-PyLiteCFunctionObject* pylt_obj_cfunc_new_no_args(PyLiteState *state, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc);
+PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteInterpreter *I, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc);
+PyLiteCFunctionObject* pylt_obj_cfunc_new_no_args(PyLiteInterpreter *I, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc);
 
 #endif

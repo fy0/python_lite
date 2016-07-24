@@ -3,7 +3,7 @@
 #include "string.h"
 #include "../misc.h"
 
-struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteState *state, PyLiteTupleObject *self) {
+struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteInterpreter *I, PyLiteTupleObject *self) {
     int index = 0;
     PyLiteStrObject *str;
     PyLiteStrObject **strlst = NULL;
@@ -19,7 +19,7 @@ struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteState *state, PyLiteTupleObj
     strlst = realloc(NULL, tlen * sizeof(PyLiteStrObject*));
 
     for (pl_uint_t i = 0; i < tlen; ++i) {
-        str = pylt_obj_to_repr(state, self->ob_val[i]);
+        str = pylt_obj_to_repr(I, self->ob_val[i]);
         data_len += str->ob_size;
         strlst[index++] = str;
     }
@@ -37,13 +37,13 @@ struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteState *state, PyLiteTupleObj
     }
     data[data_len - 1] = ')';
 
-    str = pylt_obj_str_new(state, data, data_len, true);
+    str = pylt_obj_str_new(I, data, data_len, true);
     pylt_free(data);
     pylt_free(strlst);
     return str;
 }
 
-PyLiteTupleObject* pylt_obj_tuple_new(PyLiteState *state, pl_int_t len) {
+PyLiteTupleObject* pylt_obj_tuple_new(PyLiteInterpreter *I, pl_int_t len) {
     PyLiteTupleObject *obj = pylt_realloc(NULL, sizeof(PyLiteTupleObject));
     obj->ob_type = PYLT_OBJ_TYPE_TUPLE;
     obj->ob_val = (len) ? pylt_realloc(NULL, len * sizeof(PyLiteObject*)) : NULL;
@@ -52,19 +52,19 @@ PyLiteTupleObject* pylt_obj_tuple_new(PyLiteState *state, pl_int_t len) {
 }
 
 
-PyLiteTupleObject* pylt_obj_tuple_new_with_data(PyLiteState *state, pl_int_t len, void *data) {
-    PyLiteTupleObject *obj = pylt_obj_tuple_new(state, len);
+PyLiteTupleObject* pylt_obj_tuple_new_with_data(PyLiteInterpreter *I, pl_int_t len, void *data) {
+    PyLiteTupleObject *obj = pylt_obj_tuple_new(I, len);
     if (len) memcpy(obj->ob_val, data, len * sizeof(PyLiteObject*));
     return obj;
 }
 
-PyLiteObject* pylt_obj_tuple_getitem(PyLiteState *state, PyLiteTupleObject *self, int index) {
+PyLiteObject* pylt_obj_tuple_getitem(PyLiteInterpreter *I, PyLiteTupleObject *self, int index) {
     if (index < 0) index += self->ob_size;
     if (index < 0 || index >= self->ob_size) return NULL;
     return self->ob_val[index];
 }
 
-void pylt_obj_tuple_free(PyLiteState *state, PyLiteTupleObject *self) {
+void pylt_obj_tuple_free(PyLiteInterpreter *I, PyLiteTupleObject *self) {
     pylt_free(self->ob_val);
     pylt_free(self);
 }

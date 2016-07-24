@@ -19,7 +19,7 @@ typedef struct PyLitePropertyObject {
     } fset;
 } PyLitePropertyObject;
 
-PyLitePropertyObject* pylt_obj_property_new(PyLiteState *state, PyLiteObject *fget, PyLiteObject *fset);
-void pylt_obj_property_free(PyLiteState *state, PyLitePropertyObject *self);
+PyLitePropertyObject* pylt_obj_property_new(PyLiteInterpreter *I, PyLiteObject *fget, PyLiteObject *fset);
+void pylt_obj_property_free(PyLiteInterpreter *I, PyLitePropertyObject *self);
 
 #endif

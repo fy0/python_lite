@@ -5,7 +5,7 @@
 #include "string.h"
 #include "../lib/fpconv/fpconv.h"
 
-pl_int_t pylt_obj_int_cmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+pl_int_t pylt_obj_int_cmp(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
             if (self->ob_val < castint(other)->ob_val) return -1;
@@ -24,7 +24,7 @@ pl_int_t pylt_obj_int_cmp(PyLiteState *state, PyLiteIntObject *self, PyLiteObjec
     }
 }
 
-pl_bool_t pylt_obj_int_eq(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+pl_bool_t pylt_obj_int_eq(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
             return self->ob_val == castint(other)->ob_val;
@@ -37,132 +37,132 @@ pl_bool_t pylt_obj_int_eq(PyLiteState *state, PyLiteIntObject *self, PyLiteObjec
     }
 }
 
-pl_uint32_t pylt_obj_int_hash(PyLiteState *state, PyLiteIntObject *obj) {
+pl_uint32_t pylt_obj_int_hash(PyLiteInterpreter *I, PyLiteIntObject *obj) {
     return obj->ob_val;
 }
 
-PyLiteObject* pylt_obj_int_bitor(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_bitor(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
-        case PYLT_OBJ_TYPE_INT: return castobj(pylt_obj_int_new(state, self->ob_val | castint(other)->ob_val));
+        case PYLT_OBJ_TYPE_INT: return castobj(pylt_obj_int_new(I, self->ob_val | castint(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_int_bitxor(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_bitxor(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
-        case PYLT_OBJ_TYPE_INT: return castobj(pylt_obj_int_new(state, self->ob_val ^ castint(other)->ob_val));
+        case PYLT_OBJ_TYPE_INT: return castobj(pylt_obj_int_new(I, self->ob_val ^ castint(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_int_bitand(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_bitand(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
-        case PYLT_OBJ_TYPE_INT: return castobj(pylt_obj_int_new(state, self->ob_val & castint(other)->ob_val));
+        case PYLT_OBJ_TYPE_INT: return castobj(pylt_obj_int_new(I, self->ob_val & castint(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_int_bitls(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_bitls(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
-        case PYLT_OBJ_TYPE_INT: return castobj(pylt_obj_int_new(state, self->ob_val << castint(other)->ob_val));
+        case PYLT_OBJ_TYPE_INT: return castobj(pylt_obj_int_new(I, self->ob_val << castint(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_int_bitrs(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_bitrs(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
-        case PYLT_OBJ_TYPE_INT: return castobj(pylt_obj_int_new(state, self->ob_val >> castint(other)->ob_val));
+        case PYLT_OBJ_TYPE_INT: return castobj(pylt_obj_int_new(I, self->ob_val >> castint(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_int_plus(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_plus(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_int_new(state, self->ob_val + castint(other)->ob_val));
+            return castobj(pylt_obj_int_new(I, self->ob_val + castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, self->ob_val + castfloat(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val + castfloat(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_int_minus(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_minus(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_int_new(state, self->ob_val - castint(other)->ob_val));
+            return castobj(pylt_obj_int_new(I, self->ob_val - castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, self->ob_val - castfloat(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val - castfloat(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_int_mul(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_mul(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_int_new(state, self->ob_val * castint(other)->ob_val));
+            return castobj(pylt_obj_int_new(I, self->ob_val * castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, self->ob_val * castfloat(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val * castfloat(other)->ob_val));
         case PYLT_OBJ_TYPE_BYTES:
-            return pylt_obj_bytes_mul(state, castbytes(other), castobj(self));
+            return pylt_obj_bytes_mul(I, castbytes(other), castobj(self));
         case PYLT_OBJ_TYPE_STR:
-            return pylt_obj_str_mul(state, caststr(other), castobj(self));
+            return pylt_obj_str_mul(I, caststr(other), castobj(self));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_int_div(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_div(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_float_new(state, self->ob_val / (double)castint(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val / (double)castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, self->ob_val / castfloat(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val / castfloat(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_int_floordiv(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_floordiv(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_int_new(state, self->ob_val / (uint32_t)castint(other)->ob_val));
+            return castobj(pylt_obj_int_new(I, self->ob_val / (uint32_t)castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_int_new(state, self->ob_val / (uint32_t)castfloat(other)->ob_val));
+            return castobj(pylt_obj_int_new(I, self->ob_val / (uint32_t)castfloat(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_int_mod(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_mod(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_int_new(state, self->ob_val % castint(other)->ob_val));
+            return castobj(pylt_obj_int_new(I, self->ob_val % castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, fmod(self->ob_val, castfloat(other)->ob_val)));
+            return castobj(pylt_obj_float_new(I, fmod(self->ob_val, castfloat(other)->ob_val)));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_int_positive(PyLiteState *state, PyLiteIntObject *self) {
-    return castobj(pylt_obj_int_new(state, abs(self->ob_val)));
+PyLiteObject* pylt_obj_int_positive(PyLiteInterpreter *I, PyLiteIntObject *self) {
+    return castobj(pylt_obj_int_new(I, abs(self->ob_val)));
 }
 
-PyLiteObject* pylt_obj_int_negative(PyLiteState *state, PyLiteIntObject *self) {
-    return castobj(pylt_obj_int_new(state, -abs(self->ob_val)));
+PyLiteObject* pylt_obj_int_negative(PyLiteInterpreter *I, PyLiteIntObject *self) {
+    return castobj(pylt_obj_int_new(I, -abs(self->ob_val)));
 }
 
-PyLiteObject* pylt_obj_int_bitnot(PyLiteState *state, PyLiteIntObject *self) {
-    return castobj(pylt_obj_int_new(state, ~(self->ob_val)));
+PyLiteObject* pylt_obj_int_bitnot(PyLiteInterpreter *I, PyLiteIntObject *self) {
+    return castobj(pylt_obj_int_new(I, ~(self->ob_val)));
 }
 
-PyLiteObject* pylt_obj_int_pow(PyLiteState *state, PyLiteIntObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_int_pow(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_int_new(state, (uint32_t)powl(self->ob_val, castint(other)->ob_val)));
+            return castobj(pylt_obj_int_new(I, (uint32_t)powl(self->ob_val, castint(other)->ob_val)));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, pow(self->ob_val, castfloat(other)->ob_val)));
+            return castobj(pylt_obj_float_new(I, pow(self->ob_val, castfloat(other)->ob_val)));
         default: return NULL;
     }
 }
 
-pl_int_t pylt_obj_float_cmp(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
+pl_int_t pylt_obj_float_cmp(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
             if (self->ob_val < castint(other)->ob_val) return -1;
@@ -181,7 +181,7 @@ pl_int_t pylt_obj_float_cmp(PyLiteState *state, PyLiteFloatObject *self, PyLiteO
     }
 }
 
-pl_bool_t pylt_obj_float_eq(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
+pl_bool_t pylt_obj_float_eq(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
     case PYLT_OBJ_TYPE_INT:
         return self->ob_val == castint(other)->ob_val;
@@ -194,7 +194,7 @@ pl_bool_t pylt_obj_float_eq(PyLiteState *state, PyLiteFloatObject *self, PyLiteO
     }
 }
 
-pl_uint32_t pylt_obj_float_hash(PyLiteState *state, PyLiteFloatObject *obj) {
+pl_uint32_t pylt_obj_float_hash(PyLiteInterpreter *I, PyLiteFloatObject *obj) {
     double num;
     double _frac = modf(obj->ob_val, &num);
     if (_frac == 0) return (uint32_t)num;
@@ -207,94 +207,94 @@ pl_uint32_t pylt_obj_float_hash(PyLiteState *state, PyLiteFloatObject *obj) {
     return (hash & 0x7FFFFFFF);
 }
 
-PyLiteObject* pylt_obj_float_plus(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_float_plus(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_float_new(state, self->ob_val + castint(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val + castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, self->ob_val + castfloat(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val + castfloat(other)->ob_val));
         default:
             return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_float_minus(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_float_minus(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_float_new(state, self->ob_val - castint(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val - castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, self->ob_val - castfloat(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val - castfloat(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_float_mul(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_float_mul(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_float_new(state, self->ob_val * castint(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val * castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, self->ob_val * castfloat(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val * castfloat(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_float_div(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_float_div(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_float_new(state, self->ob_val / (double)castint(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val / (double)castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, self->ob_val / castfloat(other)->ob_val));
+            return castobj(pylt_obj_float_new(I, self->ob_val / castfloat(other)->ob_val));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_float_floordiv(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_float_floordiv(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_int_new(state, (uint32_t)(self->ob_val / (uint32_t)castint(other)->ob_val)));
+            return castobj(pylt_obj_int_new(I, (uint32_t)(self->ob_val / (uint32_t)castint(other)->ob_val)));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_int_new(state, (uint32_t)(self->ob_val / (uint32_t)castfloat(other)->ob_val)));
+            return castobj(pylt_obj_int_new(I, (uint32_t)(self->ob_val / (uint32_t)castfloat(other)->ob_val)));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_float_mod(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_float_mod(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_float_new(state, fmod(self->ob_val, castint(other)->ob_val)));
+            return castobj(pylt_obj_float_new(I, fmod(self->ob_val, castint(other)->ob_val)));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, fmod(self->ob_val, castfloat(other)->ob_val)));
+            return castobj(pylt_obj_float_new(I, fmod(self->ob_val, castfloat(other)->ob_val)));
         default: return NULL;
     }
 }
 
-PyLiteObject* pylt_obj_float_positive(PyLiteState *state, PyLiteFloatObject *self) {
-    return castobj(pylt_obj_float_new(state, fabs(self->ob_val)));
+PyLiteObject* pylt_obj_float_positive(PyLiteInterpreter *I, PyLiteFloatObject *self) {
+    return castobj(pylt_obj_float_new(I, fabs(self->ob_val)));
 }
 
-PyLiteObject* pylt_obj_float_negative(PyLiteState *state, PyLiteFloatObject *self) {
-    return castobj(pylt_obj_float_new(state, -fabs(self->ob_val)));
+PyLiteObject* pylt_obj_float_negative(PyLiteInterpreter *I, PyLiteFloatObject *self) {
+    return castobj(pylt_obj_float_new(I, -fabs(self->ob_val)));
 }
 
-PyLiteObject* pylt_obj_float_pow(PyLiteState *state, PyLiteFloatObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_float_pow(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_float_new(state, pow(self->ob_val, castint(other)->ob_val)));
+            return castobj(pylt_obj_float_new(I, pow(self->ob_val, castint(other)->ob_val)));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(state, pow(self->ob_val, castfloat(other)->ob_val)));
+            return castobj(pylt_obj_float_new(I, pow(self->ob_val, castfloat(other)->ob_val)));
         default: return NULL;
     }
 }
 
 
-PyLiteIntObject* pylt_obj_int_new(PyLiteState *state, pl_int_t val) {
+PyLiteIntObject* pylt_obj_int_new(PyLiteInterpreter *I, pl_int_t val) {
     PyLiteIntObject *obj = pylt_realloc(NULL, sizeof(PyLiteIntObject));
     obj->ob_type = PYLT_OBJ_TYPE_INT;
     obj->ob_val = val;
     return obj;
 }
 
-PyLiteFloatObject* pylt_obj_float_new(PyLiteState *state, double val) {
+PyLiteFloatObject* pylt_obj_float_new(PyLiteInterpreter *I, double val) {
     PyLiteFloatObject *obj = pylt_realloc(NULL, sizeof(PyLiteFloatObject));
     obj->ob_type = PYLT_OBJ_TYPE_FLOAT;
     obj->ob_val = val;
@@ -356,7 +356,7 @@ double _read_float(RawString *str, int start_offset) {
 }
 
 
-PyLiteIntObject* pylt_obj_int_new_from_cstr_full(PyLiteState *state, const char *str, pl_int_t size, pl_int_t base_n) {
+PyLiteIntObject* pylt_obj_int_new_from_cstr_full(PyLiteInterpreter *I, const char *str, pl_int_t size, pl_int_t base_n) {
     pl_int_t iret;
     RawString rs = { str, str + size };
 
@@ -366,21 +366,21 @@ PyLiteIntObject* pylt_obj_int_new_from_cstr_full(PyLiteState *state, const char 
         case 2: iret = _read_x_int(&rs, 2, _bin, 0); break;
         case 3: iret = _read_x_int(&rs, 8, _oct, 0); break;
     }
-    return pylt_obj_int_new(state, iret);
+    return pylt_obj_int_new(I, iret);
 }
 
 
-PyLiteFloatObject* pylt_obj_float_new_from_cstr_full(PyLiteState *state, const char *str, pl_int_t size, pl_int_t point_pos) {
+PyLiteFloatObject* pylt_obj_float_new_from_cstr_full(PyLiteInterpreter *I, const char *str, pl_int_t size, pl_int_t point_pos) {
     double fret;
     pl_int_t iret;
     RawString rs = { str, str + size };
 
     iret = _read_x_int(&rs, 10, _dec, point_pos);
     fret = _read_float(&rs, point_pos + 1);
-    return pylt_obj_float_new(state, fret + iret);
+    return pylt_obj_float_new(I, fret + iret);
 }
 
-uint32_t* pylt_obj_int_to_ucs4(PyLiteState *state, PyLiteIntObject *self, pl_int_t *plen) {
+uint32_t* pylt_obj_int_to_ucs4(PyLiteInterpreter *I, PyLiteIntObject *self, pl_int_t *plen) {
     pl_int_t len;
     pl_bool_t is_neg;
     uint32_t *str_data;
@@ -415,19 +415,19 @@ uint32_t* pylt_obj_int_to_ucs4(PyLiteState *state, PyLiteIntObject *self, pl_int
     return str_data;
 }
 
-PyLiteStrObject* pylt_obj_int_to_str(PyLiteState *state, PyLiteIntObject *self) {
+PyLiteStrObject* pylt_obj_int_to_str(PyLiteInterpreter *I, PyLiteIntObject *self) {
     pl_int_t len;
     PyLiteStrObject *ret;
     uint32_t *str_data;
 
-    str_data = pylt_obj_int_to_ucs4(state, self, &len);
-    ret = pylt_obj_str_new(state, str_data, len, true);
+    str_data = pylt_obj_int_to_ucs4(I, self, &len);
+    ret = pylt_obj_str_new(I, str_data, len, true);
     pylt_free(str_data);
     return ret;
 }
 
 
-uint32_t* pylt_obj_float_to_ucs4(PyLiteState *state, PyLiteFloatObject *self, pl_int_t *plen) {
+uint32_t* pylt_obj_float_to_ucs4(PyLiteInterpreter *I, PyLiteFloatObject *self, pl_int_t *plen) {
     char buf[24 + 1];
     pl_int_t len = fpconv_dtoa(self->ob_val, buf);
     uint32_t *str_data = pylt_realloc(NULL, len * sizeof(uint32_t));
@@ -438,22 +438,22 @@ uint32_t* pylt_obj_float_to_ucs4(PyLiteState *state, PyLiteFloatObject *self, pl
     return str_data;
 }
 
-PyLiteStrObject* pylt_obj_float_to_str(PyLiteState *state, PyLiteFloatObject *self) {
+PyLiteStrObject* pylt_obj_float_to_str(PyLiteInterpreter *I, PyLiteFloatObject *self) {
     pl_int_t len;
     PyLiteStrObject *ret;
     uint32_t *str_data;
 
-    str_data = pylt_obj_float_to_ucs4(state, self, &len);
-    ret = pylt_obj_str_new(state, str_data, len, true);
+    str_data = pylt_obj_float_to_ucs4(I, self, &len);
+    ret = pylt_obj_str_new(I, str_data, len, true);
     pylt_free(str_data);
     return ret;
 }
 
 
-void pylt_obj_int_free(PyLiteState *state, PyLiteIntObject *self) {
+void pylt_obj_int_free(PyLiteInterpreter *I, PyLiteIntObject *self) {
     pylt_free(self);
 }
 
-void pylt_obj_float_free(PyLiteState *state, PyLiteFloatObject *self) {
+void pylt_obj_float_free(PyLiteInterpreter *I, PyLiteFloatObject *self) {
     pylt_free(self);
 }

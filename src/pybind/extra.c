@@ -2,7 +2,7 @@
 #include "extra.h"
 #include "../types/all.h"
 
-PyLiteObject* pylt_cls_method_range_new(PyLiteState *state, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_cls_method_range_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     pl_int_t start, end;
     if (castnone(args[2]) == &PyLiteNone) {
         start = 0;
@@ -13,20 +13,20 @@ PyLiteObject* pylt_cls_method_range_new(PyLiteState *state, int argc, PyLiteObje
     }
 
     return pylt_obj_typecast(
-        state,
+        I,
         dcast(type, args[0]),
-        castobj(pylt_obj_range_new(state, start, end, dcast(int, args[3])->ob_val))
+        castobj(pylt_obj_range_new(I, start, end, dcast(int, args[3])->ob_val))
     );
 }
 
-PyLiteObject* pylt_cls_method_base_exception_new(PyLiteState *state, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_cls_method_base_exception_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     return pylt_obj_typecast(
-        state, 
+        I, 
         dcast(type, args[0]),
-        castobj(pylt_obj_exception_new(state, dcast(tuple, args[1])))
+        castobj(pylt_obj_exception_new(I, dcast(tuple, args[1])))
     );
 }
 
-PyLiteObject* pylt_prop_base_exception_args_get(PyLiteState *state, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_prop_base_exception_args_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     return castobj(dcast(except, args[1])->args);
 }

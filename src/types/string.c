@@ -5,16 +5,16 @@
 #include "../misc.h"
 #include "../api.h"
 
-static PyLiteStrObject* hash_and_check_cache(PyLiteState *state, PyLiteStrObject *obj) {
-    obj->ob_hash = pylt_obj_str_forcehash(state, obj);
-    return (state) ? pylt_gc_cache_str_add(state, obj) : obj;
+static PyLiteStrObject* hash_and_check_cache(PyLiteInterpreter *I, PyLiteStrObject *obj) {
+    obj->ob_hash = pylt_obj_str_forcehash(I, obj);
+    return (I) ? pylt_gc_cache_str_add(I, obj) : obj;
 }
 
-pl_int_t pylt_obj_str_cmp(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other) {
+pl_int_t pylt_obj_str_cmp(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *other) {
     return false;
 }
 
-pl_bool_t pylt_obj_str_eq(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other) {
+pl_bool_t pylt_obj_str_eq(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *other) {
     unsigned int i;
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_STR:
@@ -31,12 +31,12 @@ pl_bool_t pylt_obj_str_eq(PyLiteState *state, PyLiteStrObject *self, PyLiteObjec
     }
 }
 
-pl_uint32_t pylt_obj_str_hash(PyLiteState *state, PyLiteStrObject *obj) {
+pl_uint32_t pylt_obj_str_hash(PyLiteInterpreter *I, PyLiteStrObject *obj) {
     return obj->ob_hash;
 }
 
 // BKDR Hash
-pl_uint32_t pylt_obj_str_forcehash(PyLiteState *state, PyLiteStrObject *obj) {
+pl_uint32_t pylt_obj_str_forcehash(PyLiteInterpreter *I, PyLiteStrObject *obj) {
     register size_t hash = 0;
     for (unsigned int i = 0; i < obj->ob_size; i++) {
         hash = hash * 131 + obj->ob_val[i];
@@ -44,19 +44,19 @@ pl_uint32_t pylt_obj_str_forcehash(PyLiteState *state, PyLiteStrObject *obj) {
     return (hash & 0x7FFFFFFF);
 }
 
-PyLiteStrObject* pylt_obj_str_getitem(PyLiteState *state, PyLiteStrObject *self, int index) {
+PyLiteStrObject* pylt_obj_str_getitem(PyLiteInterpreter *I, PyLiteStrObject *self, int index) {
     uint32_t buf[1];
     int len = self->ob_size;
     if (index < 0) index += len;
     if (index < 0 || index >= len) return NULL;
     else {
         buf[0] = self->ob_val[index];
-        return pylt_obj_str_new(state, buf, 1, true);
+        return pylt_obj_str_new(I, buf, 1, true);
     }
     return NULL;
 }
 
-PyLiteObject* pylt_obj_str_mul(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_str_mul(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *other) {
     PyLiteStrObject *obj;
     if (other->ob_type != PYLT_OBJ_TYPE_INT) return NULL;
 
@@ -71,10 +71,10 @@ PyLiteObject* pylt_obj_str_mul(PyLiteState *state, PyLiteStrObject *self, PyLite
     }
 
     obj->ob_val[obj->ob_size] = '\0';
-    return castobj(hash_and_check_cache(state, obj));
+    return castobj(hash_and_check_cache(I, obj));
 }
 
-PyLiteObject* pylt_obj_str_plus(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other) {
+PyLiteObject* pylt_obj_str_plus(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *other) {
     PyLiteStrObject *obj;
     if (other->ob_type != PYLT_OBJ_TYPE_STR) return NULL;
 
@@ -88,7 +88,7 @@ PyLiteObject* pylt_obj_str_plus(PyLiteState *state, PyLiteStrObject *self, PyLit
     memcpy(obj->ob_val + self->ob_size, caststr(other)->ob_val, caststr(other)->ob_size * sizeof(uint32_t));
 
     obj->ob_val[obj->ob_size] = '\0';
-    return castobj(hash_and_check_cache(state, obj));
+    return castobj(hash_and_check_cache(I, obj));
 }
 
 #define _isnumber(c) (c >= '0' && c <= '9')
@@ -130,7 +130,7 @@ typedef struct {
     pl_uint32_t dsize;
 } str_writer_t;
 
-pl_int_t str_escape_next(PyLiteState *state, str_writer_t *w) {
+pl_int_t str_escape_next(PyLiteInterpreter *I, str_writer_t *w) {
     int num;
     PyLiteStrObject *str = w->dstr;
     PyLiteStrObject *format = w->fstr;
@@ -157,7 +157,7 @@ pl_int_t str_escape_next(PyLiteState *state, str_writer_t *w) {
                     if ((format_size - w->findex >= 2) && (_ishex(format->ob_val[w->findex]) && _ishex(format->ob_val[w->findex + 1]))) {
                         str->ob_val[w->dindex++] = _hex(format->ob_val[w->findex]) * 16 + _hex(format->ob_val[w->findex + 1]);
                     } else {
-                        pylt_obj_str_free(state, str);
+                        pylt_obj_str_free(I, str);
                         // error: not hex
                         return -1;
                     }
@@ -178,7 +178,7 @@ pl_int_t str_escape_next(PyLiteState *state, str_writer_t *w) {
     return 0;
 }
 
-PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, uint32_t *str, int size, bool is_raw) {
+PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size, bool is_raw) {
     PyLiteStrObject *obj = pylt_realloc(NULL, sizeof(PyLiteStrObject));
     obj->ob_type = PYLT_OBJ_TYPE_STR;
     obj->ob_val = pylt_realloc(NULL, sizeof(uint32_t) * (size + 1));
@@ -212,7 +212,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, uint32_t *str, int size, b
                             if ((size - i >= 2) && (_ishex(str[i]) && _ishex(str[i + 1]))) {
                                 obj->ob_val[pos++] = _hex(str[i]) * 16 + _hex(str[i + 1]);
                             } else {
-                                pylt_obj_str_free(state, obj);
+                                pylt_obj_str_free(I, obj);
                                 return NULL;
                             } 
                             i += 2;
@@ -234,10 +234,10 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, uint32_t *str, int size, b
         obj->ob_val[pos] = '\0';
         obj->ob_val = pylt_realloc(obj->ob_val, sizeof(uint32_t) * (size + 1));
     }
-    return hash_and_check_cache(state, obj);
+    return hash_and_check_cache(I, obj);
 }
 
-PyLiteStrObject* pylt_obj_str_new_from_cstr(PyLiteState *state, const char *str, bool is_raw) {
+PyLiteStrObject* pylt_obj_str_new_from_cstr(PyLiteInterpreter *I, const char *str, bool is_raw) {
     uint32_t code;
     PyLiteStrObject *obj;
     const char *p = (const char *)str;
@@ -253,20 +253,20 @@ PyLiteStrObject* pylt_obj_str_new_from_cstr(PyLiteState *state, const char *str,
         buf[i] = code;
     }
 
-    obj = pylt_obj_str_new(state, buf, len, is_raw);
+    obj = pylt_obj_str_new(I, buf, len, is_raw);
     return obj;
 }
 
-PyLiteStrObject* pylt_obj_str_new_empty(PyLiteState *state) {
-    return pylt_obj_str_new(state, NULL, 0, true);
+PyLiteStrObject* pylt_obj_str_new_empty(PyLiteInterpreter *I) {
+    return pylt_obj_str_new(I, NULL, 0, true);
 }
 
-void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self) {
+void pylt_obj_str_free(PyLiteInterpreter *I, PyLiteStrObject *self) {
     pylt_free(self->ob_val);
     pylt_free(self);
 }
 
-pl_int_t pylt_obj_str_index_full(PyLiteState *state, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end) {
+pl_int_t pylt_obj_str_index_full(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end) {
     pl_int_t i, j, k;
     pl_int_t len_self = (pl_int_t)self->ob_size;
 
@@ -296,27 +296,27 @@ pl_int_t pylt_obj_str_index_full(PyLiteState *state, PyLiteStrObject *self, PyLi
     return -1;
 }
 
-pl_int_t pylt_obj_str_index(PyLiteState *state, PyLiteStrObject *self, PyLiteStrObject *sub) {
-    return pylt_obj_str_index_full(state, self, sub, 0, self->ob_size);
+pl_int_t pylt_obj_str_index(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub) {
+    return pylt_obj_str_index_full(I, self, sub, 0, self->ob_size);
 }
 
-PyLiteStrObject* pylt_obj_str_join(PyLiteState *state, PyLiteStrObject *separator, PyLiteObject *seq) {
-    if (pylt_obj_iterable(state, seq)) {
+PyLiteStrObject* pylt_obj_str_join(PyLiteInterpreter *I, PyLiteStrObject *separator, PyLiteObject *seq) {
+    if (pylt_obj_iterable(I, seq)) {
         pl_uint32_t data_len = 0;
-        PyLiteIterObject *iter = pylt_obj_iter_new(state, seq);
-        PyLiteListObject *strlst = pylt_obj_list_new(state);
+        PyLiteIterObject *iter = pylt_obj_iter_new(I, seq);
+        PyLiteListObject *strlst = pylt_obj_list_new(I);
 
-        for (PyLiteObject *obj = pylt_obj_iter_next(state, iter); obj; obj = pylt_obj_iter_next(state, iter)) {
+        for (PyLiteObject *obj = pylt_obj_iter_next(I, iter); obj; obj = pylt_obj_iter_next(I, iter)) {
             if (!pl_isstr(obj)) {
-                pylt_obj_list_free(state, strlst);
+                pylt_obj_list_free(I, strlst);
                 return NULL;
             }
             data_len += caststr(obj)->ob_size;
-            pylt_obj_list_append(state, strlst, obj);
+            pylt_obj_list_append(I, strlst, obj);
         }
 
         if (strlst->ob_size == 0) {
-            pylt_obj_list_free(state, strlst);
+            pylt_obj_list_free(I, strlst);
             return pl_static.str.TMPL_EMPTY_STR;
         }
 
@@ -337,15 +337,15 @@ PyLiteStrObject* pylt_obj_str_join(PyLiteState *state, PyLiteStrObject *separato
             }
         }
 
-        str = pylt_obj_str_new(state, data, data_len, true);
+        str = pylt_obj_str_new(I, data, data_len, true);
         pylt_free(data);
-        pylt_obj_list_free(state, strlst);
+        pylt_obj_list_free(I, strlst);
         return str;
     }
     return NULL;
 }
 
-PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObject *format, va_list args) {
+PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteInterpreter *I, PyLiteStrObject *format, va_list args) {
     uint32_t *tmp;
     PyLiteObject *obj;
     pl_int_t slen, rlen; // string length, real length
@@ -420,7 +420,7 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
                 case 'd':
                     writer.findex++;
                     if (pl_isint(obj)) {
-                        tmp = pylt_obj_int_to_ucs4(state, castint(obj), &slen);
+                        tmp = pylt_obj_int_to_ucs4(I, castint(obj), &slen);
                     } else {
                         // Error
                     }
@@ -428,7 +428,7 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
                 case 'f': case 'F': case 'g': case 'G':
                     writer.findex++;
                     if (pl_isflt(obj)) {
-                        tmp = pylt_obj_float_to_ucs4(state, castfloat(obj), &slen);
+                        tmp = pylt_obj_float_to_ucs4(I, castfloat(obj), &slen);
                         if (limitFloat) {
                             for (pl_int_t i = slen - 1; i >= 0; --i) {
                                 if (tmp[i] == '.') {
@@ -453,7 +453,7 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
                     writer.findex++;
                     pad_with_zero = false;
                     if (pl_isstr(obj)) {
-                        PyLiteStrObject *tmpstr = pylt_obj_to_str(state, obj);
+                        PyLiteStrObject *tmpstr = pylt_obj_to_str(I, obj);
                         tmp = tmpstr->ob_val;
                         slen = tmpstr->ob_size;
                         is_free = false;
@@ -483,7 +483,7 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
                 }
                 default:
                     // ValueError: incomplete format
-                    pylt_obj_str_free(state, str);
+                    pylt_obj_str_free(I, str);
                     return NULL;
             }
 
@@ -513,43 +513,43 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObje
                 }
             }
         } else {
-            str_escape_next(state, &writer);
+            str_escape_next(I, &writer);
         }
     }
     str->ob_size = writer.dindex;
     str->ob_val[writer.dindex] = '\0';
     //str->ob_val = pylt_realloc(str->ob_val, sizeof(uint32_t) * (str_size + 1));
 
-    return hash_and_check_cache(state, str);
+    return hash_and_check_cache(I, str);
 }
 
-PyLiteStrObject* pylt_obj_str_new_from_cstr_static(PyLiteState *state, const char *str, bool is_raw) {
-    PyLiteStrObject *ret = pylt_obj_str_new_from_cstr(state, str, is_raw);
-    pylt_gc_make_str_static(state, castobj(ret));
+PyLiteStrObject* pylt_obj_str_new_from_cstr_static(PyLiteInterpreter *I, const char *str, bool is_raw) {
+    PyLiteStrObject *ret = pylt_obj_str_new_from_cstr(I, str, is_raw);
+    pylt_gc_make_str_static(I, castobj(ret));
     return ret;
 }
 
-PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObject *format, ...) {
+PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteInterpreter *I, PyLiteStrObject *format, ...) {
     va_list args;
     va_start(args, format);
-    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(state, format, args);
+    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(I, format, args);
     va_end(args);
     return str;
 }
 
-PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteState *state, const char *format, ...) {
+PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
     va_start(args, format);
-    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(state, pylt_obj_str_new_from_cstr(state, format, true), args);
+    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(I, pylt_obj_str_new_from_cstr(I, format, true), args);
     va_end(args);
     return str;
 }
 
-PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteState *state, const char *format, ...) {
+PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
     va_start(args, format);
-    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(state, pylt_obj_str_new_from_cstr(state, format, true), args);
-    pylt_gc_make_str_static(state, castobj(str));
+    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(I, pylt_obj_str_new_from_cstr(I, format, true), args);
+    pylt_gc_make_str_static(I, castobj(str));
     va_end(args);
     return str;
 }

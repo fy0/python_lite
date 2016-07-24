@@ -4,6 +4,6 @@
 
 #include "../types/all.h"
 
-void pylt_bind_all_types_register(PyLiteState *state);
+void pylt_bind_all_types_register(PyLiteInterpreter *I);
 
 #endif

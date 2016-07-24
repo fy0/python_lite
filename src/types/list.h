@@ -11,27 +11,27 @@ typedef struct PyLiteListObject {
     PyLiteObject **ob_val;
 } PyLiteListObject;
 
-pl_int_t pylt_obj_list_append(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
-void pylt_obj_list_clear(PyLiteState *state, PyLiteListObject *self);
-PyLiteListObject* pylt_obj_list_copy(PyLiteState *state, PyLiteListObject *self);
-pl_uint_t pylt_obj_list_count(PyLiteState *state, PyLiteListObject *self);
-void pylt_obj_list_extend(PyLiteState *state, PyLiteListObject *self, PyLiteListObject *obj);
-pl_int_t pylt_obj_list_index(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
-pl_int_t pylt_obj_list_index_strict(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
-pl_bool_t pylt_obj_list_insert(PyLiteState *state, PyLiteListObject *self, pl_int_t index, PyLiteObject *obj);
-PyLiteObject* pylt_obj_list_pop(PyLiteState *state, PyLiteListObject *self);
-pl_bool_t pylt_obj_list_remove(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
-void pylt_obj_list_reverse(PyLiteState *state, PyLiteListObject *self);
-void pylt_obj_list_sort(PyLiteState *state, PyLiteListObject *self);
+pl_int_t pylt_obj_list_append(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *obj);
+void pylt_obj_list_clear(PyLiteInterpreter *I, PyLiteListObject *self);
+PyLiteListObject* pylt_obj_list_copy(PyLiteInterpreter *I, PyLiteListObject *self);
+pl_uint_t pylt_obj_list_count(PyLiteInterpreter *I, PyLiteListObject *self);
+void pylt_obj_list_extend(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteListObject *obj);
+pl_int_t pylt_obj_list_index(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *obj);
+pl_int_t pylt_obj_list_index_strict(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *obj);
+pl_bool_t pylt_obj_list_insert(PyLiteInterpreter *I, PyLiteListObject *self, pl_int_t index, PyLiteObject *obj);
+PyLiteObject* pylt_obj_list_pop(PyLiteInterpreter *I, PyLiteListObject *self);
+pl_bool_t pylt_obj_list_remove(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *obj);
+void pylt_obj_list_reverse(PyLiteInterpreter *I, PyLiteListObject *self);
+void pylt_obj_list_sort(PyLiteInterpreter *I, PyLiteListObject *self);
 
-PyLiteObject* pylt_obj_list_getitem(PyLiteState *state, PyLiteListObject *self, int index);
-pl_bool_t pylt_obj_list_setitem(PyLiteState *state, PyLiteListObject *self, int index, PyLiteObject* obj);
+PyLiteObject* pylt_obj_list_getitem(PyLiteInterpreter *I, PyLiteListObject *self, int index);
+pl_bool_t pylt_obj_list_setitem(PyLiteInterpreter *I, PyLiteListObject *self, int index, PyLiteObject* obj);
 
-pl_bool_t pylt_obj_list_has(PyLiteState *state, PyLiteListObject *self, PyLiteObject *obj);
-struct PyLiteStrObject* pylt_obj_list_to_str(PyLiteState *state, PyLiteListObject *self);
+pl_bool_t pylt_obj_list_has(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *obj);
+struct PyLiteStrObject* pylt_obj_list_to_str(PyLiteInterpreter *I, PyLiteListObject *self);
 
-PyLiteListObject* pylt_obj_list_new(PyLiteState *state);
-PyLiteListObject* pylt_obj_list_new_with_size(PyLiteState *state, pl_uint_t size);
-void pylt_obj_list_free(PyLiteState *state, PyLiteListObject *self);
+PyLiteListObject* pylt_obj_list_new(PyLiteInterpreter *I);
+PyLiteListObject* pylt_obj_list_new_with_size(PyLiteInterpreter *I, pl_uint_t size);
+void pylt_obj_list_free(PyLiteInterpreter *I, PyLiteListObject *self);
 
 #endif

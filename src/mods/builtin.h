@@ -4,6 +4,6 @@
 
 #include "../types/all.h"
 
-PyLiteModuleObject* pylt_mods_builtins_register(PyLiteState *state);
+PyLiteModuleObject* pylt_mods_builtins_register(PyLiteInterpreter *I);
 
 #endif

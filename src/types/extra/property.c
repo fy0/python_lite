@@ -1,7 +1,7 @@
 ﻿
 #include "property.h"
 
-PyLitePropertyObject* pylt_obj_property_new(PyLiteState *state, PyLiteObject *fget, PyLiteObject *fset) {
+PyLitePropertyObject* pylt_obj_property_new(PyLiteInterpreter *I, PyLiteObject *fget, PyLiteObject *fset) {
     PyLitePropertyObject *obj = pylt_realloc(NULL, sizeof(PyLitePropertyObject));
     obj->ob_type = PYLT_OBJ_TYPE_PROP;
     obj->fget.func = fget;
@@ -9,6 +9,6 @@ PyLitePropertyObject* pylt_obj_property_new(PyLiteState *state, PyLiteObject *fg
     return obj;
 }
 
-void pylt_obj_property_free(PyLiteState *state, PyLitePropertyObject *self) {
+void pylt_obj_property_free(PyLiteInterpreter *I, PyLitePropertyObject *self) {
     pylt_free(self);
 }

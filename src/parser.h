@@ -14,7 +14,7 @@ typedef struct ParserInfo {
 
 typedef struct ParserState {
     LexState *ls;
-    PyLiteState* state;
+    PyLiteInterpreter *I;
 
     ParserInfo *info;
     ParserInfo *info_used;
@@ -35,9 +35,9 @@ typedef struct ParserState {
 #define kv_pushins(v, x) kv_push(PyLiteInstruction, (v), (x))
 
 PyLiteCodeObject* pylt_parser_parse(ParserState *ps);
-void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls);
-void pylt_parser_finalize(PyLiteState* state, ParserState *ps);
-void pylt_parser_crash_finalize(PyLiteState* state, ParserState *ps);
+void pylt_parser_init(PyLiteInterpreter *I, ParserState *ps, LexState *ls);
+void pylt_parser_finalize(PyLiteInterpreter *I, ParserState *ps);
+void pylt_parser_crash_finalize(PyLiteInterpreter *I, ParserState *ps);
 
 // SyntaxError: invalid syntax
 #define PYLT_ERR_PARSER_INVALID_SYNTAX -1

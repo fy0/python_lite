@@ -4,10 +4,10 @@
 
 #include "parser.h"
 
-void debug_print_const_vals(PyLiteState *state, PyLiteCodeObject *code);
-void debug_print_opcodes(PyLiteState *state, PyLiteCodeObject *code);
-void debug_print_obj(PyLiteState *state, PyLiteObject *obj);
+void debug_print_const_vals(PyLiteInterpreter *I, PyLiteCodeObject *code);
+void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code);
+void debug_print_obj(PyLiteInterpreter *I, PyLiteObject *obj);
 
-void debug_test_lexer(PyLiteState *state, StringStream *ss);
+void debug_test_lexer(PyLiteInterpreter *I, StringStream *ss);
 
 #endif

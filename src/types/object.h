@@ -50,26 +50,26 @@ enum PyLiteObjectTypeCode {
 
 // Object methods
 
-pl_int_t pylt_obj_cmp(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
-pl_bool_t pylt_obj_eq(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
-pl_uint32_t pylt_obj_hash(PyLiteState *state, PyLiteObject *obj);
-pl_int_t pylt_obj_len(PyLiteState *state, PyLiteObject *obj);
+pl_int_t pylt_obj_cmp(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b);
+pl_bool_t pylt_obj_eq(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b);
+pl_uint32_t pylt_obj_hash(PyLiteInterpreter *I, PyLiteObject *obj);
+pl_int_t pylt_obj_len(PyLiteInterpreter *I, PyLiteObject *obj);
 
-pl_bool_t pylt_obj_hashable(PyLiteState *state, PyLiteObject *obj);
-pl_bool_t pylt_obj_iterable(PyLiteState *state, PyLiteObject *obj);
-pl_bool_t pylt_obj_istrue(PyLiteState *state, PyLiteObject *obj);
+pl_bool_t pylt_obj_hashable(PyLiteInterpreter *I, PyLiteObject *obj);
+pl_bool_t pylt_obj_iterable(PyLiteInterpreter *I, PyLiteObject *obj);
+pl_bool_t pylt_obj_istrue(PyLiteInterpreter *I, PyLiteObject *obj);
 
-PyLiteObject* pylt_obj_getattr(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type);
-pl_bool_t pylt_obj_setattr(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
+PyLiteObject* pylt_obj_getattr(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type);
+pl_bool_t pylt_obj_setattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
 
-PyLiteObject* pylt_obj_getitem(PyLiteState *state, PyLiteObject *obj, PyLiteObject* key);
-pl_bool_t pylt_obj_setitem(PyLiteState *state, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
-//PyLiteObject* pylt_obj_slice(PyLiteState *state, PyLiteObject *obj);
+PyLiteObject* pylt_obj_getitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key);
+pl_bool_t pylt_obj_setitem(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
+//PyLiteObject* pylt_obj_slice(PyLiteInterpreter *I, PyLiteObject *obj);
 
-pl_bool_t pylt_obj_has(PyLiteState *state, PyLiteObject *self, PyLiteObject *obj, pl_bool_t *is_valid);
+pl_bool_t pylt_obj_has(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *obj, pl_bool_t *is_valid);
 
-PyLiteObject* pylt_obj_op_unary(PyLiteState *state, int op, PyLiteObject *obj);
-PyLiteObject* pylt_obj_op_binary(PyLiteState *state, int op, PyLiteObject *a, PyLiteObject *b);
+PyLiteObject* pylt_obj_op_unary(PyLiteInterpreter *I, int op, PyLiteObject *obj);
+PyLiteObject* pylt_obj_op_binary(PyLiteInterpreter *I, int op, PyLiteObject *a, PyLiteObject *b);
 
 // Type cast
 
@@ -143,19 +143,19 @@ struct PyLiteCustomObject;
 
 #define pl_iscustomtype(i) (pl_istype(i)) && (((struct PyLiteTypeObject*)i)->ob_reftype >= PYLT_OBJ_TYPE_USERCLASS)
 
-PyLiteObject* pylt_obj_typecast(PyLiteState *state, struct PyLiteTypeObject *type, PyLiteObject *obj);
+PyLiteObject* pylt_obj_typecast(PyLiteInterpreter *I, struct PyLiteTypeObject *type, PyLiteObject *obj);
 PyLiteObject* pylt_obj_getbase(PyLiteObject *obj);
-struct PyLiteStrObject* pylt_obj_to_str(PyLiteState *state, PyLiteObject *obj);
-struct PyLiteStrObject* pylt_obj_to_repr(PyLiteState *state, PyLiteObject *obj);
+struct PyLiteStrObject* pylt_obj_to_str(PyLiteInterpreter *I, PyLiteObject *obj);
+struct PyLiteStrObject* pylt_obj_to_repr(PyLiteInterpreter *I, PyLiteObject *obj);
 
-void pylt_obj_free(PyLiteState *state, PyLiteObject *obj);
+void pylt_obj_free(PyLiteInterpreter *I, PyLiteObject *obj);
 
 // Others
 
-typedef PyLiteObject* (*PyLiteObjUnaryOpFunc)(PyLiteState *state, PyLiteObject *obj);
-typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteState *state, PyLiteObject *a, PyLiteObject *b);
+typedef PyLiteObject* (*PyLiteObjUnaryOpFunc)(PyLiteInterpreter *I, PyLiteObject *obj);
+typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b);
 
-typedef PyLiteObject* (*PyLiteCFunctionPtr)(PyLiteState *state, int argc, PyLiteObject **args);
-typedef PyLiteObject* (*PyLiteIterFunc)(PyLiteState *state, struct PyLiteIterObject *iter);
+typedef PyLiteObject* (*PyLiteCFunctionPtr)(PyLiteInterpreter *I, int argc, PyLiteObject **args);
+typedef PyLiteObject* (*PyLiteIterFunc)(PyLiteInterpreter *I, struct PyLiteIterObject *iter);
 
 #endif

@@ -117,7 +117,7 @@ function is more robust to certain non-random input.
 #ifndef __AC_KHASHO_H
 #define __AC_KHASHO_H
 
-typedef struct PyLiteState PyLiteState;
+typedef struct PyLiteInterpreter PyLiteInterpreter;
 
 /*!
 @header
@@ -203,11 +203,11 @@ static const double __ac_HASH_UPPER = 0.77;
         khint32_t *flags; \
         khkey_t *keys; \
         khval_t *vals; \
-        PyLiteState *state; \
+        PyLiteInterpreter *I; \
     } kho_##name##_t;
 
 #define __KHASHO_PROTOTYPES(name, khkey_t, khval_t)                         \
-    extern kho_##name##_t *kho_init_##name(PyLiteState *state);                            \
+    extern kho_##name##_t *kho_init_##name(PyLiteInterpreter *I);                            \
     extern void kho_destroy_##name(kho_##name##_t *h);                    \
     extern void kho_clear_##name(kho_##name##_t *h);                        \
     extern khint_t kho_get_##name(const kho_##name##_t *h, khkey_t key);     \
@@ -216,9 +216,9 @@ static const double __ac_HASH_UPPER = 0.77;
     extern void kho_del_##name(kho_##name##_t *h, khint_t x);
 
 #define __KHASHO_IMPL(name, SCOPE, khkey_t, khval_t, kho_is_map, __hash_func, __hash_equal) \
-    SCOPE kho_##name##_t *kho_init_##name(PyLiteState *state) {                            \
+    SCOPE kho_##name##_t *kho_init_##name(PyLiteInterpreter *I) {                            \
         kho_##name##_t* ret = (kho_##name##_t*)kcalloc(1, sizeof(kho_##name##_t));        \
-        ret->state = state; \
+        ret->I = I; \
         return ret; \
     }                                                                    \
     SCOPE void kho_destroy_##name(kho_##name##_t *h)                        \
@@ -241,9 +241,9 @@ static const double __ac_HASH_UPPER = 0.77;
         if (h->n_buckets) {                                                \
             khint_t k, i, last, mask, step = 0; \
             mask = h->n_buckets - 1;                                    \
-            k = __hash_func(h->state,key); i = k & mask;                            \
+            k = __hash_func(h->I,key); i = k & mask;                            \
             last = i; \
-                        while (!__ac_isempty(h->flags, i) && (__ac_isdel(h->flags, i) || !__hash_equal(h->state, h->keys[i], key))) { \
+                        while (!__ac_isempty(h->flags, i) && (__ac_isdel(h->flags, i) || !__hash_equal(h->I, h->keys[i], key))) { \
                 i = (i + (++step)) & mask; \
                 if (i == last) return h->n_buckets;                        \
                                     }                                                            \
@@ -285,7 +285,7 @@ static const double __ac_HASH_UPPER = 0.77;
                     __ac_set_isdel_true(h->flags, j);                    \
                                         while (1) { /* kick-out process; sort of like in Cuckoo hashing */ \
                         khint_t k, i, step = 0; \
-                        k = __hash_func(h->state, key);                            \
+                        k = __hash_func(h->I, key);                            \
                         i = k & new_mask;                                \
                                                 while (!__ac_isempty(new_flags, i)) i = (i + (++step)) & new_mask; \
                         __ac_set_isempty_false(new_flags, i);            \
@@ -327,11 +327,11 @@ static const double __ac_HASH_UPPER = 0.77;
                 } /* TODO: to implement automatically shrinking; resize() already support shrinking */ \
                 {                                                                \
             khint_t k, i, site, last, mask = h->n_buckets - 1, step = 0; \
-            x = site = h->n_buckets; k = __hash_func(h->state, key); i = k & mask; \
+            x = site = h->n_buckets; k = __hash_func(h->I, key); i = k & mask; \
             if (__ac_isempty(h->flags, i)) x = i; /* for speed up */    \
                         else {                                                        \
                 last = i; \
-                                while (!__ac_isempty(h->flags, i) && (__ac_isdel(h->flags, i) || !__hash_equal(h->state, h->keys[i], key))) { \
+                                while (!__ac_isempty(h->flags, i) && (__ac_isdel(h->flags, i) || !__hash_equal(h->I, h->keys[i], key))) { \
                     if (__ac_isdel(h->flags, i)) site = i;                \
                     i = (i + (++step)) & mask; \
                     if (i == last) { x = site; break; }                    \
@@ -387,7 +387,7 @@ static const double __ac_HASH_UPPER = 0.77;
 @param  name  Name of the hash table [symbol]
 @return       Pointer to the hash table [khash_t(name)*]
 */
-#define kho_init(name, state) kho_init_##name(state)
+#define kho_init(name, state) kho_init_##name(I)
 
 /*! @function
 @abstract     Destroy a hash table.

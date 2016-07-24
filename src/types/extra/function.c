@@ -2,21 +2,21 @@
 #include "function.h"
 #include "../../bind.h"
 
-PyLiteFunctionObject* pylt_obj_func_new(PyLiteState *state, PyLiteCodeObject *code) {
+PyLiteFunctionObject* pylt_obj_func_new(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     PyLiteFunctionObject *obj = pylt_realloc(NULL, sizeof(PyLiteFunctionObject));
     memset(obj, 0, sizeof(PyLiteFunctionObject));
     obj->ob_type = PYLT_OBJ_TYPE_FUNCTION;
     if (code) {
         memcpy(&obj->code, code, sizeof(PyLiteCodeObject));
     } else {
-        obj->code.const_val = pylt_obj_list_new(state);
+        obj->code.const_val = pylt_obj_list_new(I);
         kv_init(obj->code.opcodes);
     }
     return obj;
 }
 
-PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteState *state, PyLiteStrObject *name, PyLiteListObject *params, PyLiteCodeObject *code, PyLiteDictObject *defaults, PyLiteStrObject *args, PyLiteStrObject *kwargs) {
-    PyLiteFunctionObject *func = pylt_obj_func_new(state, code);
+PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteInterpreter *I, PyLiteStrObject *name, PyLiteListObject *params, PyLiteCodeObject *code, PyLiteDictObject *defaults, PyLiteStrObject *args, PyLiteStrObject *kwargs) {
+    PyLiteFunctionObject *func = pylt_obj_func_new(I, code);
 
     // set name and params
     func->info.name = name;
@@ -37,9 +37,9 @@ PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteState *state, PyLiteStrObject *
             } else if (name == kwargs) {
                 if (minimal == -1) minimal = i;
                 defvals[i] = castobj(PARAM_KWARGS);
-            } else if (pylt_obj_dict_has(state, defaults, castobj(name))) {
+            } else if (pylt_obj_dict_has(I, defaults, castobj(name))) {
                 if (minimal == -1) minimal = i;
-                defvals[i] = pylt_obj_dict_getitem(state, defaults, castobj(name));
+                defvals[i] = pylt_obj_dict_getitem(I, defaults, castobj(name));
             } else defvals[i] = NULL;
         }
 
@@ -52,7 +52,7 @@ PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteState *state, PyLiteStrObject *
     return func;
 }
 
-PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteState *state, PyLiteObject *func) {
+PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteInterpreter *I, PyLiteObject *func) {
     if (func->ob_type == PYLT_OBJ_TYPE_FUNCTION)
         return &castfunc(func)->info;
     if (func->ob_type == PYLT_OBJ_TYPE_CFUNCTION)
@@ -60,7 +60,7 @@ PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteState *state, PyLiteObject *fun
     return NULL;
 }
 
-PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteState *state, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
+PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteInterpreter *I, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_realloc(NULL, sizeof(PyLiteCFunctionObject));
     func->ob_type = PYLT_OBJ_TYPE_CFUNCTION;
     func->info.length = param_names ? param_names->ob_size : 0;
@@ -78,6 +78,6 @@ PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteState *state, PyLiteStrObject *n
     return func;
 }
 
-PyLiteCFunctionObject* pylt_obj_cfunc_new_no_args(PyLiteState *state, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc) {
-    return pylt_obj_cfunc_new(state, name, NULL, NULL, NULL, cfunc);
+PyLiteCFunctionObject* pylt_obj_cfunc_new_no_args(PyLiteInterpreter *I, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc) {
+    return pylt_obj_cfunc_new(I, name, NULL, NULL, NULL, cfunc);
 }

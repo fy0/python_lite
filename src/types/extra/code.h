@@ -18,9 +18,9 @@ typedef struct PyLiteCodeObject {
     kvec_t(PyLiteInstruction) opcodes;
 } PyLiteCodeObject;
 
-void pylt_obj_code_add_to_gc(PyLiteState* state, PyLiteCodeObject *self);
+void pylt_obj_code_add_to_gc(PyLiteInterpreter *I, PyLiteCodeObject *self);
 
-PyLiteCodeObject* pylt_obj_code_new(PyLiteState *state);
-void pylt_obj_code_free(PyLiteState *state, PyLiteCodeObject* self);
+PyLiteCodeObject* pylt_obj_code_new(PyLiteInterpreter *I);
+void pylt_obj_code_free(PyLiteInterpreter *I, PyLiteCodeObject* self);
 
 #endif

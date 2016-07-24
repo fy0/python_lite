@@ -21,17 +21,17 @@ typedef struct PyLiteIterObject {
     };
 } PyLiteIterObject;
 
-PyLiteIterObject* pylt_obj_iter_new(PyLiteState *state, PyLiteObject *obj);
-PyLiteObject* pylt_obj_iter_next(PyLiteState *state, PyLiteIterObject *iter);
+PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj);
+PyLiteObject* pylt_obj_iter_next(PyLiteInterpreter *I, PyLiteIterObject *iter);
 
-PyLiteObject* pylt_obj_bytes_iternext(PyLiteState *state, PyLiteIterObject *iter);
-PyLiteObject* pylt_obj_str_iternext(PyLiteState *state, PyLiteIterObject *iter);
-PyLiteObject* pylt_obj_tuple_iternext(PyLiteState *state, PyLiteIterObject *iter);
-PyLiteObject* pylt_obj_list_iternext(PyLiteState *state, PyLiteIterObject *iter);
-PyLiteObject* pylt_obj_set_iternext(PyLiteState *state, PyLiteIterObject *iter);
-PyLiteObject* pylt_obj_dict_iternext(PyLiteState *state, PyLiteIterObject *iter);
-PyLiteObject* pylt_obj_range_iternext(PyLiteState *state, PyLiteIterObject *iter);
+PyLiteObject* pylt_obj_bytes_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
+PyLiteObject* pylt_obj_str_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
+PyLiteObject* pylt_obj_tuple_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
+PyLiteObject* pylt_obj_list_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
+PyLiteObject* pylt_obj_set_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
+PyLiteObject* pylt_obj_dict_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
+PyLiteObject* pylt_obj_range_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
 
-void pylt_obj_iter_free(PyLiteState *state, PyLiteIterObject* self);
+void pylt_obj_iter_free(PyLiteInterpreter *I, PyLiteIterObject* self);
 
 #endif

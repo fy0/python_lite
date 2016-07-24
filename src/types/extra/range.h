@@ -11,9 +11,9 @@ typedef struct PyLiteRangeObject {
     pl_int_t step; // not zero
 } PyLiteRangeObject;
 
-PyLiteRangeObject* pylt_obj_range_new(PyLiteState *state, pl_int_t start, pl_int_t stop, pl_int_t step);
-pl_int_t pylt_obj_range_itertimes(PyLiteState *state, PyLiteRangeObject* range);
+PyLiteRangeObject* pylt_obj_range_new(PyLiteInterpreter *I, pl_int_t start, pl_int_t stop, pl_int_t step);
+pl_int_t pylt_obj_range_itertimes(PyLiteInterpreter *I, PyLiteRangeObject* range);
 
-void pylt_obj_range_free(PyLiteState *state, PyLiteRangeObject* self);
+void pylt_obj_range_free(PyLiteInterpreter *I, PyLiteRangeObject* self);
 
 #endif

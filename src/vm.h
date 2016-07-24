@@ -68,20 +68,20 @@ typedef struct PyLiteVM {
 
 #define kv_pushptr(v, x) kv_push(uintptr_t, (v), (uintptr_t)(x))
 
-void pylt_vm_load_func(PyLiteState* state, PyLiteFunctionObject *func);
-void pylt_vm_load_code(PyLiteState* state, PyLiteCodeObject *code);
+void pylt_vm_load_func(PyLiteInterpreter *I, PyLiteFunctionObject *func);
+void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code);
 
 const char* pylt_vm_get_op_name(int op);
 int token_to_op_val(uint32_t tk);
 int token_de_to_op_val(uint32_t tk);
 
-PyLiteFrame* pylt_vm_curframe(PyLiteState* state);
+PyLiteFrame* pylt_vm_curframe(PyLiteInterpreter *I);
 
-void pylt_vm_init(PyLiteState *state, PyLiteVM *vm);
-void pylt_vm_finalize(PyLiteState *state);
-void pylt_vm_run(PyLiteState* state, PyLiteCodeObject *code);
+void pylt_vm_init(PyLiteInterpreter *I, PyLiteVM *vm);
+void pylt_vm_finalize(PyLiteInterpreter *I);
+void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code);
 
-PyLiteObject* pylt_vm_call_method(PyLiteState* state, PyLiteObject *self, PyLiteObject *callable, int argc, ...);
-PyLiteObject* pylt_vm_call_func(PyLiteState* state, PyLiteObject *callable, int argc, ...);
+PyLiteObject* pylt_vm_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, int argc, ...);
+PyLiteObject* pylt_vm_call_func(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ...);
 
 #endif

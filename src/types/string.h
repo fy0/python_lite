@@ -11,31 +11,31 @@ typedef struct PyLiteStrObject {
     uint32_t *ob_val;
 } PyLiteStrObject;
 
-pl_int_t pylt_obj_str_cmp(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other);
-pl_bool_t pylt_obj_str_eq(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other);
-pl_uint32_t pylt_obj_str_hash(PyLiteState *state, PyLiteStrObject *obj);
-pl_uint32_t pylt_obj_str_forcehash(PyLiteState *state, PyLiteStrObject *obj);
+pl_int_t pylt_obj_str_cmp(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *other);
+pl_bool_t pylt_obj_str_eq(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *other);
+pl_uint32_t pylt_obj_str_hash(PyLiteInterpreter *I, PyLiteStrObject *obj);
+pl_uint32_t pylt_obj_str_forcehash(PyLiteInterpreter *I, PyLiteStrObject *obj);
 
-PyLiteStrObject* pylt_obj_str_getitem(PyLiteState *state, PyLiteStrObject *self, int index);
+PyLiteStrObject* pylt_obj_str_getitem(PyLiteInterpreter *I, PyLiteStrObject *self, int index);
 
-PyLiteObject* pylt_obj_str_mul(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other);
-PyLiteObject* pylt_obj_str_plus(PyLiteState *state, PyLiteStrObject *self, PyLiteObject *other);
+PyLiteObject* pylt_obj_str_mul(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *other);
+PyLiteObject* pylt_obj_str_plus(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *other);
 
-pl_int_t pylt_obj_str_index(PyLiteState *state, PyLiteStrObject *self, PyLiteStrObject *sub);
-pl_int_t pylt_obj_str_index_full(PyLiteState *state, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end);
-PyLiteStrObject* pylt_obj_str_join(PyLiteState *state, PyLiteStrObject *separator, PyLiteObject *seq);
+pl_int_t pylt_obj_str_index(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub);
+pl_int_t pylt_obj_str_index_full(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end);
+PyLiteStrObject* pylt_obj_str_join(PyLiteInterpreter *I, PyLiteStrObject *separator, PyLiteObject *seq);
 
-PyLiteStrObject* pylt_obj_str_new(PyLiteState *state, uint32_t *str, int size, bool is_raw);
-PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteState *state, PyLiteStrObject *format, va_list args);
+PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size, bool is_raw);
+PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteInterpreter *I, PyLiteStrObject *format, va_list args);
 
-PyLiteStrObject* pylt_obj_str_new_from_cstr(PyLiteState *state, const char *str, bool is_raw);
-PyLiteStrObject* pylt_obj_str_new_from_cstr_static(PyLiteState *state, const char *str, bool is_raw);
-PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteState *state, PyLiteStrObject *format, ...);
-PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteState *state, const char *format, ...);
-PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteState *state, const char *format, ...);
-PyLiteStrObject* pylt_obj_str_new_empty(PyLiteState *state);
+PyLiteStrObject* pylt_obj_str_new_from_cstr(PyLiteInterpreter *I, const char *str, bool is_raw);
+PyLiteStrObject* pylt_obj_str_new_from_cstr_static(PyLiteInterpreter *I, const char *str, bool is_raw);
+PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteInterpreter *I, PyLiteStrObject *format, ...);
+PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteInterpreter *I, const char *format, ...);
+PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteInterpreter *I, const char *format, ...);
+PyLiteStrObject* pylt_obj_str_new_empty(PyLiteInterpreter *I);
 
 
-void pylt_obj_str_free(PyLiteState *state, PyLiteStrObject *self);
+void pylt_obj_str_free(PyLiteInterpreter *I, PyLiteStrObject *self);
 
 #endif

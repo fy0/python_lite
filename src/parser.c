@@ -1,5 +1,5 @@
 ﻿
-#include "state.h"
+#include "intp.h"
 #include "parser.h"
 #include "debug.h"
 #include "vm.h"
@@ -65,8 +65,8 @@ void write_ins(ParserState *ps, uint8_t opcode, uint8_t exarg, int16_t extra) {
 
 int store_const(ParserState *ps, PyLiteObject *obj) {
     PyLiteListObject *const_val = ps->info->code->const_val;
-    pl_int_t index = pylt_obj_list_index_strict(ps->state, const_val, obj);
-    if (index == -1) index = pylt_obj_list_append(ps->state, const_val, obj);
+    pl_int_t index = pylt_obj_list_index_strict(ps->I, const_val, obj);
+    if (index == -1) index = pylt_obj_list_append(ps->I, const_val, obj);
     return index;
 }
 
@@ -133,10 +133,10 @@ PyLiteObject* parse_get_consttype(ParserState *ps) {
     switch (tk->val) {
         case TK_KW_TRUE:
             next(ps);
-            return castobj(pylt_obj_bool_new(ps->state, true));
+            return castobj(pylt_obj_bool_new(ps->I, true));
         case TK_KW_FALSE:
             next(ps);
-            return castobj(pylt_obj_bool_new(ps->state, false));
+            return castobj(pylt_obj_bool_new(ps->I, false));
         case TK_INT: case TK_FLOAT: case TK_STRING: case TK_BYTES:
             obj = tk->obj;
             next(ps);
@@ -712,12 +712,12 @@ void parse_func(ParserState *ps) {
 
     ACCEPT(ps, '(');
 
-    PyLiteListObject* lst = pylt_obj_list_new(ps->state);
+    PyLiteListObject* lst = pylt_obj_list_new(ps->I);
 
     while (true) {
         if (tk->val == TK_NAME) {
             name = tk->obj;
-            pylt_obj_list_append(ps->state, lst, name);
+            pylt_obj_list_append(ps->I, lst, name);
             next(ps);
             if (tk->val == '=') {
                 next(ps);
@@ -736,7 +736,7 @@ void parse_func(ParserState *ps) {
             next(ps);
             if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
             if (args_name) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX); // TODO: error info fix
-            pylt_obj_list_append(ps->state, lst, tk->obj);
+            pylt_obj_list_append(ps->I, lst, tk->obj);
             args_name = tk->obj;
             next(ps);
             if (tk->val != ',') break;
@@ -745,7 +745,7 @@ void parse_func(ParserState *ps) {
             // **kwargs
             next(ps);
             if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-            pylt_obj_list_append(ps->state, lst, tk->obj);
+            pylt_obj_list_append(ps->I, lst, tk->obj);
             kwargs_name = tk->obj;
             next(ps);
             if (tk->val != ',') {
@@ -765,7 +765,7 @@ void parse_func(ParserState *ps) {
     ACCEPT(ps, TK_INDENT);
     parse_stmts(ps);
     ACCEPT(ps, TK_DEDENT);
-    sload_const(ps, castobj(pylt_obj_none_new(ps->state)));
+    sload_const(ps, castobj(pylt_obj_none_new(ps->I)));
     write_ins(ps, BC_RET, 0, 0);
     info = func_pop(ps);
     ps->disable_return_parse = old_disable_return;
@@ -798,7 +798,7 @@ void parse_class(ParserState *ps) {
     PyLiteObject *class_name;
     PyLiteObject *base_class_name = NULL;
     Token *tk = &(ps->ls->token);
-    PyLiteListObject* lst = pylt_obj_list_new(ps->state);
+    PyLiteListObject* lst = pylt_obj_list_new(ps->I);
     bool old_disable_return;
 
     ACCEPT(ps, TK_KW_CLASS);
@@ -1121,7 +1121,7 @@ void parse_stmt(ParserState *ps) {
             }
             next(ps);
             if (!parse_try_expr(ps)) {
-                sload_const(ps, castobj(pylt_obj_none_new(ps->state)));
+                sload_const(ps, castobj(pylt_obj_none_new(ps->I)));
             }
             write_ins(ps, BC_RET, 0, 0);
             break;
@@ -1187,7 +1187,7 @@ void func_push(ParserState *ps) {
     }
 
     // 初始化
-    info->code = pylt_obj_code_new(ps->state);
+    info->code = pylt_obj_code_new(ps->I);
     info->loop_depth = 0;
     info->prev = ps->info;
     ps->info = info;
@@ -1202,8 +1202,8 @@ ParserInfo* func_pop(ParserState *ps) {
     return info;
 }
 
-void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
-    ps->state = state;
+void pylt_parser_init(PyLiteInterpreter *I, ParserState *ps, LexState *ls) {
+    ps->I = I;
     ps->ls = ls;
 
     ps->info = NULL;
@@ -1220,7 +1220,7 @@ void pylt_parser_init(PyLiteState* state, ParserState *ps, LexState *ls) {
 }
 
 // release memory if compile failed
-void pylt_parser_crash_finalize(PyLiteState* state, ParserState *ps) {
+void pylt_parser_crash_finalize(PyLiteInterpreter *I, ParserState *ps) {
     ParserInfo *info, *info2;
 
     info = ps->info;
@@ -1233,7 +1233,7 @@ void pylt_parser_crash_finalize(PyLiteState* state, ParserState *ps) {
             pylt_free(lst->ob_val[i]);
         }
 
-        pylt_obj_code_free(state, info->code);
+        pylt_obj_code_free(I, info->code);
         pylt_free(info);
         info = info2;
     }
@@ -1248,7 +1248,7 @@ void pylt_parser_crash_finalize(PyLiteState* state, ParserState *ps) {
     kv_destroy(ps->lval_check.bc_cache);
 }
 
-void pylt_parser_finalize(PyLiteState* state, ParserState *ps) {
+void pylt_parser_finalize(PyLiteInterpreter *I, ParserState *ps) {
     ParserInfo *info, *info2;
 
     info = ps->info_used;
