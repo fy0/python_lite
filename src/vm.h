@@ -58,6 +58,7 @@ typedef struct PyLiteFrame {
     PyLiteFunctionObject *func;
     PyLiteCodeObject *code;
     pl_uint_t code_pointer_slot;
+	pl_bool_t halt_when_ret;
     kvec_t(PyLiteDictObject*) var_tables;
 } PyLiteFrame;
 
@@ -83,5 +84,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code);
 
 PyLiteObject* pylt_vm_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, int argc, ...);
 PyLiteObject* pylt_vm_call_func(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ...);
+
+PyLiteObject* pylt_vm_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, PyLiteTupleObject *args, PyLiteDictObject *kwargs);
 
 #endif

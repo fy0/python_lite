@@ -10,6 +10,8 @@
 #include "mods/math.h"
 #include "pybind/typebind.h"
 
+PyLiteObject* _pylt_vm_call(PyLiteInterpreter *I, pl_int_t argc);
+
 const char* op_vals[] = {
     "or",
     "and",
@@ -78,6 +80,7 @@ void pylt_vm_init(struct PyLiteInterpreter *I, PyLiteVM* vm) {
     kv_pushp(PyLiteFrame, vm->frames);
     frame = &kv_A(vm->frames, 0);
     frame->func = NULL;
+	frame->halt_when_ret = false;
     kv_init(frame->var_tables);
 
     // built-in
@@ -103,7 +106,8 @@ void pylt_vm_load_func(PyLiteInterpreter *I, PyLiteFunctionObject *func) {
     kv_pushp(PyLiteFrame, vm->frames);
     frame = &kv_A(vm->frames, index);
     frame->func = func;
-    frame->code = &func->code;
+	frame->code = &func->code;
+	frame->halt_when_ret = false;
     kv_init(frame->var_tables);
 
     pylt_gc_add(I, castobj(func));
@@ -121,7 +125,8 @@ void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     PyLiteVM *vm = &I->vm;
     PyLiteFrame *frame = &kv_top(vm->frames);
     frame->func = NULL;
-    frame->code = code;
+	frame->code = code;
+	frame->halt_when_ret = false;
     pylt_gc_add(I, castobj(code));
 }
 
@@ -133,10 +138,10 @@ void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
 //
 // pflag: the kind of the callable object，such as ...
 //  0 tobj is a function or cfunction object
-//  1 tobj is a class, pfunc_obj is tobj.__new__
+//  1 tobj is a class, pfunc_obj is tobj.__new__ (backup parameters)
 //  2 tobj is a object with __call__ attribute, pfunc_obj is tobj.__call__
 
-int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, PyLiteDictObject *kwargs, PyLiteObject **pfunc_obj, PyLiteFunctionInfo **pinfo, pl_int_t *pflag) {
+int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, PyLiteDictObject *kwargs, PyLiteObject **pfunc_obj, PyLiteFunctionInfo **pinfo, pl_int_t *pflag, PyLiteTupleObject **params_bak) {
     PyLiteFunctionInfo *info;
     PyLiteObject *obj, *defobj;
     PyLiteObject *insert_caller = NULL;
@@ -157,7 +162,13 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
             if (obj) {
                 info = pylt_obj_func_get_info(I, obj);
                 if (!info) return -1;
-                if (pflag) *pflag = 1;
+				if (pflag) {
+					*pflag = 1;
+					// backup parameters for __init__
+					if (params_num && params_bak) {
+						*params_bak = pylt_obj_tuple_new_with_data(I, params_num, &kv_topn(I->vm.stack, params_num-1));
+					}
+				}
             } else {
                 // not function
                 return -1;
@@ -466,19 +477,19 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                         break;
                 }
                 break;
-            case BC_CALL:
+			case BC_CALL: {
                 _BC_CALL:
                 // BC_CALL      0       params_num
                 params_num = ins.extra + params_offset;
                 params_offset = 0;
 
-                ta = ins.exarg ? castobj(kv_pop(vm->stack)) : NULL; // kwargs
+                PyLiteDictObject *kwargs = ins.exarg ? castdict(kv_pop(vm->stack)) : NULL; // kwargs
                 tobj = castobj(kv_topn(vm->stack, params_num)); // 函数对象
-                //tsize = kv_size(vm->stack);
 
                 // check
                 PyLiteFunctionInfo *func_info;
-                if (tnum = func_call_check(I, tobj, params_num, castdict(ta), &tret, &func_info, &tflag)) {
+				PyLiteTupleObject *params_bak = NULL;
+				if (tnum = func_call_check(I, tobj, params_num, kwargs, &tret, &func_info, &tflag, &params_bak)) {
                     if (tnum == -1) {
                         printf("TypeError: ");
                         debug_print_obj(I, castobj(pylt_api_type_name(I, tobj->ob_type)));
@@ -489,41 +500,58 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
 
                 // set locals and execute
                 if (tret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
-                    kv_top(vm->frames).code_pointer_slot = i;
-                    pylt_vm_load_func(I, castfunc(tret));
-                    code = kv_top(vm->frames).code;
-                    locals = kv_top(kv_top(vm->frames).var_tables);
-                    if (func_info->length > 0) {
-                        for (int k = func_info->length - 1; k >= 0; --k) {
-                            pylt_obj_dict_setitem(I, locals, castobj(castfunc(tret)->info.params[k]), castobj(kv_pop(I->vm.stack)));
-                        }
-                    }
-                    kv_pop(vm->stack); // pop func obj
-                    i = -1;
+					kv_top(vm->frames).code_pointer_slot = i;
+					pylt_vm_load_func(I, castfunc(tret));
+					locals = kv_top(kv_top(vm->frames).var_tables);
+					if (func_info->length > 0) {
+						for (int k = 0; k < func_info->length; ++k) {
+							pylt_obj_dict_setitem(I, locals, castobj(func_info->params[k]), castobj(kv_topn(vm->stack, func_info->length - k - 1)));
+						}
+					}
+					kv_popn(vm->stack, func_info->length + 1); // pop args and func obj
+
+					if (tflag != 1) {
+						// tobj is func or has a __call__ method
+						code = kv_top(vm->frames).code;
+						i = -1;
+					} else {
+						// tobj is a type, new object
+						kv_top(vm->frames).halt_when_ret = true;
+						pylt_vm_run(I, NULL);
+						locals = kv_top(kv_top(vm->frames).var_tables);
+					}
                 } else if (tret->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
                     tret = castcfunc(tret)->code(I, func_info->length, (PyLiteObject**)(&kv_topn(vm->stack, func_info->length - 1)));
-                    kv_popn(vm->stack, func_info->length + 1);
-                    if (tret) kv_pushptr(I->vm.stack, tret);
-                    else kv_pushptr(I->vm.stack, (uintptr_t)pylt_obj_none_new(I));
+					kv_popn(vm->stack, func_info->length + 1);
+					if (tret) kv_pushptr(I->vm.stack, tret);
+					else kv_pushptr(I->vm.stack, (uintptr_t)pylt_obj_none_new(I));
                 }
 
                 // if new instance created
                 if (tflag == 1) {
-                    // pack custom object
-                    if (pl_iscustomtype(tobj)) {
-                        tret = castobj(kv_pop(vm->stack));
-                        kv_pushptr(vm->stack, pylt_obj_cutstom_new(I, casttype(tobj)->ob_reftype, tret));
-                    }
                     // call __init__
+					tret = castobj(kv_top(vm->stack));
+
+					if ((!pl_istype(tret)) && tret->ob_type == casttype(tobj)->ob_reftype) {
+						PyLiteObject *method_func = pylt_obj_getattr(I, tret, castobj(pl_static.str.__init__), NULL);
+						if (method_func) {
+							pylt_vm_call_method_ex(I, tret, method_func, params_bak, kwargs);
+						}
+						if (params_bak) pylt_obj_tuple_free(I, params_bak);
+					}
                 }
                 break;
+			}
             case BC_RET:
                 // RET          0       0
-                kv_pop(vm->frames);
+				if (kv_top(vm->frames).halt_when_ret) {
+					kv_pop(vm->frames);
+					goto _end;
+				}
+				kv_pop(vm->frames);
                 code = kv_top(vm->frames).code;
                 locals = kv_top(kv_top(vm->frames).var_tables);
                 i = kv_top(vm->frames).code_pointer_slot;
-                //pylt_gc_local_release(I);
                 break;
             case BC_TEST:
                 // TEST         0       jump_offset
@@ -662,13 +690,24 @@ PyLiteFrame* pylt_vm_curframe(PyLiteInterpreter *I) {
     return &kv_top(I->vm.frames);
 }
 
-PyLiteObject* pylt_vm_call_func(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ...) {
-    PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc };
-    PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
-    PyLiteCodeObject *code = pylt_obj_code_new(I);
-    PyLiteFrame frame_bak = kv_top(I->vm.frames);
-    va_list args;
 
+PyLiteObject* _pylt_vm_call(PyLiteInterpreter *I, pl_int_t argc) {
+	PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc };
+	PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
+	PyLiteCodeObject *code = pylt_obj_code_new(I);
+	PyLiteFrame frame_bak = kv_top(I->vm.frames);
+
+	kv_pushins(code->opcodes, bc_call);
+	kv_pushins(code->opcodes, bc_halt);
+	pylt_vm_run(I, code);
+
+	kv_top(I->vm.frames) = frame_bak;
+	pylt_obj_code_free(I, code);
+	return castobj(kv_pop(I->vm.stack));
+}
+
+PyLiteObject* pylt_vm_call_func(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ...) {
+    va_list args;
     kv_pushptr(I->vm.stack, callable);
 
     va_start(args, argc);
@@ -677,19 +716,10 @@ PyLiteObject* pylt_vm_call_func(PyLiteInterpreter *I, PyLiteObject *callable, in
     }
     va_end(args);
 
-    kv_pushins(code->opcodes, bc_call);
-    kv_pushins(code->opcodes, bc_halt);
-    pylt_vm_run(I, code);
-
-    kv_top(I->vm.frames) = frame_bak;
-    return castobj(kv_pop(I->vm.stack));
+	return _pylt_vm_call(I, argc);
 }
 
 PyLiteObject* pylt_vm_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, int argc, ...) {
-    PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc + 1 };
-    PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
-    PyLiteCodeObject *code = pylt_obj_code_new(I);
-    PyLiteFrame frame_bak = kv_top(I->vm.frames);
     va_list args;
 
     kv_pushptr(I->vm.stack, callable);
@@ -701,10 +731,23 @@ PyLiteObject* pylt_vm_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLi
     }
     va_end(args);
 
-    kv_pushins(code->opcodes, bc_call);
-    kv_pushins(code->opcodes, bc_halt);
-    pylt_vm_run(I, code);
+	return _pylt_vm_call(I, argc + 1);
+}
 
-    kv_top(I->vm.frames) = frame_bak;
-    return castobj(kv_pop(I->vm.stack));
+PyLiteObject* pylt_vm_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, PyLiteTupleObject *args, PyLiteDictObject *kwargs) {
+	pl_int_t argc = (args) ? args->ob_size : 0;
+	kv_pushptr(I->vm.stack, callable);
+	kv_pushptr(I->vm.stack, self);
+
+	if (args) {
+		for (pl_int_t i = 0; i < argc; ++i) {
+			kv_pushptr(I->vm.stack, args->ob_val[i]);
+		}
+	} 
+	if (kwargs) {
+		kv_pushptr(I->vm.stack, kwargs);
+		argc++;
+	}
+
+	return _pylt_vm_call(I, argc + 1);
 }

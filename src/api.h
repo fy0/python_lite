@@ -10,6 +10,7 @@ void pylt_api_output_str(PyLiteInterpreter *I, PyLiteStrObject *obj);
 PyLiteStrObject* pylt_api_type_name(PyLiteInterpreter *I, int ob_type);
 
 PyLiteTypeObject* pylt_api_gettype(PyLiteInterpreter *I, pl_uint32_t type_code);
+// get first builtin parent type (type of ob_base for custom type)
 pl_uint32_t pylt_api_get_base_typecode(PyLiteInterpreter *I, pl_uint32_t type_code);
 pl_bool_t pylt_api_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32_t type_code);
 

@@ -3,7 +3,7 @@
 #include "type.h"
 #include "../api.h"
 
-PyLiteObject* pylt_obj_cutstom_new(PyLiteInterpreter *I, uint32_t ob_type, PyLiteObject *base_obj) {
+PyLiteObject* pylt_obj_cutstom_create(PyLiteInterpreter *I, uint32_t ob_type, PyLiteObject *base_obj) {
     PyLiteCustomObject *obj = pylt_realloc(NULL, sizeof(PyLiteCustomObject));
 
     obj->ob_type = ob_type;

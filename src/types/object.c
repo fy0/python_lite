@@ -417,8 +417,17 @@ PyLiteObject* pylt_obj_op_binary(PyLiteInterpreter *I, int op, PyLiteObject *a, 
 }
 
 PyLiteObject* pylt_obj_typecast(PyLiteInterpreter *I, struct PyLiteTypeObject *type, PyLiteObject *obj) {
-    if (pl_iscustom(obj) && (obj->ob_type != type->ob_reftype)) {
-        return pylt_obj_cutstom_new(I, type->ob_reftype, obj);
+    if (pl_iscustomtype(type) && (obj->ob_type != type->ob_reftype)) {
+		pl_uint32_t type_code = pylt_api_get_base_typecode(I, type->ob_base);
+		if (type_code != obj->ob_type) {
+			// TODO: error
+			// obj can't be the ob_base
+			// TypeError: object.__new__(A) is not safe, use A.__new__()
+			// TypeError: set.__new__(A): A is not a subtype of set
+			return NULL;
+		}
+
+        return pylt_obj_cutstom_create(I, type->ob_reftype, obj);
     }
     return obj;
 }

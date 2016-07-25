@@ -8,10 +8,10 @@
 
 typedef struct PyLiteTypeObject {
     PyLiteObject_HEAD;
-    PyLiteStrObject *name;
-    pl_uint32_t ob_reftype;
-    pl_uint32_t ob_base;
-    PyLiteDictObject *ob_attrs;
+	PyLiteStrObject *name;         /* type name */
+	pl_uint32_t ob_reftype;        /* type code */
+	pl_uint32_t ob_base;           /* parent type code */
+	PyLiteDictObject *ob_attrs;    /* attrs */
     pl_bool_t allow_inherit;
 } PyLiteTypeObject;
 
