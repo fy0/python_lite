@@ -165,7 +165,7 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
                 break;
             }
             case PYLT_OBJ_TYPE_FUNCTION: {
-                // 这里不甚合理
+                // 这里不甚合理，code最好是个引用
                 PyLiteListObject *lst = castfunc(obj)->code.const_val;
                 for (pl_int_t i = 0; i < lst->ob_size; ++i) {
                     MOVE_WHITE(lst->ob_val[i]);
@@ -236,8 +236,7 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
 
         // check static before free
         if (!(pl_isstrkind(obj) && pylt_obj_set_has(I, I->gc.str_static, obj))) {
-            pylt_api_output_str(I, pylt_obj_str_new_from_cformat(I, "gc free %p %s ", obj, pylt_obj_to_str(I, obj)));
-            printf("[%d]\n", obj->ob_type);
+            printf("gc free 0x%7x [%d]\n", obj, obj->ob_type);
             if (pl_isstrkind(obj)) {
                 pylt_obj_set_remove(I, I->gc.str_cached, obj);
             }

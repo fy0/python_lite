@@ -7,7 +7,8 @@
 #include "types/bytes.h"
 #include "types/string.h"
 
-#define up_hash_func(I, key) (pl_uint32_t)(key)
+// use "(pl_int_t)" to avoid => warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+#define up_hash_func(I, key) ((pl_uint32_t)(pl_int_t)(key))
 #define up_hash_equal(I, a, b) ((a) == (b))
 
 KHASHO_INIT(unique_ptr, PyLiteObject*, char, 0, up_hash_func, up_hash_equal);
