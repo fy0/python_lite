@@ -200,14 +200,14 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
         if (params_num < info->length) {
             printf("TypeError: ");
             debug_print_obj(I, castobj(info->name));
-            printf("() missing %d required positional argument\n", (info->minimal - params_num));
+            printf("() missing %d required positional argument\n", (int)(info->minimal - params_num));
             return 1;
         }
 
         if (params_num > info->minimal) {
             printf("TypeError: ");
             debug_print_obj(I, castobj(info->name));
-            printf("() takes %d positional arguments but %d were given\n", info->length, params_num);
+			printf("() takes %d positional arguments but %d were given\n", (int)info->length, params_num);
             return 1;
         }
     } else {
@@ -217,7 +217,7 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
         for (int i = 0; i < info->length; ++i) {
             defobj = info->defaults ? info->defaults[i] : PARAM_NODEF;
 
-            switch ((int)defobj) {
+            switch ((pl_int_t)defobj) {
                 case PARAM_NODEF:
                     // 如果栈中还有参数，试图填充
                     // 如果没有，试图找 kwargs 填充
@@ -237,7 +237,7 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
 
                     printf("TypeError: ");
                     debug_print_obj(I, castobj(info->name));
-                    printf("() missing %d required positional argument (%d given)\n", (info->minimal - params_num), i);
+					printf("() missing %d required positional argument (%d given)\n", (int)(info->minimal - params_num), i);
                     return 1;
                 case PARAM_ARGS:
                     // 如果栈中还有参数，将剩下的参数做成 tuple 入栈
@@ -283,7 +283,7 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
         if (args_i != params_num) {
             printf("TypeError: ");
             debug_print_obj(I, castobj(info->name));
-            printf("() takes %d positional arguments but %d were given\n", info->length, params_num);
+			printf("() takes %d positional arguments but %d were given\n", (int)info->length, params_num);
             return 1;
         }
     }

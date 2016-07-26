@@ -77,8 +77,8 @@ struct PyLiteIntObject;
 struct PyLiteFloatObject;
 struct PyLiteBoolObject;
 
-struct PyLiteBytesObject;
 struct PyLiteStrObject;
+struct PyLiteBytesObject;
 struct PyLiteSetObject;
 struct PyLiteListObject;
 struct PyLiteTupleObject;
@@ -106,8 +106,8 @@ struct PyLiteCustomObject;
 #define castfloat(i)    cast(struct PyLiteFloatObject*, (i))
 #define castbool(i)     cast(struct PyLiteBoolObject*, (i))
 
-#define castbytes(i)    cast(struct PyLiteBytesObject*, (i))
 #define caststr(i)      cast(struct PyLiteStrObject*, (i))
+#define castbytes(i)    cast(struct PyLiteBytesObject*, (i))
 #define castset(i)      cast(struct PyLiteSetObject*, (i))
 #define castlist(i)     cast(struct PyLiteListObject*, (i))
 #define casttuple(i)    cast(struct PyLiteTupleObject*, (i))

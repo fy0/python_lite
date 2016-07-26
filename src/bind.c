@@ -62,7 +62,7 @@ void gc_register_cfunc(PyLiteInterpreter *I, PyLiteCFunctionObject *cfunc) {
 
     if (cfunc->info.defaults) {
         for (pl_int_t i = 0; i < cfunc->info.length; ++i) {
-            if (cfunc->info.defaults[i] > PARAM_KWARGS) {
+            if ((pl_int_t)cfunc->info.defaults[i] > PARAM_KWARGS) {
                 pylt_gc_add(I, cfunc->info.defaults[i]);
             }
         }

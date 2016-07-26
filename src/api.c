@@ -9,7 +9,7 @@ void pylt_api_output_str(PyLiteInterpreter *I, PyLiteStrObject *obj) {
     }
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_BYTES:
-            printf("%s", castbytes(obj)->ob_size, castbytes(obj)->ob_val);
+            printf("%s", castbytes(obj)->ob_val);
             break;
         case PYLT_OBJ_TYPE_STR:
             for (size_t i = 0; i < caststr(obj)->ob_size; i++) {
