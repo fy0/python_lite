@@ -690,7 +690,6 @@ PyLiteFrame* pylt_vm_curframe(PyLiteInterpreter *I) {
     return &kv_top(I->vm.frames);
 }
 
-
 PyLiteObject* _pylt_vm_call(PyLiteInterpreter *I, pl_int_t argc) {
 	PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc };
 	PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
@@ -702,7 +701,6 @@ PyLiteObject* _pylt_vm_call(PyLiteInterpreter *I, pl_int_t argc) {
 	pylt_vm_run(I, code);
 
 	kv_top(I->vm.frames) = frame_bak;
-	pylt_obj_code_free(I, code);
 	return castobj(kv_pop(I->vm.stack));
 }
 

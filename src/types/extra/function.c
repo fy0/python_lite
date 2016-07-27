@@ -37,7 +37,7 @@ PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteInterpreter *I, PyLiteStrObject
             } else if (name == kwargs) {
                 if (minimal == -1) minimal = i;
                 defvals[i] = castobj(PARAM_KWARGS);
-            } else if (pylt_obj_dict_has(I, defaults, castobj(name))) {
+			} else if (defaults && pylt_obj_dict_has(I, defaults, castobj(name))) {
                 if (minimal == -1) minimal = i;
                 defvals[i] = pylt_obj_dict_getitem(I, defaults, castobj(name));
             } else defvals[i] = NULL;
