@@ -5,7 +5,7 @@
 #include "all.h"
 
 
-void* basetype_op_func_table[][23] = {
+void* basetype_op_func_table[][24] = {
     /* {
      BITOR, BITXOR, BITAND, BITLS, BITRS, 
      PLUS, MINUS, MUL, MATMUL, DIV, FLOORDIV, MOD, 
@@ -39,42 +39,41 @@ void* basetype_op_func_table[][23] = {
     },
     { // bytes
         NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+		&pylt_obj_bytes_plus, NULL, &pylt_obj_bytes_plus, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // set
-        //NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
-        NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_bytes_plus, NULL, &pylt_obj_bytes_plus, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // list
-        //NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
         NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // tuple
-        //NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
-        NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // dict
-        //NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
-        NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
-    },
+	},
+	{ // unusual
+		NULL, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL
+	},
 
     { // module
-        //NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
-        NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_float_plus, NULL, NULL, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // function
-        //NULL, NULL, NULL, NULL, NULL, &pylt_obj_float_eq,
         NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
@@ -202,8 +201,9 @@ pl_bool_t pylt_obj_hashable(PyLiteInterpreter *I, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_TYPE:
         case PYLT_OBJ_TYPE_TUPLE:
             return true;
-        case PYLT_OBJ_TYPE_SET:
-        case PYLT_OBJ_TYPE_DICT:
+		case PYLT_OBJ_TYPE_SET:
+		case PYLT_OBJ_TYPE_DICT:
+		case PYLT_OBJ_TYPE_UNUSUAL:
             return false;
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
@@ -456,6 +456,8 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteInterpreter *I, PyLiteObject *obj) {
             return pylt_obj_tuple_to_str(I, casttuple(obj));
         case PYLT_OBJ_TYPE_DICT:
             return pylt_obj_dict_to_str(I, castdict(obj));
+		case PYLT_OBJ_TYPE_UNUSUAL:
+			return pylt_obj_unusual_to_str(I, castunusual(obj));
         case PYLT_OBJ_TYPE_MODULE:
             return pylt_obj_str_new_from_format(I, pl_static.str.TMPL_MODULE_TO_STR, pl_static.str.None);
         case PYLT_OBJ_TYPE_FUNCTION:

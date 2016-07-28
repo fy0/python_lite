@@ -57,7 +57,8 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *set;
         PyLiteStrObject *list;
         PyLiteStrObject *tuple;
-        PyLiteStrObject *dict;
+		PyLiteStrObject *dict;
+		PyLiteStrObject *unusual;
 
         PyLiteStrObject *module;
         PyLiteStrObject *function;

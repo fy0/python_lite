@@ -26,23 +26,24 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_SET,
     PYLT_OBJ_TYPE_LIST,
     PYLT_OBJ_TYPE_TUPLE,
-    PYLT_OBJ_TYPE_DICT,
+	PYLT_OBJ_TYPE_DICT,
+	PYLT_OBJ_TYPE_UNUSUAL,
 
-    PYLT_OBJ_TYPE_MODULE, // 11
+    PYLT_OBJ_TYPE_MODULE, // 12
     PYLT_OBJ_TYPE_FUNCTION,
     PYLT_OBJ_TYPE_CFUNCTION,
-    PYLT_OBJ_TYPE_CODE,
+	PYLT_OBJ_TYPE_CODE,
 
-    PYLT_OBJ_TYPE_TYPE, // 15
+    PYLT_OBJ_TYPE_TYPE, // 16
     PYLT_OBJ_TYPE_ITER,
     PYLT_OBJ_TYPE_PROP,
     PYLT_OBJ_TYPE_NONE,
 
-    PYLT_OBJ_TYPE_RANGE, // 19
+    PYLT_OBJ_TYPE_RANGE, // 20
 
-    PYLT_OBJ_TYPE_BASE_EXCEPTION, // 20
+    PYLT_OBJ_TYPE_BASE_EXCEPTION, // 21
 
-    PYLT_OBJ_TYPE_USERCLASS, // 21
+    PYLT_OBJ_TYPE_USERCLASS, // 22
 };
 
 #define PYLT_OBJ_BUILTIN_TYPE_NUM PYLT_OBJ_TYPE_BASE_EXCEPTION
@@ -83,6 +84,7 @@ struct PyLiteSetObject;
 struct PyLiteListObject;
 struct PyLiteTupleObject;
 struct PyLiteDictObject;
+struct PyLiteUnusualObject;
 
 struct PyLiteCodeObject;
 struct PyLiteModuleObject;
@@ -112,6 +114,7 @@ struct PyLiteCustomObject;
 #define castlist(i)     cast(struct PyLiteListObject*, (i))
 #define casttuple(i)    cast(struct PyLiteTupleObject*, (i))
 #define castdict(i)     cast(struct PyLiteDictObject*, (i))
+#define castunusual(i)  cast(struct PyLiteUnusualObject*, (i))
 
 #define castmod(i)      cast(struct PyLiteModuleObject*, (i))
 #define castfunc(i)     cast(struct PyLiteFunctionObject*, (i))

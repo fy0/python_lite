@@ -85,6 +85,8 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
     PyLiteTypeObject *type;
     kv_resize(PyLiteTypeObject*, I->cls_base, PYLT_OBJ_BUILTIN_TYPE_NUM + 20);
 
+	// ============== 0 ==============
+
     // object
     type = pylt_obj_type_new_with_type(I, pl_static.str.object, PYLT_OBJ_TYPE_OBJ, 0);
     pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_obj_new);
@@ -155,7 +157,11 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
     pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(cls), _S(object)), _NT(I, 2, PARAM_NODEF, PARAM_KWARGS), NULL, &pylt_cls_method_dict_new);
     pylt_obj_type_register(I, type);
 
-    // ============== 11 ==============
+	// unusual
+	type = pylt_obj_type_new_with_type(I, _S(unusual), PYLT_OBJ_TYPE_UNUSUAL, PYLT_OBJ_TYPE_OBJ);
+	pylt_obj_type_register(I, type);
+
+    // ============== 12 ==============
 
     // module
     type = pylt_obj_type_new_with_type(I, pl_static.str.module, PYLT_OBJ_TYPE_MODULE, PYLT_OBJ_TYPE_OBJ);
@@ -177,7 +183,7 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
     type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 
-    // ============== 15 ==============
+    // ============== 16 ==============
 
     // type
     type = pylt_obj_type_new_with_type(I, pl_static.str.type, PYLT_OBJ_TYPE_TYPE, PYLT_OBJ_TYPE_OBJ);
@@ -202,7 +208,7 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
     type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 
-    // ============== 19 ==============
+    // ============== 20 ==============
 
     // range
     type = pylt_obj_type_new_with_type(I, pl_static.str.range, PYLT_OBJ_TYPE_RANGE, PYLT_OBJ_TYPE_OBJ);

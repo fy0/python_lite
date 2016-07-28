@@ -12,6 +12,7 @@
 #include "list.h"
 #include "tuple.h"
 #include "dict.h"
+#include "unusual.h"
 
 #include "extra/module.h"
 #include "extra/function.h"

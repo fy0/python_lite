@@ -51,8 +51,9 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
     pl_static.str.bytes = pylt_obj_str_new_from_cstr_static(I, "bytes", true);
     pl_static.str.set = pylt_obj_str_new_from_cstr_static(I, "set", true);
     pl_static.str.list = pylt_obj_str_new_from_cstr_static(I, "list", true);
-    pl_static.str.tuple = pylt_obj_str_new_from_cstr_static(I, "tuple", true);
-    pl_static.str.dict = pylt_obj_str_new_from_cstr_static(I, "dict", true);
+	pl_static.str.tuple = pylt_obj_str_new_from_cstr_static(I, "tuple", true);
+	pl_static.str.dict = pylt_obj_str_new_from_cstr_static(I, "dict", true);
+	pl_static.str.unusual = pylt_obj_str_new_from_cstr_static(I, "unusual", true);
 
     pl_static.str.module = pylt_obj_str_new_from_cstr_static(I, "module", true);
     pl_static.str.function = pylt_obj_str_new_from_cstr_static(I, "function", true);
