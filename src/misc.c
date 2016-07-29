@@ -86,6 +86,11 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
     pl_static.str.insert = pylt_obj_str_new_from_cstr_static(I, "insert", true);
     pl_static.str.reverse = pylt_obj_str_new_from_cstr_static(I, "reverse", true);
 
+	pl_static.str.unknown = pylt_obj_str_new_from_cstr_static(I, "unknown", true);
+	pl_static.str.param_args = pylt_obj_str_new_from_cstr_static(I, "param_args", true);
+	pl_static.str.param_kwargs = pylt_obj_str_new_from_cstr_static(I, "param_kwargs", true);
+	pl_static.str.param_undefined = pylt_obj_str_new_from_cstr_static(I, "param_undefined", true);
+
     pl_static.str.fget = pylt_obj_str_new_from_cstr_static(I, "fget", true);
     pl_static.str.fset = pylt_obj_str_new_from_cstr_static(I, "fset", true);
 

@@ -6,8 +6,9 @@
 #include "bind.h"
 #include "lib/kvec.h"
 #include "types/all.h"
-#include "mods/builtin.h"
 #include "mods/math.h"
+#include "mods/builtin.h"
+#include "mods/unusualm.h"
 #include "pybind/typebind.h"
 
 PyLiteObject* _pylt_vm_call(PyLiteInterpreter *I, pl_int_t argc);
@@ -665,7 +666,9 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                     pylt_obj_dict_setitem(I, locals, castobj(pl_static.str.math), castobj(pylt_mods_math_register(I)));
                 } else if (tobj == castobj(pl_static.str.builtins)) {
                     pylt_obj_dict_setitem(I, locals, castobj(pl_static.str.builtins), castobj(pylt_mods_builtins_register(I)));
-                } else {
+				} else if (tobj == castobj(pl_static.str.unusual)) {
+					pylt_obj_dict_setitem(I, locals, castobj(pl_static.str.unusual), castobj(pylt_mods_unusual_register(I)));
+				} else {
                     // TODO
                 }
                 kv_popn(vm->stack, ins.extra);
