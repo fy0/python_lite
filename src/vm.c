@@ -216,68 +216,66 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
         args_i = 0;
 
         for (int i = 0; i < info->length; ++i) {
-            defobj = info->defaults ? info->defaults[i] : PARAM_NODEF;
+            defobj = info->defaults ? info->defaults->ob_val[i] : castobj(&PyLiteParamUndefined);
 
-            switch ((pl_int_t)defobj) {
-                case PARAM_NODEF:
-                    // 如果栈中还有参数，试图填充
-                    // 如果没有，试图找 kwargs 填充
-                    // 都没有，报错，缺参数
-                    if (args_i != params_num) {
-                        args_i++;
-                        break;
-                    }
+			if (defobj == castobj(&PyLiteParamUndefined)) {
+				// 如果栈中还有参数，试图填充
+				// 如果没有，试图找 kwargs 填充
+				// 都没有，报错，缺参数
+				pl_bool_t ok = false;
 
-                    if (kwargs) {
-                        obj = pylt_obj_dict_pop(I, kwargs, (PyLiteObject*)info->params[i]);
-                        if (obj) {
-                            kv_pushptr(I->vm.stack, obj);
-                            break;
-                        }
-                    }
+				if (args_i != params_num) {
+					args_i++;
+					ok = true;
+				} else if (kwargs) {
+					obj = pylt_obj_dict_pop(I, kwargs, info->params->ob_val[i]);
+					if (obj) {
+						kv_pushptr(I->vm.stack, obj);
+						ok = true;
+					}
+				}
 
-                    printf("TypeError: ");
-                    debug_print_obj(I, castobj(info->name));
+				if (!ok) {
+					printf("TypeError: ");
+					debug_print_obj(I, castobj(info->name));
 					printf("() missing %d required positional argument (%d given)\n", (int)(info->minimal - params_num), i);
-                    return 1;
-                case PARAM_ARGS:
-                    // 如果栈中还有参数，将剩下的参数做成 tuple 入栈
-                    // 如果没有，压入一个空 tuple
-                    if (args_i != params_num) {
-                        int args_len = params_num - args_i;
-                        PyLiteTupleObject *tuple = pylt_obj_tuple_new_with_data(I, args_len, args + args_i);
-                        kv_popn(I->vm.stack, args_len);
-                        kv_pushptr(I->vm.stack, tuple);
-                        params_num -= args_len;
-                    } else {
-                        PyLiteTupleObject *tuple = pylt_obj_tuple_new(I, 0);
-                        kv_pushptr(I->vm.stack, tuple);
-                    }
+					return 1;
+				}
+			} else if (defobj == castobj(&PyLiteParamArgs)) {
+                // 如果栈中还有参数，将剩下的参数做成 tuple 入栈
+                // 如果没有，压入一个空 tuple
+                if (args_i != params_num) {
+                    int args_len = params_num - args_i;
+                    PyLiteTupleObject *tuple = pylt_obj_tuple_new_with_data(I, args_len, args + args_i);
+                    kv_popn(I->vm.stack, args_len);
+                    kv_pushptr(I->vm.stack, tuple);
+                    params_num -= args_len;
+                } else {
+                    PyLiteTupleObject *tuple = pylt_obj_tuple_new(I, 0);
+                    kv_pushptr(I->vm.stack, tuple);
+                }
+			} else if (defobj == castobj(&PyLiteParamKwargs)) {
+				// 必定为最后一个参数，如果有 kwargs，压入
+				// 如果没有 压入一个空字典
+				kv_pushptr(I->vm.stack, (kwargs) ? kwargs : pylt_obj_dict_new(I));
+			} else {
+                // 如果栈中还有参数，试图填充
+                // 如果没有，试图找 kwargs 填充
+                // 还没有，用预设值填充
+                if (args_i != params_num) {
+                    args_i++;
                     break;
-                case PARAM_KWARGS:
-                    // 必定为最后一个参数，如果有 kwargs，压入
-                    // 如果没有 压入一个空字典
-                    kv_pushptr(I->vm.stack, (kwargs) ? kwargs : pylt_obj_dict_new(I));
-                    break;
-                default:
-                    // 如果栈中还有参数，试图填充
-                    // 如果没有，试图找 kwargs 填充
-                    // 还没有，用预设值填充
-                    if (args_i != params_num) {
-                        args_i++;
+                }
+
+                if (kwargs) {
+					obj = pylt_obj_dict_pop(I, kwargs, info->params->ob_val[i]);
+                    if (obj) {
+                        kv_pushptr(I->vm.stack, obj);
                         break;
                     }
+                }
 
-                    if (kwargs) {
-                        obj = pylt_obj_dict_pop(I, kwargs, (PyLiteObject*)info->params[i]);
-                        if (obj) {
-                            kv_pushptr(I->vm.stack, obj);
-                            break;
-                        }
-                    }
-
-                    kv_pushptr(I->vm.stack, defobj);
-                    break;
+                kv_pushptr(I->vm.stack, defobj);
             }
         }
         // 如果 args_i != params_num 那么参数多出来了，报错
@@ -298,7 +296,7 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
             if (!pylt_api_isinstance(I, args[i], info->type_codes[i])) {
                 // 类型不符合，报错
                 printf("TypeError: ");
-                debug_print_obj(I, castobj(info->params[i]));
+				debug_print_obj(I, castobj(info->params->ob_val[i]));
                 pl_print(I, " must be %s\n", pylt_api_type_name(I, info->type_codes[i]));
                 //PyLiteETypeErrorObject()
                 return 3;
@@ -506,7 +504,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
 					locals = kv_top(kv_top(vm->frames).var_tables);
 					if (func_info->length > 0) {
 						for (int k = 0; k < func_info->length; ++k) {
-							pylt_obj_dict_setitem(I, locals, castobj(func_info->params[k]), castobj(kv_topn(vm->stack, func_info->length - k - 1)));
+							pylt_obj_dict_setitem(I, locals, castobj(func_info->params->ob_val[k]), castobj(kv_topn(vm->stack, func_info->length - k - 1)));
 						}
 					}
 					kv_popn(vm->stack, func_info->length + 1); // pop args and func obj

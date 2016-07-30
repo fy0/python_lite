@@ -105,7 +105,7 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // bool
     type = pylt_obj_type_new_with_type(I, pl_static.str.bool_, PYLT_OBJ_TYPE_BOOL, PYLT_OBJ_TYPE_OBJ);
-    pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(cls), _S(object)), _NT(I, 2, PARAM_NODEF, &PyLiteFalse), NULL, &pylt_cls_method_bool_new);
+    pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(cls), _S(object)), _NT(I, 2, castobj(&PyLiteParamUndefined), &PyLiteFalse), NULL, &pylt_cls_method_bool_new);
     pylt_obj_type_register(I, type);
 
     // ============== 5 ==============
@@ -113,8 +113,8 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
     // str
     type = pylt_obj_type_new_with_type(I, pl_static.str.str, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_OBJ);
     pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_str_new);
-    pylt_cmethod_register(I, type, _S(index), _NT(I, 4, _S(self), _S(sub), _S(start), _S(end)), _NT(I, 4, PARAM_NODEF, PARAM_NODEF, _NI(0), _NI(-1)), _UINTS(4, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_INT, PYLT_OBJ_TYPE_INT), &pylt_method_str_index);
-    pylt_cmethod_register(I, type, _S(join), _NST(I, 2, "self", "sequence"), NULL, _UINTS(2, PYLT_OBJ_TYPE_STR, PARAM_NODEF), &pylt_method_str_join);
+    pylt_cmethod_register(I, type, _S(index), _NT(I, 4, _S(self), _S(sub), _S(start), _S(end)), _NT(I, 4, castobj(&PyLiteParamUndefined), castobj(&PyLiteParamUndefined), _NI(0), _NI(-1)), _UINTS(4, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_INT, PYLT_OBJ_TYPE_INT), &pylt_method_str_index);
+    pylt_cmethod_register(I, type, _S(join), _NST(I, 2, "self", "sequence"), NULL, _UINTS(2, PYLT_OBJ_TYPE_STR, castobj(&PyLiteParamUndefined)), &pylt_method_str_join);
     pylt_obj_type_register(I, type);
 
     // bytes
@@ -124,7 +124,7 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // set
     type = pylt_obj_type_new_with_type(I, pl_static.str.set, PYLT_OBJ_TYPE_SET, PYLT_OBJ_TYPE_OBJ);
-    pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(cls), _S(object)), _NT(I, 2, PARAM_NODEF, pylt_obj_tuple_new(I, 0)), NULL, &pylt_cls_method_set_new);
+    pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(cls), _S(object)), _NT(I, 2, castobj(&PyLiteParamUndefined), pylt_obj_tuple_new(I, 0)), NULL, &pylt_cls_method_set_new);
     pylt_cmethod_register_1_args(I, type, pl_static.str.add, &pylt_method_set_add);
     pylt_cmethod_register_0_args(I, type, pl_static.str.clear, &pylt_method_set_clear);
     pylt_cmethod_register_0_args(I, type, pl_static.str.copy, &pylt_method_set_copy);
@@ -134,7 +134,7 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // list
     type = pylt_obj_type_new_with_type(I, pl_static.str.list, PYLT_OBJ_TYPE_LIST, PYLT_OBJ_TYPE_OBJ);
-    pylt_cclsmethod_register(I, type, _S(__new__), _NST(I, 2, "cls", "obj"), _NT(I, 2, PARAM_NODEF, pylt_obj_tuple_new(I, 0)), NULL, &pylt_cls_method_list_new);
+    pylt_cclsmethod_register(I, type, _S(__new__), _NST(I, 2, "cls", "obj"), _NT(I, 2, castobj(&PyLiteParamUndefined), pylt_obj_tuple_new(I, 0)), NULL, &pylt_cls_method_list_new);
     pylt_cmethod_register_1_args(I, type, pl_static.str.append, &pylt_method_list_append);
     pylt_cmethod_register_0_args(I, type, pl_static.str.clear, &pylt_method_list_clear);
     pylt_cmethod_register_0_args(I, type, pl_static.str.copy, &pylt_method_list_copy);
@@ -149,12 +149,12 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // tuple
     type = pylt_obj_type_new_with_type(I, pl_static.str.tuple, PYLT_OBJ_TYPE_TUPLE, PYLT_OBJ_TYPE_OBJ);
-    pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(cls), _S(object)), _NT(I, 2, PARAM_NODEF, pylt_obj_tuple_new(I, 0)), NULL, &pylt_cls_method_tuple_new);
+    pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(cls), _S(object)), _NT(I, 2, castobj(&PyLiteParamUndefined), pylt_obj_tuple_new(I, 0)), NULL, &pylt_cls_method_tuple_new);
     pylt_obj_type_register(I, type);
 
     // dict
     type = pylt_obj_type_new_with_type(I, pl_static.str.dict, PYLT_OBJ_TYPE_DICT, PYLT_OBJ_TYPE_OBJ);
-    pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(cls), _S(object)), _NT(I, 2, PARAM_NODEF, PARAM_KWARGS), NULL, &pylt_cls_method_dict_new);
+	pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(cls), _S(object)), _NT(I, 2, castobj(&PyLiteParamUndefined), castobj(&PyLiteParamKwargs)), NULL, &pylt_cls_method_dict_new);
     pylt_obj_type_register(I, type);
 
 	// unusual
@@ -212,13 +212,13 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // range
     type = pylt_obj_type_new_with_type(I, pl_static.str.range, PYLT_OBJ_TYPE_RANGE, PYLT_OBJ_TYPE_OBJ);
-    pylt_cmethod_register(I, type, pl_static.str.__new__, _NST(I, 4, "cls", "start", "stop", "step"), _NT(I, 4, PARAM_NODEF, PARAM_NODEF, &PyLiteNone, pylt_obj_int_new(I, 1)), NULL, &pylt_cls_method_range_new);
+    pylt_cmethod_register(I, type, pl_static.str.__new__, _NST(I, 4, "cls", "start", "stop", "step"), _NT(I, 4, castobj(&PyLiteParamUndefined), castobj(&PyLiteParamUndefined), &PyLiteNone, pylt_obj_int_new(I, 1)), NULL, &pylt_cls_method_range_new);
     type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 
     // exception
     type = pylt_obj_type_new_with_type(I, pl_static.str.BaseException, PYLT_OBJ_TYPE_BASE_EXCEPTION, PYLT_OBJ_TYPE_OBJ);
-    pylt_cmethod_register(I, type, pl_static.str.__new__, _NT(I, 2, _S(cls), _S(args)), _NT(I, 2, PARAM_NODEF, PARAM_ARGS), NULL, &pylt_cls_method_base_exception_new);
+    pylt_cmethod_register(I, type, pl_static.str.__new__, _NT(I, 2, _S(cls), _S(args)), _NT(I, 2, castobj(&PyLiteParamUndefined), castobj(&PyLiteParamArgs)), NULL, &pylt_cls_method_base_exception_new);
     pylt_cprop_register(I, type, _S(args), &pylt_prop_base_exception_args_get, NULL);
     pylt_obj_type_register(I, type);
 

@@ -13,9 +13,9 @@ typedef struct PyLiteFunctionInfo {
     pl_int_t minimal;          /* minimal number of parameters */
 
     PyLiteStrObject *name;
-    PyLiteStrObject **params;  /* parameters' names */
-    pl_int_t *type_codes;      /* parameters' type code */
-    PyLiteObject **defaults;   /* default values of parameters */
+	PyLiteTupleObject *params;    /* parameters' names */
+    pl_int_t *type_codes;         /* parameters' type code */
+    PyLiteTupleObject *defaults;  /* default values of parameters */
     PyLiteStrObject *doc;
 } PyLiteFunctionInfo;
 

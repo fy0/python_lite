@@ -52,23 +52,12 @@ pl_uint_t* _UINTS(pl_uint_t n, ...) {
 }
 
 void gc_register_cfunc(PyLiteInterpreter *I, PyLiteCFunctionObject *cfunc) {
-    if (!cfunc) return;
-    pylt_gc_add(I, castobj(cfunc->info.name));
-    pylt_gc_add(I, castobj(cfunc->info.doc));
-
-    for (pl_int_t i = 0; i < cfunc->info.length; ++i) {
-        pylt_gc_add(I, castobj(cfunc->info.params[i]));
-    }
-
-    if (cfunc->info.defaults) {
-        for (pl_int_t i = 0; i < cfunc->info.length; ++i) {
-            if ((pl_int_t)cfunc->info.defaults[i] > PARAM_KWARGS) {
-                pylt_gc_add(I, cfunc->info.defaults[i]);
-            }
-        }
-    }
-
-    pylt_gc_add(I, castobj(cfunc));
+	if (!cfunc) return;
+	pylt_gc_add(I, castobj(cfunc));
+	pylt_gc_add(I, castobj(cfunc->info.name));
+	pylt_gc_add(I, castobj(cfunc->info.doc));
+	pylt_gc_add(I, castobj(cfunc->info.params));
+	pylt_gc_add(I, castobj(cfunc->info.defaults));
 }
 
 PyLiteCFunctionObject* pylt_cfunc_register(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {

@@ -27,20 +27,20 @@ PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteInterpreter *I, PyLiteStrObject
     // set default values
     if (defaults || args || kwargs) {
         pl_int_t minimal = -1;
-        PyLiteObject **defvals = pylt_realloc(NULL, params->ob_size * sizeof(PyLiteObject*));
+		PyLiteTupleObject *defvals = pylt_obj_tuple_new(I, params->ob_size);
 
         for (int i = 0; i < params->ob_size; ++i) {
             PyLiteStrObject *name = caststr(params->ob_val[i]);
             if (name == args) {
                 if (minimal == -1) minimal = i;
-                defvals[i] = castobj(PARAM_ARGS);
+                defvals->ob_val[i] = castobj(&PyLiteParamArgs);
             } else if (name == kwargs) {
                 if (minimal == -1) minimal = i;
-                defvals[i] = castobj(PARAM_KWARGS);
+				defvals->ob_val[i] = castobj(&PyLiteParamKwargs);
 			} else if (defaults && pylt_obj_dict_has(I, defaults, castobj(name))) {
-                if (minimal == -1) minimal = i;
-                defvals[i] = pylt_obj_dict_getitem(I, defaults, castobj(name));
-            } else defvals[i] = NULL;
+				if (minimal == -1) minimal = i;
+				defvals->ob_val[i] = pylt_obj_dict_getitem(I, defaults, castobj(name));
+			} else defvals->ob_val[i] = castobj(&PyLiteParamUndefined);
         }
 
         func->info.defaults = defvals;
@@ -68,13 +68,11 @@ PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteInterpreter *I, PyLiteStrObject 
 
     func->info.name = name;
     func->info.doc = NULL;
-    func->info.params = param_names ? (PyLiteStrObject**)param_names->ob_val : NULL;
-    func->info.defaults = defaults ? defaults->ob_val : NULL;
+	func->info.params = param_names ? param_names : NULL;
+    func->info.defaults = defaults ? defaults : NULL;
     func->info.type_codes = types;
     func->code = cfunc;
 
-    pylt_free(param_names);
-    pylt_free(defaults);
     return func;
 }
 

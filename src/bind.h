@@ -27,9 +27,4 @@ PyLiteTupleObject* _NST(PyLiteInterpreter *I, int n, ...);
 
 pl_uint_t* _UINTS(pl_uint_t n, ...);
 
-
-#define PARAM_NODEF  0
-#define PARAM_ARGS   1
-#define PARAM_KWARGS 2
-
 #endif

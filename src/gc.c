@@ -172,20 +172,10 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
                 }
             }
             case PYLT_OBJ_TYPE_CFUNCTION:
-                MOVE_WHITE(castfunc(obj)->info.name);
-                MOVE_WHITE(castfunc(obj)->info.doc);
-
-                for (pl_int_t i = 0; i < castfunc(obj)->info.length; ++i) {
-                    MOVE_WHITE(castfunc(obj)->info.params[i]);
-                }
-
-                if (castfunc(obj)->info.defaults) {
-                    for (pl_int_t i = 0; i < castfunc(obj)->info.length; ++i) {
-						if ((pl_int_t)(castfunc(obj)->info.defaults[i]) > PARAM_KWARGS) {
-                            MOVE_WHITE(castfunc(obj)->info.defaults[i]);
-                        }
-                    }
-                }
+				MOVE_WHITE(castfunc(obj)->info.name);
+				MOVE_WHITE(castfunc(obj)->info.doc);
+				MOVE_WHITE(castfunc(obj)->info.params);
+				MOVE_WHITE(castfunc(obj)->info.defaults);
                 break;
             case PYLT_OBJ_TYPE_CODE: {
                 PyLiteListObject *lst = castcode(obj)->const_val;
