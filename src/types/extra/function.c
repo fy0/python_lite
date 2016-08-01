@@ -21,8 +21,8 @@ PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteInterpreter *I, PyLiteStrObject
     // set name and params
     func->info.name = name;
     func->info.length = params->ob_size;
-    func->info.params = pylt_realloc(NULL, params->ob_size * sizeof(PyLiteObject*));
-    memcpy(func->info.params, params->ob_val, params->ob_size * sizeof(PyLiteStrObject*));
+    func->info.params = pylt_obj_tuple_new(I, params->ob_size);
+    memcpy(func->info.params->ob_val, params->ob_val, params->ob_size * sizeof(PyLiteObject*));
 
     // set default values
     if (defaults || args || kwargs) {
