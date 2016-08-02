@@ -33,8 +33,7 @@ PyLiteObject* pylt_cls_method_type_new(PyLiteInterpreter *I, int argc, PyLiteObj
 
 
 PyLiteObject* pylt_cls_method_int_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    // TODO: 从其他形式转换为数字
-    // 奇怪。。。我当时想要干什么来着？？？好奇怪的写法
+    // TODO: 从字符串转为数字
     PyLiteIntObject *num = pylt_obj_int_new(I, 0);
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(num));
 }
@@ -47,7 +46,7 @@ PyLiteObject* pylt_method_int_is_integer(PyLiteInterpreter *I, int argc, PyLiteO
 
 
 PyLiteObject* pylt_cls_method_float_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    // TODO: 从其他形式转换为数字
+    // TODO: 从字符串转为数字
     PyLiteFloatObject *num = pylt_obj_float_new(I, 0);
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(num));
 }
@@ -220,3 +219,6 @@ PyLiteObject* pylt_cls_method_dict_new(PyLiteInterpreter *I, int argc, PyLiteObj
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(newdict));
 }
 
+PyLiteObject* pylt_cls_method_useless_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+	return NULL;
+}

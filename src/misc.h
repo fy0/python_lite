@@ -34,6 +34,9 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *__setitem__;
         PyLiteStrObject *__getitem__;
 
+		PyLiteStrObject *__defaults__;
+		PyLiteStrObject *__parameters__;
+
         PyLiteStrObject *id;
         PyLiteStrObject *dir;
         PyLiteStrObject *len;

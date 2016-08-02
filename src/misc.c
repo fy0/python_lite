@@ -27,7 +27,9 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
     pl_static.str.__setattr__ = pylt_obj_str_new_from_cstr_static(I, "__setattr__", true);
     pl_static.str.__getattr__ = pylt_obj_str_new_from_cstr_static(I, "__getattr__", true);
     pl_static.str.__setitem__ = pylt_obj_str_new_from_cstr_static(I, "__setitem__", true);
-    pl_static.str.__getitem__ = pylt_obj_str_new_from_cstr_static(I, "__getitem__", true);
+	pl_static.str.__getitem__ = pylt_obj_str_new_from_cstr_static(I, "__getitem__", true);
+	pl_static.str.__defaults__ = pylt_obj_str_new_from_cstr_static(I, "__defaults__", true);
+	pl_static.str.__parameters__ = pylt_obj_str_new_from_cstr_static(I, "__parameters__", true);
 
     pl_static.str.id = pylt_obj_str_new_from_cstr_static(I, "id", true);
     pl_static.str.dir = pylt_obj_str_new_from_cstr_static(I, "dir", true);
