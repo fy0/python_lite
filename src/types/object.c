@@ -477,25 +477,46 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteInterpreter *I, PyLiteObject *obj) {
 
 struct PyLiteStrObject* pylt_obj_to_repr(PyLiteInterpreter *I, PyLiteObject *obj) {
     switch (obj->ob_type) {
-        case PYLT_OBJ_TYPE_STR: {
-            uint32_t *data;
-            pl_uint_t i, j = 0;
-            int quote_count = 0;
+		case PYLT_OBJ_TYPE_STR: {
+			pl_uint32_t c;
+			pl_uint32_t *data;
+			pl_uint_t i, j = 0;
+            int ext_count = 0;
             PyLiteStrObject *self = caststr(obj);
 
             for (i = 0; i < self->ob_size; ++i) {
-                if (self->ob_val[i] == '\'') quote_count++;
+				c = self->ob_val[i];
+				if (c == '\'') ext_count++;
+				else if ((0 <= c && c <= 32) || (127 <= c && c <= 160)) ext_count += 3;
             }
 
-            data = pylt_realloc(NULL, (self->ob_size + quote_count + 2) * sizeof(uint32_t));
+			data = pylt_realloc(NULL, (self->ob_size + ext_count + 2) * sizeof(uint32_t));
             data[0] = '\'';
             j = 1;
 
             for (i = 0; i < self->ob_size; ++i) {
-                if (self->ob_val[i] == '\'') {
-                    data[j++] = '\\';
-                }
-                data[j++] = self->ob_val[i];
+				switch (self->ob_val[i]) {
+					case '\a': data[j++] = '\\'; data[j++] = 'a'; break;
+					case '\b': data[j++] = '\\'; data[j++] = 'b'; break;
+					case '\f': data[j++] = '\\'; data[j++] = 'f'; break;
+					case '\n': data[j++] = '\\'; data[j++] = 'n'; break;
+					case '\r': data[j++] = '\\'; data[j++] = 'r'; break;
+					case '\t': data[j++] = '\\'; data[j++] = 't'; break;
+					case '\v': data[j++] = '\\'; data[j++] = 'v'; break;
+					case '\\': data[j++] = '\\'; data[j++] = '\\'; break;
+					default: {
+						c = self->ob_val[i];
+						if ((0 <= c && c <= 32) || (127 <= c && c <= 160)) {
+							data[j++] = '\\';
+							data[j++] = 'x';
+							data[j++] = '0' + (c / 16);
+							data[j++] = '0' + (c % 16);
+						} else {
+							data[j++] = self->ob_val[i];
+						}
+						break;
+					}
+				}
             }
 
             data[j++] = '\'';
