@@ -396,7 +396,7 @@ PyLiteObject* pylt_mods_math_tanh(PyLiteInterpreter *I, int argc, PyLiteObject *
 
 
 PyLiteModuleObject* pylt_mods_math_register(PyLiteInterpreter *I) {
-    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL);
+    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(math));
 
     pylt_cfunc_register(I, mod, _NS(I, "acos"), _NST(I, 1, "x"), NULL, NULL, &pylt_mods_math_acos);
     pylt_cfunc_register(I, mod, _NS(I, "acosh"), _NST(I, 1, "x"), NULL, NULL, &pylt_mods_math_acosh);
