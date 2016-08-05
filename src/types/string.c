@@ -172,6 +172,7 @@ pl_int_t str_escape_next(PyLiteInterpreter *I, str_writer_t *w) {
                     str->ob_val[w->dindex++] = format->ob_val[w->findex];
                     break;
             }
+			break;
         default: _def :
             str->ob_val[w->dindex++] = format->ob_val[w->findex++];
     }
@@ -226,6 +227,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size,
                             obj->ob_val[pos++] = str[i];
                             break;
                     }
+					break;
                 default: _def :
                     obj->ob_val[pos++] = str[i++];
             }
@@ -343,6 +345,53 @@ PyLiteStrObject* pylt_obj_str_join(PyLiteInterpreter *I, PyLiteStrObject *separa
         return str;
     }
     return NULL;
+}
+
+PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *self) {
+	pl_uint32_t c;
+	pl_uint32_t *data;
+	pl_uint_t i, j = 0;
+	int ext_count = 0;
+
+	for (i = 0; i < self->ob_size; ++i) {
+		c = self->ob_val[i];
+		if (c == '\'') ext_count++;
+		else if ((0 <= c && c <= 32) || (127 <= c && c <= 160)) ext_count += 3;
+	}
+
+	data = pylt_realloc(NULL, (self->ob_size + ext_count + 2) * sizeof(uint32_t));
+	data[0] = '\'';
+	j = 1;
+
+	for (i = 0; i < self->ob_size; ++i) {
+		switch (self->ob_val[i]) {
+			case '\a': data[j++] = '\\'; data[j++] = 'a'; break;
+			case '\b': data[j++] = '\\'; data[j++] = 'b'; break;
+			case '\f': data[j++] = '\\'; data[j++] = 'f'; break;
+			case '\n': data[j++] = '\\'; data[j++] = 'n'; break;
+			case '\r': data[j++] = '\\'; data[j++] = 'r'; break;
+			case '\t': data[j++] = '\\'; data[j++] = 't'; break;
+			case '\v': data[j++] = '\\'; data[j++] = 'v'; break;
+			case '\\': data[j++] = '\\'; data[j++] = '\\'; break;
+			default: {
+				c = self->ob_val[i];
+				if ((0 <= c && c <= 32) || (127 <= c && c <= 160)) {
+					data[j++] = '\\';
+					data[j++] = 'x';
+					data[j++] = (c / 16) >= 10 ? (c / 16) - 10 + 'a' : (c / 16) + '0';
+					data[j++] = (c % 16) >= 10 ? (c % 16) - 10 + 'a' : (c % 16) + '0';
+				} else {
+					data[j++] = self->ob_val[i];
+				}
+				break;
+			}
+		}
+	}
+
+	data[j++] = '\'';
+	PyLiteStrObject *str = pylt_obj_str_new(I, data, j, true);
+	pylt_free(data);
+	return str;
 }
 
 PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteInterpreter *I, PyLiteStrObject *format, va_list args) {

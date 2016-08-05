@@ -163,6 +163,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int
                             obj->ob_val[pos++] = str[++i];
                             break;
                     }
+					break;
                 default: _def:
                     obj->ob_val[pos++] = str[i++];
             }
