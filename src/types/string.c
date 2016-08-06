@@ -107,13 +107,18 @@ _INLINE static uint8_t _oct(uint32_t code) {
 }
 
 _INLINE static
-int _read_x_int(uint32_t *p, int *pnum, uint8_t(*func)(uint32_t code), int max_size) {
+int _read_x_int(uint32_t *p, int n, uint8_t(*func)(uint32_t code), int *pnum, int max_size) {
     uint32_t *e = p + max_size;
-    int ret = 0, num = 0, val = (int)pow(10, e - p - 1);
+    int ret = 0, num = 0, val = (int)pow(n, e - p - 1);
 
     do {
-        ret += (*func)(*p++) * val;
-        val /= 10;
+		uint8_t c = (*func)(*p++);
+		if (c == 0xff) {
+			ret = (int)(ret * pow(n, -max_size + num));
+			break;
+		}
+        ret += c * val;
+        val /= n;
         num++;
     } while (p != e);
 
@@ -149,7 +154,7 @@ pl_int_t str_escape_next(PyLiteInterpreter *I, str_writer_t *w) {
                 case 'v': str->ob_val[w->dindex++] = 11; break;
                 case '\\': str->ob_val[w->dindex++] = '\\'; break;
                 case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
-                    str->ob_val[w->dindex++] = _read_x_int(format->ob_val + w->findex, &num, _oct, min(format_size - w->findex, 3));
+					str->ob_val[w->dindex++] = _read_x_int(format->ob_val + w->findex, 8, _oct, &num, min(format_size - w->findex, 3));
                     w->findex += num;
                     break;
                 case 'x':
@@ -205,7 +210,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size,
                         case 'v': obj->ob_val[pos++] = 11; break;
                         case '\\': obj->ob_val[pos++] = '\\'; break;
                         case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
-                            obj->ob_val[pos++] = _read_x_int(str + i, &num, _oct, min(size - i, 3));
+							obj->ob_val[pos++] = _read_x_int(str + i, 8, _oct, &num, min(size - i, 3));
                             i += num;
                             break;
                         case 'x':
