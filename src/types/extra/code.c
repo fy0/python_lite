@@ -14,11 +14,15 @@ void pylt_obj_code_add_to_gc(PyLiteInterpreter *I, PyLiteCodeObject *self) {
     pylt_gc_add(I, castobj(self));
 }
 
-PyLiteCodeObject* pylt_obj_code_new(PyLiteInterpreter *I) {
-    PyLiteCodeObject *obj = pylt_realloc(NULL, sizeof(PyLiteCodeObject));
+PyLiteCodeObject* pylt_obj_code_new(PyLiteInterpreter *I, pl_bool_t with_debug_info) {
+	PyLiteCodeObject *obj = pylt_realloc(NULL, sizeof(PyLiteCodeObject));
     obj->ob_type = PYLT_OBJ_TYPE_CODE;
     obj->const_val = pylt_obj_list_new(I);
     kv_init(obj->opcodes);
+	obj->with_debug_info = with_debug_info;
+	if (with_debug_info) {
+		kv_init(obj->lnotab);
+	}
     return obj;
 }
 

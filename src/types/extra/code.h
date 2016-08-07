@@ -16,11 +16,14 @@ typedef struct PyLiteCodeObject {
     PyLiteObject_HEAD;
     PyLiteListObject *const_val;
     kvec_t(PyLiteInstruction) opcodes;
+
+	pl_bool_t with_debug_info;
+	kvec_t(uint32_t) lnotab;
 } PyLiteCodeObject;
 
 void pylt_obj_code_add_to_gc(PyLiteInterpreter *I, PyLiteCodeObject *self);
 
-PyLiteCodeObject* pylt_obj_code_new(PyLiteInterpreter *I);
+PyLiteCodeObject* pylt_obj_code_new(PyLiteInterpreter *I, pl_bool_t with_debug_info);
 void pylt_obj_code_free(PyLiteInterpreter *I, PyLiteCodeObject* self);
 
 #endif

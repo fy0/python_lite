@@ -694,7 +694,7 @@ PyLiteFrame* pylt_vm_curframe(PyLiteInterpreter *I) {
 PyLiteObject* _pylt_vm_call(PyLiteInterpreter *I, pl_int_t argc) {
 	PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc };
 	PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
-	PyLiteCodeObject *code = pylt_obj_code_new(I);
+	PyLiteCodeObject *code = pylt_obj_code_new(I, false);
 	PyLiteFrame frame_bak = kv_top(I->vm.frames);
 
 	kv_pushins(code->opcodes, bc_call);

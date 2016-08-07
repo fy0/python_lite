@@ -60,6 +60,7 @@ opcode    extarg     extra
 */
 void write_ins(ParserState *ps, uint8_t opcode, uint8_t exarg, int16_t extra) {
     PyLiteInstruction ins = build_ins(opcode, exarg, extra);
+	kv_push(uint32_t, ps->info->code->lnotab, (uint32_t)(ps->ls->linenumber));
     kv_pushins(ps->info->code->opcodes, ins);
 }
 
@@ -1187,7 +1188,7 @@ void func_push(ParserState *ps) {
     }
 
     // 初始化
-    info->code = pylt_obj_code_new(ps->I);
+    info->code = pylt_obj_code_new(ps->I, true);
     info->loop_depth = 0;
     info->prev = ps->info;
     ps->info = info;
