@@ -25,8 +25,13 @@ PyLiteStrObject* pylt_api_type_name(PyLiteInterpreter *I, int ob_type) {
 }
 
 
-PyLiteTypeObject* pylt_api_gettype(PyLiteInterpreter *I, pl_uint32_t type_code) {
+PyLiteTypeObject* pylt_api_gettype_by_code(PyLiteInterpreter *I, pl_uint32_t type_code) {
     return kv_A(I->cls_base, type_code);
+}
+
+PyLiteTypeObject* pylt_api_gettype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
+	PyLiteObject *obj = pylt_obj_mod_getattr(I, mod, castobj(name));
+	return pl_istype(obj) ? casttype(obj) : NULL;
 }
 
 pl_uint32_t pylt_api_get_base_typecode(PyLiteInterpreter *I, pl_uint32_t type_code) {
@@ -34,7 +39,7 @@ pl_uint32_t pylt_api_get_base_typecode(PyLiteInterpreter *I, pl_uint32_t type_co
 
     top_base = type_code;
     while (top_base >= PYLT_OBJ_TYPE_USERCLASS) {
-        top_base = pylt_api_gettype(I, top_base)->ob_base;
+        top_base = pylt_api_gettype_by_code(I, top_base)->ob_base;
     }
 
     return top_base;
@@ -50,7 +55,7 @@ pl_bool_t pylt_api_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32
 
     while (ob_type != PYLT_OBJ_TYPE_OBJ) {
         if (ob_type == type_code) return true;
-        type = pylt_api_gettype(I, ob_type);
+        type = pylt_api_gettype_by_code(I, ob_type);
         ob_type = type->ob_base;
     }
 

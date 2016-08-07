@@ -14,7 +14,7 @@ PyLiteObject* pylt_method_type_mro(PyLiteInterpreter *I, int argc, PyLiteObject 
     pl_uint32_t ob_type = dcast(type, args[0])->ob_reftype;
 
     while (ob_type) {
-        type = pylt_api_gettype(I, ob_type);
+        type = pylt_api_gettype_by_code(I, ob_type);
         pylt_obj_list_append(I, lst, castobj(type));
         ob_type = type->ob_base;
     }
@@ -23,12 +23,12 @@ PyLiteObject* pylt_method_type_mro(PyLiteInterpreter *I, int argc, PyLiteObject 
 }
 
 PyLiteObject* pylt_prop_type_base_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    PyLiteTypeObject *type = pylt_api_gettype(I, dcast(type, args[0])->ob_reftype);
-    return castobj(pylt_api_gettype(I, type->ob_base));
+    PyLiteTypeObject *type = pylt_api_gettype_by_code(I, dcast(type, args[0])->ob_reftype);
+    return castobj(pylt_api_gettype_by_code(I, type->ob_base));
 }
 
 PyLiteObject* pylt_cls_method_type_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    return castobj(pylt_api_gettype(I, args[1]->ob_type));
+    return castobj(pylt_api_gettype_by_code(I, args[1]->ob_type));
 }
 
 

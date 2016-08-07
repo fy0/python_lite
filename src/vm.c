@@ -468,7 +468,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                         tb = castobj(kv_pop(vm->stack)); // base type
                         tc = castobj(kv_pop(vm->stack)); // class vars
 
-                        tb = (tb->ob_type == PYLT_OBJ_TYPE_NONE) ? castobj(pylt_api_gettype(I, PYLT_OBJ_TYPE_OBJ)) : tb;
+                        tb = (tb->ob_type == PYLT_OBJ_TYPE_NONE) ? castobj(pylt_api_gettype_by_code(I, PYLT_OBJ_TYPE_OBJ)) : tb;
                         PyLiteTypeObject *type = pylt_obj_type_new(I, caststr(ta), casttype(tb)->ob_reftype, castdict(tc));
                         pylt_obj_type_register(I, type);
                         pylt_gc_add(I, castobj(type));

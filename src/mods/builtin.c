@@ -56,7 +56,7 @@ PyLiteObject* pylt_mods_builtins_pow(PyLiteInterpreter *I, int argc, PyLiteObjec
 
 PyLiteObject* pylt_mods_builtins_dir(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteListObject *lst = pylt_obj_list_new(I);
-    PyLiteTypeObject *type = pylt_api_gettype(I, args[0]->ob_type);
+    PyLiteTypeObject *type = pylt_api_gettype_by_code(I, args[0]->ob_type);
 
     if (type->ob_reftype != PYLT_OBJ_TYPE_TYPE) {
         for (pl_int32_t it = pylt_obj_dict_begin(I, type->ob_attrs); it != pylt_obj_dict_end(I, type->ob_attrs); pylt_obj_dict_next(I, type->ob_attrs, &it)) {
@@ -113,7 +113,7 @@ PyLiteObject* pylt_mods_builtins_repr(PyLiteInterpreter *I, int argc, PyLiteObje
 
 
 PyLiteObject* pylt_mods_builtins_super(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    PyLiteTypeObject *type = pylt_api_gettype(I, args[0]->ob_type);
+    PyLiteTypeObject *type = pylt_api_gettype_by_code(I, args[0]->ob_type);
     return castobj(type);
 }
 
@@ -155,7 +155,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteInterpreter *I) {
     for (pl_int_t i = PYLT_OBJ_TYPE_OBJ; i < I->class_num; ++i) {
 		if (i >= PYLT_OBJ_TYPE_UNUSUAL && i <= PYLT_OBJ_TYPE_CODE) continue;
 		if (i == PYLT_OBJ_TYPE_NONE) continue;
-        type = pylt_api_gettype(I, i);
+        type = pylt_api_gettype_by_code(I, i);
         pylt_obj_mod_setattr(I, mod, type->name, castobj(type));
     }
 

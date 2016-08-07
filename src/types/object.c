@@ -257,7 +257,7 @@ PyLiteObject* pylt_obj_getattr(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteOb
                 return pylt_obj_custom_getattr(I, castcustom(obj), key, p_at_type);
             } else {
                 if (p_at_type) *p_at_type = true;
-                return pylt_obj_type_getattr(I, pylt_api_gettype(I, obj->ob_type), key, NULL);
+                return pylt_obj_type_getattr(I, pylt_api_gettype_by_code(I, obj->ob_type), key, NULL);
             }
             break;
     }
