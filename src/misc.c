@@ -31,19 +31,20 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
 	pl_static.str.__defaults__ = pylt_obj_str_new_from_cstr_static(I, "__defaults__", true);
 	pl_static.str.__parameters__ = pylt_obj_str_new_from_cstr_static(I, "__parameters__", true);
 
-    pl_static.str.id = pylt_obj_str_new_from_cstr_static(I, "id", true);
-    pl_static.str.dir = pylt_obj_str_new_from_cstr_static(I, "dir", true);
-    pl_static.str.len = pylt_obj_str_new_from_cstr_static(I, "len", true);
-    pl_static.str.hash = pylt_obj_str_new_from_cstr_static(I, "hash", true);
-    pl_static.str.iter = pylt_obj_str_new_from_cstr_static(I, "iter", true);
-    pl_static.str.repr = pylt_obj_str_new_from_cstr_static(I, "repr", true);
-    pl_static.str.super = pylt_obj_str_new_from_cstr_static(I, "super", true);
-    pl_static.str.isinstance = pylt_obj_str_new_from_cstr_static(I, "isinstance", true);
-    pl_static.str.print = pylt_obj_str_new_from_cstr_static(I, "print", true);
-    pl_static.str.pow = pylt_obj_str_new_from_cstr_static(I, "pow", true);
-    pl_static.str.setattr = pylt_obj_str_new_from_cstr_static(I, "setattr", true);
-    pl_static.str.getattr = pylt_obj_str_new_from_cstr_static(I, "getattr", true);
-    pl_static.str.range = pylt_obj_str_new_from_cstr_static(I, "range", true);
+	pl_static.str.dir = pylt_obj_str_new_from_cstr_static(I, "dir", true);
+	pl_static.str.getattr = pylt_obj_str_new_from_cstr_static(I, "getattr", true);
+	pl_static.str.hash = pylt_obj_str_new_from_cstr_static(I, "hash", true);
+	pl_static.str.id = pylt_obj_str_new_from_cstr_static(I, "id", true);
+	pl_static.str.isinstance = pylt_obj_str_new_from_cstr_static(I, "isinstance", true);
+	pl_static.str.iter = pylt_obj_str_new_from_cstr_static(I, "iter", true);
+	pl_static.str.len = pylt_obj_str_new_from_cstr_static(I, "len", true);
+	pl_static.str.next = pylt_obj_str_new_from_cstr_static(I, "next", true);
+	pl_static.str.pow = pylt_obj_str_new_from_cstr_static(I, "pow", true);
+	pl_static.str.print = pylt_obj_str_new_from_cstr_static(I, "print", true);
+	pl_static.str.range = pylt_obj_str_new_from_cstr_static(I, "range", true);
+	pl_static.str.repr = pylt_obj_str_new_from_cstr_static(I, "repr", true);
+	pl_static.str.setattr = pylt_obj_str_new_from_cstr_static(I, "setattr", true);
+	pl_static.str.super = pylt_obj_str_new_from_cstr_static(I, "super", true);
 
     pl_static.str.object = pylt_obj_str_new_from_cstr_static(I, "object", true);
     pl_static.str.int_ = pylt_obj_str_new_from_cstr_static(I, "int", true);
@@ -108,9 +109,11 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
     pl_static.str.args = pylt_obj_str_new_from_cstr_static(I, "args", true);
     pl_static.str.kwargs = pylt_obj_str_new_from_cstr_static(I, "kwargs", true);
     pl_static.str.param1 = pylt_obj_str_new_from_cstr_static(I, "param1", true);
-    pl_static.str.param2 = pylt_obj_str_new_from_cstr_static(I, "param2", true);
-    pl_static.str.param3 = pylt_obj_str_new_from_cstr_static(I, "param3", true);
-    pl_static.str.param4 = pylt_obj_str_new_from_cstr_static(I, "param4", true);
+	pl_static.str.param2 = pylt_obj_str_new_from_cstr_static(I, "param2", true);
+	pl_static.str.param3 = pylt_obj_str_new_from_cstr_static(I, "param3", true);
+	pl_static.str.param4 = pylt_obj_str_new_from_cstr_static(I, "param4", true);
+	pl_static.str.default_ = pylt_obj_str_new_from_cstr_static(I, "default", true);
+	pl_static.str.iterator = pylt_obj_str_new_from_cstr_static(I, "iterator", true);
 
     pl_static.str.x = pylt_obj_str_new_from_cstr_static(I, "x", true);
     pl_static.str.y = pylt_obj_str_new_from_cstr_static(I, "y", true);

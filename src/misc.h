@@ -37,19 +37,21 @@ struct PyLiteStaticObjectsType {
 		PyLiteStrObject *__defaults__;
 		PyLiteStrObject *__parameters__;
 
-        PyLiteStrObject *id;
-        PyLiteStrObject *dir;
-        PyLiteStrObject *len;
-        PyLiteStrObject *hash;
-        PyLiteStrObject *iter;
-        PyLiteStrObject *repr;
-        PyLiteStrObject *super;
-        PyLiteStrObject *isinstance;
-        PyLiteStrObject *print;
-        PyLiteStrObject *pow;
-        PyLiteStrObject *setattr;
-        PyLiteStrObject *getattr;
-        PyLiteStrObject *range;
+		// builtins
+		PyLiteStrObject *dir;
+		PyLiteStrObject *getattr;
+		PyLiteStrObject *hash;
+		PyLiteStrObject *id;
+		PyLiteStrObject *isinstance;
+		PyLiteStrObject *iter;
+		PyLiteStrObject *len;
+		PyLiteStrObject *next;
+		PyLiteStrObject *pow;
+		PyLiteStrObject *print;
+		PyLiteStrObject *range;
+		PyLiteStrObject *repr;
+		PyLiteStrObject *setattr;
+		PyLiteStrObject *super;
 
         PyLiteStrObject *object;
         PyLiteStrObject *int_;
@@ -123,7 +125,8 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *param1;
         PyLiteStrObject *param2;
         PyLiteStrObject *param3;
-        PyLiteStrObject *param4;
+		PyLiteStrObject *param4;
+		PyLiteStrObject *default_;
 
         PyLiteStrObject *x;
         PyLiteStrObject *y;
