@@ -19,6 +19,7 @@ typedef struct PyLiteIterObject {
             pl_int32_t k;
         } hashmap;
     };
+    struct PyLiteIterObject *backup; // isn't tracked by gc
 } PyLiteIterObject;
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj);
@@ -31,6 +32,7 @@ PyLiteObject* pylt_obj_list_iternext(PyLiteInterpreter *I, PyLiteIterObject *ite
 PyLiteObject* pylt_obj_set_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_dict_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_range_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
+PyLiteObject* pylt_obj_custom_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
 
 void pylt_obj_iter_free(PyLiteInterpreter *I, PyLiteIterObject* self);
 
