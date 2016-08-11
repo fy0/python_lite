@@ -7,20 +7,20 @@
 
 struct PyLiteStaticObjectsType {
     struct {
-        PyLiteStrObject *__init__;
-        PyLiteStrObject *__new__;
-        PyLiteStrObject *__call__;
         PyLiteStrObject *__base__;
+        PyLiteStrObject *__call__;
+        PyLiteStrObject *__new__;
         PyLiteStrObject *__import__;
+        PyLiteStrObject *__init__;
 
         PyLiteStrObject *__add__;
-        PyLiteStrObject *__sub__;
-        PyLiteStrObject *__mul__;
         PyLiteStrObject *__div__;
         PyLiteStrObject *__floordiv__;
-        PyLiteStrObject *__pos__;
+        PyLiteStrObject *__mul__;
         PyLiteStrObject *__neg__;
+        PyLiteStrObject *__pos__;
         PyLiteStrObject *__pow__;
+        PyLiteStrObject *__sub__;
 
         PyLiteStrObject *__lshift__;
         PyLiteStrObject *__rshift__;
@@ -34,25 +34,65 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *__setitem__;
         PyLiteStrObject *__getitem__;
 
-		PyLiteStrObject *__defaults__;
-		PyLiteStrObject *__parameters__;
+        PyLiteStrObject *__defaults__;
+        PyLiteStrObject *__parameters__;
 
-		// builtins
-		PyLiteStrObject *dir;
-		PyLiteStrObject *getattr;
-		PyLiteStrObject *hash;
-		PyLiteStrObject *id;
-		PyLiteStrObject *isinstance;
-		PyLiteStrObject *iter;
-		PyLiteStrObject *len;
-		PyLiteStrObject *next;
-		PyLiteStrObject *pow;
-		PyLiteStrObject *print;
-		PyLiteStrObject *range;
-		PyLiteStrObject *repr;
-		PyLiteStrObject *setattr;
-		PyLiteStrObject *super;
+        // builtins
+        PyLiteStrObject *abs;
+        PyLiteStrObject *all;
+        PyLiteStrObject *any;
+        PyLiteStrObject *ascii;
+        PyLiteStrObject *bin;
+        PyLiteStrObject *bytearray;
+        PyLiteStrObject *callable;
+        PyLiteStrObject *chr;
+        PyLiteStrObject *classmethod;
+        PyLiteStrObject *compile;
+        PyLiteStrObject *delattr;
+        PyLiteStrObject *dir;
+        PyLiteStrObject *divmod;
+        PyLiteStrObject *enumerate;
+        PyLiteStrObject *eval;
+        PyLiteStrObject *exec;
+        PyLiteStrObject *filter;
+        PyLiteStrObject *format;
+        PyLiteStrObject *frozenset;
+        PyLiteStrObject *getattr;
+        PyLiteStrObject *globals;
+        PyLiteStrObject *hasattr;
+        PyLiteStrObject *hash;
+        PyLiteStrObject *help;
+        PyLiteStrObject *hex;
+        PyLiteStrObject *id;
+        PyLiteStrObject *input;
+        PyLiteStrObject *isinstance;
+        PyLiteStrObject *issubclass;
+        PyLiteStrObject *iter;
+        PyLiteStrObject *len;
+        PyLiteStrObject *locals;
+        PyLiteStrObject *map;
+        PyLiteStrObject *max;
+        PyLiteStrObject *memoryview;
+        PyLiteStrObject *min;
+        PyLiteStrObject *next;
+        PyLiteStrObject *oct;
+        PyLiteStrObject *open;
+        PyLiteStrObject *ord;
+        PyLiteStrObject *pow;
+        PyLiteStrObject *print;
+        PyLiteStrObject *repr;
+        PyLiteStrObject *reversed;
+        PyLiteStrObject *round;
+        PyLiteStrObject *setattr;
+        PyLiteStrObject *slice;
+        PyLiteStrObject *sorted;
+        PyLiteStrObject *staticmethod;
+        PyLiteStrObject *sum;
+        PyLiteStrObject *super;
+        PyLiteStrObject *vars;
+        PyLiteStrObject *zip;
 
+        // classes
         PyLiteStrObject *object;
         PyLiteStrObject *int_;
         PyLiteStrObject *float_;
@@ -62,8 +102,8 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *set;
         PyLiteStrObject *list;
         PyLiteStrObject *tuple;
-		PyLiteStrObject *dict;
-		PyLiteStrObject *unusual;
+        PyLiteStrObject *dict;
+        PyLiteStrObject *unusual;
 
         PyLiteStrObject *module;
         PyLiteStrObject *function;
@@ -73,6 +113,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *iterator;
         PyLiteStrObject *property_;
         PyLiteStrObject *NoneType;
+        PyLiteStrObject *range;
 
         // object
         PyLiteStrObject *mro;
@@ -101,11 +142,12 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *insert;
         PyLiteStrObject *reverse;
 
-		// unusual
-		PyLiteStrObject *unknown;
-		PyLiteStrObject *param_args;
-		PyLiteStrObject *param_kwargs;
-		PyLiteStrObject *param_undefined;
+        // unusual
+        PyLiteStrObject *unknown;
+        PyLiteStrObject *useless;
+        PyLiteStrObject *param_args;
+        PyLiteStrObject *param_kwargs;
+        PyLiteStrObject *param_undefined;
 
         // prop
         PyLiteStrObject *fget;
@@ -115,6 +157,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *True;
         PyLiteStrObject *False;
 
+        // modules
         PyLiteStrObject *math;
         PyLiteStrObject *builtins;
 
@@ -125,12 +168,13 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *param1;
         PyLiteStrObject *param2;
         PyLiteStrObject *param3;
-		PyLiteStrObject *param4;
-		PyLiteStrObject *default_;
+        PyLiteStrObject *param4;
+        PyLiteStrObject *default_;
 
         PyLiteStrObject *x;
         PyLiteStrObject *y;
 
+        // exceptions
         PyLiteStrObject *BaseException;
         PyLiteStrObject *SystemExit;
         PyLiteStrObject *KeyboardInterrupt;

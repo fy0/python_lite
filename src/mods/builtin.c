@@ -36,14 +36,19 @@ PyLiteObject* pylt_mods_builtins_hash(PyLiteInterpreter *I, int argc, PyLiteObje
     return castobj(pylt_obj_int_new(I, (pl_int_t)pylt_obj_hash(I, args[0])));
 }
 
-
 PyLiteObject* pylt_mods_builtins_len(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     return castobj(pylt_obj_int_new(I, (pl_int_t)pylt_obj_len(I, args[0])));
 }
 
 PyLiteObject* pylt_mods_builtins_next(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
 	PyLiteObject *obj = pylt_obj_iter_next(I, castiter(args[0]));
-	// TODO: 现阶段并不能分清迭代器是没有了还是正常迭代结束了，另外default参数也没有用到
+	if (!obj) {
+		if (args[1] == castobj(&PyLiteUseless)) {
+			// TODO: 抛出异常
+			return NULL;
+		}
+		return args[1];
+	}
 	return obj;
 }
 
@@ -148,7 +153,7 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteInterpreter *I) {
     pylt_cfunc_register(I, mod, pl_static.str.len, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_len);
     pylt_cfunc_register(I, mod, pl_static.str.hash, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_hash);
 	pylt_cfunc_register(I, mod, pl_static.str.iter, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_iter);
-	pylt_cfunc_register(I, mod, _S(next), _NT(I, 2, _S(iterator), _S(default_)), NULL, NULL, &pylt_mods_builtins_next);
+	pylt_cfunc_register(I, mod, _S(next), _NT(I, 2, _S(iterator), _S(default_)), _NT(I, 2, &PyLiteParamUndefined, &PyLiteUseless), NULL, &pylt_mods_builtins_next);
     pylt_cfunc_register(I, mod, pl_static.str.isinstance, _NST(I, 2, "object", "class_or_type_or_tuple"), NULL, NULL, &pylt_mods_builtins_isinstance);
     pylt_cfunc_register(I, mod, pl_static.str.repr, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_repr);
     pylt_cfunc_register(I, mod, pl_static.str.super, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_super);

@@ -11,6 +11,7 @@ typedef struct PyLiteUnusualObject {
 
 // unique values
 PyLiteUnusualObject PyLiteUnknown;
+PyLiteUnusualObject PyLiteUseless;
 
 // to fill defaults of function info
 PyLiteUnusualObject PyLiteParamArgs;
