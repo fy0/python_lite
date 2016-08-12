@@ -15,8 +15,10 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
 	sstr_new(__base__);
 	sstr_new(__call__);
 	sstr_new(__new__);
-	sstr_new(__import__);
-	sstr_new(__init__);
+    sstr_new(__import__);
+    sstr_new(__init__);
+    sstr_new(__str__);
+    sstr_new(__repr__);
 
 	sstr_new(__add__);
 	sstr_new(__div__);
@@ -40,7 +42,8 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
 	sstr_new(__getitem__);
 
 	sstr_new(__defaults__);
-	sstr_new(__parameters__);
+    sstr_new(__parameters__);
+    sstr_new(__args_types__);
 
     sstr_new(abs);
     sstr_new(all);

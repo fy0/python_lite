@@ -469,7 +469,16 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteInterpreter *I, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_TYPE:
             return pylt_obj_str_new_from_format(I, pl_static.str.TMPL_CLASS_TO_STR, pylt_api_type_name(I, casttype(obj)->ob_reftype));
         default:
-            // custom/range/exception 需要特别处理
+            // range/exception 需要特别处理
+            if (pl_iscustom(obj)) {
+                PyLiteObject *method_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__str__), NULL);
+                if (method_func) {
+                    // TODO: 别忘了拒绝非 str 类型的返回值
+                    // TypeError: __str__ returned non-string (type int)
+                    // TypeError: __str__ returned non-string (type NoneType)
+                    return caststr(pylt_vm_call_method(I, obj, method_func, 0));
+                }
+            }
             return pylt_obj_str_new_from_format(I, pl_static.str.TMPL_OBJECT_TO_STR, pylt_api_type_name(I, obj->ob_type), obj);
     }
     return NULL;

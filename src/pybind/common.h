@@ -5,6 +5,8 @@
 #include "../types/object.h"
 
 PyLiteObject* pylt_cls_method_obj_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);
+PyLiteObject* pylt_method_obj_repr(PyLiteInterpreter *I, int argc, PyLiteObject **args);
+PyLiteObject* pylt_method_obj_str(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 
 PyLiteObject* pylt_method_type_mro(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 PyLiteObject* pylt_prop_type_base_get(PyLiteInterpreter *I, int argc, PyLiteObject **args);
@@ -48,6 +50,6 @@ PyLiteObject* pylt_cls_method_tuple_new(PyLiteInterpreter *I, int argc, PyLiteOb
 PyLiteObject* pylt_cls_method_dict_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 
 // A new function returns None
-PyLiteObject* pylt_cls_method_useless_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);
+PyLiteObject* pylt_cls_method_meaningless_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 
 #endif

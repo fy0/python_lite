@@ -90,6 +90,8 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
     // object
     type = pylt_obj_type_new_with_type(I, pl_static.str.object, PYLT_OBJ_TYPE_OBJ, 0);
     pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_obj_new);
+    pylt_cmethod_register_0_args(I, type, _S(__str__), &pylt_method_obj_repr);
+    pylt_cmethod_register_0_args(I, type, _S(__repr__), &pylt_method_obj_str);
     pylt_obj_type_register(I, type);
 
     // int
@@ -159,20 +161,20 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
 	// unusual
 	type = pylt_obj_type_new_with_type(I, _S(unusual), PYLT_OBJ_TYPE_UNUSUAL, PYLT_OBJ_TYPE_OBJ);
-	pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_useless_new);
+    pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_meaningless_new);
 	pylt_obj_type_register(I, type);
 
     // ============== 12 ==============
 
     // module
     type = pylt_obj_type_new_with_type(I, pl_static.str.module, PYLT_OBJ_TYPE_MODULE, PYLT_OBJ_TYPE_OBJ);
-	pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_useless_new);
+    pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_meaningless_new);
 	type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 
     // function
     type = pylt_obj_type_new_with_type(I, pl_static.str.function, PYLT_OBJ_TYPE_FUNCTION, PYLT_OBJ_TYPE_OBJ);
-	pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_useless_new);
+    pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_meaningless_new);
 	pylt_cprop_register(I, type, _S(__defaults__), &pylt_prop_function_defaults_get, NULL);
 	pylt_cprop_register(I, type, _S(__parameters__), &pylt_prop_function_parameters_get, NULL);
 	type->allow_inherit = false;
@@ -180,7 +182,7 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // cfunction
 	type = pylt_obj_type_new_with_type(I, pl_static.str.cfunction, PYLT_OBJ_TYPE_CFUNCTION, PYLT_OBJ_TYPE_OBJ);
-	pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_useless_new);
+    pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_meaningless_new);
 	pylt_cprop_register(I, type, _S(__defaults__), &pylt_prop_function_defaults_get, NULL);
 	pylt_cprop_register(I, type, _S(__parameters__), &pylt_prop_function_parameters_get, NULL);
 	type->allow_inherit = false;
@@ -188,7 +190,7 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // code
 	type = pylt_obj_type_new_with_type(I, pl_static.str.code, PYLT_OBJ_TYPE_CODE, PYLT_OBJ_TYPE_OBJ);
-	pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_useless_new);
+    pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_meaningless_new);
     type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 
@@ -209,7 +211,7 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // none
 	type = pylt_obj_type_new_with_type(I, pl_static.str.NoneType, PYLT_OBJ_TYPE_NONE, PYLT_OBJ_TYPE_OBJ);
-	pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_useless_new);
+    pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_meaningless_new);
     type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 

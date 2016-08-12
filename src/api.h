@@ -15,7 +15,6 @@ PyLiteTypeObject* pylt_api_gettype_by_code(PyLiteInterpreter *I, pl_uint32_t typ
 pl_uint32_t pylt_api_get_base_typecode(PyLiteInterpreter *I, pl_uint32_t type_code);
 pl_bool_t pylt_api_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32_t type_code);
 
-
 void pl_print(PyLiteInterpreter *I, const char *format, ...);
 
 #endif

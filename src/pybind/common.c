@@ -1,11 +1,20 @@
 ﻿
 #include "common.h"
 #include "../api.h"
+#include "../misc.h"
 #include "../types/all.h"
 
 PyLiteObject* pylt_cls_method_obj_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteTypeObject *type = dcast(type, args[0]);
     return pylt_obj_cutstom_create(I, type->ob_reftype, NULL);
+}
+
+PyLiteObject* pylt_method_obj_repr(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    return pylt_method_obj_str(I, argc, args);
+}
+
+PyLiteObject* pylt_method_obj_str(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    return castobj(pylt_obj_str_new_from_format(I, pl_static.str.TMPL_OBJECT_TO_STR, pylt_api_type_name(I, args[0]->ob_type), args[0]));
 }
 
 PyLiteObject* pylt_method_type_mro(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
@@ -219,6 +228,6 @@ PyLiteObject* pylt_cls_method_dict_new(PyLiteInterpreter *I, int argc, PyLiteObj
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(newdict));
 }
 
-PyLiteObject* pylt_cls_method_useless_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+PyLiteObject* pylt_cls_method_meaningless_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
 	return NULL;
 }

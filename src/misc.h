@@ -12,6 +12,8 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *__new__;
         PyLiteStrObject *__import__;
         PyLiteStrObject *__init__;
+        PyLiteStrObject *__str__;
+        PyLiteStrObject *__repr__;
 
         PyLiteStrObject *__add__;
         PyLiteStrObject *__div__;
@@ -36,6 +38,7 @@ struct PyLiteStaticObjectsType {
 
         PyLiteStrObject *__defaults__;
         PyLiteStrObject *__parameters__;
+        PyLiteStrObject *__args_types__;
 
         // builtins
         PyLiteStrObject *abs;
