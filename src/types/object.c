@@ -175,7 +175,7 @@ pl_uint32_t pylt_obj_hash(PyLiteInterpreter *I, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_STR: return pylt_obj_str_hash(I, caststr(obj));
         case PYLT_OBJ_TYPE_TYPE: return pylt_obj_type_hash(I, casttype(obj));
         default:
-            if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
+            if (pl_iscustom(obj)) {
                 PyLiteObject *ret;
                 PyLiteObject *hash_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__hash__), NULL);
                 if (hash_func) {
@@ -185,32 +185,25 @@ pl_uint32_t pylt_obj_hash(PyLiteInterpreter *I, PyLiteObject *obj) {
                     }
                 }
             }
+            return (pl_uint32_t)obj;
     }
     return 0;
 }
 
 pl_bool_t pylt_obj_hashable(PyLiteInterpreter *I, PyLiteObject *obj) {
     switch (obj->ob_type) {
-        case PYLT_OBJ_TYPE_INT:
-        case PYLT_OBJ_TYPE_FLOAT:
-        case PYLT_OBJ_TYPE_BOOL:
-        case PYLT_OBJ_TYPE_BYTES:
-        case PYLT_OBJ_TYPE_STR:
-        case PYLT_OBJ_TYPE_FUNCTION:
-        case PYLT_OBJ_TYPE_MODULE:
-        case PYLT_OBJ_TYPE_TYPE:
-        case PYLT_OBJ_TYPE_TUPLE:
-            return true;
 		case PYLT_OBJ_TYPE_SET:
 		case PYLT_OBJ_TYPE_DICT:
 		case PYLT_OBJ_TYPE_UNUSUAL:
             return false;
         default:
-            if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                return false;
+            if (pl_iscustom(obj)) {
+                PyLiteObject *method_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__hash__), NULL);
+                if (method_func) return true;
+                return pylt_obj_hashable(I, castcustom(obj)->base_obj);
             }
+            return true;
     }
-    return false;
 }
 
 
@@ -227,7 +220,8 @@ pl_bool_t pylt_obj_iterable(PyLiteInterpreter *I, PyLiteObject *obj) {
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 PyLiteObject *obj_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__iter__), NULL);
-                return (obj_func) ? true : false;
+                if (obj_func) return true;
+                return pylt_obj_iterable(I, castcustom(obj)->base_obj);
             }
     }
     return false;
