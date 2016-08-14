@@ -233,9 +233,17 @@ pl_bool_t pylt_obj_istrue(PyLiteInterpreter *I, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_INT: return castint(obj)->ob_val != 0;
         case PYLT_OBJ_TYPE_FLOAT: return castfloat(obj)->ob_val != 0;
         case PYLT_OBJ_TYPE_BOOL: return castbool(obj)->ob_val != 0;
-        case PYLT_OBJ_TYPE_BYTES: return castbytes(obj)->ob_size != 0;
         case PYLT_OBJ_TYPE_STR: return caststr(obj)->ob_size != 0;
-        default: return true;
+        case PYLT_OBJ_TYPE_BYTES: return castbytes(obj)->ob_size != 0;
+        case PYLT_OBJ_TYPE_SET: return pylt_obj_set_len(I, castset(obj)) != 0;
+        case PYLT_OBJ_TYPE_LIST: return pylt_obj_list_count(I, castlist(obj)) != 0;
+        case PYLT_OBJ_TYPE_TUPLE: return casttuple(obj)->ob_size != 0;
+        case PYLT_OBJ_TYPE_DICT: return pylt_obj_dict_len(I, castdict(obj)) != 0;
+        case PYLT_OBJ_TYPE_NONE: return false;
+        default: {
+            if (pl_iscustom(obj)) return pylt_obj_istrue(I, castcustom(obj)->base_obj);
+            return true;
+        }
     }
 }
 
