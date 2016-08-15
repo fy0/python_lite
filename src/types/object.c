@@ -166,6 +166,8 @@ pl_bool_t pylt_obj_eq(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b) {
     return false;
 }
 
+// 这个可怜的函数无法添加更多参数了，因为他被 khash 所用。
+// 但愿你们实现的 __hash__ 都是正确的，不过我以后可以在VM中查返回值类型。
 pl_uint32_t pylt_obj_hash(PyLiteInterpreter *I, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_INT: return pylt_obj_int_hash(I, castint(obj));

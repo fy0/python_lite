@@ -66,26 +66,33 @@ PyLiteObject* pylt_mods_builtins_pow(PyLiteInterpreter *I, int argc, PyLiteObjec
 
 PyLiteObject* pylt_mods_builtins_dir(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteListObject *lst = pylt_obj_list_new(I);
-    PyLiteTypeObject *type = pylt_api_gettype_by_code(I, args[0]->ob_type);
 
-    if (type->ob_reftype != PYLT_OBJ_TYPE_TYPE) {
-        for (pl_int32_t it = pylt_obj_dict_begin(I, type->ob_attrs); it != pylt_obj_dict_end(I, type->ob_attrs); pylt_obj_dict_next(I, type->ob_attrs, &it)) {
-            pylt_obj_list_append(I, lst, pylt_obj_dict_itemkey(I, type->ob_attrs, it));
-        }
-    }
-
-    switch (type->ob_reftype) {
+    switch (args[0]->ob_type) {
         case PYLT_OBJ_TYPE_MODULE:
             for (pl_int32_t it = pylt_obj_dict_begin(I, castmod(args[0])->attrs); it != pylt_obj_dict_end(I, castmod(args[0])->attrs); pylt_obj_dict_next(I, castmod(args[0])->attrs, &it)) {
                 pylt_obj_list_append(I, lst, pylt_obj_dict_itemkey(I, castmod(args[0])->attrs, it));
             }
             break;
-        case PYLT_OBJ_TYPE_TYPE:
-            for (pl_int32_t it = pylt_obj_dict_begin(I, casttype(args[0])->ob_attrs); it != pylt_obj_dict_end(I, casttype(args[0])->ob_attrs); pylt_obj_dict_next(I, casttype(args[0])->ob_attrs, &it)) {
-                pylt_obj_list_append(I, lst, pylt_obj_dict_itemkey(I, casttype(args[0])->ob_attrs, it));
+        default:
+            if (pl_iscustom(args[0])) {
+                for (pl_int32_t it = pylt_obj_dict_begin(I, castcustom(args[0])->ob_attrs); it != pylt_obj_dict_end(I, castcustom(args[0])->ob_attrs); pylt_obj_dict_next(I, castcustom(args[0])->ob_attrs, &it)) {
+                    pylt_obj_list_append(I, lst, pylt_obj_dict_itemkey(I, castcustom(args[0])->ob_attrs, it));
+                }
+                break;
             }
-            break;
     }
+
+    PyLiteTypeObject *type = pylt_api_gettype_by_code(I, args[0]->ob_type);
+    while (true) {
+        for (pl_int32_t it = pylt_obj_dict_begin(I, type->ob_attrs); it != pylt_obj_dict_end(I, type->ob_attrs); pylt_obj_dict_next(I, type->ob_attrs, &it)) {
+            PyLiteObject *key = pylt_obj_dict_itemkey(I, type->ob_attrs, it);
+            if (!pylt_obj_list_has(I, lst, key)) {
+                pylt_obj_list_append(I, lst, key);
+            }
+        }
+        if (type->ob_reftype == PYLT_OBJ_TYPE_OBJ) break;
+        type = pylt_api_gettype_by_code(I, type->ob_base);
+    };
 
     return castobj(lst);
 }
@@ -148,8 +155,8 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteInterpreter *I) {
     pylt_cfunc_register(I, mod, pl_static.str.__import__, _NST(I, 1, "name", "globals", "locals"), NULL, _UINTS(1, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_import);
     pylt_cfunc_register(I, mod, pl_static.str.setattr, _NST(I, 3, "object", "name", "value"), NULL, _UINTS(3, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_OBJ), &pylt_mods_builtins_setattr);
 
+    pylt_cfunc_register(I, mod, _S(dir), _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_dir);
     pylt_cfunc_register(I, mod, pl_static.str.id, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_id);
-    pylt_cfunc_register(I, mod, pl_static.str.dir, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_dir);
     pylt_cfunc_register(I, mod, pl_static.str.len, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_len);
     pylt_cfunc_register(I, mod, pl_static.str.hash, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_hash);
 	pylt_cfunc_register(I, mod, pl_static.str.iter, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_iter);
