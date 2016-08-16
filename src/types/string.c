@@ -624,9 +624,11 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteInterpreter *I, PyLiteStrObj
         targs->ob_val[i] = va_arg(args, PyLiteObject*);
     }
     va_end(args);
-    return pylt_obj_str_new_from_format_with_tuple(I, format, targs);
+    PyLiteStrObject *str = pylt_obj_str_new_from_format_with_tuple(I, format, targs);
+    pylt_obj_tuple_free(I, targs);
+    return str;
 }
-
+ 
 PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
     pl_int_t args_count = _get_arg_count2(format);
@@ -638,7 +640,9 @@ PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteInterpreter *I, const char 
     }
     va_end(args);
 
-    return pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
+    PyLiteStrObject *str = pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
+    pylt_obj_tuple_free(I, targs);
+    return str;
 }
 
 PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteInterpreter *I, const char *format, ...) {
@@ -654,5 +658,6 @@ PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteInterpreter *I, cons
 
     PyLiteStrObject *str = pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
     pylt_gc_make_str_static(I, castobj(str));
+    pylt_obj_tuple_free(I, targs);
     return str;
 }
