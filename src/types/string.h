@@ -28,15 +28,14 @@ PyLiteStrObject* pylt_obj_str_join(PyLiteInterpreter *I, PyLiteStrObject *separa
 PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *self);
 
 PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size, bool is_raw);
-PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteInterpreter *I, PyLiteStrObject *format, va_list args);
-
 PyLiteStrObject* pylt_obj_str_new_from_cstr(PyLiteInterpreter *I, const char *str, bool is_raw);
 PyLiteStrObject* pylt_obj_str_new_from_cstr_static(PyLiteInterpreter *I, const char *str, bool is_raw);
+
+PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, PyLiteStrObject *format, struct PyLiteTupleObject *args);
 PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteInterpreter *I, PyLiteStrObject *format, ...);
 PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteInterpreter *I, const char *format, ...);
 PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteInterpreter *I, const char *format, ...);
 PyLiteStrObject* pylt_obj_str_new_empty(PyLiteInterpreter *I);
-
 
 void pylt_obj_str_free(PyLiteInterpreter *I, PyLiteStrObject *self);
 

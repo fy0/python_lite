@@ -399,9 +399,10 @@ PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *sel
 	return str;
 }
 
-PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteInterpreter *I, PyLiteStrObject *format, va_list args) {
+PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, PyLiteStrObject *format, PyLiteTupleObject *args) {
     uint32_t *tmp;
     PyLiteObject *obj;
+    pl_int_t argtimes = 0;
     pl_int_t slen, rlen; // string length, real length
     PyLiteStrObject *str = pylt_realloc(NULL, sizeof(PyLiteStrObject));
     str->ob_type = PYLT_OBJ_TYPE_STR;
@@ -424,7 +425,12 @@ PyLiteStrObject* pylt_obj_str_new_from_vformat(PyLiteInterpreter *I, PyLiteStrOb
             pl_int_t cstate = 0; // default state
             pl_int_t limitAll = 0, limitFloat = 0; // "%0.0d"
             uint32_t ch = format->ob_val[++writer.findex];
-            obj = va_arg(args, PyLiteObject*);
+            obj = pylt_obj_tuple_getitem(I, args, argtimes++);
+            if (!obj) {
+                // TODO: ERROR
+                // format 参数不够了
+                return NULL;
+            }
 
             // flag check
             while (true) {
@@ -583,27 +589,70 @@ PyLiteStrObject* pylt_obj_str_new_from_cstr_static(PyLiteInterpreter *I, const c
     return ret;
 }
 
+static pl_int_t _get_arg_count(PyLiteStrObject *format) {
+    pl_int_t args_count = 0;
+    for (pl_uint32_t i = 1; i < format->ob_size; ++i) {
+        if (format->ob_val[i] == '%') {
+            if (format->ob_val[i - 1] != '%' && format->ob_val[i - 1] != '//') {
+                args_count++;
+            }
+        }
+    }
+    return args_count;
+}
+
+static pl_int_t _get_arg_count2(const char *format) {
+    pl_int_t args_count = 0;
+    if (format[0] == '\0') return 0;
+    for (const char *p = format + 1; *p; ++p) {
+        if (*p == '%') {
+            if (*(p - 1) != '%' && *(p - 1) != '//') {
+                args_count++;
+            }
+        }
+    }
+    return args_count;
+}
+
 PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteInterpreter *I, PyLiteStrObject *format, ...) {
     va_list args;
+    pl_int_t args_count = _get_arg_count(format);
+    PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
+
     va_start(args, format);
-    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(I, format, args);
+    for (pl_int_t i = 0; i < args_count; ++i) {
+        targs->ob_val[i] = va_arg(args, PyLiteObject*);
+    }
     va_end(args);
-    return str;
+    return pylt_obj_str_new_from_format_with_tuple(I, format, targs);
 }
 
 PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
+    pl_int_t args_count = _get_arg_count2(format);
+    PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
+
     va_start(args, format);
-    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(I, pylt_obj_str_new_from_cstr(I, format, true), args);
+    for (pl_int_t i = 0; i < args_count; ++i) {
+        targs->ob_val[i] = va_arg(args, PyLiteObject*);
+    }
     va_end(args);
-    return str;
+
+    return pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
 }
 
 PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
+    pl_int_t args_count = _get_arg_count2(format);
+    PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
+
     va_start(args, format);
-    PyLiteStrObject *str = pylt_obj_str_new_from_vformat(I, pylt_obj_str_new_from_cstr(I, format, true), args);
-    pylt_gc_make_str_static(I, castobj(str));
+    for (pl_int_t i = 0; i < args_count; ++i) {
+        targs->ob_val[i] = va_arg(args, PyLiteObject*);
+    }
     va_end(args);
+
+    PyLiteStrObject *str = pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
+    pylt_gc_make_str_static(I, castobj(str));
     return str;
 }

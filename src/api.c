@@ -62,12 +62,31 @@ pl_bool_t pylt_api_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32
     return false;
 }
 
+static pl_int_t _get_arg_count2(const char *format) {
+    pl_int_t args_count = 0;
+    if (format[0] == '\0') return 0;
+    for (const char *p = format + 1; *p; ++p) {
+        if (*p == '%') {
+            if (*(p - 1) != '%' && *(p - 1) != '//') {
+                args_count++;
+            }
+        }
+    }
+    return args_count;
+}
+
 void pl_print(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
     PyLiteStrObject *str;
+    pl_int_t args_count = _get_arg_count2(format);
+    PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
 
     va_start(args, format);
-    str = pylt_obj_str_new_from_vformat(I, pylt_obj_str_new_from_cstr(I, format, true), args);
+    for (pl_int_t i = 0; i < args_count; ++i) {
+        targs->ob_val[i] = va_arg(args, PyLiteObject*);
+    }
     va_end(args);
+
+    str = pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
     pylt_api_output_str(I, str);
 }
