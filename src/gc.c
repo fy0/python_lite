@@ -132,6 +132,8 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
     }
     // 4. frame code
     MOVE_WHITE(frame->code);
+    // 5. builtins
+    MOVE_WHITE(I->vm.builtins);
 
     while (upset_len(grey)) {
         // 从 Grey 集合中移除一个对象O，并将O设置成Black状态

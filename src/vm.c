@@ -72,7 +72,6 @@ int token_de_to_op_val(uint32_t tk) {
 
 void pylt_vm_init(struct PyLiteInterpreter *I, PyLiteVM* vm) {
     PyLiteFrame *frame;
-    PyLiteModuleObject *mod;
 
     kv_init(vm->stack);
     kv_init(vm->frames);
@@ -87,8 +86,8 @@ void pylt_vm_init(struct PyLiteInterpreter *I, PyLiteVM* vm) {
     // built-in
     pylt_bind_all_types_register(I);
 
-    mod = pylt_mods_builtins_register(I);
-    kv_push(PyLiteDictObject*, frame->var_tables, mod->attrs);
+    vm->builtins = pylt_mods_builtins_register(I);
+    kv_push(PyLiteDictObject*, frame->var_tables, vm->builtins->attrs);
 
     // first local
     kv_push(PyLiteDictObject*, frame->var_tables, pylt_obj_dict_new(I));

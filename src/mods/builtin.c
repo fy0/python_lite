@@ -176,5 +176,6 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteInterpreter *I) {
         pylt_obj_mod_setattr(I, mod, type->name, castobj(type));
     }
 
+    pylt_gc_add(I, castobj(mod));
     return mod;
 }

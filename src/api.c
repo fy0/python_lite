@@ -24,12 +24,15 @@ PyLiteStrObject* pylt_api_type_name(PyLiteInterpreter *I, int ob_type) {
     return kv_A(I->cls_base, ob_type)->name;
 }
 
+PyLiteTypeObject* pylt_api_getbuiltintype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
+    return pylt_api_gettype_by_mod(I, I->vm.builtins, name);
+}
 
 PyLiteTypeObject* pylt_api_gettype_by_code(PyLiteInterpreter *I, pl_uint32_t type_code) {
     return kv_A(I->cls_base, type_code);
 }
 
-PyLiteTypeObject* pylt_api_gettype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
+PyLiteTypeObject* pylt_api_gettype_by_mod(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
 	PyLiteObject *obj = pylt_obj_mod_getattr(I, mod, castobj(name));
 	return pl_istype(obj) ? casttype(obj) : NULL;
 }

@@ -65,6 +65,7 @@ typedef struct PyLiteFrame {
 typedef struct PyLiteVM {
     kvec_t(uintptr_t) stack;
     kvec_t(PyLiteFrame) frames;
+    PyLiteModuleObject *builtins;
 } PyLiteVM;
 
 #define kv_pushptr(v, x) kv_push(uintptr_t, (v), (uintptr_t)(x))
