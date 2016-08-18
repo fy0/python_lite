@@ -1,19 +1,36 @@
 ﻿
 #include "extra.h"
+#include "../api.h"
 #include "../types/all.h"
 
 PyLiteObject* pylt_cls_method_function_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
 	return NULL;
 }
 
-PyLiteObject* pylt_prop_function_parameters_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-	PyLiteFunctionInfo *info = pylt_obj_func_get_info(I, args[0]);
-	return castobj(info->params);
+PyLiteObject* pylt_prop_function_args_types_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    PyLiteFunctionInfo *info = pylt_obj_func_get_info(I, args[0]);
+    PyLiteTupleObject *data = pylt_obj_tuple_new(I, info->length);
+    if (!info->type_codes) {
+        for (pl_int_t i = 0; i < data->ob_size; ++i) {
+            data->ob_val[i] = castobj(pylt_api_gettype_by_code(I, PYLT_OBJ_TYPE_OBJ));
+        }
+    } else {
+        for (pl_int_t i = 0; i < data->ob_size; ++i) {
+            pl_int_t typecode = info->type_codes[i];
+            data->ob_val[i] = castobj(pylt_api_gettype_by_code(I, typecode ? typecode : PYLT_OBJ_TYPE_OBJ));
+        }
+    }
+    return castobj(data);
 }
 
 PyLiteObject* pylt_prop_function_defaults_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    PyLiteFunctionInfo *info = pylt_obj_func_get_info(I, args[0]);
+    return castobj(info->defaults);
+}
+
+PyLiteObject* pylt_prop_function_parameters_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
 	PyLiteFunctionInfo *info = pylt_obj_func_get_info(I, args[0]);
-	return castobj(info->defaults);
+	return castobj(info->params);
 }
 
 PyLiteObject* pylt_cls_method_range_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
