@@ -74,6 +74,20 @@ PyLiteObject* pylt_obj_str_mul(PyLiteInterpreter *I, PyLiteStrObject *self, PyLi
     return castobj(hash_and_check_cache(I, obj));
 }
 
+
+PyLiteObject* pylt_obj_str_mod(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *other) {
+    if (pl_istuple(other)) {
+        return castobj(pylt_obj_str_new_from_format_with_tuple(I, self, casttuple(other)));
+    } else {
+        PyLiteStrObject *ret;
+        PyLiteTupleObject *tuple = pylt_obj_tuple_new(I, 1);
+        tuple->ob_val[0] = other;
+        ret = pylt_obj_str_new_from_format_with_tuple(I, self, tuple);
+        pylt_obj_tuple_free(I, tuple);
+        return castobj(ret);
+    }
+}
+
 PyLiteObject* pylt_obj_str_plus(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *other) {
     PyLiteStrObject *obj;
     if (other->ob_type != PYLT_OBJ_TYPE_STR) return NULL;
@@ -483,6 +497,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, P
                         tmp = pylt_obj_int_to_ucs4(I, castint(obj), &slen);
                     } else {
                         // Error
+                        // TypeError: %d format: a number is required, not list
                     }
                     break;
                 case 'f': case 'F': case 'g': case 'G':

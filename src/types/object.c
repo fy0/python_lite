@@ -34,7 +34,7 @@ void* basetype_op_func_table[][24] = {
 
     { // str
         NULL, NULL, NULL, NULL, NULL,
-        &pylt_obj_str_plus, NULL, &pylt_obj_str_mul, NULL, NULL, NULL, NULL,
+        &pylt_obj_str_plus, NULL, &pylt_obj_str_mul, NULL, NULL, NULL, &pylt_obj_str_mod,
         NULL, NULL, NULL, NULL
     },
     { // bytes
