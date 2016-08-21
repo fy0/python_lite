@@ -4,7 +4,7 @@
 #include "../types/all.h"
 
 PyLiteObject* pylt_cls_method_function_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-	return NULL;
+    return NULL;
 }
 
 PyLiteObject* pylt_prop_function_args_types_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
@@ -29,8 +29,12 @@ PyLiteObject* pylt_prop_function_defaults_get(PyLiteInterpreter *I, int argc, Py
 }
 
 PyLiteObject* pylt_prop_function_parameters_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-	PyLiteFunctionInfo *info = pylt_obj_func_get_info(I, args[0]);
-	return castobj(info->params);
+    PyLiteFunctionInfo *info = pylt_obj_func_get_info(I, args[0]);
+    return castobj(info->params);
+}
+
+PyLiteObject* pylt_cls_method_iter_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    return pylt_obj_typecast(I, casttype(args[0]), castobj(pylt_obj_iter_new(I, args[1])));
 }
 
 PyLiteObject* pylt_cls_method_range_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {

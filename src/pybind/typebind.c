@@ -200,14 +200,16 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // type
     type = pylt_obj_type_new_with_type(I, pl_static.str.type, PYLT_OBJ_TYPE_TYPE, PYLT_OBJ_TYPE_OBJ);
+    pylt_cmethod_register(I, type, _S(__new__), _NST(I, 2, "cls", "object"), NULL, NULL, &pylt_cls_method_type_new);
     pylt_cmethod_register_0_args(I, type, pl_static.str.mro, &pylt_method_type_mro);
     pylt_cprop_register(I, type, pl_static.str.__base__, &pylt_prop_type_base_get, NULL);
-    pylt_cmethod_register(I, type, pl_static.str.__new__, _NST(I, 2, "cls", "object"), NULL, NULL, &pylt_cls_method_type_new);
     type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 
     // prop
     type = pylt_obj_type_new_with_type(I, pl_static.str.property_, PYLT_OBJ_TYPE_PROP, PYLT_OBJ_TYPE_OBJ);
+    // TODO: prop.__new__
+    pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_meaningless_new);
     type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 
@@ -219,6 +221,7 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // iter
     type = pylt_obj_type_new_with_type(I, pl_static.str.iterator, PYLT_OBJ_TYPE_ITER, PYLT_OBJ_TYPE_OBJ);
+    pylt_cmethod_register_1_args(I, type, _S(__new__), &pylt_cls_method_iter_new);
     type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 

@@ -10,6 +10,8 @@ PyLiteObject* pylt_prop_function_args_types_get(PyLiteInterpreter *I, int argc, 
 PyLiteObject* pylt_prop_function_defaults_get(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 PyLiteObject* pylt_prop_function_parameters_get(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 
+PyLiteObject* pylt_cls_method_iter_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);
+
 PyLiteObject* pylt_cls_method_range_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 
 PyLiteObject* pylt_cls_method_base_exception_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);

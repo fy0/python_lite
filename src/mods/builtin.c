@@ -170,8 +170,9 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteInterpreter *I) {
 
 	PyLiteTypeObject *type;
     for (pl_int_t i = PYLT_OBJ_TYPE_OBJ; i < I->class_num; ++i) {
-		if (i >= PYLT_OBJ_TYPE_UNUSUAL && i <= PYLT_OBJ_TYPE_CODE) continue;
-		if (i == PYLT_OBJ_TYPE_NONE) continue;
+        if (i >= PYLT_OBJ_TYPE_UNUSUAL && i <= PYLT_OBJ_TYPE_CODE) continue;
+        if (i == PYLT_OBJ_TYPE_NONE) continue;
+        if (i == PYLT_OBJ_TYPE_ITER) continue;
         type = pylt_api_gettype_by_code(I, i);
         pylt_obj_mod_setattr(I, mod, type->name, castobj(type));
     }
