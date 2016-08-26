@@ -67,9 +67,7 @@ PyLiteObject* pylt_cls_method_bool_new(PyLiteInterpreter *I, int argc, PyLiteObj
 
 
 PyLiteObject* pylt_cls_method_str_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    // TODO: 从其他形式转换为字符串
-    PyLiteStrObject *str = pylt_obj_str_new_empty(I);
-    return pylt_obj_typecast(I, dcast(type, args[0]), castobj(str));
+    return pylt_obj_typecast(I, dcast(type, args[0]), castobj(pylt_obj_to_str(I, args[1])));
 }
 
 PyLiteObject* pylt_method_str_index(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
