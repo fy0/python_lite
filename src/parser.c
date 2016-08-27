@@ -138,6 +138,9 @@ PyLiteObject* parse_get_consttype(ParserState *ps) {
         case TK_KW_FALSE:
             next(ps);
             return castobj(pylt_obj_bool_new(ps->I, false));
+        case TK_KW_NONE:
+            next(ps);
+            return castobj(&PyLiteNone);
         case TK_INT: case TK_FLOAT: case TK_STRING: case TK_BYTES:
             obj = tk->obj;
             next(ps);
