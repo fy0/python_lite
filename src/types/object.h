@@ -166,4 +166,6 @@ typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteInterpreter *I, PyLiteObjec
 typedef PyLiteObject* (*PyLiteCFunctionPtr)(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 typedef PyLiteObject* (*PyLiteIterFunc)(PyLiteInterpreter *I, struct PyLiteIterObject *iter);
 
+typedef struct PyLiteModuleObject* (*PyLiteModuleRegisterFunc)(PyLiteInterpreter *I);
+
 #endif

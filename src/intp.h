@@ -16,10 +16,15 @@ typedef struct PyLiteInterpreter {
     LexState *lexer;
     ParserState *parser;
 
-    kvec_t(PyLiteTypeObject*) cls_base;
+    // loaded modules
     PyLiteDictObject *modules;
+    // builtin modules' name and their load function (C ptr)
+    PyLiteDictObject *inner_module_loaders;
+    // exception object when error occurred. NULL as default.
+    PyLiteObject *error;
+
     pl_int_t class_num;
-    int error_code;
+    kvec_t(PyLiteTypeObject*) cls_base;
 } PyLiteInterpreter;
 
 PyLiteInterpreter* pylt_intp_new();

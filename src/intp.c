@@ -1,6 +1,9 @@
 ﻿
 #include "intp.h"
 #include "misc.h"
+#include "mods/math.h"
+#include "mods/builtin.h"
+#include "mods/unusualm.h"
 
 void pylt_intp_err(PyLiteInterpreter *I) {
     exit(-1);
@@ -20,7 +23,8 @@ void pylt_intp_free(PyLiteInterpreter *I) {
 void pylt_intp_init(PyLiteInterpreter *I) {
     kv_init(I->cls_base);
     I->modules = pylt_obj_dict_new(I);
-    I->error_code = 0;
+    I->inner_module_loaders = pylt_obj_dict_new(I);
+    I->error = NULL;
 
     I->lexer = pylt_realloc(NULL, sizeof(LexState));
     I->parser = pylt_realloc(NULL, sizeof(ParserState));
@@ -30,6 +34,11 @@ void pylt_intp_init(PyLiteInterpreter *I) {
     pylt_parser_init(I, I->parser, I->lexer);
     pylt_misc_static_objs_init(I);
     pylt_vm_init(I, &I->vm);
+
+    // be careful, cptrs are not real object!
+    pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.builtins), castobj(&pylt_mods_builtins_register));
+    pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.math), castobj(&pylt_mods_math_register));
+    pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.unusual), castobj(&pylt_mods_unusual_register));
 }
 
 void pylt_intp_finalize(PyLiteInterpreter *I) {
@@ -52,10 +61,13 @@ void pylt_intp_finalize(PyLiteInterpreter *I) {
         pylt_obj_free(I, k);
         pylt_obj_free(I, v);
     }*/
- 
+
     //pylt_obj_dict_free(I, I->modules);
     pylt_gc_freeall(I);
     pylt_gc_finalize(I);
+
+    pylt_obj_dict_free(I, I->modules);
+    pylt_obj_dict_free(I, I->inner_module_loaders);
 
     pylt_free(I->lexer);
     pylt_free(I->parser);
