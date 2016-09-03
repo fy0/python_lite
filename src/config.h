@@ -14,11 +14,6 @@
 #include <stdint.h>
 #include <math.h>
 
-typedef struct RawString {
-    const uint8_t *s;
-    const uint8_t *e;
-} RawString;
-
 typedef intptr_t pl_int_t;
 typedef uintptr_t pl_uint_t;
 typedef int32_t pl_int32_t;
@@ -38,9 +33,6 @@ typedef struct PyLiteInterpreter PyLiteInterpreter;
 
 void* pylt_realloc(void* m, size_t size);
 void pylt_free(void* m);
-
-void putcode(uint32_t code);
-void raw_str_print(RawString *rs);
 
 #endif
 

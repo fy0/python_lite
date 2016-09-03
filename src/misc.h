@@ -2,8 +2,9 @@
 #ifndef PYLITE_MISC_H
 #define PYLITE_MISC_H
 
-#include "types/all.h"
-#include "intp.h"
+#include "config.h"
+
+typedef struct PyLiteStrObject PyLiteStrObject;
 
 struct PyLiteStaticObjectsType {
     struct {
@@ -257,8 +258,15 @@ struct PyLiteStaticObjectsType {
     } str;
 } pl_static;
 
-void pylt_misc_static_objs_init(PyLiteInterpreter *I);
+typedef struct RawString {
+    const uint8_t *s;
+    const uint8_t *e;
+} RawString;
 
+void putcode(uint32_t code);
+void raw_str_print(RawString *rs);
+
+void pylt_misc_static_objs_init(PyLiteInterpreter *I);
 
 #endif
 

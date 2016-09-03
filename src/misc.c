@@ -1,5 +1,26 @@
 
 #include "misc.h"
+#include "intp.h"
+#include "types/all.h"
+
+void putcode(uint32_t code) {
+    if (code < 0xff) {
+        putchar((char)code);
+    } else {
+        char* ret = ucs4_to_utf8(code);
+        printf_u8("%s", ret);
+        free(ret);
+    }
+}
+
+void raw_str_print(RawString *rs) {
+    uint32_t code;
+    for (const uint8_t *p = rs->s; p != rs->e;) {
+        p = utf8_decode(p, &code);
+        putcode(code);
+    }
+}
+
 
 #define sstr_new(_name) pl_static.str._name = pylt_obj_str_new_from_cstr_static(I, #_name, true)
 #define sstr_new2(_name, _str) pl_static.str._name = pylt_obj_str_new_from_cstr_static(I, (_str), true);

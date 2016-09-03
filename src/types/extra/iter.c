@@ -1,6 +1,7 @@
 ﻿
 #include "iter.h"
 #include "../all.h"
+#include "../../vm.h"
 #include "../../misc.h"
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
