@@ -184,7 +184,7 @@ void* my_malloc(size_t size);
 #define kcalloc(N,Z) my_malloc((N)*(Z))
 #endif
 #ifndef kmalloc
-#define kmalloc(Z) pylt_realloc(NULL, Z)
+#define kmalloc(Z) pylt_malloc(I, Z)
 #endif
 #ifndef krealloc
 #define krealloc(P,Z) pylt_realloc(P,Z)

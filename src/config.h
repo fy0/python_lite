@@ -31,8 +31,9 @@ typedef struct PyLiteInterpreter PyLiteInterpreter;
 #define PYLT_LEX_STR_DEFAULT_BUFFER_SIZE 24
 #define PYLT_LEX_STR_DEFAULT_BUFFER_INC_STEP 24
 
-void* pylt_realloc(void* m, size_t size);
-void pylt_free(void* m);
+void* pylt_realloc(PyLiteInterpreter *I, void* m, size_t osize, size_t size);
+#define pylt_malloc(I, size) pylt_realloc(I, NULL, 0, size)
+#define pylt_free(I, m, s) pylt_realloc(I, (m), (s), 0)
+#define pylt_free_ex(I, m) pylt_realloc(I, (m), sizeof(*(m)), 0)
 
 #endif
-

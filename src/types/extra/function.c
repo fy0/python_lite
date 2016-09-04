@@ -3,14 +3,14 @@
 #include "../../bind.h"
 
 PyLiteFunctionObject* pylt_obj_func_new(PyLiteInterpreter *I, PyLiteCodeObject *code) {
-    PyLiteFunctionObject *obj = pylt_realloc(NULL, sizeof(PyLiteFunctionObject));
+    PyLiteFunctionObject *obj = pylt_malloc(I, sizeof(PyLiteFunctionObject));
     memset(obj, 0, sizeof(PyLiteFunctionObject));
     obj->ob_type = PYLT_OBJ_TYPE_FUNCTION;
     if (code) {
         memcpy(&obj->code, code, sizeof(PyLiteCodeObject));
     } else {
         obj->code.const_val = pylt_obj_list_new(I);
-        kv_init(obj->code.opcodes);
+        kv_init(I, obj->code.opcodes);
     }
     return obj;
 }
@@ -61,7 +61,7 @@ PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteInterpreter *I, PyLiteObject *f
 }
 
 PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteInterpreter *I, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
-    PyLiteCFunctionObject *func = pylt_realloc(NULL, sizeof(PyLiteCFunctionObject));
+    PyLiteCFunctionObject *func = pylt_malloc(I, sizeof(PyLiteCFunctionObject));
     func->ob_type = PYLT_OBJ_TYPE_CFUNCTION;
     func->info.length = param_names ? param_names->ob_size : 0;
     func->info.minimal = func->info.length - (defaults ? defaults->ob_size : 0);

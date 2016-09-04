@@ -61,10 +61,10 @@ PyLiteObject* pylt_obj_str_mul(PyLiteInterpreter *I, PyLiteStrObject *self, PyLi
     PyLiteStrObject *obj;
     if (other->ob_type != PYLT_OBJ_TYPE_INT) return NULL;
 
-    obj = pylt_realloc(NULL, sizeof(PyLiteStrObject));
+    obj = pylt_malloc(I, sizeof(PyLiteStrObject));
     obj->ob_type = PYLT_OBJ_TYPE_STR;
     obj->ob_size = self->ob_size * castint(other)->ob_val;
-    obj->ob_val = pylt_realloc(NULL, sizeof(uint32_t) * (obj->ob_size + 1));
+    obj->ob_val = pylt_malloc(I, sizeof(uint32_t) * (obj->ob_size + 1));
     if (!obj->ob_val); // Memory Error
 
     for (int i = 0; i < castint(other)->ob_val; ++i) {
@@ -93,10 +93,10 @@ PyLiteObject* pylt_obj_str_plus(PyLiteInterpreter *I, PyLiteStrObject *self, PyL
     PyLiteStrObject *obj;
     if (other->ob_type != PYLT_OBJ_TYPE_STR) return NULL;
 
-    obj = pylt_realloc(NULL, sizeof(PyLiteStrObject));
+    obj = pylt_malloc(I, sizeof(PyLiteStrObject));
     obj->ob_type = PYLT_OBJ_TYPE_STR;
     obj->ob_size = self->ob_size + caststr(other)->ob_size;
-    obj->ob_val = pylt_realloc(NULL, sizeof(uint32_t) * (obj->ob_size + 1));
+    obj->ob_val = pylt_malloc(I, sizeof(uint32_t) * (obj->ob_size + 1));
     if (!obj->ob_val); // Memory Error
 
     memcpy(obj->ob_val, self->ob_val, self->ob_size * sizeof(uint32_t));
@@ -200,9 +200,9 @@ pl_int_t str_escape_next(PyLiteInterpreter *I, str_writer_t *w) {
 }
 
 PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size, bool is_raw) {
-    PyLiteStrObject *obj = pylt_realloc(NULL, sizeof(PyLiteStrObject));
+    PyLiteStrObject *obj = pylt_malloc(I, sizeof(PyLiteStrObject));
     obj->ob_type = PYLT_OBJ_TYPE_STR;
-    obj->ob_val = pylt_realloc(NULL, sizeof(uint32_t) * (size + 1));
+    obj->ob_val = pylt_malloc(I, sizeof(uint32_t) * (size + 1));
     if (is_raw) {
         obj->ob_size = size;
         for (int i = 0; i < size; i++) {
@@ -252,9 +252,9 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size,
                     obj->ob_val[pos++] = str[i++];
             }
         }
-        obj->ob_size = pos;
+        obj->ob_val = pylt_realloc(I, obj->ob_val, sizeof(uint32_t) * obj->ob_size, sizeof(uint32_t) * (size + 1));
         obj->ob_val[pos] = '\0';
-        obj->ob_val = pylt_realloc(obj->ob_val, sizeof(uint32_t) * (size + 1));
+        obj->ob_size = pos;
     }
     return hash_and_check_cache(I, obj);
 }
@@ -264,12 +264,12 @@ PyLiteStrObject* pylt_obj_str_new_from_cstr(PyLiteInterpreter *I, const char *st
     PyLiteStrObject *obj;
     const char *p = (const char *)str;
     int len = utf8_len(str);
-    uint32_t *buf = pylt_realloc(NULL, (len + 1) * sizeof(uint32_t));
+    uint32_t *buf = pylt_malloc(I, (len + 1) * sizeof(uint32_t));
 
     for (int i = 0; i < len; i++) {
         p = utf8_decode(p, &code);
         if (!p) {
-            pylt_free(buf);
+            pylt_free(I, buf, (len + 1) * sizeof(uint32_t));
             return NULL;
         }
         buf[i] = code;
@@ -284,8 +284,8 @@ PyLiteStrObject* pylt_obj_str_new_empty(PyLiteInterpreter *I) {
 }
 
 void pylt_obj_str_free(PyLiteInterpreter *I, PyLiteStrObject *self) {
-    pylt_free(self->ob_val);
-    pylt_free(self);
+    pylt_free(I, self->ob_val, sizeof(uint32_t)*self->ob_size);
+    pylt_free_ex(I, self);
 }
 
 pl_int_t pylt_obj_str_index_full(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end) {
@@ -347,7 +347,7 @@ PyLiteStrObject* pylt_obj_str_join(PyLiteInterpreter *I, PyLiteStrObject *separa
         PyLiteStrObject *str;
 
         data_len += (strlst->ob_size - 1) * separator->ob_size;
-        data = pylt_realloc(NULL, data_len * sizeof(uint32_t));
+        data = pylt_malloc(I, data_len * sizeof(uint32_t));
 
         for (pl_int_t i = 0; i < strlst->ob_size; ++i) {
             str = caststr(strlst->ob_val[i]);
@@ -360,7 +360,7 @@ PyLiteStrObject* pylt_obj_str_join(PyLiteInterpreter *I, PyLiteStrObject *separa
         }
 
         str = pylt_obj_str_new(I, data, data_len, true);
-        pylt_free(data);
+        pylt_free(I, data, str->ob_size * sizeof(uint32_t));
         pylt_obj_list_free(I, strlst);
         return str;
     }
@@ -379,7 +379,7 @@ PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *sel
 		else if ((0 <= c && c <= 32) || (127 <= c && c <= 160)) ext_count += 3;
 	}
 
-	data = pylt_realloc(NULL, (self->ob_size + ext_count + 2) * sizeof(uint32_t));
+    data = pylt_malloc(I, (self->ob_size + ext_count + 2) * sizeof(uint32_t));
 	data[0] = '\'';
 	j = 1;
 
@@ -410,7 +410,7 @@ PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *sel
 
 	data[j++] = '\'';
 	PyLiteStrObject *str = pylt_obj_str_new(I, data, j, true);
-	pylt_free(data);
+    pylt_free(I, data, (self->ob_size + ext_count + 2) * sizeof(uint32_t));
 	return str;
 }
 
@@ -419,9 +419,9 @@ PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, P
     PyLiteObject *obj;
     pl_int_t argtimes = 0;
     pl_int_t slen, rlen; // string length, real length
-    PyLiteStrObject *str = pylt_realloc(NULL, sizeof(PyLiteStrObject));
+    PyLiteStrObject *str = pylt_malloc(I, sizeof(PyLiteStrObject));
     str->ob_type = PYLT_OBJ_TYPE_STR;
-    str->ob_val = pylt_realloc(NULL, sizeof(uint32_t) * (format->ob_size + 1));
+    str->ob_val = pylt_malloc(I, sizeof(uint32_t) * (format->ob_size + 1));
 
     str_writer_t writer = {
         .fstr = format,
@@ -541,7 +541,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, P
                     uint8_t tmp_bytes[MAX_LONG_LONG_CHARS];
 #ifdef PLATFORM_WINDOWS
                     slen = sprintf(tmp_bytes, "%p", obj) + 2;
-                    tmp = pylt_realloc(NULL, slen*sizeof(uint32_t));
+                    tmp = pylt_malloc(I, slen*sizeof(uint32_t));
                     tmp[0] = '0';
                     tmp[1] = 'x';
                     for (int i = 2; i < slen; ++i) {
@@ -549,7 +549,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, P
                     }
 #else
                     slen = sprintf(tmp_bytes, "%p", obj);
-                    tmp = pylt_realloc(NULL, slen*sizeof(uint32_t));
+                    tmp = pylt_malloc(I, slen*sizeof(uint32_t));
                     for (int i = 0; i < slen; ++i) {
                         tmp[i] = tmp_bytes[i];
                     }
@@ -568,7 +568,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, P
 
             pl_uint32_t rest = writer.fstr->ob_size - writer.findex;
             if (writer.dindex + rest + rlen > writer.dsize) {
-                writer.dstr->ob_val = pylt_realloc(writer.dstr->ob_val, sizeof(uint32_t) * (writer.dindex + rest + rlen + 1));
+                writer.dstr->ob_val = pylt_realloc(I, writer.dstr->ob_val, sizeof(uint32_t) * (writer.dsize), sizeof(uint32_t) * (writer.dindex + rest + rlen + 1));
                 writer.dsize = writer.dindex + rest + rlen;
             }
 
@@ -581,7 +581,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, P
 
             memcpy(writer.dstr->ob_val + writer.dindex, tmp, sizeof(uint32_t)*slen);
             writer.dindex += slen;
-            if (is_free) pylt_free(tmp);
+            if (is_free) pylt_free(I, tmp, sizeof(uint32_t)*slen);
 
             if ((!left_pad) && pad_len) {
                 for (pl_int_t i = 0; i < pad_len; ++i) {

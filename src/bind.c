@@ -39,9 +39,9 @@ PyLiteTupleObject* _NST(PyLiteInterpreter *I, int n, ...) {
     return obj;
 }
 
-pl_uint_t* _UINTS(pl_uint_t n, ...) {
+pl_uint_t* _UINTS(PyLiteInterpreter *I, pl_uint_t n, ...) {
     va_list args;
-    pl_uint_t *ret = pylt_realloc(NULL, sizeof(pl_uint_t) * n);
+    pl_uint_t *ret = pylt_malloc(I, sizeof(pl_uint_t) * n);
 
     va_start(args, n);
     for (pl_uint_t i = 0; i < n; ++i) {

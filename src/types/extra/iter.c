@@ -8,7 +8,7 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
     PyLiteIterObject *iter;
     if (obj->ob_type == PYLT_OBJ_TYPE_ITER) return castiter(obj);
 
-    iter = pylt_realloc(NULL, sizeof(PyLiteIterObject));
+    iter = pylt_malloc(I, sizeof(PyLiteIterObject));
     iter->ob_type = PYLT_OBJ_TYPE_ITER;
     iter->base = obj;
     iter->backup = NULL;
@@ -56,7 +56,7 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
                 if (obj_func) {
                     niter = castiter(pylt_vm_call_method(I, obj, obj_func, 0, NULL));
                     if (pl_isiter(niter)) {
-                        pylt_free(iter);
+                        pylt_free_ex(I, iter);
                         return iter;
                     }
                 } else {
@@ -69,7 +69,7 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
             }
     }
 
-    pylt_free(iter);
+    pylt_free_ex(I, iter);
     return NULL;
 }
 
@@ -153,5 +153,5 @@ PyLiteObject* pylt_obj_custom_iternext(PyLiteInterpreter *I, PyLiteIterObject *i
 
 void pylt_obj_iter_free(PyLiteInterpreter *I, PyLiteIterObject* self) {
     if (self->backup) pylt_obj_iter_free(I, self->backup);
-    pylt_free(self);
+    pylt_free_ex(I, self);
 }

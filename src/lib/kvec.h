@@ -52,17 +52,18 @@
 #include "../config.h"
 
 #ifndef krealloc
-#define krealloc(P,Z) pylt_realloc(P,Z)
+#define krealloc(I,P,O,Z) pylt_realloc(I,P,O,Z)
 #endif
 #ifndef kfree
-#define kfree(P) pylt_free(P)
+#define kfree(I,P,S) pylt_free(I, P, S)
+#define kfree_ex(I,P) pylt_free_ex(I, P)
 #endif
 
 #define kv_roundup32(x) (--(x), (x)|=(x)>>1, (x)|=(x)>>2, (x)|=(x)>>4, (x)|=(x)>>8, (x)|=(x)>>16, ++(x))
 
-#define kvec_t(type) struct { size_t n, m; type *a; }
-#define kv_init(v) ((v).n = (v).m = 0, (v).a = 0)
-#define kv_destroy(v) kfree((v).a)
+#define kvec_t(type) struct { size_t n, m; type *a;PyLiteInterpreter *I; }
+#define kv_init(I, v) ((v).n = (v).m = 0, (v).a = 0, (v).I = I)
+#define kv_destroy(v) kfree((v).I, (v).a, 0)
 #define kv_A(v, i) ((v).a[(i)])
 #define kv_top(v) ((v).a[(v).n-1])
 #define kv_topn(v, num) ((v).a[(v).n-1-(num)])
@@ -72,10 +73,10 @@
 #define kv_max(v) ((v).m)
 #define kv_clear(v) ((v).n = 0)
 
-#define kv_resize(type, v, s)  ((v).m = (s), (v).a = (type*)krealloc((v).a, sizeof(type) * (v).m))
+#define kv_resize(type, v, s)  ((v).m = (s), (v).a = (type*)krealloc((v).I, (v).a, 0, sizeof(type) * (v).m))
 
 #define kv_shallowcopy(dest, src) { \
-    (dest).n = (src).n; (dest).m = (src).m; (dest).a = (src).a; \
+    (dest).n = (src).n; (dest).m = (src).m; (dest).a = (src).a; (dest).I = (src).I; \
 }
 
 #define kv_copy(type, v1, v0) do {                            \
@@ -93,19 +94,19 @@
 #define kv_push(type, v, x) do {                                    \
         if ((v).n == (v).m) {                                        \
             (v).m = (v).m? (v).m<<1 : 2;                            \
-            (v).a = (type*)krealloc((v).a, sizeof(type) * (v).m);    \
+            (v).a = (type*)krealloc((v).I, (v).a, sizeof(type) * (v).n, sizeof(type) * (v).m);    \
         }                                                            \
         (v).a[(v).n++] = (x);                                        \
     } while (0)
 
 #define kv_pushp(type, v) (((v).n == (v).m)?                            \
                            ((v).m = ((v).m? (v).m<<1 : 2),                \
-                            (v).a = (type*)krealloc((v).a, sizeof(type) * (v).m), 0)    \
+                            (v).a = (type*)krealloc((v).I, (v).a, sizeof(type) * (v).n, sizeof(type) * (v).m), 0)    \
                            : 0), ((v).a + ((v).n++))
 
 #define kv_a(type, v, i) (((v).m <= (size_t)(i)? \
                           ((v).m = (v).n = (i) + 1, kv_roundup32((v).m), \
-                           (v).a = (type*)krealloc((v).a, sizeof(type) * (v).m), 0) \
+                           (v).a = (type*)krealloc((v).I, (v).a, sizeof(type) * (v).n, sizeof(type) * (v).m), 0) \
                           : (v).n <= (size_t)(i)? (v).n = (i) + 1 \
                           : 0), (v).a[(i)])
 

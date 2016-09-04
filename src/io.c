@@ -11,7 +11,7 @@ char* read_file(const char* fn, int *psize) {
         fseek(fp, 0, SEEK_END);
         size = ftell(fp);
         fseek(fp, 0, SEEK_SET);
-        buf = pylt_realloc(NULL, size + 1);
+        buf = pylt_malloc(NULL, size + 1);
         buf[size] = '\0';
         fread(buf, size, 1, fp);
         fclose(fp);
@@ -23,7 +23,7 @@ char* read_file(const char* fn, int *psize) {
 
 
 StringStream* ss_new(uint8_t *buf, int size) {
-    StringStream *ss = pylt_realloc(NULL, sizeof(StringStream));
+    StringStream *ss = pylt_malloc(NULL, sizeof(StringStream));
     ss->buf = buf;
     ss->p = buf;
     ss->now = 0;
@@ -33,7 +33,7 @@ StringStream* ss_new(uint8_t *buf, int size) {
 }
 
 void ss_free(StringStream *ss) {
-    pylt_free(ss);
+    pylt_free_ex(NULL, ss);
 }
 
 void ss_nextc(StringStream* ss) {

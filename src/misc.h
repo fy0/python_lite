@@ -269,4 +269,3 @@ void raw_str_print(RawString *rs);
 void pylt_misc_static_objs_init(PyLiteInterpreter *I);
 
 #endif
-

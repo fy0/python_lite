@@ -499,7 +499,7 @@ struct PyLiteStrObject* pylt_obj_to_repr(PyLiteInterpreter *I, PyLiteObject *obj
 void pylt_obj_free(PyLiteInterpreter *I, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_OBJ:
-            pylt_free(obj);
+            pylt_free_ex(I, obj);
             break;
         case PYLT_OBJ_TYPE_INT:
             pylt_obj_int_free(I, castint(obj));

@@ -3,7 +3,7 @@
 #include "../dict.h"
 
 PyLiteModuleObject* pylt_obj_module_new(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteStrObject *name) {
-	PyLiteModuleObject *obj = castmod(pylt_realloc(NULL, sizeof(PyLiteModuleObject)));
+	PyLiteModuleObject *obj = castmod(pylt_malloc(I, sizeof(PyLiteModuleObject)));
     obj->ob_type = PYLT_OBJ_TYPE_MODULE;
     obj->attrs = pylt_obj_dict_new(I);
     obj->code = code;
@@ -21,5 +21,5 @@ PyLiteObject* pylt_obj_mod_getattr(PyLiteInterpreter *I, PyLiteModuleObject *sel
 
 void pylt_obj_module_free(PyLiteInterpreter *I, PyLiteModuleObject *self) {
     pylt_obj_dict_free(I, self->attrs);
-    pylt_free(self);
+    pylt_free_ex(I, self);
 }

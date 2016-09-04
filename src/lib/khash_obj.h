@@ -181,18 +181,19 @@ typedef khint_t khiter_t;
 #include "../config.h"
 
 #ifndef kcalloc
-void* my_malloc(size_t size);
+void* my_malloc(PyLiteInterpreter *I, size_t size);
 
-#define kcalloc(N,Z) my_malloc((N)*(Z))
+#define kcalloc(I,N,Z) my_malloc(I, (N)*(Z))
 #endif
 #ifndef kmalloc
-#define kmalloc(Z) pylt_realloc(NULL, Z)
+#define kmalloc(I,Z) my_malloc(I, Z)
 #endif
 #ifndef krealloc
-#define krealloc(P,Z) pylt_realloc(P,Z)
+#define krealloc(I,P,S,Z) pylt_realloc(I,P,S,Z)
 #endif
 #ifndef kfree
-#define kfree(P) pylt_free(P)
+#define kfree(I,P,S) pylt_free(I, P, S)
+#define kfree_ex(I,P) pylt_free_ex(I, P)
 #endif
 
 static const double __ac_HASH_UPPER = 0.77;
@@ -217,16 +218,16 @@ static const double __ac_HASH_UPPER = 0.77;
 
 #define __KHASHO_IMPL(name, SCOPE, khkey_t, khval_t, kho_is_map, __hash_func, __hash_equal) \
     SCOPE kho_##name##_t *kho_init_##name(PyLiteInterpreter *I) {                            \
-        kho_##name##_t* ret = (kho_##name##_t*)kcalloc(1, sizeof(kho_##name##_t));        \
+        kho_##name##_t* ret = (kho_##name##_t*)kcalloc(I, 1, sizeof(kho_##name##_t));        \
         ret->I = I; \
         return ret; \
     }                                                                    \
     SCOPE void kho_destroy_##name(kho_##name##_t *h)                        \
     {                                                                    \
         if (h) {                                                        \
-            kfree((void *)h->keys); kfree(h->flags);                    \
-            kfree((void *)h->vals);                                        \
-            kfree(h);                                                    \
+            kfree(h->I, (void *)h->keys, 0); kfree(h->I, h->flags, 0);                    \
+            kfree(h->I, (void *)h->vals, 0);                                        \
+            kfree_ex(h->I, h);                                                    \
                 }                                                                \
     }                                                                    \
     SCOPE void kho_clear_##name(kho_##name##_t *h)                        \
@@ -259,16 +260,16 @@ static const double __ac_HASH_UPPER = 0.77;
             if (new_n_buckets < 4) new_n_buckets = 4;                    \
             if (h->size >= (khint_t)(new_n_buckets * __ac_HASH_UPPER + 0.5)) j = 0;    /* requested size is too small */ \
                         else { /* hash table size to be changed (shrink or expand); rehash */ \
-                new_flags = (khint32_t*)kmalloc(__ac_fsize(new_n_buckets) * sizeof(khint32_t));    \
+                new_flags = (khint32_t*)kmalloc(h->I, __ac_fsize(new_n_buckets) * sizeof(khint32_t));    \
                 if (!new_flags) return -1;                                \
                 memset(new_flags, 0xaa, __ac_fsize(new_n_buckets) * sizeof(khint32_t)); \
                 if (h->n_buckets < new_n_buckets) {    /* expand */        \
-                    khkey_t *new_keys = (khkey_t*)krealloc((void *)h->keys, new_n_buckets * sizeof(khkey_t)); \
-                    if (!new_keys) { kfree(new_flags); return -1; }        \
+                    khkey_t *new_keys = (khkey_t*)krealloc(h->I, (void *)h->keys, h->n_buckets * sizeof(khkey_t), new_n_buckets * sizeof(khkey_t)); \
+                    if (!new_keys) { kfree(h->I, new_flags, __ac_fsize(new_n_buckets) * sizeof(khint32_t)); return -1; }        \
                     h->keys = new_keys;                                    \
                     if (kho_is_map) {                                    \
-                        khval_t *new_vals = (khval_t*)krealloc((void *)h->vals, new_n_buckets * sizeof(khval_t)); \
-                        if (!new_vals) { kfree(new_flags); return -1; }    \
+                        khval_t *new_vals = (khval_t*)krealloc(h->I, (void *)h->vals, h->n_buckets * sizeof(khval_t), new_n_buckets * sizeof(khval_t)); \
+                        if (!new_vals) { kfree(h->I, new_flags, __ac_fsize(new_n_buckets) * sizeof(khint32_t)); return -1; }    \
                         h->vals = new_vals;                                \
                                         }                                                    \
                                 } /* otherwise shrink */                                \
@@ -302,10 +303,10 @@ static const double __ac_HASH_UPPER = 0.77;
                                 }                                                        \
                         }                                                            \
             if (h->n_buckets > new_n_buckets) { /* shrink the hash table */ \
-                h->keys = (khkey_t*)krealloc((void *)h->keys, new_n_buckets * sizeof(khkey_t)); \
-                if (kho_is_map) h->vals = (khval_t*)krealloc((void *)h->vals, new_n_buckets * sizeof(khval_t)); \
+                h->keys = (khkey_t*)krealloc(h->I, (void *)h->keys, h->n_buckets * sizeof(khkey_t), new_n_buckets * sizeof(khkey_t)); \
+                if (kho_is_map) h->vals = (khval_t*)krealloc(h->I, (void *)h->vals, h->n_buckets * sizeof(khkey_t), new_n_buckets * sizeof(khval_t)); \
                         }                                                            \
-            kfree(h->flags); /* free the working space */                \
+            kfree(h->I, h->flags, 0); /* free the working space */                \
             h->flags = new_flags;                                        \
             h->n_buckets = new_n_buckets;                                \
             h->n_occupied = h->size;                                    \

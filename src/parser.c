@@ -1183,7 +1183,7 @@ void func_push(ParserState *ps) {
     ParserInfo *info;
     // 如果没有空槽
     if (!ps->info_used) {
-        info = pylt_realloc(NULL, sizeof(ParserInfo));
+        info = pylt_malloc(ps->I, sizeof(ParserInfo));
     // 如果有用过的空槽
     } else {
         info = ps->info_used;
@@ -1215,7 +1215,7 @@ void pylt_parser_init(PyLiteInterpreter *I, ParserState *ps, LexState *ls) {
 
     ps->lval_check.enable = false;
     ps->lval_check.expr_level = 0;
-    kv_init(ps->lval_check.bc_cache);
+    kv_init(I, ps->lval_check.bc_cache);
 
     ps->disable_expr_tuple_parse = false;
     ps->disable_return_parse = true;
@@ -1234,18 +1234,18 @@ void pylt_parser_crash_finalize(PyLiteInterpreter *I, ParserState *ps) {
         // free const vals
         PyLiteListObject *lst = info->code->const_val;
         for (pl_int_t i = 0; i < lst->ob_size; ++i) {
-            pylt_free(lst->ob_val[i]);
+            pylt_obj_free(I, lst->ob_val[i]);
         }
 
         pylt_obj_code_free(I, info->code);
-        pylt_free(info);
+        pylt_free_ex(I, info);
         info = info2;
     }
 
     info = ps->info_used;
     while (info) {
         info2 = info->prev;
-        pylt_free(info);
+        pylt_free_ex(I, info);
         info = info2;
     }
 
@@ -1258,7 +1258,7 @@ void pylt_parser_finalize(PyLiteInterpreter *I, ParserState *ps) {
     info = ps->info_used;
     while (info) {
         info2 = info->prev;
-        pylt_free(info);
+        pylt_free_ex(I, info);
         info = info2;
     }
 

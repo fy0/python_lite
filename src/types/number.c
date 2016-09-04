@@ -288,14 +288,14 @@ PyLiteObject* pylt_obj_float_pow(PyLiteInterpreter *I, PyLiteFloatObject *self, 
 
 
 PyLiteIntObject* pylt_obj_int_new(PyLiteInterpreter *I, pl_int_t val) {
-    PyLiteIntObject *obj = pylt_realloc(NULL, sizeof(PyLiteIntObject));
+    PyLiteIntObject *obj = pylt_malloc(I, sizeof(PyLiteIntObject));
     obj->ob_type = PYLT_OBJ_TYPE_INT;
     obj->ob_val = val;
     return obj;
 }
 
 PyLiteFloatObject* pylt_obj_float_new(PyLiteInterpreter *I, double val) {
-    PyLiteFloatObject *obj = pylt_realloc(NULL, sizeof(PyLiteFloatObject));
+    PyLiteFloatObject *obj = pylt_malloc(I, sizeof(PyLiteFloatObject));
     obj->ob_type = PYLT_OBJ_TYPE_FLOAT;
     obj->ob_val = val;
     return obj;
@@ -401,7 +401,7 @@ uint32_t* pylt_obj_int_to_ucs4(PyLiteInterpreter *I, PyLiteIntObject *self, pl_i
     }
 
     val = abs(self->ob_val);
-    str_data = pylt_realloc(NULL, len * sizeof(uint32_t));
+    str_data = pylt_malloc(I, len * sizeof(uint32_t));
     if (is_neg) str_data[0] = '-';
     if (val == 0) str_data[0] = '0';
     pos = len - 1;
@@ -422,7 +422,7 @@ PyLiteStrObject* pylt_obj_int_to_str(PyLiteInterpreter *I, PyLiteIntObject *self
 
     str_data = pylt_obj_int_to_ucs4(I, self, &len);
     ret = pylt_obj_str_new(I, str_data, len, true);
-    pylt_free(str_data);
+    pylt_free(I, str_data, sizeof(uint32_t) * len);
     return ret;
 }
 
@@ -430,7 +430,7 @@ PyLiteStrObject* pylt_obj_int_to_str(PyLiteInterpreter *I, PyLiteIntObject *self
 uint32_t* pylt_obj_float_to_ucs4(PyLiteInterpreter *I, PyLiteFloatObject *self, pl_int_t *plen) {
     char buf[24 + 1];
     pl_int_t len = fpconv_dtoa(self->ob_val, buf);
-    uint32_t *str_data = pylt_realloc(NULL, len * sizeof(uint32_t));
+    uint32_t *str_data = pylt_malloc(I, len * sizeof(uint32_t));
     for (pl_int_t i = 0; i < len; ++i) {
         str_data[i] = buf[i];
     }
@@ -445,15 +445,15 @@ PyLiteStrObject* pylt_obj_float_to_str(PyLiteInterpreter *I, PyLiteFloatObject *
 
     str_data = pylt_obj_float_to_ucs4(I, self, &len);
     ret = pylt_obj_str_new(I, str_data, len, true);
-    pylt_free(str_data);
+    pylt_free(I, str_data, len*sizeof(uint32_t));
     return ret;
 }
 
 
 void pylt_obj_int_free(PyLiteInterpreter *I, PyLiteIntObject *self) {
-    pylt_free(self);
+    pylt_free_ex(I, self);
 }
 
 void pylt_obj_float_free(PyLiteInterpreter *I, PyLiteFloatObject *self) {
-    pylt_free(self);
+    pylt_free_ex(I, self);
 }

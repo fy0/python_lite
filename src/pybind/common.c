@@ -210,7 +210,7 @@ PyLiteObject* pylt_cls_method_tuple_new(PyLiteInterpreter *I, int argc, PyLiteOb
     }
 
     tuple = pylt_obj_tuple_new_with_data(I, pylt_obj_list_count(I, lst), (void*)lst->ob_val);
-    pylt_free(lst->ob_val);
+    pylt_free(I, lst->ob_val, sizeof(PyLiteObject*) * lst->ob_size);
 
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(tuple));
 }

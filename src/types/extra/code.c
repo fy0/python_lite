@@ -15,13 +15,13 @@ void pylt_obj_code_add_to_gc(PyLiteInterpreter *I, PyLiteCodeObject *self) {
 }
 
 PyLiteCodeObject* pylt_obj_code_new(PyLiteInterpreter *I, pl_bool_t with_debug_info) {
-	PyLiteCodeObject *obj = pylt_realloc(NULL, sizeof(PyLiteCodeObject));
+	PyLiteCodeObject *obj = pylt_malloc(I, sizeof(PyLiteCodeObject));
     obj->ob_type = PYLT_OBJ_TYPE_CODE;
     obj->const_val = pylt_obj_list_new(I);
-    kv_init(obj->opcodes);
+    kv_init(I, obj->opcodes);
 	obj->with_debug_info = with_debug_info;
 	if (with_debug_info) {
-		kv_init(obj->lnotab);
+        kv_init(I, obj->lnotab);
 	}
     return obj;
 }
@@ -29,5 +29,5 @@ PyLiteCodeObject* pylt_obj_code_new(PyLiteInterpreter *I, pl_bool_t with_debug_i
 void pylt_obj_code_free(PyLiteInterpreter *I, PyLiteCodeObject* self) {
     pylt_obj_list_free(I, self->const_val);
     kv_destroy(self->opcodes);
-    pylt_free(self);
+    pylt_free_ex(I, self);
 }

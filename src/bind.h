@@ -25,6 +25,6 @@ void pylt_attr_register(PyLiteInterpreter *I, PyLiteTypeObject *type, PyLiteStrO
 PyLiteTupleObject* _NT(PyLiteInterpreter *I, int n, ...);
 PyLiteTupleObject* _NST(PyLiteInterpreter *I, int n, ...);
 
-pl_uint_t* _UINTS(pl_uint_t n, ...);
+pl_uint_t* _UINTS(PyLiteInterpreter *I, pl_uint_t n, ...);
 
 #endif

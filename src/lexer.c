@@ -45,21 +45,21 @@ void pylt_lex_init(PyLiteInterpreter *I, LexState *ls, StringStream *ss) {
     ls->current_indent = -1;
     ls->inside_couples = 0;
     
-    ls->indent = idt = pylt_realloc(NULL, sizeof(IndentInfo));
+    ls->indent = idt = pylt_malloc(I, sizeof(IndentInfo));
     idt->val = 0;
     idt->prev = NULL;
 
-    ls->indent_used = idt = pylt_realloc(NULL, sizeof(IndentInfo));
+    ls->indent_used = idt = pylt_malloc(I, sizeof(IndentInfo));
     for (int i = 0; i < 4; i++) {
-        idt->prev = pylt_realloc(NULL, sizeof(IndentInfo));
+        idt->prev = pylt_malloc(I, sizeof(IndentInfo));
         idt = idt->prev;
     }
     idt->prev = NULL;
 
-    ls->le.bytes.buf = pylt_realloc(NULL, PYLT_LEX_STR_DEFAULT_BUFFER_SIZE);
+    ls->le.bytes.buf = pylt_malloc(I, PYLT_LEX_STR_DEFAULT_BUFFER_SIZE);
     ls->le.bytes.size = PYLT_LEX_STR_DEFAULT_BUFFER_SIZE;
 
-    ls->le.str.buf = pylt_realloc(NULL, PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE * sizeof(uint32_t));
+    ls->le.str.buf = pylt_malloc(I, PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE * sizeof(uint32_t));
     ls->le.str.size = PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE;
 }
 
@@ -69,19 +69,19 @@ void pylt_lex_finalize(PyLiteInterpreter *I, LexState *ls) {
     idt = ls->indent;
     while (idt) {
         idt2 = idt->prev;
-        pylt_free(idt);
+        pylt_free_ex(I, idt);
         idt = idt2;
     }
 
     idt = ls->indent_used;
     while (idt) {
         idt2 = idt->prev;
-        pylt_free(idt);
+        pylt_free_ex(I, idt);
         idt = idt2;
     }
 
-    pylt_free(ls->le.bytes.buf);
-    pylt_free(ls->le.str.buf);
+    pylt_free(I, ls->le.bytes.buf, ls->le.bytes.size);
+    pylt_free(I, ls->le.str.buf, ls->le.str.size * sizeof(uint32_t));
 }
 
 
@@ -158,7 +158,8 @@ _not_str:
 
 _INLINE static bool bytes_next(LexState *ls, uint32_t chr) {
     if (ls->le.bytes.pos+1 == ls->le.bytes.size) {
-        ls->le.bytes.buf = pylt_realloc(ls->le.bytes.buf, ls->le.bytes.size += PYLT_LEX_BYTES_DEFAULT_BUFFER_INC_STEP);
+        ls->le.bytes.buf = pylt_realloc(ls->I, ls->le.bytes.buf, ls->le.bytes.size, ls->le.bytes.size + PYLT_LEX_BYTES_DEFAULT_BUFFER_INC_STEP);
+        ls->le.bytes.size += PYLT_LEX_BYTES_DEFAULT_BUFFER_INC_STEP;
     }
     ls->le.bytes.buf[ls->le.bytes.pos++] = (char)chr;
     return true;
@@ -166,7 +167,8 @@ _INLINE static bool bytes_next(LexState *ls, uint32_t chr) {
 
 _INLINE static bool str_next(LexState *ls, uint32_t chr) {
     if (ls->le.str.pos + 1 == ls->le.str.size) {
-        ls->le.str.buf = pylt_realloc(ls->le.str.buf, (ls->le.str.size += PYLT_LEX_STR_DEFAULT_BUFFER_INC_STEP) * sizeof(uint32_t));
+        ls->le.str.buf = pylt_realloc(ls->I, ls->le.str.buf, ls->le.str.size * sizeof(uint32_t), (ls->le.str.size + PYLT_LEX_STR_DEFAULT_BUFFER_INC_STEP) * sizeof(uint32_t));
+        ls->le.str.size += (PYLT_LEX_STR_DEFAULT_BUFFER_INC_STEP) * sizeof(uint32_t);
     }
     ls->le.str.buf[ls->le.str.pos++] = chr;
     return true;
@@ -448,7 +450,7 @@ indent_end:
                 idt = ls->indent_used;
                 ls->indent_used = idt->prev;
             } else {
-                idt = pylt_realloc(NULL, sizeof(IndentInfo));
+                idt = pylt_malloc(ls->I, sizeof(IndentInfo));
             }
             idt->prev = ls->indent;
             idt->val = cur_indent;
@@ -624,7 +626,7 @@ indent_end:
                     IndentInfo *idt = ls->indent;
                     ls->indent = ls->indent->prev;
                     ls->current_indent = ls->indent->val;
-                    pylt_free(idt);
+                    pylt_free_ex(ls->I, idt);
                     ls->token.val = TK_DEDENT;
                     return 0;
                 }

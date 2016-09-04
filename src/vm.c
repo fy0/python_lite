@@ -71,15 +71,15 @@ int token_de_to_op_val(uint32_t tk) {
 void pylt_vm_init(struct PyLiteInterpreter *I, PyLiteVM* vm) {
     PyLiteFrame *frame;
 
-    kv_init(vm->stack);
-    kv_init(vm->frames);
+    kv_init(I, vm->stack);
+    kv_init(I, vm->frames);
 
     // first frame
     kv_pushp(PyLiteFrame, vm->frames);
     frame = &kv_A(vm->frames, 0);
     frame->func = NULL;
 	frame->halt_when_ret = false;
-    kv_init(frame->var_tables);
+    kv_init(I, frame->var_tables);
 
     // built-in
     pylt_bind_all_types_register(I);
@@ -106,7 +106,7 @@ void pylt_vm_load_func(PyLiteInterpreter *I, PyLiteFunctionObject *func) {
     frame->func = func;
 	frame->code = &func->code;
 	frame->halt_when_ret = false;
-    kv_init(frame->var_tables);
+    kv_init(I, frame->var_tables);
 
     pylt_gc_add(I, castobj(func));
     //pylt_gc_add(I, castobj(func->code));
@@ -571,7 +571,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 break;
             case BC_DEL_FORCE:
                 // DEL_FORCE    0       0
-                pylt_free(castobj(kv_pop(I->vm.stack)));
+                //pylt_free(I, castobj(kv_pop(I->vm.stack)));
                 break;
             case BC_POP:
                 // POP          0       0

@@ -129,7 +129,7 @@ struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteInterpreter *I, PyLiteDictObj
     pl_uint32_t *data;
     pl_uint32_t comma_num = dlen - 1;
     pl_uint32_t data_len = 2 + comma_num * 2 + dlen * 2; // {} + ', ' + ': '
-    strlst = realloc(NULL, dlen * 2 * sizeof(PyLiteStrObject*));
+    strlst = pylt_malloc(I, dlen * 2 * sizeof(PyLiteStrObject*));
 
     for (pl_int32_t k = pylt_obj_dict_begin(I, self); k != pylt_obj_dict_end(I, self); pylt_obj_dict_next(I, self, &k)) {
         str = pylt_obj_to_repr(I, pylt_obj_dict_itemkey(I, self, k));
@@ -141,7 +141,7 @@ struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteInterpreter *I, PyLiteDictObj
         strlst[index++] = str;
     }
 
-    data = pylt_realloc(NULL, data_len * sizeof(uint32_t));
+    data = pylt_malloc(I, data_len * sizeof(uint32_t));
     data[0] = '{';
     index = 1;
     for (pl_uint_t i = 0; i < dlen*2; ++i) {
@@ -166,13 +166,13 @@ struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteInterpreter *I, PyLiteDictObj
     data[data_len - 1] = '}';
 
     str = pylt_obj_str_new(I, data, data_len, true);
-    pylt_free(data);
-    pylt_free(strlst);
+    pylt_free(I, data, data_len * sizeof(uint32_t));
+    pylt_free_ex(I, strlst);
     return str;
 }
 
 PyLiteDictObject* pylt_obj_dict_new(PyLiteInterpreter *I) {
-    PyLiteDictObject *obj = pylt_realloc(NULL, sizeof(PyLiteDictObject));
+    PyLiteDictObject *obj = pylt_malloc(I, sizeof(PyLiteDictObject));
     obj->ob_type = PYLT_OBJ_TYPE_DICT;
     obj->ob_val = kho_init(table, state);
     return obj;
@@ -180,5 +180,5 @@ PyLiteDictObject* pylt_obj_dict_new(PyLiteInterpreter *I) {
 
 void pylt_obj_dict_free(PyLiteInterpreter *I, PyLiteDictObject *self) {
     kho_destroy(table, self->ob_val);
-    pylt_free(self);
+    pylt_free_ex(I, self);
 }

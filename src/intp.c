@@ -10,24 +10,25 @@ void pylt_intp_err(PyLiteInterpreter *I) {
 }
 
 PyLiteInterpreter* pylt_intp_new() {
-    PyLiteInterpreter *I = pylt_realloc(NULL, sizeof(PyLiteInterpreter));
+    PyLiteInterpreter *I = pylt_malloc(NULL, sizeof(PyLiteInterpreter));
+    // 处理
     pylt_intp_init(I);
     return I;
 }
 
 void pylt_intp_free(PyLiteInterpreter *I) {
     pylt_intp_finalize(I);
-    pylt_free(I);
+    pylt_free_ex(NULL, I);
 }
 
 void pylt_intp_init(PyLiteInterpreter *I) {
-    kv_init(I->cls_base);
+    kv_init(I, I->cls_base);
     I->modules = pylt_obj_dict_new(I);
     I->inner_module_loaders = pylt_obj_dict_new(I);
     I->error = NULL;
 
-    I->lexer = pylt_realloc(NULL, sizeof(LexState));
-    I->parser = pylt_realloc(NULL, sizeof(ParserState));
+    I->lexer = pylt_malloc(I, sizeof(LexState));
+    I->parser = pylt_malloc(I, sizeof(ParserState));
 
     pylt_gc_init(I);
     pylt_lex_init(I, I->lexer, NULL);
@@ -69,8 +70,8 @@ void pylt_intp_finalize(PyLiteInterpreter *I) {
     pylt_obj_dict_free(I, I->modules);
     pylt_obj_dict_free(I, I->inner_module_loaders);
 
-    pylt_free(I->lexer);
-    pylt_free(I->parser);
+    pylt_free_ex(I, I->lexer);
+    pylt_free_ex(I, I->parser);
 }
 
 void pylt_intp_load_stream(PyLiteInterpreter *I, StringStream *ss) {
