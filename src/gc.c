@@ -248,6 +248,7 @@ void pylt_gc_finalize(PyLiteInterpreter *I) {
     upset_free(I->gc.black);
     pylt_obj_set_free(I, I->gc.str_static);
     pylt_obj_set_free(I, I->gc.str_cached);
+    printf("mem unfreed: %d\n", I->mem_used);
 }
 
 void pylt_gc_freeall(PyLiteInterpreter *I) {

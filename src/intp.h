@@ -23,6 +23,7 @@ typedef struct PyLiteInterpreter {
     // exception object when error occurred. NULL as default.
     PyLiteObject *error;
 
+    pl_uint_t mem_used;
     pl_int_t class_num;
     kvec_t(PyLiteTypeObject*) cls_base;
 } PyLiteInterpreter;

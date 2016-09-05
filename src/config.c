@@ -1,6 +1,9 @@
 
 #include "config.h"
+#include "intp.h"
 
-void* pylt_realloc(PyLiteInterpreter *I, void* m, size_t osize, size_t size) {
-    return realloc(m, size);
+void* pylt_realloc(PyLiteInterpreter *I, void* m, size_t osize, size_t nsize) {
+    void* ret = realloc(m, nsize);
+    if (I) I->mem_used = I->mem_used - osize + nsize;
+    return ret;
 }

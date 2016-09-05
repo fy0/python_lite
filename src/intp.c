@@ -11,7 +11,6 @@ void pylt_intp_err(PyLiteInterpreter *I) {
 
 PyLiteInterpreter* pylt_intp_new() {
     PyLiteInterpreter *I = pylt_malloc(NULL, sizeof(PyLiteInterpreter));
-    // 处理
     pylt_intp_init(I);
     return I;
 }
@@ -22,6 +21,7 @@ void pylt_intp_free(PyLiteInterpreter *I) {
 }
 
 void pylt_intp_init(PyLiteInterpreter *I) {
+    I->mem_used = 0;
     kv_init(I, I->cls_base);
     I->modules = pylt_obj_dict_new(I);
     I->inner_module_loaders = pylt_obj_dict_new(I);
