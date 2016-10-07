@@ -48,7 +48,7 @@ A simple, lightweight implementation of python3-like language.
 
 * compare operators (use __cmp__)
 
-* all encodings except utf-8/ucs4
+* encodings except utf-8/ucs4
 
 * while/for - else 
 

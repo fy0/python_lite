@@ -225,8 +225,9 @@ static const double __ac_HASH_UPPER = 0.77;
     SCOPE void kho_destroy_##name(kho_##name##_t *h)                        \
     {                                                                    \
         if (h) {                                                        \
-            kfree(h->I, (void *)h->keys, 0); kfree(h->I, h->flags, 0);                    \
-            kfree(h->I, (void *)h->vals, 0);                                        \
+            kfree(h->I, (void *)h->keys, h->n_buckets * sizeof(khkey_t)); \
+            kfree(h->I, h->flags, __ac_fsize(h->n_buckets) * sizeof(khint32_t));                    \
+            kfree(h->I, (void *)h->vals, h->n_buckets * sizeof(khval_t));                                        \
             kfree_ex(h->I, h);                                                    \
                 }                                                                \
     }                                                                    \
@@ -304,9 +305,9 @@ static const double __ac_HASH_UPPER = 0.77;
                         }                                                            \
             if (h->n_buckets > new_n_buckets) { /* shrink the hash table */ \
                 h->keys = (khkey_t*)krealloc(h->I, (void *)h->keys, h->n_buckets * sizeof(khkey_t), new_n_buckets * sizeof(khkey_t)); \
-                if (kho_is_map) h->vals = (khval_t*)krealloc(h->I, (void *)h->vals, h->n_buckets * sizeof(khkey_t), new_n_buckets * sizeof(khval_t)); \
+                if (kho_is_map) h->vals = (khval_t*)krealloc(h->I, (void *)h->vals, h->n_buckets * sizeof(khval_t), new_n_buckets * sizeof(khval_t)); \
                         }                                                            \
-            kfree(h->I, h->flags, 0); /* free the working space */                \
+            kfree(h->I, h->flags, __ac_fsize(h->n_buckets) * sizeof(khint32_t)); /* free the working space */                \
             h->flags = new_flags;                                        \
             h->n_buckets = new_n_buckets;                                \
             h->n_occupied = h->size;                                    \

@@ -63,7 +63,7 @@
 
 #define kvec_t(type) struct { size_t n, m; type *a;PyLiteInterpreter *I; }
 #define kv_init(I, v) ((v).n = (v).m = 0, (v).a = 0, (v).I = I)
-#define kv_destroy(v) kfree((v).I, (v).a, 0)
+#define kv_destroy(v) kfree((v).I, (v).a, sizeof(type) * (v).m)
 #define kv_A(v, i) ((v).a[(i)])
 #define kv_top(v) ((v).a[(v).n-1])
 #define kv_topn(v, num) ((v).a[(v).n-1-(num)])
@@ -73,7 +73,7 @@
 #define kv_max(v) ((v).m)
 #define kv_clear(v) ((v).n = 0)
 
-#define kv_resize(type, v, s)  ((v).m = (s), (v).a = (type*)krealloc((v).I, (v).a, 0, sizeof(type) * (v).m))
+#define kv_resize(type, v, s)  ((v).a = (type*)krealloc((v).I, (v).a, sizeof(type) * (v).m, sizeof(type) * (s)), (v).m = (s))
 
 #define kv_shallowcopy(dest, src) { \
     (dest).n = (src).n; (dest).m = (src).m; (dest).a = (src).a; (dest).I = (src).I; \
@@ -103,11 +103,5 @@
                            ((v).m = ((v).m? (v).m<<1 : 2),                \
                             (v).a = (type*)krealloc((v).I, (v).a, sizeof(type) * (v).n, sizeof(type) * (v).m), 0)    \
                            : 0), ((v).a + ((v).n++))
-
-#define kv_a(type, v, i) (((v).m <= (size_t)(i)? \
-                          ((v).m = (v).n = (i) + 1, kv_roundup32((v).m), \
-                           (v).a = (type*)krealloc((v).I, (v).a, sizeof(type) * (v).n, sizeof(type) * (v).m), 0) \
-                          : (v).n <= (size_t)(i)? (v).n = (i) + 1 \
-                          : 0), (v).a[(i)])
 
 #endif
