@@ -63,7 +63,7 @@
 
 #define kvec_t(type) struct { size_t n, m; type *a;PyLiteInterpreter *I; }
 #define kv_init(I, v) ((v).n = (v).m = 0, (v).a = 0, (v).I = I)
-#define kv_destroy(v) kfree((v).I, (v).a, sizeof(type) * (v).m)
+#define kv_destroy(v) kfree((v).I, (v).a, sizeof(*((v).a)) * (v).m)
 #define kv_A(v, i) ((v).a[(i)])
 #define kv_top(v) ((v).a[(v).n-1])
 #define kv_topn(v, num) ((v).a[(v).n-1-(num)])
