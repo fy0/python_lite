@@ -6,6 +6,7 @@ PyLiteFunctionObject* pylt_obj_func_new(PyLiteInterpreter *I, PyLiteCodeObject *
     PyLiteFunctionObject *obj = pylt_malloc(I, sizeof(PyLiteFunctionObject));
     memset(obj, 0, sizeof(PyLiteFunctionObject));
     obj->ob_type = PYLT_OBJ_TYPE_FUNCTION;
+    obj->ob_flags = 0;
     if (code) {
         memcpy(&obj->code, code, sizeof(PyLiteCodeObject));
     } else {
@@ -63,6 +64,7 @@ PyLiteFunctionInfo* pylt_obj_func_get_info(PyLiteInterpreter *I, PyLiteObject *f
 PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteInterpreter *I, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_malloc(I, sizeof(PyLiteCFunctionObject));
     func->ob_type = PYLT_OBJ_TYPE_CFUNCTION;
+    func->ob_flags = 0;
     func->info.length = param_names ? param_names->ob_size : 0;
     func->info.minimal = func->info.length - (defaults ? defaults->ob_size : 0);
 

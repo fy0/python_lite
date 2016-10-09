@@ -4,6 +4,7 @@
 PyLitePropertyObject* pylt_obj_property_new(PyLiteInterpreter *I, PyLiteObject *fget, PyLiteObject *fset) {
     PyLitePropertyObject *obj = pylt_malloc(I, sizeof(PyLitePropertyObject));
     obj->ob_type = PYLT_OBJ_TYPE_PROP;
+    obj->ob_flags = 0;
     obj->fget.func = fget;
     obj->fset.func = fset;
     return obj;

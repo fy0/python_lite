@@ -46,6 +46,7 @@ struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteInterpreter *I, PyLiteTupleO
 PyLiteTupleObject* pylt_obj_tuple_new(PyLiteInterpreter *I, pl_int_t len) {
     PyLiteTupleObject *obj = pylt_malloc(I, sizeof(PyLiteTupleObject));
     obj->ob_type = PYLT_OBJ_TYPE_TUPLE;
+    obj->ob_flags = 0;
     obj->ob_val = (len) ? pylt_malloc(I, len * sizeof(PyLiteObject*)) : NULL;
     obj->ob_size = len;
     return obj;

@@ -11,10 +11,12 @@
 
 typedef struct PyLiteObject {
     uint32_t ob_type;
+    uint32_t ob_flags;
 } PyLiteObject;
 
 #define PyLiteObject_HEAD \
-    uint32_t ob_type
+    uint32_t ob_type; \
+    uint32_t ob_flags
 
 enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_OBJ = 1,

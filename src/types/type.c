@@ -8,6 +8,7 @@ PyLiteTypeObject* pylt_obj_type_new_with_type(PyLiteInterpreter *I, PyLiteStrObj
     PyLiteTypeObject *obj = pylt_malloc(I, sizeof(PyLiteTypeObject));
     obj->name = name;
     obj->ob_type = PYLT_OBJ_TYPE_TYPE;
+    obj->ob_flags = 0;
     obj->ob_attrs = pylt_obj_dict_new(I);
     obj->ob_reftype = instance_type;
     obj->ob_base = base_type;

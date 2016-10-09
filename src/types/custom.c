@@ -7,6 +7,7 @@ PyLiteObject* pylt_obj_cutstom_create(PyLiteInterpreter *I, uint32_t ob_type, Py
     PyLiteCustomObject *obj = pylt_malloc(I, sizeof(PyLiteCustomObject));
 
     obj->ob_type = ob_type;
+    obj->ob_flags = 0;
     obj->ob_attrs = pylt_obj_dict_new(I);
     obj->base_obj = base_obj;
 

@@ -128,6 +128,7 @@ int _read_x_int(const char *p, int n, uint8_t(*func)(uint32_t code), int *pnum, 
 PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int size, bool is_raw) {
     PyLiteBytesObject *obj = pylt_malloc(I, sizeof(PyLiteBytesObject));
     obj->ob_type = PYLT_OBJ_TYPE_BYTES;
+    obj->ob_flags = 0;
     obj->ob_val = pylt_malloc(I, sizeof(uint8_t) * (size + 1));
     if (is_raw) {
         obj->ob_val[size] = '\0';

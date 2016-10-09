@@ -202,6 +202,7 @@ pl_int_t str_escape_next(PyLiteInterpreter *I, str_writer_t *w) {
 PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size, bool is_raw) {
     PyLiteStrObject *obj = pylt_malloc(I, sizeof(PyLiteStrObject));
     obj->ob_type = PYLT_OBJ_TYPE_STR;
+    obj->ob_flags = 0;  
     obj->ob_val = pylt_malloc(I, sizeof(uint32_t) * (size + 1));
     if (is_raw) {
         obj->ob_size = size;
@@ -421,6 +422,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, P
     pl_int_t slen, rlen; // string length, real length
     PyLiteStrObject *str = pylt_malloc(I, sizeof(PyLiteStrObject));
     str->ob_type = PYLT_OBJ_TYPE_STR;
+    obj->ob_flags = 0;
     str->ob_val = pylt_malloc(I, sizeof(uint32_t) * (format->ob_size + 1));
 
     str_writer_t writer = {

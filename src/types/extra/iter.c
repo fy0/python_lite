@@ -10,6 +10,7 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
 
     iter = pylt_malloc(I, sizeof(PyLiteIterObject));
     iter->ob_type = PYLT_OBJ_TYPE_ITER;
+    iter->ob_flags = 0;
     iter->base = obj;
     iter->backup = NULL;
 

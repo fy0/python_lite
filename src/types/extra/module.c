@@ -5,6 +5,7 @@
 PyLiteModuleObject* pylt_obj_module_new(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteStrObject *name) {
 	PyLiteModuleObject *obj = castmod(pylt_malloc(I, sizeof(PyLiteModuleObject)));
     obj->ob_type = PYLT_OBJ_TYPE_MODULE;
+    obj->ob_flags = 0;
     obj->attrs = pylt_obj_dict_new(I);
     obj->code = code;
 	obj->name = name;

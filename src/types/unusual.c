@@ -2,12 +2,12 @@
 #include "unusual.h"
 #include "string.h"
 
-PyLiteUnusualObject PyLiteUnknown = { PYLT_OBJ_TYPE_UNUSUAL };
-PyLiteUnusualObject PyLiteUseless = { PYLT_OBJ_TYPE_UNUSUAL };
+PyLiteUnusualObject PyLiteUnknown = { PYLT_OBJ_TYPE_UNUSUAL, 0 };
+PyLiteUnusualObject PyLiteUseless = { PYLT_OBJ_TYPE_UNUSUAL, 0 };
 
-PyLiteUnusualObject PyLiteParamArgs = { PYLT_OBJ_TYPE_UNUSUAL };
-PyLiteUnusualObject PyLiteParamKwargs = { PYLT_OBJ_TYPE_UNUSUAL };
-PyLiteUnusualObject PyLiteParamUndefined = { PYLT_OBJ_TYPE_UNUSUAL };
+PyLiteUnusualObject PyLiteParamArgs = { PYLT_OBJ_TYPE_UNUSUAL, 0 };
+PyLiteUnusualObject PyLiteParamKwargs = { PYLT_OBJ_TYPE_UNUSUAL, 0 };
+PyLiteUnusualObject PyLiteParamUndefined = { PYLT_OBJ_TYPE_UNUSUAL, 0 };
 
 
 struct PyLiteStrObject* pylt_obj_unusual_to_str(PyLiteInterpreter *I, PyLiteUnusualObject *self) {

@@ -174,6 +174,7 @@ struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteInterpreter *I, PyLiteDictObj
 PyLiteDictObject* pylt_obj_dict_new(PyLiteInterpreter *I) {
     PyLiteDictObject *obj = pylt_malloc(I, sizeof(PyLiteDictObject));
     obj->ob_type = PYLT_OBJ_TYPE_DICT;
+    obj->ob_flags = 0;
     obj->ob_val = kho_init(table, state);
     return obj;
 }

@@ -6,6 +6,7 @@
 PyLiteListObject* pylt_obj_list_new(PyLiteInterpreter *I) {
     PyLiteListObject *obj = pylt_malloc(I, sizeof(PyLiteListObject));
     obj->ob_type = PYLT_OBJ_TYPE_LIST;
+    obj->ob_flags = 0;
     obj->ob_size = 0;
     obj->ob_maxsize = 4;
     obj->ob_val = pylt_malloc(I, 4 * sizeof(PyLiteObject*));

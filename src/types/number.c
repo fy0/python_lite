@@ -290,6 +290,7 @@ PyLiteObject* pylt_obj_float_pow(PyLiteInterpreter *I, PyLiteFloatObject *self, 
 PyLiteIntObject* pylt_obj_int_new(PyLiteInterpreter *I, pl_int_t val) {
     PyLiteIntObject *obj = pylt_malloc(I, sizeof(PyLiteIntObject));
     obj->ob_type = PYLT_OBJ_TYPE_INT;
+    obj->ob_flags = 0;
     obj->ob_val = val;
     return obj;
 }
@@ -297,6 +298,7 @@ PyLiteIntObject* pylt_obj_int_new(PyLiteInterpreter *I, pl_int_t val) {
 PyLiteFloatObject* pylt_obj_float_new(PyLiteInterpreter *I, double val) {
     PyLiteFloatObject *obj = pylt_malloc(I, sizeof(PyLiteFloatObject));
     obj->ob_type = PYLT_OBJ_TYPE_FLOAT;
+    obj->ob_flags = 0;
     obj->ob_val = val;
     return obj;
 }

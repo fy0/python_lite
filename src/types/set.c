@@ -158,6 +158,7 @@ struct PyLiteStrObject* pylt_obj_set_to_str(PyLiteInterpreter *I, PyLiteSetObjec
 PyLiteSetObject* pylt_obj_set_new(PyLiteInterpreter *I) {
     PyLiteSetObject *obj = pylt_malloc(I, sizeof(PyLiteSetObject));
     obj->ob_type = PYLT_OBJ_TYPE_SET;
+    obj->ob_flags = 0;
     obj->ob_val = kho_init(set_obj, state);
     return obj;
 }

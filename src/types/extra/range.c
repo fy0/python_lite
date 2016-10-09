@@ -5,6 +5,7 @@
 PyLiteRangeObject* pylt_obj_range_new(PyLiteInterpreter *I, pl_int_t start, pl_int_t stop, pl_int_t step) {
     PyLiteRangeObject *obj = pylt_malloc(I, sizeof(PyLiteRangeObject));
     obj->ob_type = PYLT_OBJ_TYPE_RANGE;
+    obj->ob_flags = 0;
     obj->start = start;
     obj->stop = stop;
     obj->step = step;
