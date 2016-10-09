@@ -51,6 +51,11 @@ enum PyLiteObjectTypeCode {
 
 #define PYLT_OBJ_BUILTIN_TYPE_NUM PYLT_OBJ_TYPE_BASE_EXCEPTION
 
+// Object Flags
+
+#define PYLT_OBJ_FLAG_STATIC  1
+#define PYLT_OBJ_FLAG_WATCH   2
+
 
 // Object methods
 
