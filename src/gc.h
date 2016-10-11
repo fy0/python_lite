@@ -21,8 +21,9 @@ typedef struct PyLiteGC {
     PyLiteUPSet *grey;
     PyLiteUPSet *black;
 
+    // Static containers
+    PyLiteSetObject *statics;
     // Cache for str/bytes
-    PyLiteSetObject *str_static;
     PyLiteSetObject *str_cached;
 } PyLiteGC;
 
@@ -35,7 +36,9 @@ void pylt_gc_collect(PyLiteInterpreter *I);
 
 PyLiteStrObject* pylt_gc_cache_str_add(PyLiteInterpreter *I, PyLiteStrObject *key);
 PyLiteBytesObject* pylt_gc_cache_bytes_add(PyLiteInterpreter *I, PyLiteBytesObject *key);
-void pylt_gc_make_str_static(PyLiteInterpreter *I, PyLiteObject *obj);
+
+void pylt_gc_static_add(PyLiteInterpreter *I, PyLiteObject *obj);
+void pylt_gc_static_remove(PyLiteInterpreter *I, PyLiteObject *obj);
 
 void pylt_gc_static_release(PyLiteInterpreter *I);
 

@@ -65,9 +65,8 @@ PyLiteObject* upset_pop(PyLiteUPSet *upset) {
 
 void pylt_gc_add(PyLiteInterpreter *I, PyLiteObject *obj) {
     if (!obj) return;
-    if (!(pl_isstrkind(obj) && pylt_obj_set_has(I, I->gc.str_static, obj))) {
-        upset_add(I->gc.white, obj);
-    }
+    // TODO: prevent immutable static objects be added to gc
+    upset_add(I->gc.white, obj);
 }
 
 void pylt_gc_remove(PyLiteInterpreter *I, PyLiteObject *obj) {
@@ -79,7 +78,7 @@ void pylt_gc_init(PyLiteInterpreter *I) {
     I->gc.grey = upset_new(I);
     I->gc.black = upset_new(I);
 
-    I->gc.str_static = pylt_obj_set_new(I);
+    I->gc.statics = pylt_obj_set_new(I);
     I->gc.str_cached = pylt_obj_set_new(I);
 }
 
@@ -227,8 +226,8 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
         PyLiteObject *obj = upset_item(white, k);
 
         // check static before free
-        if (!(pl_isstrkind(obj) && pylt_obj_set_has(I, I->gc.str_static, obj))) {
-			printf("gc free 0x%7x [%d]\n", (unsigned int)(pl_uint_t)obj, (int)obj->ob_type);
+        if (!(obj->ob_flags | PYLT_OBJ_FLAG_STATIC)) {
+            printf("gc free 0x%7x [%d]\n", (unsigned int)(pl_uint_t)obj, (int)obj->ob_type);
             if (pl_isstrkind(obj)) {
                 pylt_obj_set_remove(I, I->gc.str_cached, obj);
             }
@@ -246,7 +245,7 @@ void pylt_gc_finalize(PyLiteInterpreter *I) {
     upset_free(I->gc.white);
     upset_free(I->gc.grey);
     upset_free(I->gc.black);
-    pylt_obj_set_free(I, I->gc.str_static);
+    pylt_obj_set_free(I, I->gc.statics);
     pylt_obj_set_free(I, I->gc.str_cached);
     printf("mem unfreed: %d\n", I->mem_used);
 }
@@ -281,11 +280,6 @@ PyLiteStrObject* pylt_gc_cache_str_add(PyLiteInterpreter *I, PyLiteStrObject *ke
     return key;
 }
 
-void pylt_gc_make_str_static(PyLiteInterpreter *I, PyLiteObject *obj) {
-    upset_remove(I->gc.white, obj);
-    pylt_obj_set_add(I, I->gc.str_static, obj);
-}
-
 PyLiteBytesObject* pylt_gc_cache_bytes_add(PyLiteInterpreter *I, PyLiteBytesObject *key) {
     PyLiteBytesObject* ret = castbytes(_pylt_gc_cache_add(I, castobj(key)));
     if (ret) {
@@ -294,6 +288,21 @@ PyLiteBytesObject* pylt_gc_cache_bytes_add(PyLiteInterpreter *I, PyLiteBytesObje
     }
     return key;
 }
+
+void pylt_gc_static_add(PyLiteInterpreter *I, PyLiteObject *obj) {
+    if (!(obj->ob_flags | PYLT_OBJ_FLAG_STATIC)) {
+        obj->ob_flags |= PYLT_OBJ_FLAG_STATIC;
+        pylt_obj_set_add(I, I->gc.statics, obj);
+    }
+}
+
+void pylt_gc_static_remove(PyLiteInterpreter *I, PyLiteObject *obj) {
+    if (obj->ob_flags | PYLT_OBJ_FLAG_STATIC) {
+        obj->ob_flags ^= PYLT_OBJ_FLAG_STATIC;
+        pylt_obj_set_add(I, I->gc.statics, obj);
+    }
+}
+
 
 void pylt_gc_static_release(PyLiteInterpreter *I) {
 }
