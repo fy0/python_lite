@@ -173,7 +173,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int
                     obj->ob_val[pos++] = str[i++];
             }
         }
-        obj->ob_val = pylt_realloc(I, obj->ob_val, sizeof(uint8_t)*obj->ob_size, sizeof(uint8_t)*pos + 1);
+        obj->ob_val = pylt_realloc(I, obj->ob_val, sizeof(uint8_t)*pos, sizeof(uint8_t)*pos + 1);
         obj->ob_size = pos;
         obj->ob_val[pos] = '\0';
     }

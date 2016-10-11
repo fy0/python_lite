@@ -253,7 +253,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size,
                     obj->ob_val[pos++] = str[i++];
             }
         }
-        obj->ob_val = pylt_realloc(I, obj->ob_val, sizeof(uint32_t) * obj->ob_size, sizeof(uint32_t) * (size + 1));
+        obj->ob_val = pylt_realloc(I, obj->ob_val, sizeof(uint32_t) * size, sizeof(uint32_t) * (size + 1));
         obj->ob_val[pos] = '\0';
         obj->ob_size = pos;
     }
