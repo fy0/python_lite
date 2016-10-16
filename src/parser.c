@@ -769,7 +769,6 @@ void parse_func(ParserState *ps) {
     ACCEPT(ps, TK_INDENT);
     parse_stmts(ps);
     ACCEPT(ps, TK_DEDENT);
-    sload_const(ps, castobj(pylt_obj_none_new(ps->I)));
     write_ins(ps, BC_RET, 0, 0);
     info = func_pop(ps);
     ps->disable_return_parse = old_disable_return;
@@ -1124,10 +1123,11 @@ void parse_stmt(ParserState *ps) {
                 error(ps, PYLT_ERR_PARSER_RETURN_OUTSIDE_FUNCTION);
             }
             next(ps);
-            if (!parse_try_expr(ps)) {
-                sload_const(ps, castobj(pylt_obj_none_new(ps->I)));
+            if (parse_try_expr(ps)) {
+                write_ins(ps, BC_RET, 0, 1);
+            } else {
+                write_ins(ps, BC_RET, 0, 0);
             }
-            write_ins(ps, BC_RET, 0, 0);
             break;
         case TK_KW_ASSERT:
             next(ps);

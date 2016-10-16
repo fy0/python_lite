@@ -539,12 +539,14 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 break;
 			}
             case BC_RET:
-                // RET          0       0
+                // RET          0       with_value
+                if (!ins.extra) kv_pushptr(I->vm.stack, &PyLiteNone);
 				if (kv_top(vm->frames).halt_when_ret) {
 					kv_pop(vm->frames);
 					goto _end;
 				}
-				kv_pop(vm->frames);
+
+                kv_pop(vm->frames);
                 code = kv_top(vm->frames).code;
                 locals = kv_top(kv_top(vm->frames).var_tables);
                 i = kv_top(vm->frames).code_pointer_slot;
