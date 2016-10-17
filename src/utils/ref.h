@@ -2,7 +2,6 @@
 #ifndef PYLITE_REF_H
 #define PYLITE_REF_H
 
-#include "../intp.h"
 #include "../types/object.h"
 
 typedef struct PyLiteRef {

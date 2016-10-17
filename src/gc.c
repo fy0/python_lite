@@ -78,7 +78,8 @@ void pylt_gc_init(PyLiteInterpreter *I) {
     I->gc.grey = upset_new(I);
     I->gc.black = upset_new(I);
 
-    I->gc.statics = pylt_obj_set_new(I);
+    I->gc.refs = upset_new(I);
+    I->gc.statics = upset_new(I);
     I->gc.str_cached = pylt_obj_set_new(I);
 }
 
@@ -129,9 +130,14 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
             MOVE_WHITE(v);
         }
     }
-    // 4. frame code
+    // 4. references
+    for (pl_uint32_t k = upset_begin(I->gc.refs); k != upset_end(I->gc.refs); upset_next(I->gc.refs, &k)) {
+        PyLiteRef *ref = (PyLiteRef*)upset_item(I->gc.refs, k);
+        MOVE_WHITE(ref->obj);
+    }
+    // 5. frame code
     MOVE_WHITE(frame->code);
-    // 5. builtins
+    // 6. builtins
     MOVE_WHITE(I->vm.builtins);
 
     while (upset_len(grey)) {
@@ -245,7 +251,9 @@ void pylt_gc_finalize(PyLiteInterpreter *I) {
     upset_free(I->gc.white);
     upset_free(I->gc.grey);
     upset_free(I->gc.black);
-    pylt_obj_set_free(I, I->gc.statics);
+
+    upset_free(I->gc.refs);
+    upset_free(I->gc.statics);
     pylt_obj_set_free(I, I->gc.str_cached);
     printf("mem unfreed: %d\n", I->mem_used);
 }
@@ -292,15 +300,24 @@ PyLiteBytesObject* pylt_gc_cache_bytes_add(PyLiteInterpreter *I, PyLiteBytesObje
 void pylt_gc_static_add(PyLiteInterpreter *I, PyLiteObject *obj) {
     if (!(obj->ob_flags | PYLT_OBJ_FLAG_STATIC)) {
         obj->ob_flags |= PYLT_OBJ_FLAG_STATIC;
-        pylt_obj_set_add(I, I->gc.statics, obj);
+        upset_add(I->gc.statics, obj);
     }
 }
 
 void pylt_gc_static_remove(PyLiteInterpreter *I, PyLiteObject *obj) {
     if (obj->ob_flags | PYLT_OBJ_FLAG_STATIC) {
         obj->ob_flags ^= PYLT_OBJ_FLAG_STATIC;
-        pylt_obj_set_add(I, I->gc.statics, obj);
+        upset_remove(I->gc.statics, obj);
     }
+}
+
+void pylt_gc_ref_add(PyLiteInterpreter *I, PyLiteRef *ref) {
+    // actually is not object type
+    upset_add(I->gc.refs, castobj(ref));
+}
+
+void pylt_gc_ref_remove(PyLiteInterpreter *I, PyLiteRef *ref) {
+    upset_remove(I->gc.refs, castobj(ref));
 }
 
 

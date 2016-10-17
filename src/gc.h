@@ -3,6 +3,7 @@
 #define PYLITE_GC_H
 
 #include "config.h"
+#include "utils/ref.h"
 #include "types/set.h"
 #include "types/bytes.h"
 #include "types/string.h"
@@ -21,8 +22,10 @@ typedef struct PyLiteGC {
     PyLiteUPSet *grey;
     PyLiteUPSet *black;
 
+    // Keep reference alive
+    PyLiteUPSet *refs;
     // Static containers
-    PyLiteSetObject *statics;
+    PyLiteUPSet *statics;
     // Cache for str/bytes
     PyLiteSetObject *str_cached;
 } PyLiteGC;
@@ -39,6 +42,9 @@ PyLiteBytesObject* pylt_gc_cache_bytes_add(PyLiteInterpreter *I, PyLiteBytesObje
 
 void pylt_gc_static_add(PyLiteInterpreter *I, PyLiteObject *obj);
 void pylt_gc_static_remove(PyLiteInterpreter *I, PyLiteObject *obj);
+
+void pylt_gc_ref_add(PyLiteInterpreter *I, PyLiteRef *ref);
+void pylt_gc_ref_remove(PyLiteInterpreter *I, PyLiteRef *ref);
 
 void pylt_gc_static_release(PyLiteInterpreter *I);
 
