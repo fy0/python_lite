@@ -24,15 +24,15 @@ PyLiteStrObject* pylt_api_type_name(PyLiteInterpreter *I, int ob_type) {
     return kv_A(I->cls_base, ob_type)->name;
 }
 
-PyLiteTypeObject* pylt_api_getbuiltintype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
-    return pylt_api_gettype_by_mod(I, I->vm.builtins, name);
+PyLiteTypeObject* pylt_api_getbuiltintype(PyLiteInterpreter *I, PyLiteStrObject *name) {
+    return pylt_api_gettype_from_mod(I, I->vm.builtins, name);
 }
 
 PyLiteTypeObject* pylt_api_gettype_by_code(PyLiteInterpreter *I, pl_uint32_t type_code) {
     return kv_A(I->cls_base, type_code);
 }
 
-PyLiteTypeObject* pylt_api_gettype_by_mod(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
+PyLiteTypeObject* pylt_api_gettype_from_mod(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
 	PyLiteObject *obj = pylt_obj_mod_getattr(I, mod, castobj(name));
 	return pl_istype(obj) ? casttype(obj) : NULL;
 }
@@ -65,12 +65,15 @@ pl_bool_t pylt_api_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32
     return false;
 }
 
-static pl_int_t _get_arg_count2(const char *format) {
+static pl_int_t _get_arg_count_cstr(const char *format) {
     pl_int_t args_count = 0;
     if (format[0] == '\0') return 0;
+    if (format[0] == '%') args_count++;
     for (const char *p = format + 1; *p; ++p) {
         if (*p == '%') {
-            if (*(p - 1) != '%' && *(p - 1) != '//') {
+            char last = *(p - 1);
+            if (last == '%') args_count--;
+            else if (last != '//') {
                 args_count++;
             }
         }
@@ -81,7 +84,7 @@ static pl_int_t _get_arg_count2(const char *format) {
 void pl_print(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
     PyLiteStrObject *str;
-    pl_int_t args_count = _get_arg_count2(format);
+    pl_int_t args_count = _get_arg_count_cstr(format);
     PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
 
     va_start(args, format);
@@ -91,5 +94,27 @@ void pl_print(PyLiteInterpreter *I, const char *format, ...) {
     va_end(args);
 
     str = pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
+    pylt_obj_tuple_free(I, targs);
     pylt_api_output_str(I, str);
+}
+
+void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char *format, ...) {
+    // 1. build error string
+    va_list args;
+    pl_int_t args_count = _get_arg_count_cstr(format);
+    PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
+
+    va_start(args, format);
+    for (pl_int_t i = 0; i < args_count; ++i) {
+        targs->ob_val[i] = va_arg(args, PyLiteObject*);
+    }
+    va_end(args);
+
+    PyLiteStrObject *str = pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
+    pylt_obj_tuple_free(I, targs);
+
+    // 2. new Exception
+    PyLiteTypeObject *type = pylt_api_getbuiltintype(I, exception_name);
+    PyLiteObject *error = pylt_vm_call_func(I, castobj(type), 1, str);
+    I->error = error;
 }

@@ -328,6 +328,18 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     locals = kv_top(kv_top(vm->frames).var_tables);
 
     for (pl_uint_t i = 0; ; ++i) {
+        // raise error
+        if (I->error) {
+            // TOOD: except
+            pl_print(I, "Traceback (most recent call last):\n");
+            if (code->with_debug_info) {
+                pl_print(I, "  File \"<stdin>\", line %d, in <module>\n", pylt_obj_int_new(I, kv_A(code->lnotab, i-1)));
+            }
+            PyLiteTupleObject *args = dcast(except, I->error)->args;
+            PyLiteObject *output = args->ob_size == 1 ? args->ob_val[0] : castobj(args);
+            pl_print(I, "%s: %s\n", pylt_api_type_name(I, I->error->ob_type), output);
+            return;
+        }
         ins = kv_A(code->opcodes, i);
         //if (i && (i % 25 == 0)) pylt_gc_collect(I);
 
@@ -357,10 +369,11 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 }
 
                 if (!tobj) {
-                    printf("NameError: name '");
-                    pylt_api_output_str(I, caststr(const_obj(ins.extra)));
-                    printf("' is not defined\n");
-                    return;
+                    //printf("NameError: name '");
+                    //pylt_api_output_str(I, caststr(const_obj(ins.extra)));
+                    //printf("' is not defined\n");
+                    pl_error(I, pl_static.str.NameError, "name %r is not defined.", caststr(const_obj(ins.extra)));
+                    break;
                 }
                 kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
                 break;

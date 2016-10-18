@@ -2,7 +2,6 @@
 #ifndef PYLITE_WATCH_H
 #define PYLITE_WATCH_H
 
-#include "../intp.h"
 #include "../types/object.h"
 
 //PyLiteWatchObject;

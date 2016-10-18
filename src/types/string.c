@@ -527,18 +527,17 @@ PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, P
                     // TODO: hex number
                     writer.findex++;
                     break;
-                case 's':
+                case 's': case 'r': {
+                    ch = format->ob_val[writer.findex];
                     writer.findex++;
                     pad_with_zero = false;
-                    if (pl_isstr(obj)) {
-                        PyLiteStrObject *tmpstr = pylt_obj_to_str(I, obj);
-                        tmp = tmpstr->ob_val;
-                        slen = tmpstr->ob_size;
-                        is_free = false;
-                    } else {
-                        // Error
-                    }
+                    PyLiteStrObject *tmpstr = (ch == 's') ? pylt_obj_to_str(I, obj) : pylt_obj_to_repr(I, obj);
+                    tmp = tmpstr->ob_val;
+                    slen = tmpstr->ob_size;
+                    // wait for gc collect
+                    is_free = false;
                     break;
+                }
                 case 'p': {
                     uint8_t tmp_bytes[MAX_LONG_LONG_CHARS];
 #ifdef PLATFORM_WINDOWS
@@ -607,11 +606,14 @@ PyLiteStrObject* pylt_obj_str_new_from_cstr_static(PyLiteInterpreter *I, const c
     return ret;
 }
 
-static pl_int_t _get_arg_count(PyLiteStrObject *format) {
+static pl_int_t _get_arg_count_str(PyLiteStrObject *format) {
     pl_int_t args_count = 0;
+    if (format->ob_val[0] == '%') args_count++;
     for (pl_uint32_t i = 1; i < format->ob_size; ++i) {
         if (format->ob_val[i] == '%') {
-            if (format->ob_val[i - 1] != '%' && format->ob_val[i - 1] != '//') {
+            pl_uint32_t last = format->ob_val[i - 1];
+            if (last == '%') args_count--;
+            else if (last != '//') {
                 args_count++;
             }
         }
@@ -619,12 +621,15 @@ static pl_int_t _get_arg_count(PyLiteStrObject *format) {
     return args_count;
 }
 
-static pl_int_t _get_arg_count2(const char *format) {
+static pl_int_t _get_arg_count_cstr(const char *format) {
     pl_int_t args_count = 0;
     if (format[0] == '\0') return 0;
+    if (format[0] == '%') args_count++;
     for (const char *p = format + 1; *p; ++p) {
         if (*p == '%') {
-            if (*(p - 1) != '%' && *(p - 1) != '//') {
+            char last = *(p - 1);
+            if (last == '%') args_count--;
+            else if (last != '//') {
                 args_count++;
             }
         }
@@ -634,7 +639,7 @@ static pl_int_t _get_arg_count2(const char *format) {
 
 PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteInterpreter *I, PyLiteStrObject *format, ...) {
     va_list args;
-    pl_int_t args_count = _get_arg_count(format);
+    pl_int_t args_count = _get_arg_count_str(format);
     PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
 
     va_start(args, format);
@@ -649,7 +654,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format(PyLiteInterpreter *I, PyLiteStrObj
  
 PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
-    pl_int_t args_count = _get_arg_count2(format);
+    pl_int_t args_count = _get_arg_count_cstr(format);
     PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
 
     va_start(args, format);
@@ -665,7 +670,7 @@ PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteInterpreter *I, const char 
 
 PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
-    pl_int_t args_count = _get_arg_count2(format);
+    pl_int_t args_count = _get_arg_count_cstr(format);
     PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
 
     va_start(args, format);
