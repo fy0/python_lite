@@ -128,11 +128,13 @@ void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     pylt_gc_add(I, castobj(code));
 }
 
+#define func_call_ret(val) {retval = (val); goto _err;}
+
 // 函数调用检查
 //  1 为当前的参数个数小于最少参数个数
 //  2 为当前的参数个数多于参数个数
 //  3 为参数的类型不符合
-// -1 当前对象并非函数类型
+// -1 当前对象不是可调用对象
 //
 // pflag: the kind of the callable object，such as ...
 //  0 tobj is a function or cfunction object
@@ -147,6 +149,7 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
 
     int args_i;
     bool at_type;
+    int retval, retval_util;
 
     info = pylt_obj_func_get_info(I, tobj);
     if (info) {
@@ -159,7 +162,7 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
 
             if (obj) {
                 info = pylt_obj_func_get_info(I, obj);
-                if (!info) return -1;
+                if (!info) func_call_ret(-1);
 				if (pflag) {
 					*pflag = 1;
 					// backup parameters for __init__
@@ -169,16 +172,16 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
 				}
             } else {
                 // not function
-                return -1;
+                func_call_ret(-1);
             }
         } else {
             // __call__
             obj = pylt_obj_getattr(I, tobj, castobj(pl_static.str.__call__), &at_type);
             if (obj) {
                 info = pylt_obj_func_get_info(I, obj);
-                if (!info) return -1;
+                if (!info) func_call_ret(-1);
                 if (pflag) *pflag = 2;
-            } else return -1;
+            } else func_call_ret(-1);
         }
 
         // 插入首个参数
@@ -196,17 +199,12 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
     if (!info->defaults && !kwargs) {
         // 极简情况，调用时不用字典调用，函数本身也没有默认值、*args和**kwargs
         if (params_num < info->length) {
-            printf("TypeError: ");
-            debug_print_obj(I, castobj(info->name));
-            printf("() missing %d required positional argument\n", (int)(info->minimal - params_num));
-            return 1;
+            retval_util = params_num;
+            func_call_ret(1);
         }
 
         if (params_num > info->minimal) {
-            printf("TypeError: ");
-            debug_print_obj(I, castobj(info->name));
-			printf("() takes %d positional arguments but %d were given\n", (int)info->length, params_num);
-            return 1;
+            func_call_ret(2);
         }
     } else {
         args = (PyLiteObject**)(&kv_topn(I->vm.stack, params_num - 1));
@@ -232,11 +230,9 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
 					}
 				}
 
-				if (!ok) {
-					printf("TypeError: ");
-					debug_print_obj(I, castobj(info->name));
-					printf("() missing %d required positional argument (%d given)\n", (int)(info->minimal - params_num), i);
-					return 1;
+                if (!ok) {
+                    retval_util = i;
+					func_call_ret(1);
 				}
 			} else if (defobj == castobj(&PyLiteParamArgs)) {
                 // 如果栈中还有参数，将剩下的参数做成 tuple 入栈
@@ -277,10 +273,7 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
         }
         // 如果 args_i != params_num 那么参数多出来了，报错
         if (args_i != params_num) {
-            printf("TypeError: ");
-            debug_print_obj(I, castobj(info->name));
-			printf("() takes %d positional arguments but %d were given\n", (int)info->length, params_num);
-            return 1;
+            func_call_ret(2);
         }
     }
 
@@ -291,30 +284,44 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
         for (int i = 0; i < info->length; ++i) {
             if (!info->type_codes[i]) continue;
             if (!pylt_api_isinstance(I, args[i], info->type_codes[i])) {
-                // 类型不符合，报错
-                printf("TypeError: ");
-				debug_print_obj(I, castobj(info->params->ob_val[i]));
-                pl_print(I, " must be %s\n", pylt_api_type_name(I, info->type_codes[i]));
-                //PyLiteETypeErrorObject()
-                return 3;
+                retval_util = i;
+                func_call_ret(3);
             }
         }
     }
 
     if (pinfo) *pinfo = info;
     return 0;
+
+_err:
+    switch (retval) {
+        case -1:
+            pl_error(I, pl_static.str.TypeError, "%r object is not callable", pylt_api_type_name(I, tobj->ob_type));
+            break;
+        case 1: // less than minimal
+            // Why TypeError?
+            pl_error(I, pl_static.str.TypeError, "%s() missing %d required positional argument (%d given)", info->name, pylt_obj_int_new(I, info->minimal - params_num), pylt_obj_int_new(I, retval_util));
+            break;
+        case 2: // more than parameter's num
+            // another version: TypeError: int() takes at most 2 arguments (3 given)
+            pl_error(I, pl_static.str.TypeError, "%s() takes %d positional arguments but %d were given", info->name, pylt_obj_int_new(I, info->length), pylt_obj_int_new(I, params_num));
+            break;
+        case 3: // error parameter type
+            pl_error(I, pl_static.str.TypeError, "%s()'s parameter %r must be %s", info->name, info->params->ob_val[retval_util], pylt_api_type_name(I, info->type_codes[retval_util]));
+            break; 
+    }
+    return retval;
 }
 
 #define const_obj(__index) pylt_obj_list_getitem(I, code->const_val, (__index))
-
 
 void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     PyLiteVM *vm = &I->vm;
     PyLiteDictObject *locals;
     PyLiteInstruction ins;
 
+    pl_int_t tflag;
     pl_bool_t at_type;
-    pl_int_t tnum, tflag;
     PyLiteFunctionObject *tfunc;
     PyLiteObject *tobj, *tret, *ta, *tb, *tc, *td, *te, *tf;
 
@@ -336,8 +343,12 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 pl_print(I, "  File \"<stdin>\", line %d, in <module>\n", pylt_obj_int_new(I, kv_A(code->lnotab, i-1)));
             }
             PyLiteTupleObject *args = dcast(except, I->error)->args;
-            PyLiteObject *output = args->ob_size == 1 ? args->ob_val[0] : castobj(args);
-            pl_print(I, "%s: %s\n", pylt_api_type_name(I, I->error->ob_type), output);
+            if (args->ob_size == 0) {
+                pl_print(I, "%s\n", pylt_api_type_name(I, I->error->ob_type));
+            } else {
+                PyLiteObject *output = args->ob_size == 1 ? args->ob_val[0] : castobj(args);
+                pl_print(I, "%s: %s\n", pylt_api_type_name(I, I->error->ob_type), output);
+            }
             return;
         }
         ins = kv_A(code->opcodes, i);
@@ -369,10 +380,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 }
 
                 if (!tobj) {
-                    //printf("NameError: name '");
-                    //pylt_api_output_str(I, caststr(const_obj(ins.extra)));
-                    //printf("' is not defined\n");
-                    pl_error(I, pl_static.str.NameError, "name %r is not defined.", caststr(const_obj(ins.extra)));
+                    pl_error(I, pl_static.str.NameError, "name %r is not defined", caststr(const_obj(ins.extra)));
                     break;
                 }
                 kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
@@ -388,12 +396,12 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                         ta = castobj(kv_pop(I->vm.stack));
                         tret = pylt_obj_op_binary(I, ins.extra, ta, tb);
                         if (!tret) {
-                            printf("TypeError: unsupported operand type(s) for %s: ", pylt_vm_get_op_name(ins.extra));
-                            debug_print_obj(I, castobj(pylt_api_type_name(I, ta->ob_type)));
-                            printf(" and ");
-                            debug_print_obj(I, castobj(pylt_api_type_name(I, tb->ob_type)));
-                            printf("\n");
-                            return;
+                            pl_error(I, pl_static.str.TypeError, "unsupported operand type(s) for %s: %r and %r", 
+                                pylt_obj_str_new_from_cstr(I, pylt_vm_get_op_name(ins.extra), true),
+                                pylt_api_type_name(I, ta->ob_type),
+                                pylt_api_type_name(I, tb->ob_type)
+                            );
+                            break;
                         }
                         pylt_gc_add(I, tret);
                         kv_push(uintptr_t, I->vm.stack, (uintptr_t)tret);
@@ -402,10 +410,11 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                         ta = castobj(kv_pop(I->vm.stack));
                         tret = pylt_obj_op_unary(I, ins.extra, ta);
                         if (!tret) {
-                            printf("TypeError: bad operand type for unary '%s': ", pylt_vm_get_op_name(ins.extra));
-                            debug_print_obj(I, castobj(pylt_api_type_name(I, tobj->ob_type)));
-                            printf("\n");
-                            return;
+                            pl_error(I, pl_static.str.TypeError, "bad operand type for unary %s: %r",
+                                pylt_obj_str_new_from_cstr(I, pylt_vm_get_op_name(ins.extra), true),
+                                pylt_api_type_name(I, ta->ob_type)
+                            );
+                            break;
                         }
                         pylt_gc_add(I, tret);
                         kv_push(uintptr_t, I->vm.stack, (uintptr_t)tret);
@@ -473,7 +482,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                         pylt_gc_add(I, tobj);
                         kv_push(uintptr_t, vm->stack, (uintptr_t)tobj);
                         break;
-                    case PYLT_OBJ_TYPE_TYPE:
+                    case PYLT_OBJ_TYPE_TYPE: {
                         ta = castobj(kv_pop(vm->stack)); // name
                         tb = castobj(kv_pop(vm->stack)); // base type
                         tc = castobj(kv_pop(vm->stack)); // class vars
@@ -484,6 +493,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                         pylt_gc_add(I, castobj(type));
                         kv_pushptr(vm->stack, type);
                         break;
+                    }
                 }
                 break;
 			case BC_CALL: {
@@ -498,13 +508,8 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 // check
                 PyLiteFunctionInfo *func_info;
 				PyLiteTupleObject *params_bak = NULL;
-				if (tnum = func_call_check(I, tobj, params_num, kwargs, &tret, &func_info, &tflag, &params_bak)) {
-                    if (tnum == -1) {
-                        printf("TypeError: ");
-                        debug_print_obj(I, castobj(pylt_api_type_name(I, tobj->ob_type)));
-                        printf(" object is not callable\n");
-                    }
-                    return;
+				if (func_call_check(I, tobj, params_num, kwargs, &tret, &func_info, &tflag, &params_bak)) {
+                    break;
                 }
 
                 // set locals and execute
@@ -599,10 +604,10 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 ta = castobj(kv_pop(I->vm.stack));
                 tobj = pylt_obj_getitem(I, ta, tb);
                 if (!tobj) {
-                    printf("KeyError: ");
-                    debug_print_obj(I, tb);
-                    putchar('\n');
-                    return;
+                    pl_error(I, pl_static.str.IndexError, "list index out of range");
+                    //pl_error(I, pl_static.str.TypeError, "list indices must be integers, not str");
+                    //pl_error(I, pl_static.str.KeyError, "%s", tb);
+                    break;
                 } else {
                     kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
                 }
@@ -613,8 +618,9 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 tobj = castobj(kv_pop(I->vm.stack));
                 tb = castobj(kv_pop(I->vm.stack));
                 if (!pylt_obj_setitem(I, tobj, ta, tb)) {
-                    printf("IndexError: list assignment index out of range\n");
-                    return;
+                    //pl_error(I, pl_static.str.TypeError, "list indices must be integers, not str");
+                    pl_error(I, pl_static.str.IndexError, "list assignment index out of range");
+                    break;
                 }
                 kv_pushptr(vm->stack, tb);
                 break;
@@ -624,11 +630,11 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 tobj = castobj(kv_pop(I->vm.stack));
                 tret = pylt_obj_getattr(I, tobj, const_obj(ins.extra), &at_type);
                 if (!tret) {
-                    // TODO
-                    printf("AttributeError: ");
-                    debug_print_obj(I, castobj(pylt_api_type_name(I, tobj->ob_type)));
-                    printf(" object has no this attribute\n");
-                    return;
+                    pl_error(I, pl_static.str.AttributeError, "type object %r has no attribute %r",
+                        pylt_api_type_name(I, tobj->ob_type),
+                        const_obj(ins.extra)
+                    );
+                    break;
                 }
                 kv_pushptr(vm->stack, tret);
 
@@ -655,17 +661,16 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 tobj = castobj(kv_pop(I->vm.stack));
                 tb = castobj(kv_pop(I->vm.stack));
                 if (!pylt_obj_setattr(I, tobj, const_obj(ins.extra), tb)) {
-                    printf("TypeError: can't set attributes of built-in/extension type ");
-                    debug_print_obj(I, castobj(pylt_api_type_name(I, tobj->ob_type)));
-                    printf("\n");
-                    return;
+                    pl_error(I, pl_static.str.TypeError, "can't set attributes of built-in/extension type %r", pylt_api_type_name(I, tobj->ob_type));
+                    break;
                 }
                 kv_pushptr(vm->stack, tb);
                 break;
             case BC_ASSERT:
                 // ASSERT       0       0
                 if (!pylt_obj_istrue(I, castobj(kv_pop(I->vm.stack)))) {
-                    printf("AssertionError\n");
+                    // TODO: ASSERT with text (assert False, "123")
+                    pl_error(I, pl_static.str.AssertionError, NULL);
                     return;
                 }
                 break;
@@ -677,7 +682,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                     PyLiteModuleRegisterFunc func = (PyLiteModuleRegisterFunc)tret;
                     pylt_obj_dict_setitem(I, locals, tobj, castobj((func)(I)));
                 } else {
-                    // TODO
+                    // TODO: import from disk
                 }
                 kv_popn(vm->stack, ins.extra);
                 break;
@@ -686,9 +691,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                     debug_print_obj(I, castobj(kv_top(I->vm.stack)));
                     putchar('\n');
                 }
-                printf("locals: ");
-                debug_print_obj(I, castobj(locals));
-                putchar('\n');
+                pl_print(I, "locals: %s\n", castobj(locals));
             case BC_HALT:
                 goto _end;
                 break;

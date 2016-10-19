@@ -99,22 +99,30 @@ void pl_print(PyLiteInterpreter *I, const char *format, ...) {
 }
 
 void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char *format, ...) {
-    // 1. build error string
-    va_list args;
-    pl_int_t args_count = _get_arg_count_cstr(format);
-    PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
-
-    va_start(args, format);
-    for (pl_int_t i = 0; i < args_count; ++i) {
-        targs->ob_val[i] = va_arg(args, PyLiteObject*);
-    }
-    va_end(args);
-
-    PyLiteStrObject *str = pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
-    pylt_obj_tuple_free(I, targs);
-
-    // 2. new Exception
+    PyLiteObject *error;
+    PyLiteStrObject *str;
     PyLiteTypeObject *type = pylt_api_getbuiltintype(I, exception_name);
-    PyLiteObject *error = pylt_vm_call_func(I, castobj(type), 1, str);
+    va_list args;
+
+    if (format) {
+        // build error string
+        pl_int_t args_count = _get_arg_count_cstr(format);
+        PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
+
+        va_start(args, format);
+        for (pl_int_t i = 0; i < args_count; ++i) {
+            targs->ob_val[i] = va_arg(args, PyLiteObject*);
+        }
+        va_end(args);
+
+         str = pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
+         pylt_obj_tuple_free(I, targs);
+
+         // new Exception
+         error = pylt_vm_call_func(I, castobj(type), 1, str);
+         I->error = error;
+    } else {
+        error = pylt_vm_call_func(I, castobj(type), 0);
+    }
     I->error = error;
 }
