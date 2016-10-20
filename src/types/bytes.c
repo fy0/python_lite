@@ -2,6 +2,7 @@
 #include "bool.h"
 #include "bytes.h"
 #include "set.h"
+#include "../api.h"
 #include "../intp.h"
 
 static PyLiteBytesObject* hash_and_check_cache(PyLiteInterpreter *I, PyLiteBytesObject *obj) {
@@ -249,4 +250,14 @@ struct PyLiteStrObject* pylt_obj_bytes_to_str(PyLiteInterpreter *I, PyLiteBytesO
     PyLiteStrObject *str = pylt_obj_str_new(I, data, j, true);
     pylt_free(I, data, (self->ob_size + quote_count + 3) * sizeof(uint32_t));
     return str;
+}
+
+PyLiteBytesObject* pylt_obj_bytes_Egetitem(PyLiteInterpreter *I, PyLiteBytesObject *self, PyLiteObject *index) {
+    if (index->ob_type == PYLT_OBJ_TYPE_INT) {
+        PyLiteBytesObject *ret = pylt_obj_bytes_getitem(I, self, castint(index)->ob_val);
+        if (!ret) pl_error(I, pl_static.str.IndexError, "list index out of range");
+        return ret;
+    }
+    pl_error(I, pl_static.str.TypeError, "%s indices must be integers, not %s", pl_type(I, castobj(self))->name, pl_type(I, index)->name);
+    return NULL;
 }

@@ -617,11 +617,8 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 ta = castobj(kv_pop(I->vm.stack));
                 tobj = castobj(kv_pop(I->vm.stack));
                 tb = castobj(kv_pop(I->vm.stack));
-                if (!pylt_obj_setitem(I, tobj, ta, tb)) {
-                    //pl_error(I, pl_static.str.TypeError, "list indices must be integers, not str");
-                    pl_error(I, pl_static.str.IndexError, "list assignment index out of range");
-                    break;
-                }
+                pylt_obj_setitem(I, tobj, ta, tb);
+                if (I->error) break;
                 kv_pushptr(vm->stack, tb);
                 break;
             case BC_GET_ATTR:
@@ -629,13 +626,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 // GET_ATTR     0/1     const_id
                 tobj = castobj(kv_pop(I->vm.stack));
                 tret = pylt_obj_getattr(I, tobj, const_obj(ins.extra), &at_type);
-                if (!tret) {
-                    pl_error(I, pl_static.str.AttributeError, "type object %r has no attribute %r",
-                        pylt_api_type_name(I, tobj->ob_type),
-                        const_obj(ins.extra)
-                    );
-                    break;
-                }
+                if (I->error) break;
                 kv_pushptr(vm->stack, tret);
 
                 // next instruction is BC_CALL, and it's a method!

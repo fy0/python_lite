@@ -684,3 +684,14 @@ PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteInterpreter *I, cons
     pylt_obj_tuple_free(I, targs);
     return str;
 }
+
+PyLiteStrObject* pylt_obj_str_Egetitem(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *index) {
+    if (index->ob_type == PYLT_OBJ_TYPE_INT) {
+        PyLiteStrObject *ret = pylt_obj_str_getitem(I, self, castint(index)->ob_val);
+        if (!ret) pl_error(I, pl_static.str.IndexError, "list index out of range");
+        return ret;
+    }
+    pl_error(I, pl_static.str.TypeError, "%s indices must be integers, not %s", pl_type(I, castobj(self))->name, pl_type(I, index)->name);
+    return NULL;
+}
+

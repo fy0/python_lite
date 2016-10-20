@@ -40,4 +40,6 @@ PyLiteStrObject* pylt_obj_str_new_empty(PyLiteInterpreter *I);
 
 void pylt_obj_str_free(PyLiteInterpreter *I, PyLiteStrObject *self);
 
+PyLiteStrObject* pylt_obj_str_Egetitem(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *index);
+
 #endif

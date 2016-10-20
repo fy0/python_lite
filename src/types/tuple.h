@@ -17,4 +17,6 @@ PyLiteObject* pylt_obj_tuple_getitem(PyLiteInterpreter *I, PyLiteTupleObject *se
 PyLiteTupleObject* pylt_obj_tuple_new_with_data(PyLiteInterpreter *I, pl_int_t len, void *data);
 void pylt_obj_tuple_free(PyLiteInterpreter *I, PyLiteTupleObject *self);
 
+PyLiteObject* pylt_obj_tuple_Egetitem(PyLiteInterpreter *I, PyLiteTupleObject *self, PyLiteObject *index);
+
 #endif

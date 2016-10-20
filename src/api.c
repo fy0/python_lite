@@ -81,6 +81,10 @@ static pl_int_t _get_arg_count_cstr(const char *format) {
     return args_count;
 }
 
+PyLiteTypeObject* pl_type(PyLiteInterpreter *I, PyLiteObject *obj) {
+    return kv_A(I->cls_base, obj->ob_type);
+}
+
 void pl_print(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
     PyLiteStrObject *str;

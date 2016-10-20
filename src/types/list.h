@@ -34,4 +34,6 @@ PyLiteListObject* pylt_obj_list_new(PyLiteInterpreter *I);
 PyLiteListObject* pylt_obj_list_new_with_size(PyLiteInterpreter *I, pl_uint_t size);
 void pylt_obj_list_free(PyLiteInterpreter *I, PyLiteListObject *self);
 
+PyLiteObject* pylt_obj_list_Egetitem(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *index);
+
 #endif

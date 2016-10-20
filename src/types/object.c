@@ -250,22 +250,29 @@ pl_bool_t pylt_obj_istrue(PyLiteInterpreter *I, PyLiteObject *obj) {
 }
 
 PyLiteObject* pylt_obj_getattr(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type) {
+    PyLiteObject *ret = NULL;
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_MODULE:
             if (p_at_type) *p_at_type = false;
-            return pylt_obj_mod_getattr(I, castmod(obj), key);
+            ret = pylt_obj_mod_getattr(I, castmod(obj), key);
+            break;
         case PYLT_OBJ_TYPE_TYPE:
-            return pylt_obj_type_getattr(I, casttype(obj), key, p_at_type);
+            ret = pylt_obj_type_getattr(I, casttype(obj), key, p_at_type);
+            break;
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                return pylt_obj_custom_getattr(I, castcustom(obj), key, p_at_type);
+                ret = pylt_obj_custom_getattr(I, castcustom(obj), key, p_at_type);
             } else {
                 if (p_at_type) *p_at_type = true;
-                return pylt_obj_type_getattr(I, pylt_api_gettype_by_code(I, obj->ob_type), key, NULL);
+                ret = pylt_obj_type_getattr(I, pylt_api_gettype_by_code(I, obj->ob_type), key, NULL);
             }
             break;
     }
-    return NULL;
+    if (!ret) {
+        pl_error(I, pl_static.str.AttributeError, "type object %r has no attribute %r",
+            pylt_api_type_name(I, obj->ob_type), key);
+    }
+    return ret;
 }
 
 pl_bool_t pylt_obj_setattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value) {
@@ -291,24 +298,13 @@ pl_bool_t pylt_obj_setattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObjec
 PyLiteObject* pylt_obj_getitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_BYTES:
-            if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                return castobj(pylt_obj_bytes_getitem(I, castbytes(obj), castint(key)->ob_val));
-            }
-            break;
+            return castobj(pylt_obj_bytes_Egetitem(I, castbytes(obj), key));
         case PYLT_OBJ_TYPE_STR:
-            if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                return castobj(pylt_obj_str_getitem(I, caststr(obj), castint(key)->ob_val));
-            }
-            break;
+            return castobj(pylt_obj_str_Egetitem(I, caststr(obj), key));
         case PYLT_OBJ_TYPE_LIST:
-            if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                return castobj(pylt_obj_list_getitem(I, castlist(obj), castint(key)->ob_val));
-            }
-            break;
+            return pylt_obj_list_Egetitem(I, castlist(obj), key);
         case PYLT_OBJ_TYPE_TUPLE:
-            if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                return castobj(pylt_obj_tuple_getitem(I, casttuple(obj), castint(key)->ob_val));
-            }
+            return pylt_obj_tuple_Egetitem(I, casttuple(obj), key);
         case PYLT_OBJ_TYPE_DICT:
             return pylt_obj_dict_getitem(I, castdict(obj), key);
         default:
@@ -321,7 +317,7 @@ PyLiteObject* pylt_obj_getitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteOb
                         return pylt_obj_getitem(I, castcustom(obj)->base_obj, key);
                     }
                 }
-            }
+            } 
     }
     return NULL;
 }
@@ -330,7 +326,13 @@ pl_bool_t pylt_obj_setitem(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObjec
     switch (self->ob_type) {
         case PYLT_OBJ_TYPE_LIST:
             if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                return pylt_obj_list_setitem(I, castlist(self), castint(key)->ob_val, value);
+                if (!pylt_obj_list_setitem(I, castlist(self), castint(key)->ob_val, value)) {
+                    pl_error(I, pl_static.str.IndexError, "list assignment index out of range");
+                    break;
+                }
+                return true;
+            } else {
+                pl_error(I, pl_static.str.TypeError, "list indices must be integers, not str");
             }
             break;
         case PYLT_OBJ_TYPE_DICT:
