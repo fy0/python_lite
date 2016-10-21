@@ -1,9 +1,7 @@
 ﻿
 #include "tuple.h"
 #include "string.h"
-#include "number.h"
 #include "../misc.h"
-#include "../api.h"
 
 struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteInterpreter *I, PyLiteTupleObject *self) {
     int index = 0;
@@ -71,14 +69,3 @@ void pylt_obj_tuple_free(PyLiteInterpreter *I, PyLiteTupleObject *self) {
     pylt_free(I, self->ob_val, sizeof(PyLiteObject*) * self->ob_size);
     pylt_free_ex(I, self);
 }
-
-PyLiteObject* pylt_obj_tuple_Egetitem(PyLiteInterpreter *I, PyLiteTupleObject *self, PyLiteObject *index) {
-    if (index->ob_type == PYLT_OBJ_TYPE_INT) {
-        PyLiteObject *ret = pylt_obj_tuple_getitem(I, self, castint(index)->ob_val);
-        if (!ret) pl_error(I, pl_static.str.IndexError, "tuple index out of range");
-        return ret;
-    }
-    pl_error(I, pl_static.str.TypeError, "%s indices must be integers, not %s", pl_type(I, castobj(self))->name, pl_type(I, index)->name);
-    return NULL;
-}
-

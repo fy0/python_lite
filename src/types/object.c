@@ -1,8 +1,9 @@
 ﻿
+#include "all.h"
 #include "../vm.h"
 #include "../api.h"
 #include "../misc.h"
-#include "all.h"
+#include "../utils/with_exceptions.h"
 
 
 void* basetype_op_func_table[][24] = {
@@ -249,7 +250,7 @@ pl_bool_t pylt_obj_istrue(PyLiteInterpreter *I, PyLiteObject *obj) {
     }
 }
 
-PyLiteObject* pylt_obj_getattr(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type) {
+PyLiteObject* pylt_obj_getattr_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, PyLiteObject* _default, pl_bool_t *p_at_type) {
     PyLiteObject *ret = NULL;
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_MODULE:
@@ -269,10 +270,17 @@ PyLiteObject* pylt_obj_getattr(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteOb
             break;
     }
     if (!ret) {
+        // if default value is &PyLiteUseless, not found and no exception
+        if (_default) return _default;
         pl_error(I, pl_static.str.AttributeError, "type object %r has no attribute %r",
             pylt_api_type_name(I, obj->ob_type), key);
     }
     return ret;
+}
+
+PyLiteObject* pylt_obj_getattr(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type) {
+    PyLiteObject *ret = pylt_obj_getattr_ex(I, obj, key, castobj(&PyLiteUseless), p_at_type);
+    return (ret != castobj(&PyLiteUseless)) ? ret : NULL;
 }
 
 pl_bool_t pylt_obj_setattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value) {
@@ -306,13 +314,13 @@ PyLiteObject* pylt_obj_getitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteOb
         case PYLT_OBJ_TYPE_TUPLE:
             return pylt_obj_tuple_Egetitem(I, casttuple(obj), key);
         case PYLT_OBJ_TYPE_DICT:
-            return pylt_obj_dict_getitem(I, castdict(obj), key);
+            return pylt_obj_dict_Egetitem(I, castdict(obj), key);
         default:
             if (pl_iscustom(obj)) {
                 PyLiteObject *method_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__getitem__), NULL);
                 if (method_func) {
                     return pylt_vm_call_method(I, obj, method_func, 1, key);
-                } else {
+                } else { 
                     if (castcustom(obj)->base_obj) {
                         return pylt_obj_getitem(I, castcustom(obj)->base_obj, key);
                     }
@@ -325,16 +333,7 @@ PyLiteObject* pylt_obj_getitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteOb
 pl_bool_t pylt_obj_setitem(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value) {
     switch (self->ob_type) {
         case PYLT_OBJ_TYPE_LIST:
-            if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                if (!pylt_obj_list_setitem(I, castlist(self), castint(key)->ob_val, value)) {
-                    pl_error(I, pl_static.str.IndexError, "list assignment index out of range");
-                    break;
-                }
-                return true;
-            } else {
-                pl_error(I, pl_static.str.TypeError, "list indices must be integers, not str");
-            }
-            break;
+            return pylt_obj_list_Esetitem(I, castlist(self), key, value);
         case PYLT_OBJ_TYPE_DICT:
             pylt_obj_dict_setitem(I, castdict(self), key, value);
             return true;

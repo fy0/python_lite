@@ -30,7 +30,4 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int
 PyLiteBytesObject* pylt_obj_bytes_new_empty(PyLiteInterpreter *I);
 void pylt_obj_bytes_free(PyLiteInterpreter *I, PyLiteBytesObject *self);
 
-// api with exceptions
-PyLiteBytesObject* pylt_obj_bytes_Egetitem(PyLiteInterpreter *I, PyLiteBytesObject *self, PyLiteObject *index);
-
 #endif

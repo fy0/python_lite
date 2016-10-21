@@ -1,9 +1,7 @@
 ﻿
 #include "list.h"
-#include "number.h"
 #include "string.h"
 #include "../misc.h"
-#include "../api.h"
 
 PyLiteListObject* pylt_obj_list_new(PyLiteInterpreter *I) {
     PyLiteListObject *obj = pylt_malloc(I, sizeof(PyLiteListObject));
@@ -190,14 +188,4 @@ struct PyLiteStrObject* pylt_obj_list_to_str(PyLiteInterpreter *I, PyLiteListObj
     pylt_free(I, data, sizeof(uint32_t) * data_len);
     pylt_free_ex(I, strlst);
     return str;
-}
-
-PyLiteObject* pylt_obj_list_Egetitem(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *index) {
-    if (index->ob_type == PYLT_OBJ_TYPE_INT) {
-        PyLiteObject *ret = pylt_obj_list_getitem(I, self, castint(index)->ob_val);
-        if (!ret) pl_error(I, pl_static.str.IndexError, "list index out of range");
-        return ret;
-    }
-    pl_error(I, pl_static.str.TypeError, "%s indices must be integers, not %s", pl_type(I, castobj(self))->name, pl_type(I, index)->name);
-    return NULL;
 }

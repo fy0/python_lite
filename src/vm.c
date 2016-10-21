@@ -603,14 +603,8 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 tb = castobj(kv_pop(I->vm.stack));
                 ta = castobj(kv_pop(I->vm.stack));
                 tobj = pylt_obj_getitem(I, ta, tb);
-                if (!tobj) {
-                    pl_error(I, pl_static.str.IndexError, "list index out of range");
-                    //pl_error(I, pl_static.str.TypeError, "list indices must be integers, not str");
-                    //pl_error(I, pl_static.str.KeyError, "%s", tb);
-                    break;
-                } else {
-                    kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
-                }
+                if (!tobj) break;
+                kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
                 break;
             case BC_SET_ITEM:
                 // SET_ITEM     0       0
@@ -625,7 +619,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_GET_ATTR_EX:
                 // GET_ATTR     0/1     const_id
                 tobj = castobj(kv_pop(I->vm.stack));
-                tret = pylt_obj_getattr(I, tobj, const_obj(ins.extra), &at_type);
+                tret = pylt_obj_getattr_ex(I, tobj, const_obj(ins.extra), NULL, &at_type);
                 if (I->error) break;
                 kv_pushptr(vm->stack, tret);
 
