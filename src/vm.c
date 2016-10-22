@@ -347,7 +347,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 pl_print(I, "%s\n", pylt_api_type_name(I, I->error->ob_type));
             } else {
                 PyLiteObject *output = args->ob_size == 1 ? args->ob_val[0] : castobj(args);
-                pl_print(I, "%s: %s\n", pylt_api_type_name(I, I->error->ob_type), output);
+                pl_print(I, "%s: %s\n", pl_type(I, I->error)->name, output);
             }
             return;
         }

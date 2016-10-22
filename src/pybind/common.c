@@ -89,15 +89,17 @@ PyLiteObject* pylt_cls_method_bytes_new(PyLiteInterpreter *I, int argc, PyLiteOb
 
 PyLiteObject* pylt_cls_method_set_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteObject *obj;
-    PyLiteSetObject *set = pylt_obj_set_new(I);
+    PyLiteSetObject *set;
 
     if (pylt_obj_iterable(I, args[1])) {
         PyLiteIterObject *iter = pylt_obj_iter_new(I, args[1]);
+        set = pylt_obj_set_new(I);
         for (obj = pylt_obj_iter_next(I, iter); obj; obj = pylt_obj_iter_next(I, iter)) {
             pylt_obj_set_add(I, set, obj);
         }
     } else {
-        // error
+        pl_error(I, pl_static.str.TypeError, "%r object is not iterable", pl_type(I, args[1])->name);
+        return NULL;
     }
 
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(set));
@@ -129,15 +131,17 @@ PyLiteObject* pylt_method_set_remove(PyLiteInterpreter *I, int argc, PyLiteObjec
 
 PyLiteObject* pylt_cls_method_list_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteObject *obj;
-    PyLiteListObject *lst = pylt_obj_list_new(I);
+    PyLiteListObject *lst;
 
     if (pylt_obj_iterable(I, args[1])) {
         PyLiteIterObject *iter = pylt_obj_iter_new(I, args[1]);
+        lst = pylt_obj_list_new(I);
         for (obj = pylt_obj_iter_next(I, iter); obj; obj = pylt_obj_iter_next(I, iter)) {
             pylt_obj_list_append(I, lst, obj);
         }
     } else {
-        // error
+        pl_error(I, pl_static.str.TypeError, "%r object is not iterable", pl_type(I, args[1])->name);
+        return NULL;
     }
 
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(lst));
@@ -198,15 +202,17 @@ PyLiteObject* pylt_cls_method_tuple_new(PyLiteInterpreter *I, int argc, PyLiteOb
     PyLiteObject *obj;
     PyLiteIterObject *iter;
     PyLiteTupleObject *tuple;
-    PyLiteListObject *lst = pylt_obj_list_new(I);
+    PyLiteListObject *lst;
 
     if (pylt_obj_iterable(I, args[1])) {
+        lst = pylt_obj_list_new(I);
         iter = pylt_obj_iter_new(I, args[1]);
         for (obj = pylt_obj_iter_next(I, iter); obj; obj = pylt_obj_iter_next(I, iter)) {
             pylt_obj_list_append(I, lst, obj);
         }
     } else {
-        // error
+        pl_error(I, pl_static.str.TypeError, "%r object is not iterable", pl_type(I, args[1])->name);
+        return NULL;
     }
 
     tuple = pylt_obj_tuple_new_with_data(I, pylt_obj_list_count(I, lst), (void*)lst->ob_val);

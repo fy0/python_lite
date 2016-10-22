@@ -421,17 +421,15 @@ PyLiteObject* pylt_obj_op_binary(PyLiteInterpreter *I, int op, PyLiteObject *a, 
     }
 }
 
+// 印象中这个是专用于自定义类的
+// 先创建其基本类，然后包一层自定义类的外壳
 PyLiteObject* pylt_obj_typecast(PyLiteInterpreter *I, struct PyLiteTypeObject *type, PyLiteObject *obj) {
     if (pl_iscustomtype(type) && (obj->ob_type != type->ob_reftype)) {
 		pl_uint32_t type_code = pylt_api_get_base_typecode(I, type->ob_base);
 		if (type_code != obj->ob_type) {
-			// TODO: error
-			// obj can't be the ob_base
-			// TypeError: object.__new__(A) is not safe, use A.__new__()
-			// TypeError: set.__new__(A): A is not a subtype of set
+            pl_error(I, pl_static.str.TypeError, "%s is not a subtype of %s", pl_type(I, castobj(type))->name, pylt_api_type_name(I, type_code));
 			return NULL;
 		}
-
         return pylt_obj_cutstom_create(I, type->ob_reftype, obj);
     }
     return obj;
