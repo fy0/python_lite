@@ -66,7 +66,15 @@ PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteInterpreter *I, PyLiteStrObject 
     func->ob_type = PYLT_OBJ_TYPE_CFUNCTION;
     func->ob_flags = 0;
     func->info.length = param_names ? param_names->ob_size : 0;
-    func->info.minimal = func->info.length - (defaults ? defaults->ob_size : 0);
+    func->info.minimal = func->info.length;
+    if (defaults) {
+        pl_int_t skip = 0;
+        for (pl_int_t i = 0; i < defaults->ob_size; ++i) {
+            if (defaults->ob_val[i] == castobj(&PyLiteParamUndefined)) skip++;
+            else break;
+        } 
+        func->info.minimal -= (defaults->ob_size - skip);
+    }
 
     func->info.name = name;
     func->info.doc = NULL;
