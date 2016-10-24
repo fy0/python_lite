@@ -355,6 +355,10 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
         //if (i && (i % 25 == 0)) pylt_gc_collect(I);
 
         switch (ins.code) {
+            case BC_LOADNONE:
+                // LOAD_NONE    0       0
+                kv_pushptr(vm->stack, &PyLiteNone);
+                break;
             case BC_LOADCONST:
                 // LOAD_CONST   0       const_id
                 kv_pushptr(vm->stack, const_obj(ins.extra));

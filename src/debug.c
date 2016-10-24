@@ -49,6 +49,9 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 printf("   %-15s %d", "LOAD_VAL_EX", ins.extra);
                 putchar('\n');
                 break;
+            case BC_LOADNONE:
+                printf("   %-15s\n", "LOADNONE");
+                break;
             case BC_LOADCONST:
                 printf("   %-15s %d\n", "LOADCONST", ins.extra);
                 break;

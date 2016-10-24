@@ -10,6 +10,7 @@ enum {
     BC_OPERATOR,       // 运算符
     BC_SET_VAL,        // 赋值
     BC_LOAD_VAL,       // 载入变量（入栈）
+    BC_LOADNONE,       // 载入 None
     BC_LOADCONST,      // 载入常量
     BC_LOADLOCALS,     // 载入本地变量空间
     BC_NEW_OBJ,        // 新建对象

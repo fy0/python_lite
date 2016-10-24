@@ -72,7 +72,8 @@ int store_const(ParserState *ps, PyLiteObject *obj) {
 }
 
 void sload_const(ParserState *ps, PyLiteObject *obj) {
-    write_ins(ps, BC_LOADCONST, 0, store_const(ps, obj));
+    if (obj == castobj(&PyLiteNone)) write_ins(ps, BC_LOADNONE, 0, 0);
+    else write_ins(ps, BC_LOADCONST, 0, store_const(ps, obj));
 }
 
 void error(ParserState *ps, int code) {
