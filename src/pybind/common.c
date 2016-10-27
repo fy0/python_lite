@@ -2,6 +2,7 @@
 #include "common.h"
 #include "../api.h"
 #include "../misc.h"
+#include "../bind.h"
 #include "../types/all.h"
 
 PyLiteObject* pylt_cls_method_obj_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
@@ -90,6 +91,9 @@ PyLiteObject* pylt_cls_method_bytes_new(PyLiteInterpreter *I, int argc, PyLiteOb
 PyLiteObject* pylt_cls_method_set_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteObject *obj;
     PyLiteSetObject *set;
+
+    if (!pl_bind_cls_check(I, pylt_api_gettype_by_code(I, PYLT_OBJ_TYPE_SET), _S(__new__), casttype(args[0])))
+        return NULL;
 
     if (pylt_obj_iterable(I, args[1])) {
         PyLiteIterObject *iter = pylt_obj_iter_new(I, args[1]);

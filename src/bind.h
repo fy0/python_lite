@@ -5,7 +5,9 @@
 #include "misc.h"
 #include "types/all.h"
 
-void pylt_obj_type_register(PyLiteInterpreter *I, PyLiteTypeObject* type);
+pl_bool_t pl_bind_cls_check(PyLiteInterpreter *I, PyLiteTypeObject *defclass, PyLiteStrObject *method_name, PyLiteTypeObject *givenclass);
+PyLiteObject* pylt_obj_typecast(PyLiteInterpreter *I, struct PyLiteTypeObject *type, PyLiteObject *obj);
+void pylt_obj_type_register(PyLiteInterpreter *I, PyLiteTypeObject *type);
 
 PyLiteCFunctionObject* pylt_cfunc_register(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc);
 PyLiteCFunctionObject* pylt_cmethod_register(PyLiteInterpreter *I, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc);

@@ -81,6 +81,18 @@ static pl_int_t _get_arg_count_cstr(const char *format) {
     return args_count;
 }
 
+pl_bool_t pl_api_issubclass(PyLiteInterpreter *I, PyLiteTypeObject *a, PyLiteTypeObject *b) {
+    if (a == b) return true;
+    else {
+        PyLiteTypeObject* type = a;
+        while (type->ob_reftype != PYLT_OBJ_TYPE_OBJ) {
+            type = pylt_api_gettype_by_code(I, type->ob_base);
+            if (type == b) return true;
+        }
+    }
+    return false;
+}
+
 PyLiteTypeObject* pl_type(PyLiteInterpreter *I, PyLiteObject *obj) {
     return kv_A(I->cls_base, obj->ob_type);
 }

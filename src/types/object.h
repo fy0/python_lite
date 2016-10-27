@@ -160,7 +160,6 @@ struct PyLiteCustomObject;
 #define pl_iscustomtype(i) (pl_istype(i)) && (((struct PyLiteTypeObject*)i)->ob_reftype >= PYLT_OBJ_TYPE_USERCLASS)
 
 /** convert builtin type's obj to subclass instance*/
-PyLiteObject* pylt_obj_typecast(PyLiteInterpreter *I, struct PyLiteTypeObject *type, PyLiteObject *obj);
 PyLiteObject* pylt_obj_getbase(PyLiteObject *obj);
 struct PyLiteStrObject* pylt_obj_to_str(PyLiteInterpreter *I, PyLiteObject *obj);
 struct PyLiteStrObject* pylt_obj_to_repr(PyLiteInterpreter *I, PyLiteObject *obj);
