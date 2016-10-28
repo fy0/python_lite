@@ -20,6 +20,8 @@ pl_bool_t pylt_api_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32
 pl_bool_t pl_api_issubclass(PyLiteInterpreter *I, PyLiteTypeObject *a, PyLiteTypeObject *b);
 
 PyLiteTypeObject* pl_type(PyLiteInterpreter *I, PyLiteObject *obj);
+PyLiteTypeObject* pl_type_by_code(PyLiteInterpreter *I, pl_uint32_t type_code);
+
 void pl_print(PyLiteInterpreter *I, const char *format, ...);
 void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char *format, ...);
 // pl_error(PyLiteInterpreter *I, ...)

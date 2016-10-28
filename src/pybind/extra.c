@@ -1,9 +1,11 @@
 ﻿
 #include "extra.h"
 #include "../api.h"
+#include "../bind.h"
 #include "../types/all.h"
 
 PyLiteObject* pylt_cls_method_function_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    // won't supported
     return NULL;
 }
 
@@ -34,11 +36,16 @@ PyLiteObject* pylt_prop_function_parameters_get(PyLiteInterpreter *I, int argc, 
 }
 
 PyLiteObject* pylt_cls_method_iter_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_ITER), _S(__new__), casttype(args[0])))
+        return NULL;
     return pylt_obj_typecast(I, casttype(args[0]), castobj(pylt_obj_iter_new(I, args[1])));
 }
 
 PyLiteObject* pylt_cls_method_range_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     pl_int_t start, end;
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_RANGE), _S(__new__), casttype(args[0])))
+        return NULL;
+
     if (castnone(args[2]) == &PyLiteNone) {
         start = 0;
         end = dcast(int, args[1])->ob_val;
@@ -55,6 +62,9 @@ PyLiteObject* pylt_cls_method_range_new(PyLiteInterpreter *I, int argc, PyLiteOb
 }
 
 PyLiteObject* pylt_cls_method_base_exception_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_BASE_EXCEPTION), _S(__new__), casttype(args[0])))
+        return NULL;
+
     return pylt_obj_typecast(
         I, 
         dcast(type, args[0]),

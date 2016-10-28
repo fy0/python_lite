@@ -97,6 +97,10 @@ PyLiteTypeObject* pl_type(PyLiteInterpreter *I, PyLiteObject *obj) {
     return kv_A(I->cls_base, obj->ob_type);
 }
 
+PyLiteTypeObject* pl_type_by_code(PyLiteInterpreter *I, pl_uint32_t type_code) {
+    return kv_A(I->cls_base, type_code);
+}
+
 void pl_print(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
     PyLiteStrObject *str;

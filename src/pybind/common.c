@@ -6,6 +6,8 @@
 #include "../types/all.h"
 
 PyLiteObject* pylt_cls_method_obj_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_OBJ), _S(__new__), casttype(args[0])))
+        return NULL;
     PyLiteTypeObject *type = dcast(type, args[0]);
     return pylt_obj_cutstom_create(I, type->ob_reftype, NULL);
 }
@@ -38,11 +40,16 @@ PyLiteObject* pylt_prop_type_base_get(PyLiteInterpreter *I, int argc, PyLiteObje
 }
 
 PyLiteObject* pylt_cls_method_type_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    // TODO: type.__new__ 的含义其实比较丰富，但我认为不太重要。有机会再抉择一下
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_TYPE), _S(__new__), casttype(args[0])))
+        return NULL;
     return castobj(pylt_api_gettype_by_code(I, args[1]->ob_type));
 }
 
 
 PyLiteObject* pylt_cls_method_int_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_INT), _S(__new__), casttype(args[0])))
+        return NULL;
     // TODO: 从字符串转为数字
     PyLiteIntObject *num = pylt_obj_int_new(I, 0);
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(num));
@@ -56,6 +63,8 @@ PyLiteObject* pylt_method_int_is_integer(PyLiteInterpreter *I, int argc, PyLiteO
 
 
 PyLiteObject* pylt_cls_method_float_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_FLOAT), _S(__new__), casttype(args[0])))
+        return NULL;
     // TODO: 从字符串转为数字
     PyLiteFloatObject *num = pylt_obj_float_new(I, 0);
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(num));
@@ -63,17 +72,21 @@ PyLiteObject* pylt_cls_method_float_new(PyLiteInterpreter *I, int argc, PyLiteOb
 
 
 PyLiteObject* pylt_cls_method_bool_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_BOOL), _S(__new__), casttype(args[0])))
+        return NULL;
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(pylt_obj_istrue(I, args[1]) ? &PyLiteTrue : &PyLiteFalse));
 }
 
 
 PyLiteObject* pylt_cls_method_str_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_STR), _S(__new__), casttype(args[0])))
+        return NULL;
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(pylt_obj_to_str(I, args[1])));
 }
 
 PyLiteObject* pylt_method_str_index(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     pl_int_t ret = pylt_obj_str_index_full(I, dcast(str, args[0]), dcast(str, args[1]), dcast(int, args[2])->ob_val, dcast(int, args[3])->ob_val);
-    // TODO: -2
+    // TODO: ret == -2, error
     return castobj(pylt_obj_int_new(I, ret));
 }
 
@@ -83,6 +96,8 @@ PyLiteObject* pylt_method_str_join(PyLiteInterpreter *I, int argc, PyLiteObject 
 
 
 PyLiteObject* pylt_cls_method_bytes_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_BYTES), _S(__new__), casttype(args[0])))
+        return NULL;
     PyLiteBytesObject *str = pylt_obj_bytes_new_empty(I);
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(str));
 }
@@ -136,6 +151,9 @@ PyLiteObject* pylt_method_set_remove(PyLiteInterpreter *I, int argc, PyLiteObjec
 PyLiteObject* pylt_cls_method_list_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteObject *obj;
     PyLiteListObject *lst;
+
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_LIST), _S(__new__), casttype(args[0])))
+        return NULL;
 
     if (pylt_obj_iterable(I, args[1])) {
         PyLiteIterObject *iter = pylt_obj_iter_new(I, args[1]);
@@ -208,6 +226,9 @@ PyLiteObject* pylt_cls_method_tuple_new(PyLiteInterpreter *I, int argc, PyLiteOb
     PyLiteTupleObject *tuple;
     PyLiteListObject *lst;
 
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_TUPLE), _S(__new__), casttype(args[0])))
+        return NULL;
+
     if (pylt_obj_iterable(I, args[1])) {
         lst = pylt_obj_list_new(I);
         iter = pylt_obj_iter_new(I, args[1]);
@@ -226,6 +247,9 @@ PyLiteObject* pylt_cls_method_tuple_new(PyLiteInterpreter *I, int argc, PyLiteOb
 }
 
 PyLiteObject* pylt_cls_method_dict_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_DICT), _S(__new__), casttype(args[0])))
+        return NULL;
+
     PyLiteDictObject *kwargs = dcast(dict, args[1]);
     PyLiteDictObject *newdict = pylt_obj_dict_new(I);
 
@@ -237,5 +261,6 @@ PyLiteObject* pylt_cls_method_dict_new(PyLiteInterpreter *I, int argc, PyLiteObj
 }
 
 PyLiteObject* pylt_cls_method_meaningless_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    // TODO: 这里取不到cls，值得想个办法
 	return NULL;
 }
