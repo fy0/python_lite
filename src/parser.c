@@ -1130,11 +1130,21 @@ void parse_stmt(ParserState *ps) {
                 write_ins(ps, BC_RET, 0, 0);
             }
             break;
-        case TK_KW_ASSERT:
+        case TK_KW_ASSERT: {
+            bool old_disable_expr_tuple_parse = ps->disable_expr_tuple_parse;
+            ps->disable_expr_tuple_parse = true;
             next(ps);
             parse_expr(ps);
-            write_ins(ps, BC_ASSERT, 0, 0);
+            if (tk->val == ',') {
+                next(ps);
+                parse_expr(ps);
+                write_ins(ps, BC_ASSERT, 0, 1);
+            } else {
+                write_ins(ps, BC_ASSERT, 0, 0);
+            }
+            ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
             break;
+        }
         case TK_NEWLINE:
             // empty file
             break;

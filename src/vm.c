@@ -628,7 +628,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 kv_pushptr(vm->stack, tret);
 
                 // next instruction is BC_CALL, and it's a method!
-                if (at_type) {
+                if (!pl_istype(tobj) && at_type) {
                     if (ins.exarg) {
                         kv_pushptr(vm->stack, tobj);
                         params_offset = 1;
@@ -656,11 +656,11 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 kv_pushptr(vm->stack, tb);
                 break;
             case BC_ASSERT:
-                // ASSERT       0       0
+                // ASSERT       0       extra
+                if (ins.extra) ta = castobj(kv_pop(I->vm.stack));
                 if (!pylt_obj_istrue(I, castobj(kv_pop(I->vm.stack)))) {
-                    // TODO: ASSERT with text (assert False, "123")
-                    pl_error(I, pl_static.str.AssertionError, NULL);
-                    return;
+                    if (ins.extra) pl_error(I, pl_static.str.AssertionError, "%s", ta);
+                    else pl_error(I, pl_static.str.AssertionError, NULL);
                 }
                 break;
             case BC_IMPORT_NAME:
