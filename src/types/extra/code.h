@@ -3,7 +3,7 @@
 #define PYLITE_TYPES_CODE_SNIPPET_H
 
 #include "../object.h"
-#include "../list.h"
+#include "../common/list.h"
 #include "../../lib/kvec.h"
 
 typedef struct PyLiteInstruction {

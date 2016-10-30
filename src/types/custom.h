@@ -3,7 +3,7 @@
 #define PYLITE_TYPES_CUTSOM_H
 
 #include "object.h"
-#include "dict.h"
+#include "common/dict.h"
 
 // Custom object
 

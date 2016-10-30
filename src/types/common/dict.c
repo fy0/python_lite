@@ -1,7 +1,6 @@
 ﻿
 #include "dict.h"
 #include "string.h"
-#include "../misc.h"
 
 pl_int_t pylt_obj_dict_cmp(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *other) {
     return 2;

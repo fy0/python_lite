@@ -159,12 +159,20 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 	pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(cls), _S(object)), _NT(I, 2, castobj(&PyLiteParamUndefined), castobj(&PyLiteParamKwargs)), NULL, &pylt_cls_method_dict_new);
     pylt_obj_type_register(I, type);
 
+    // type
+    type = pylt_obj_type_new_with_type(I, pl_static.str.type, PYLT_OBJ_TYPE_TYPE, PYLT_OBJ_TYPE_OBJ);
+    pylt_cmethod_register(I, type, _S(__new__), _NST(I, 2, "cls", "object"), NULL, NULL, &pylt_cls_method_type_new);
+    pylt_cmethod_register_0_args(I, type, pl_static.str.mro, &pylt_method_type_mro);
+    pylt_cprop_register(I, type, pl_static.str.__base__, &pylt_prop_type_base_get, NULL);
+    type->allow_inherit = false;
+    pylt_obj_type_register(I, type);
+
 	// unusual
 	type = pylt_obj_type_new_with_type(I, _S(unusual), PYLT_OBJ_TYPE_UNUSUAL, PYLT_OBJ_TYPE_OBJ);
     pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_meaningless_new);
 	pylt_obj_type_register(I, type);
 
-    // ============== 12 ==============
+    // ============== 13 ==============
 
     // module
     type = pylt_obj_type_new_with_type(I, pl_static.str.module, PYLT_OBJ_TYPE_MODULE, PYLT_OBJ_TYPE_OBJ);
@@ -196,15 +204,7 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
     type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 
-    // ============== 16 ==============
-
-    // type
-    type = pylt_obj_type_new_with_type(I, pl_static.str.type, PYLT_OBJ_TYPE_TYPE, PYLT_OBJ_TYPE_OBJ);
-    pylt_cmethod_register(I, type, _S(__new__), _NST(I, 2, "cls", "object"), NULL, NULL, &pylt_cls_method_type_new);
-    pylt_cmethod_register_0_args(I, type, pl_static.str.mro, &pylt_method_type_mro);
-    pylt_cprop_register(I, type, pl_static.str.__base__, &pylt_prop_type_base_get, NULL);
-    type->allow_inherit = false;
-    pylt_obj_type_register(I, type);
+    // ============== 17 ==============
 
     // prop
     type = pylt_obj_type_new_with_type(I, pl_static.str.property_, PYLT_OBJ_TYPE_PROP, PYLT_OBJ_TYPE_OBJ);

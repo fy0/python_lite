@@ -2,8 +2,8 @@
 #include "bool.h"
 #include "bytes.h"
 #include "set.h"
-#include "../api.h"
-#include "../intp.h"
+#include "../../api.h"
+#include "../../intp.h"
 
 static PyLiteBytesObject* hash_and_check_cache(PyLiteInterpreter *I, PyLiteBytesObject *obj) {
     obj->ob_hash = pylt_obj_bytes_forcehash(I, obj);

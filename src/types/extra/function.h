@@ -3,9 +3,9 @@
 #define PYLITE_TYPES_FUNC_H
 
 #include "../object.h"
-#include "../string.h"
-#include "../tuple.h"
-#include "../dict.h"
+#include "../common/string.h"
+#include "../common/tuple.h"
+#include "../common/dict.h"
 #include "code.h"
 
 typedef struct PyLiteFunctionInfo {

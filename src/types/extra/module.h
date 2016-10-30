@@ -3,8 +3,8 @@
 #define PYLITE_TYPES_MODULE_H
 
 #include "../object.h"
-#include "../string.h"
-#include "../dict.h"
+#include "../common/string.h"
+#include "../common/dict.h"
 #include "code.h"
 
 typedef struct PyLiteModuleObject {

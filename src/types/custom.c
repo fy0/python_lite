@@ -1,6 +1,6 @@
 
 #include "custom.h"
-#include "type.h"
+#include "common/type.h"
 #include "../api.h"
 
 PyLiteObject* pylt_obj_cutstom_create(PyLiteInterpreter *I, uint32_t ob_type, PyLiteObject *base_obj) {

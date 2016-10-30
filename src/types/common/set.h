@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_SET_H
 #define PYLITE_TYPES_SET_H
 
-#include "object.h"
+#include "../object.h"
 
 KHASHO_INIT(set_obj, PyLiteObject*, char, 0, pylt_obj_hash, pylt_obj_eq);
 

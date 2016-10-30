@@ -7,8 +7,8 @@
 #include "vm.h"
 #include "gc.h"
 #include "lib/kvec.h"
-#include "types/set.h"
-#include "types/type.h"
+#include "types/common/set.h"
+#include "types/common/type.h"
 
 typedef struct PyLiteInterpreter {
     PyLiteVM vm;

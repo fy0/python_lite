@@ -1,8 +1,8 @@
 ﻿
 #include "type.h"
 #include "dict.h"
-#include "../intp.h"
-#include "../api.h"
+#include "../../intp.h"
+#include "../../api.h"
 
 PyLiteTypeObject* pylt_obj_type_new_with_type(PyLiteInterpreter *I, PyLiteStrObject *name, pl_uint32_t instance_type, pl_uint32_t base_type) {
     PyLiteTypeObject *obj = pylt_malloc(I, sizeof(PyLiteTypeObject));

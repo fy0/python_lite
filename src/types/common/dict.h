@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_DICT_H
 #define PYLITE_TYPES_DICT_H
 
-#include "object.h"
+#include "../object.h"
 
 KHASHO_INIT(table, PyLiteObject*, PyLiteObject*, 1, pylt_obj_hash, pylt_obj_eq);
 

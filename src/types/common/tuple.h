@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_TUPLE_H
 #define PYLITE_TYPES_TUPLE_H
 
-#include "object.h"
+#include "../object.h"
 
 typedef struct PyLiteTupleObject {
     PyLiteObject_HEAD;

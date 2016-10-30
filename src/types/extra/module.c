@@ -1,6 +1,6 @@
 ﻿
 #include "module.h"
-#include "../dict.h"
+#include "../common/dict.h"
 
 PyLiteModuleObject* pylt_obj_module_new(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteStrObject *name) {
 	PyLiteModuleObject *obj = castmod(pylt_malloc(I, sizeof(PyLiteModuleObject)));

@@ -30,15 +30,16 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_LIST,
     PYLT_OBJ_TYPE_TUPLE,
 	PYLT_OBJ_TYPE_DICT,
+
+    PYLT_OBJ_TYPE_TYPE,  // 11
 	PYLT_OBJ_TYPE_UNUSUAL,
 
-    PYLT_OBJ_TYPE_MODULE, // 12
+    PYLT_OBJ_TYPE_MODULE, // 13
     PYLT_OBJ_TYPE_FUNCTION,
     PYLT_OBJ_TYPE_CFUNCTION,
 	PYLT_OBJ_TYPE_CODE,
 
-    PYLT_OBJ_TYPE_TYPE, // 16
-    PYLT_OBJ_TYPE_ITER,
+    PYLT_OBJ_TYPE_ITER, // 17
     PYLT_OBJ_TYPE_PROP,
     PYLT_OBJ_TYPE_NONE,
 
@@ -123,6 +124,7 @@ struct PyLiteCustomObject;
 #define castlist(i)     cast(struct PyLiteListObject*, (i))
 #define casttuple(i)    cast(struct PyLiteTupleObject*, (i))
 #define castdict(i)     cast(struct PyLiteDictObject*, (i))
+#define casttype(i)     cast(struct PyLiteTypeObject*, (i))
 #define castunusual(i)  cast(struct PyLiteUnusualObject*, (i))
 
 #define castmod(i)      cast(struct PyLiteModuleObject*, (i))
@@ -130,7 +132,6 @@ struct PyLiteCustomObject;
 #define castcfunc(i)    cast(struct PyLiteCFunctionObject*, (i))
 #define castcode(i)     cast(struct PyLiteCodeObject*, (i))
 
-#define casttype(i)     cast(struct PyLiteTypeObject*, (i))
 #define castiter(i)     cast(struct PyLiteIterObject*, (i))
 #define castprop(i)     cast(struct PyLitePropertyObject*, (i))
 #define castnone(i)     cast(struct PyLiteNoneObject*, (i))
@@ -149,8 +150,8 @@ struct PyLiteCustomObject;
 #define pl_iset(i)         (i->ob_type == PYLT_OBJ_TYPE_SET)
 #define pl_islist(i)       (i->ob_type == PYLT_OBJ_TYPE_LIST)
 #define pl_istuple(i)      (i->ob_type == PYLT_OBJ_TYPE_TUPLE)
-#define pl_isunusual(i)    (i->ob_type == PYLT_OBJ_TYPE_UNUSUAL)
 #define pl_istype(i)       (i->ob_type == PYLT_OBJ_TYPE_TYPE)
+#define pl_isunusual(i)    (i->ob_type == PYLT_OBJ_TYPE_UNUSUAL)
 #define pl_isiter(i)       (i->ob_type == PYLT_OBJ_TYPE_ITER)
 #define pl_isnum(i)        ((i->ob_type == PYLT_OBJ_TYPE_INT) || (i->ob_type == PYLT_OBJ_TYPE_FLOAT))
 #define pl_isstrkind(i)    ((i->ob_type == PYLT_OBJ_TYPE_STR) || (i->ob_type == PYLT_OBJ_TYPE_BYTES))

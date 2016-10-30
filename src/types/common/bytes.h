@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_BYTES_H
 #define PYLITE_TYPES_BYTES_H
 
-#include "object.h"
+#include "../object.h"
 
 typedef struct PyLiteBytesObject {
     PyLiteObject_HEAD;

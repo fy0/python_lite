@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_UNUSUAL_H
 #define PYLITE_TYPES_UNUSUAL_H
 
-#include "object.h"
+#include "../object.h"
 
 typedef struct PyLiteUnusualObject {
     PyLiteObject_HEAD;

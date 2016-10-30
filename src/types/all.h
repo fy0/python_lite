@@ -3,30 +3,29 @@
 #define PYLITE_TYPES_ALL_H
 
 #include "object.h"
-#include "number.h"
-#include "bool.h"
+#include "common/number.h"
+#include "common/bool.h"
 
-#include "string.h"
-#include "bytes.h"
-#include "set.h"
-#include "list.h"
-#include "tuple.h"
-#include "dict.h"
-#include "unusual.h"
+#include "common/string.h"
+#include "common/bytes.h"
+#include "common/set.h"
+#include "common/list.h"
+#include "common/tuple.h"
+#include "common/dict.h"
+#include "common/type.h"
+#include "common/unusual.h"
 
 #include "extra/module.h"
 #include "extra/function.h"
 #include "extra/code.h"
 
-#include "type.h"
 #include "extra/iter.h"
 #include "extra/property.h"
 #include "extra/none.h"
 
 #include "extra/range.h"
+#include "extra/exception.h"
 
 #include "custom.h"
-
-#include "extra/exception.h"
 
 #endif

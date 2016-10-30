@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_LIST_H
 #define PYLITE_TYPES_LIST_H
 
-#include "object.h"
+#include "../object.h"
 
 typedef struct PyLiteListObject {
     PyLiteObject_HEAD;

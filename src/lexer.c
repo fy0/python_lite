@@ -1,8 +1,8 @@
 ﻿
 #include "lexer.h"
-#include "types/string.h"
-#include "types/bytes.h"
-#include "types/number.h"
+#include "types/common/string.h"
+#include "types/common/bytes.h"
+#include "types/common/number.h"
 
 uint32_t get_token_1(StringStream *ss, uint32_t next1_eq_token, uint32_t next1_token, uint32_t next2_token);
 

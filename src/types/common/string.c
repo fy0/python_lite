@@ -2,9 +2,8 @@
 #include "bool.h"
 #include "string.h"
 #include "list.h"
-#include "../misc.h"
-#include "../api.h"
-#include "../gc.h"
+#include "../../api.h"
+#include "../../gc.h"
 
 static PyLiteStrObject* hash_and_check_cache(PyLiteInterpreter *I, PyLiteStrObject *obj) {
     obj->ob_hash = pylt_obj_str_forcehash(I, obj);

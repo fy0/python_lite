@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_NUMBER_H
 #define PYLITE_TYPES_NUMBER_H
 
-#include "object.h"
+#include "../object.h"
 
 typedef struct PyLiteIntObject {
     PyLiteObject_HEAD;

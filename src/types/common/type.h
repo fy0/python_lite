@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_TYPE_H
 #define PYLITE_TYPES_TYPE_H
 
-#include "object.h"
+#include "../object.h"
 #include "string.h"
 #include "dict.h"
 

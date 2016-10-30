@@ -4,9 +4,9 @@
 
 #include "config.h"
 #include "utils/ref.h"
-#include "types/set.h"
-#include "types/bytes.h"
-#include "types/string.h"
+#include "types/common/set.h"
+#include "types/common/bytes.h"
+#include "types/common/string.h"
 
 // use "(pl_int_t)" to avoid => warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
 #define up_hash_func(I, key) ((pl_uint32_t)(pl_int_t)(key))

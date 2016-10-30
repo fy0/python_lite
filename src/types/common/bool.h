@@ -2,7 +2,7 @@
 #ifndef PYLITE_TYPES_BOOL_H
 #define PYLITE_TYPES_BOOL_H
 
-#include "object.h"
+#include "../object.h"
 
 typedef struct PyLiteBoolObject {
     PyLiteObject_HEAD;

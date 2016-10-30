@@ -243,6 +243,11 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *BytesWarning;
         PyLiteStrObject *ResourceWarning;
 
+        // module
+        // _io
+        PyLiteStrObject *_io;
+        PyLiteStrObject *FileIO;
+
         // template
         PyLiteStrObject *TMPL_OBJECT_TO_STR;
         PyLiteStrObject *TMPL_CLASS_TO_STR;

@@ -3,9 +3,9 @@
 #define PYLITE_TYPES_EXCEPTION_H
 
 #include "../object.h"
-#include "../string.h"
-#include "../tuple.h"
 #include "../custom.h"
+#include "../common/string.h"
+#include "../common/tuple.h"
 
 typedef struct PyLiteBaseExceptionObject {
     PyLiteObject_HEAD;
