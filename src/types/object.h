@@ -42,12 +42,13 @@ enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_ITER, // 17
     PYLT_OBJ_TYPE_PROP,
     PYLT_OBJ_TYPE_NONE,
+    PYLT_OBJ_TYPE_CPTR,
 
-    PYLT_OBJ_TYPE_RANGE, // 20
+    PYLT_OBJ_TYPE_RANGE, // 21
 
-    PYLT_OBJ_TYPE_BASE_EXCEPTION, // 21
+    PYLT_OBJ_TYPE_BASE_EXCEPTION, // 22
 
-    PYLT_OBJ_TYPE_USERCLASS, // 22
+    PYLT_OBJ_TYPE_USERCLASS, // 23
 };
 
 #define PYLT_OBJ_BUILTIN_TYPE_NUM PYLT_OBJ_TYPE_BASE_EXCEPTION
@@ -94,6 +95,7 @@ struct PyLiteSetObject;
 struct PyLiteListObject;
 struct PyLiteTupleObject;
 struct PyLiteDictObject;
+struct PyLiteTypeObject;
 struct PyLiteUnusualObject;
 
 struct PyLiteCodeObject;
@@ -101,7 +103,6 @@ struct PyLiteModuleObject;
 struct PyLiteFunctionObject;
 struct PyLiteCFunctionObject;
 
-struct PyLiteTypeObject;
 struct PyLiteIterObject;
 struct PyLitePropertyObject;
 struct PyLiteNoneObject;

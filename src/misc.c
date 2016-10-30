@@ -131,16 +131,17 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(list);
     sstr_new(tuple);
     sstr_new(dict);
+    sstr_new(type);
     sstr_new(unusual);
 
     sstr_new(module);
     sstr_new(function);
     sstr_new(cfunction);
     sstr_new(code);
-    sstr_new(type);
     sstr_new(iterator);
     sstr_new2(property_, "property");
     sstr_new(NoneType);
+    sstr_new(cpointer);
     sstr_new(range);
 
     // object

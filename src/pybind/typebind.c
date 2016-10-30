@@ -206,6 +206,12 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // ============== 17 ==============
 
+    // iter
+    type = pylt_obj_type_new_with_type(I, pl_static.str.iterator, PYLT_OBJ_TYPE_ITER, PYLT_OBJ_TYPE_OBJ);
+    pylt_cmethod_register_1_args(I, type, _S(__new__), &pylt_cls_method_iter_new);
+    type->allow_inherit = false;
+    pylt_obj_type_register(I, type);
+
     // prop
     type = pylt_obj_type_new_with_type(I, pl_static.str.property_, PYLT_OBJ_TYPE_PROP, PYLT_OBJ_TYPE_OBJ);
     // TODO: prop.__new__
@@ -219,13 +225,13 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
     type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 
-    // iter
-    type = pylt_obj_type_new_with_type(I, pl_static.str.iterator, PYLT_OBJ_TYPE_ITER, PYLT_OBJ_TYPE_OBJ);
+    // cpointer
+    type = pylt_obj_type_new_with_type(I, _S(cpointer), PYLT_OBJ_TYPE_CPTR, PYLT_OBJ_TYPE_OBJ);
     pylt_cmethod_register_1_args(I, type, _S(__new__), &pylt_cls_method_iter_new);
     type->allow_inherit = false;
     pylt_obj_type_register(I, type);
 
-    // ============== 20 ==============
+    // ============== 21 ==============
 
     // range
     type = pylt_obj_type_new_with_type(I, pl_static.str.range, PYLT_OBJ_TYPE_RANGE, PYLT_OBJ_TYPE_OBJ);

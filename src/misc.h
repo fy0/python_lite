@@ -107,16 +107,17 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *list;
         PyLiteStrObject *tuple;
         PyLiteStrObject *dict;
+        PyLiteStrObject *type;
         PyLiteStrObject *unusual;
 
         PyLiteStrObject *module;
         PyLiteStrObject *function;
         PyLiteStrObject *cfunction;
         PyLiteStrObject *code;
-        PyLiteStrObject *type;
         PyLiteStrObject *iterator;
         PyLiteStrObject *property_;
         PyLiteStrObject *NoneType;
+        PyLiteStrObject *cpointer;
         PyLiteStrObject *range;
 
         // object
