@@ -22,6 +22,7 @@
 #include "extra/iter.h"
 #include "extra/property.h"
 #include "extra/none.h"
+#include "extra/cpointer.h"
 
 #include "extra/range.h"
 #include "extra/exception.h"

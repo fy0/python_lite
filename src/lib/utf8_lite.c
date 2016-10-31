@@ -10,6 +10,15 @@
 #include <Windows.h>
 #endif
 
+const char  abPrefix[] = { 0, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+const int adwCodeUp[] = {
+    0x80,           // U+00000000 ～ U+0000007F
+    0x800,          // U+00000080 ～ U+000007FF
+    0x10000,        // U+00000800 ～ U+0000FFFF
+    0x200000,       // U+00010000 ～ U+001FFFFF
+    0x4000000,      // U+00200000 ～ U+03FFFFFF
+    0x80000000      // U+04000000 ～ U+7FFFFFFF
+};
 
 /*
 ** Decode one UTF-8 sequence, returning NULL if byte sequence is invalid.
@@ -40,7 +49,7 @@ const char *utf8_decode(const char *o, int *val) {
 }
 
 
-int utf8_len(const char *s) {
+int utf8str_len(const char *s) {
     int code;
     int len = 0, rlen = strlen(s);
     const char* s_end = s + rlen + 1;
@@ -52,44 +61,56 @@ int utf8_len(const char *s) {
     return len;
 }
 
+bool ucs4_to_utf8(int code, char *buf, int *plen) {
+    int ilen = ucs4_to_utf8_size(code);
+    if (!ilen) return false;  // UCS4 编码无效
 
-char* ucs4_to_utf8(int code) {
-    const char  abPrefix[] = {0, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC};
-    const int adwCodeUp[] = {
-        0x80,           // U+00000000 ～ U+0000007F
-        0x800,          // U+00000080 ～ U+000007FF
-        0x10000,        // U+00000800 ～ U+0000FFFF
-        0x200000,       // U+00010000 ～ U+001FFFFF
-        0x4000000,      // U+00200000 ～ U+03FFFFFF
-        0x80000000      // U+04000000 ～ U+7FFFFFFF
-    };
-
-    int i, ilen;
-
-    // 根据UCS4编码范围确定对应的UTF-8编码字节数
-    ilen = sizeof(adwCodeUp) / sizeof(uint32_t);
-    for(i = 0; i < ilen; i++) {
-        if( code < adwCodeUp[i] ) break;
-    }
-
-    if (i == ilen) return NULL;    // 无效的UCS4编码
-
-    ilen = i + 1;   // UTF-8编码字节数
-    char* pbUTF8 = malloc(sizeof(char) * (ilen+1));
-
-    if (pbUTF8 != NULL) {   // 转换为UTF-8编码
-        for( ; i > 0; i-- ) {
-            pbUTF8[i] = (char)((code & 0x3F) | 0x80);
+    if (buf != NULL) {  // 转换为UTF-8编码
+        for (int i = ilen - 1; i > 0; --i) {
+            buf[i] = (char)((code & 0x3F) | 0x80);
             code >>= 6;
         }
-
-        pbUTF8[0] = (char)(code | abPrefix[ilen - 1]);
+        buf[0] = (char)(code | abPrefix[ilen - 1]);
     }
 
-    /*for (i = 0; i < ilen; i++) {
-        printf("%2x ", pbUTF8[i]);
-    }*/
-    pbUTF8[ilen] = 0;
-    
-    return pbUTF8;
+    if (plen) *plen = ilen;
+    return true;
+}
+
+
+int ucs4_to_utf8_size(int code) {
+    // 根据UCS4编码范围确定对应的UTF-8编码字节数
+    int i;
+    int ilen = sizeof(adwCodeUp) / sizeof(uint32_t);
+    for (i = 0; i < ilen; ++i) {
+        if (code < adwCodeUp[i]) break;
+    }
+    if (i == ilen) return 0;    // 无效的UCS4编码
+    return i + 1;   // UTF-8编码字节数
+}
+
+bool ucs4str_to_utf8(uint32_t *ucs4str, int ucs4str_len, char *buf, int *plen) {
+    int len, written=0;
+    char u8buf[6];
+
+    for (int i = 0; i < ucs4str_len; ++i) {
+        if (ucs4_to_utf8(ucs4str[i], (char*)&u8buf, &len)) {
+            memcpy(buf + written, &u8buf, len);
+            written += len;
+        } else return false;
+    }
+
+    buf[written] = '\0';
+    if (plen) *plen = written;
+    return true;
+}
+
+int ucs4str_to_utf8_size(uint32_t *ucs4str, int ucs4str_len) {
+    int isize, allsize = 0;
+    for (int i = 0; i < ucs4str_len; ++i) {
+        isize = ucs4_to_utf8_size(ucs4str[i]);
+        if (!isize) return 0;
+        allsize += isize;
+    }
+    return allsize;
 }

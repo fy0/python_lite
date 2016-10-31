@@ -7,9 +7,12 @@ void putcode(uint32_t code) {
     if (code < 0xff) {
         putchar((char)code);
     } else {
-        char* ret = ucs4_to_utf8(code);
-        printf_u8("%s", ret);
-        free(ret);
+        int len;
+        char buf[7];
+        if (ucs4_to_utf8(code, (char*)&buf, &len)) {
+            buf[len] = '\0';
+            printf_u8("%s", &buf);
+        }
     }
 }
 

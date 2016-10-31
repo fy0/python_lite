@@ -263,7 +263,7 @@ PyLiteStrObject* pylt_obj_str_new_from_cstr(PyLiteInterpreter *I, const char *st
     uint32_t code;
     PyLiteStrObject *obj;
     const char *p = (const char *)str;
-    int len = utf8_len(str);
+    int len = utf8str_len(str);
     uint32_t *buf = pylt_malloc(I, (len + 1) * sizeof(uint32_t));
 
     for (int i = 0; i < len; i++) {
