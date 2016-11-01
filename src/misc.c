@@ -192,6 +192,10 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
     // modules
     sstr_new(math);
     sstr_new(builtins);
+    sstr_new(cio);
+
+    sstr_new(io);
+    sstr_new(FileIO);
 
     sstr_new(cls);
     sstr_new(self);
@@ -270,10 +274,6 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(UnicodeWarning);
     sstr_new(BytesWarning);
     sstr_new(ResourceWarning);
-
-    // module
-    sstr_new(_io);
-    sstr_new(FileIO);
 
     // template
     sstr_new2(TMPL_OBJECT_TO_STR, "<%s object at %p>");

@@ -165,6 +165,9 @@ struct PyLiteStaticObjectsType {
         // modules
         PyLiteStrObject *math;
         PyLiteStrObject *builtins;
+        PyLiteStrObject *cio;
+        PyLiteStrObject *io;
+        PyLiteStrObject *FileIO;
 
         PyLiteStrObject *cls;
         PyLiteStrObject *self;
@@ -243,11 +246,6 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *UnicodeWarning;
         PyLiteStrObject *BytesWarning;
         PyLiteStrObject *ResourceWarning;
-
-        // module
-        // _io
-        PyLiteStrObject *_io;
-        PyLiteStrObject *FileIO;
 
         // template
         PyLiteStrObject *TMPL_OBJECT_TO_STR;

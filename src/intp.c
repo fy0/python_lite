@@ -1,7 +1,8 @@
 ﻿
 #include "intp.h"
 #include "misc.h"
-#include "mods/_io.h"
+#include "mods/io.h"
+#include "mods/cio.h"
 #include "mods/math.h"
 #include "mods/builtin.h"
 #include "mods/unusualm.h"
@@ -41,7 +42,8 @@ void pylt_intp_init(PyLiteInterpreter *I) {
     pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.builtins), castobj(&pylt_mods_builtins_register));
     pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.math), castobj(&pylt_mods_math_register));
     pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.unusual), castobj(&pylt_mods_unusual_register));
-    pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str._io), castobj(&pylt_mods_io_register));
+    pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.io), castobj(&pylt_mods_io_register));
+    pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.cio), castobj(&pylt_mods_cio_register));
 }
 
 void pylt_intp_finalize(PyLiteInterpreter *I) {

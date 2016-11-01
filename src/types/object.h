@@ -106,6 +106,7 @@ struct PyLiteCFunctionObject;
 struct PyLiteIterObject;
 struct PyLitePropertyObject;
 struct PyLiteNoneObject;
+struct PyLiteCPtrObject;
 
 struct PyLiteRangeObject;
 struct PyLiteBaseExceptionObject;
@@ -136,6 +137,7 @@ struct PyLiteCustomObject;
 #define castiter(i)     cast(struct PyLiteIterObject*, (i))
 #define castprop(i)     cast(struct PyLitePropertyObject*, (i))
 #define castnone(i)     cast(struct PyLiteNoneObject*, (i))
+#define castcptr(i)     cast(struct PyLiteCPtrObject*, (i))
 
 #define castrange(i)    cast(struct PyLiteRangeObject*, (i))
 #define castexcept(i)   cast(struct PyLiteBaseExceptionObject*, (i))
