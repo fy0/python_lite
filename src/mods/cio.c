@@ -9,31 +9,55 @@
 #include "../types/all.h"
 
 
+FILE* mfopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode) {
+    if (fn->ob_size > 255) {
+        pl_error(I, pl_static.str.ValueError, "File name too long: %r", fn);
+        return NULL;
+    }
+    if (mode->ob_size > 20) {
+        pl_error(I, pl_static.str.ValueError, "invalid mode: %r", mode);
+        return NULL;
+    }
+
+#ifdef PLATFORM_WINDOWS
+    uint16_t cfn[256];
+    uint16_t cmode[21];
+
+    if (!ucs4str_to_ucs2(fn->ob_val, fn->ob_size, (uint16_t*)&cfn, false)) {
+        pl_error(I, pl_static.str.UnicodeEncodeError, "invalid filename.");
+        return NULL;
+    }
+
+    if (!ucs4str_to_ucs2(mode->ob_val, mode->ob_size, (uint16_t*)&cmode, false)) {
+        pl_error(I, pl_static.str.UnicodeEncodeError, "invalid mode.");
+        return NULL;
+    }
+
+    return _wfopen((const wchar_t*)cfn, (const wchar_t*)cmode);
+#else
+    char cfn[1536];
+    char cmode[126];
+
+    if (!ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&cfn, NULL)) {
+        pl_error(I, pl_static.str.UnicodeEncodeError, "invalid filename.");
+        return NULL;
+    }
+
+    if (!ucs4str_to_utf8(mode->ob_val, mode->ob_size, (char*)&cmode, NULL)) {
+        pl_error(I, pl_static.str.UnicodeEncodeError, "invalid mode.");
+        return NULL;
+    }
+
+    return fopen((const char*)&cfn, (const char*)&cmode);
+#endif
+}
+
+
 PyLiteObject* pylt_mods_cio_fopen(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     int len;
     PyLiteStrObject *fn = caststr(args[0]);
     PyLiteStrObject *mode = caststr(args[1]);
-
-    char cfn[256];
-    char cmode[21];
-
-    len = ucs4str_to_utf8_size(fn->ob_val, fn->ob_size);
-    if (len > 255) {
-        //[Errno 36] File name too long
-        pl_error(I, pl_static.str.ValueError, "File name too long");
-        return NULL;
-    }
-
-    len = ucs4str_to_utf8_size(mode->ob_val, mode->ob_size);
-    if (len > 21) {
-        pl_error(I, pl_static.str.ValueError, "Invalid mode: %r", mode);
-        return NULL;
-    }
-
-    ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&cfn, NULL);
-    ucs4str_to_utf8(mode->ob_val, mode->ob_size, (char*)&cmode, NULL);
-    
-    FILE *fp = fopen((const char*)&cfn, (const char*)&cmode);
+    FILE *fp = mfopen(I, fn, mode);
 
     if (!fp) {
         switch (errno) {
