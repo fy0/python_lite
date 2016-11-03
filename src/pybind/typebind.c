@@ -66,6 +66,12 @@ void pylt_bind_exceptions(PyLiteInterpreter *I) {
     base2 = type->ob_base;
     EXCEPTION_REGISTER(IndentationError, base2);
 
+    EXCEPTION_REGISTER(UnicodeError, base);
+    base2 = type->ob_base;
+    EXCEPTION_REGISTER(UnicodeDecodeError, base2);
+    EXCEPTION_REGISTER(UnicodeEncodeError, base2);
+    EXCEPTION_REGISTER(UnicodeTranslateError, base2);
+
     EXCEPTION_REGISTER(Warning, base);
     base2 = type->ob_base;
     EXCEPTION_REGISTER(DeprecationWarning, base2);

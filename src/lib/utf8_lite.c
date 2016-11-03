@@ -57,7 +57,6 @@ int utf8str_len(const char *s) {
     for (const char *p = utf8_decode(s, &code); p != s_end; p = utf8_decode(p, &code)) {
         len += 1;
     }
-    
     return len;
 }
 
@@ -113,4 +112,36 @@ int ucs4str_to_utf8_size(uint32_t *ucs4str, int ucs4str_len) {
         allsize += isize;
     }
     return allsize;
+}
+
+
+bool ucs4_to_ucs2(uint32_t u4, uint16_t *u2) {
+    if (u4 > UINT16_MAX) {
+        *u2 = (uint16_t)' ';
+        return false;
+    }
+    *u2 = (uint16_t)u4;
+    return true;
+}
+
+bool ucs2_to_ucs4(uint16_t u2, uint32_t *u4) {
+    *u4 = (uint32_t)u2;
+    return true;
+}
+
+bool ucs4str_to_ucs2(uint32_t *ucs4str, int ucs4str_len, uint16_t *buf, bool ignore) {
+    for (int i = 0; i < ucs4str_len; ++i) {
+        bool ret = ucs4_to_ucs2(ucs4str[i], buf + i);
+        if (ignore || (!ret)) return false;
+    }
+    buf[ucs4str_len] = (uint16_t)'\0';
+    return true;
+}
+
+bool ucs2str_to_ucs4(uint32_t *ucs2str, int ucs2str_len, uint16_t *buf) {
+    for (int i = 0; i < ucs2str_len; ++i) {
+        ucs2_to_ucs4(ucs2str[i], buf + i);
+    }
+    buf[ucs2str_len] = (uint32_t)'\0';
+    return true;
 }

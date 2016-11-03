@@ -1,5 +1,8 @@
 ﻿
 #include <errno.h>
+#include <sys/stat.h>
+#include <stdio.h>
+
 #include "io.h"
 #include "../api.h"
 #include "../bind.h"
@@ -29,6 +32,7 @@ PyLiteObject* pylt_mods_cio_fopen(PyLiteInterpreter *I, int argc, PyLiteObject *
 
     ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&cfn, NULL);
     ucs4str_to_utf8(mode->ob_val, mode->ob_size, (char*)&cmode, NULL);
+    
     FILE *fp = fopen((const char*)&cfn, (const char*)&cmode);
 
     if (!fp) {
@@ -43,7 +47,7 @@ PyLiteObject* pylt_mods_cio_fopen(PyLiteInterpreter *I, int argc, PyLiteObject *
                 pl_error(I, pl_static.str.IsADirectoryError, "[Errno 21] Is a directory: %r", args[0]);
                 break;
             default:
-                pl_error(I, pl_static.str.OSError, "[Errno %d] File Open Error: %r", args[0]);
+                pl_error(I, pl_static.str.OSError, "[Errno %d] File Open Error: %r", pylt_obj_int_new(I, errno), args[0]);
         }
     }
 
@@ -55,17 +59,25 @@ PyLiteObject* pylt_mods_cio_fclose(PyLiteInterpreter *I, int argc, PyLiteObject 
 }
 
 
+PyLiteObject* pylt_mods_cio_fsize(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    FILE *fp = castcptr(args[0])->ob_ptr;
+    struct stat stbuf;
+    fstat(fileno(fp), &stbuf);    
+    return castobj(pylt_obj_int_new(I, stbuf.st_size));
+}
+
+
 PyLiteObject* pylt_mods_cio_fread(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     // 这里有必要提一句，在Windows上，'r'模式下，fread之后的ftell就是一定会返回错误的值！
     // 不是BUG！切到'rb'就好了
     FILE *fp = castcptr(args[0])->ob_ptr;
     pl_int_t size = castint(args[1])->ob_val;
 
-    long pos = ftell(fp);
+    /*long pos = ftell(fp);
     fseek(fp, 0, SEEK_END);
     long maxsize = ftell(fp) - pos;
     fseek(fp, pos, SEEK_SET);
-    if (size > maxsize) size = maxsize;
+    if (size > maxsize) size = maxsize;*/
 
     uint8_t *buf = pylt_malloc(I, size+1);
     size_t read = fread(buf, size, 1, fp);
@@ -106,6 +118,7 @@ PyLiteModuleObject* pylt_mods_cio_register(PyLiteInterpreter *I) {
 
     pylt_cfunc_register(I, mod, _NS(I, "fopen"), _NST(I, 2, "fn", "mode"), NULL, NULL, &pylt_mods_cio_fopen);
     pylt_cfunc_register(I, mod, _NS(I, "fclose"), _NST(I, 1, "file"), NULL, NULL, &pylt_mods_cio_fclose);
+    pylt_cfunc_register(I, mod, _NS(I, "fsize"), _NST(I, 1, "file"), NULL, NULL, &pylt_mods_cio_fsize);
     pylt_cfunc_register(I, mod, _NS(I, "fread"), _NST(I, 2, "file", "size"), NULL, NULL, &pylt_mods_cio_fread);
     pylt_cfunc_register(I, mod, _NS(I, "fwrite"), _NST(I, 2, "file", "buf"), NULL, NULL, &pylt_mods_cio_fwrite);
     pylt_cfunc_register(I, mod, _NS(I, "ftell"), _NST(I, 1, "file"), NULL, NULL, &pylt_mods_cio_ftell);
