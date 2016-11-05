@@ -54,7 +54,6 @@ FILE* mfopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode) {
 
 
 PyLiteObject* pylt_mods_cio_fopen(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    int len;
     PyLiteStrObject *fn = caststr(args[0]);
     PyLiteStrObject *mode = caststr(args[1]);
     FILE *fp = mfopen(I, fn, mode);
@@ -86,7 +85,7 @@ PyLiteObject* pylt_mods_cio_fclose(PyLiteInterpreter *I, int argc, PyLiteObject 
 PyLiteObject* pylt_mods_cio_fsize(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     FILE *fp = castcptr(args[0])->ob_ptr;
     struct stat stbuf;
-    fstat(fileno(fp), &stbuf);    
+    fstat(_fileno(fp), &stbuf);    
     return castobj(pylt_obj_int_new(I, stbuf.st_size));
 }
 

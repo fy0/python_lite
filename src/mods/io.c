@@ -29,6 +29,18 @@ PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **a
     PyLiteStrObject *mode = caststr(args[1]);
     FILE *fp = mfopen(I, fn, mode);
 
+    pl_bool_t is_bin = false;
+    for (pl_int_t i = 0; i <= mode->ob_size; ++i) {
+        if (mode->ob_val[i] == 'b') {
+            is_bin = true;
+            break;
+        }
+    }
+
+    if (!is_bin) {
+        mode = pylt_obj_str_plus(I, mode, castobj(pylt_obj_str_new_from_cstr(I, "b", true)));
+    }
+
     if (!fp) {
         switch (errno) {
             case ENOENT:
@@ -46,7 +58,7 @@ PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **a
     }
 
     struct stat stbuf;
-    fstat(fileno(fp), &stbuf);
+    fstat(_fileno(fp), &stbuf);
 
     return castobj(pylt_obj_cptr_new(I, fp));
 }

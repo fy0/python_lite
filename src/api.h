@@ -19,6 +19,18 @@ pl_bool_t pylt_api_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32
 // return true if a is subclass of b
 pl_bool_t pl_api_issubclass(PyLiteInterpreter *I, PyLiteTypeObject *a, PyLiteTypeObject *b);
 
+
+PyLiteObject* pylt_vm_call_func(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ...);
+
+PyLiteObject* pylt_vm_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, int argc, ...);
+PyLiteObject* pylt_vm_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, PyLiteTupleObject *args, PyLiteDictObject *kwargs);
+
+#define pl_new              pylt_vm_call_func
+#define pl_call             pylt_vm_call_func
+#define pl_call_method      pylt_vm_call_method
+#define pl_call_method_ex   pylt_vm_call_method_ex
+
+
 PyLiteTypeObject* pl_type(PyLiteInterpreter *I, PyLiteObject *obj);
 PyLiteTypeObject* pl_type_by_code(PyLiteInterpreter *I, pl_uint32_t type_code);
 

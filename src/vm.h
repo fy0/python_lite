@@ -5,6 +5,7 @@
 #include "config.h"
 #include "lib/kvec.h"
 #include "types/all.h"
+#include "api.h"
 
 enum {
     BC_OPERATOR,       // 运算符
@@ -83,10 +84,5 @@ PyLiteFrame* pylt_vm_curframe(PyLiteInterpreter *I);
 void pylt_vm_init(PyLiteInterpreter *I, PyLiteVM *vm);
 void pylt_vm_finalize(PyLiteInterpreter *I);
 void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code);
-
-PyLiteObject* pylt_vm_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, int argc, ...);
-PyLiteObject* pylt_vm_call_func(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ...);
-
-PyLiteObject* pylt_vm_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, PyLiteTupleObject *args, PyLiteDictObject *kwargs);
 
 #endif
