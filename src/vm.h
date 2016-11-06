@@ -10,6 +10,7 @@
 enum {
     BC_OPERATOR,       // 运算符
     BC_SET_VAL,        // 赋值
+    BC_SET_VALX,       // 偏移赋值
     BC_LOAD_VAL,       // 载入变量（入栈）
     BC_LOADNONE,       // 载入 None
     BC_LOADCONST,      // 载入常量
@@ -23,6 +24,7 @@ enum {
     BC_JMP,            // 跳转
     BC_JMP_BACK,       // 前向跳转
     BC_POP,            // 弹出一个值
+    BC_POPN,           // 弹出多个值
     BC_FORITER,        // For循环
     BC_DEL_FORCE,      // 强制释放
     BC_GET_ITEM,       // 取下标
@@ -31,14 +33,16 @@ enum {
     BC_SET_ATTR,       // 存入属性
     BC_ASSERT,         // 真值断言
 
-    BC_IMPORT_NAME,    // 导入模块
-
     BC_GET_ITEM_EX,    // 取下标
     BC_LOAD_VAL_EX,    // 载入变量
     BC_GET_ATTR_EX,    // 取属性
 
-    BC_FAKE_BREAK,     // 伪指令，break
-    BC_FAKE_CONTINUE,  // 伪指令，continue
+    BC_IMPORT_NAME,    // 导入模块
+    BC_UNPACK_SEQ,     // 解包
+    BC_NOP,            // 空指令
+
+    BC_PH_BREAK,     // 伪指令，break (ph == placeholder)
+    BC_PH_CONTINUE,  // 伪指令，continue
 };
 
 enum {

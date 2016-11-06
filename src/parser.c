@@ -7,6 +7,9 @@
 #include "bind.h"
 #include "types/all.h"
 
+#define kv_pushobj(v, x) kv_push(PyLiteObject*, (v), (PyLiteObject*)(x))
+#define kv_pushins(v, x) kv_push(PyLiteInstruction, (v), (x))
+
 void func_push(ParserState *ps);
 ParserInfo* func_pop(ParserState *ps);
 
@@ -684,14 +687,14 @@ void loop_control_replace(ParserState *ps, int start_pos) {
     for (unsigned int i = start_pos; i < kv_size(ps->info->code->opcodes); ++i) {
         ins = kv_A(ps->info->code->opcodes, i);
         switch (ins.code) {
-            case BC_FAKE_BREAK:
+            case BC_PH_BREAK:
                 if (ins.extra == ps->info->loop_depth + 1) {
                     ins.code = BC_JMP;
                     ins.extra = kv_size(ps->info->code->opcodes) - i;
                     kv_A(ps->info->code->opcodes, i) = ins;
                 }
                 break;
-            case BC_FAKE_CONTINUE:
+            case BC_PH_CONTINUE:
                 if (ins.extra == ps->info->loop_depth + 1) {
                     ins.code = BC_JMP;
                     ins.extra = kv_size(ps->info->code->opcodes) - i - 1;
@@ -858,7 +861,8 @@ void parse_class(ParserState *ps) {
 }
 
 
-void value_assign_fix(ParserState *ps) {
+int value_assign_fix(ParserState *ps) {
+    int si, seqsize = 0;
     PyLiteInstruction ins, last_ins = { 0 };
 
     for (pl_int_t i = kv_size(ps->lval_check.bc_cache) - 1; i >= 0;) {
@@ -879,12 +883,24 @@ void value_assign_fix(ParserState *ps) {
                 }
                 break;
             case BC_LOAD_VAL_EX:
-                kv_A(ps->lval_check.bc_cache, i--).code = BC_SET_VAL;
+                if (seqsize) {
+                    kv_A(ps->lval_check.bc_cache, i).code = BC_SET_VALX;
+                    kv_A(ps->lval_check.bc_cache, i--).exarg = si++;
+                } else {
+                    kv_A(ps->lval_check.bc_cache, i--).code = BC_SET_VAL;
+                }
+                break;
+            case BC_NEW_OBJ:
+                // lval is tuple, unpack sequence
+                si = 0;
+                seqsize = kv_A(ps->lval_check.bc_cache, i--).extra;
+                kv_pop(ps->lval_check.bc_cache);
                 break;
             default:
                 i--;
         }
     }
+    return seqsize;
 }
 
 
@@ -919,6 +935,8 @@ void parse_inplace_op(ParserState *ps, int op_val) {
 
 void parse_value_assign(ParserState *ps) {
     pl_uint_t size;
+    pl_bool_t unpacked = false;
+    int last_seqsize = 0;
 
     //while (true) { ACCEPT(ps, '='); parse_expr(ps); break; }
     //return;
@@ -944,7 +962,16 @@ void parse_value_assign(ParserState *ps) {
         kv_popn(ps->info->code->opcodes, size);
 
         parse_expr(ps);
-        value_assign_fix(ps);
+        int seqsize = value_assign_fix(ps);
+        // TODO: ERROR 
+        // if (unpacked && (seqsize != last_seqsize)) { ... }
+        last_seqsize = seqsize;
+
+        // lval is tuple
+        if (seqsize) {
+            write_ins(ps, BC_UNPACK_SEQ, 0, seqsize);
+            unpacked = true;
+        }
 
         for (pl_uint_t i = 0; i < kv_size(ps->lval_check.bc_cache); ++i) {
             kv_pushins(ps->info->code->opcodes, kv_A(ps->lval_check.bc_cache, i));
@@ -952,6 +979,9 @@ void parse_value_assign(ParserState *ps) {
 
         kv_clear(ps->lval_check.bc_cache);
     }
+
+    if (unpacked) write_ins(ps, BC_POPN, 0, last_seqsize);
+    else write_ins(ps, BC_POP, 0, 0);
 }
 
 
@@ -1061,12 +1091,12 @@ void parse_stmt(ParserState *ps) {
         case TK_KW_BREAK:
             next(ps);
             if (ps->info->loop_depth == 0) error(ps, PYLT_ERR_PARSER_BREAK_OUTSIDE_LOOP);
-            else write_ins(ps, BC_FAKE_BREAK, 0, ps->info->loop_depth);
+            else write_ins(ps, BC_PH_BREAK, 0, ps->info->loop_depth);
             break;
         case TK_KW_CONTINUE:
             next(ps);
             if (ps->info->loop_depth == 0) error(ps, PYLT_ERR_PARSER_CONTINUE_OUTSIDE_LOOP);
-            else write_ins(ps, BC_FAKE_CONTINUE, 0, ps->info->loop_depth);
+            else write_ins(ps, BC_PH_CONTINUE, 0, ps->info->loop_depth);
             break;
         case TK_KW_FOR:
             next(ps);
@@ -1156,8 +1186,10 @@ void parse_stmt(ParserState *ps) {
             parse_expr(ps);
             switch (tk->val) {
                 case '=':
+                    // 这里需要自行处理 POP 的参数个数
                     parse_value_assign(ps);
-                    break;
+                    ps->lval_check.enable = false;
+                    goto _end;
                 case TK_DE_PLUS_EQ: case TK_DE_MINUS_EQ:  case TK_DE_MUL_EQ: case TK_DE_DIV_EQ:
                 case TK_DE_FLOORDIV_EQ: case TK_DE_MOD_EQ: case TK_DE_MATMUL_EQ:
                 case TK_DE_BITAND_EQ: case TK_DE_BITOR_EQ: case TK_DE_BITXOR_EQ:
@@ -1169,6 +1201,7 @@ void parse_stmt(ParserState *ps) {
             ps->lval_check.enable = false;
             write_ins(ps, BC_POP, 0, 0);
     }
+_end:
     ACCEPT(ps, TK_NEWLINE);
 }
 

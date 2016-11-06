@@ -30,9 +30,6 @@ typedef struct ParserState {
 	bool disable_expr_tuple_parse;
     bool disable_return_parse;
 } ParserState;
- 
-#define kv_pushobj(v, x) kv_push(PyLiteObject*, (v), (PyLiteObject*)(x))
-#define kv_pushins(v, x) kv_push(PyLiteInstruction, (v), (x))
 
 PyLiteCodeObject* pylt_parser_parse(ParserState *ps);
 void pylt_parser_init(PyLiteInterpreter *I, ParserState *ps, LexState *ls);

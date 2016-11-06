@@ -4,7 +4,7 @@
 
 #include "../types/all.h"
 
-// api with exceptions
+// object api with exceptions
 PyLiteBytesObject* pylt_obj_bytes_Egetitem(PyLiteInterpreter *I, PyLiteBytesObject *self, PyLiteObject *index);
 PyLiteStrObject* pylt_obj_str_Egetitem(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *index);
 PyLiteObject* pylt_obj_tuple_Egetitem(PyLiteInterpreter *I, PyLiteTupleObject *self, PyLiteObject *index);

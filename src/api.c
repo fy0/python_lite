@@ -147,6 +147,8 @@ void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char 
     I->error = error;
 }
 
+#define kv_pushins(v, x) kv_push(PyLiteInstruction, (v), (x))
+
 PyLiteObject* _pl_call(PyLiteInterpreter *I, pl_int_t argc) {
     PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc };
     PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };

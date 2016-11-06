@@ -369,7 +369,11 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 break;
             case BC_SET_VAL:
                 // SET_VAL      0       const_id
-                pylt_obj_dict_setitem(I, locals, const_obj(ins.extra), castobj(kv_top(I->vm.stack)));
+                pylt_obj_dict_setitem(I, locals, const_obj(ins.extra), castobj(kv_top(vm->stack)));
+                break;
+            case BC_SET_VALX:
+                // SET_VALX     offset  const_id
+                pylt_obj_dict_setitem(I, locals, const_obj(ins.extra), castobj(kv_topn(vm->stack, ins.exarg)));
                 break;
             case BC_LOAD_VAL:
             case BC_LOAD_VAL_EX:
@@ -599,7 +603,11 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 break;
             case BC_POP:
                 // POP          0       0
-                kv_pop(I->vm.stack);
+                kv_pop(vm->stack);
+                break;
+            case BC_POPN:
+                // POPN         0       num
+                kv_popn(vm->stack, ins.extra);
                 break;
             case BC_GET_ITEM:
             case BC_GET_ITEM_EX:
@@ -674,6 +682,17 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                     // TODO: import from disk
                 }
                 kv_popn(vm->stack, ins.extra);
+                break;
+            case BC_UNPACK_SEQ: {
+                tret = castobj(kv_pop(vm->stack));
+                // TODO: 使用带异常版本进行迭代
+                PyLiteIterObject *iter = pylt_obj_iter_new(I, tret);
+                for (PyLiteObject *obj = pylt_obj_iter_next(I, iter); obj; obj = pylt_obj_iter_next(I, iter)) {
+                    kv_pushptr(vm->stack, obj);
+                }
+                break;
+            }
+            case BC_NOP:
                 break;
             case BC_PRINT:
                 if (kv_size(I->vm.stack) != 0) {

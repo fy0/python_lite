@@ -41,6 +41,9 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 //debug_print_obj(I, castobj(kv_A(code->opcodes, ++i)));
                 putchar('\n');
                 break;
+            case BC_SET_VALX:
+                printf("   %-15s %d %-3d\n", "SET_VALX", ins.extra, ins.exarg);
+                break;
             case BC_LOAD_VAL:
                 printf("   %-15s %d", "LOAD_VAL", ins.extra);
                 putchar('\n');
@@ -93,6 +96,9 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_POP:
                 printf("   %-15s\n", "POP");
                 break;
+            case BC_POPN:
+                printf("   %-15s %d\n", "POPN", ins.extra);
+                break;
             case BC_GET_ITEM:
                 printf("   %-15s\n", "GET_ITEM");
                 break;
@@ -117,8 +123,14 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_IMPORT_NAME:
                 printf("   %-15s %d\n", "IMPORT_NAME", ins.extra);
                 break;
+            case BC_UNPACK_SEQ:
+                printf("   %-15s %d\n", "UNPACK_SEQ", ins.extra);
+                break;
             case BC_PRINT:
                 printf("   %-15s\n", "PRINT");
+                break;
+            case BC_NOP:
+                printf("   %-15s\n", "NOP");
                 break;
             case BC_HALT:
                 printf("   %-15s\n", "HALT");
