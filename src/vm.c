@@ -553,7 +553,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
 					if ((!pl_istype(tret)) && tret->ob_type == casttype(tobj)->ob_reftype) {
 						PyLiteObject *method_func = pylt_obj_getattr(I, tret, castobj(pl_static.str.__init__), NULL);
 						if (method_func) {
-							pylt_vm_call_method_ex(I, tret, method_func, params_bak, kwargs);
+                            pl_call_method_ex(I, tret, method_func, params_bak, kwargs);
 						}
 						if (params_bak) pylt_obj_tuple_free(I, params_bak);
 					}
@@ -691,64 +691,4 @@ _end:;
 
 PyLiteFrame* pylt_vm_curframe(PyLiteInterpreter *I) {
     return &kv_top(I->vm.frames);
-}
-
-PyLiteObject* _pylt_vm_call(PyLiteInterpreter *I, pl_int_t argc) {
-	PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc };
-	PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
-	PyLiteCodeObject *code = pylt_obj_code_new(I, false);
-	PyLiteFrame frame_bak = kv_top(I->vm.frames);
-
-	kv_pushins(code->opcodes, bc_call);
-	kv_pushins(code->opcodes, bc_halt);
-	pylt_vm_run(I, code);
-
-	kv_top(I->vm.frames) = frame_bak;
-	return castobj(kv_pop(I->vm.stack));
-}
-
-PyLiteObject* pylt_vm_call_func(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ...) {
-    va_list args;
-    kv_pushptr(I->vm.stack, callable);
-
-    va_start(args, argc);
-    for (pl_int_t i = 0; i < argc; ++i) {
-        kv_pushptr(I->vm.stack, va_arg(args, PyLiteObject*));
-    }
-    va_end(args);
-
-	return _pylt_vm_call(I, argc);
-}
-
-PyLiteObject* pylt_vm_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, int argc, ...) {
-    va_list args;
-
-    kv_pushptr(I->vm.stack, callable);
-    kv_pushptr(I->vm.stack, self);
-
-    va_start(args, argc);
-    for (pl_int_t i = 0; i < argc; ++i) {
-        kv_pushptr(I->vm.stack, va_arg(args, PyLiteObject*));
-    }
-    va_end(args);
-
-	return _pylt_vm_call(I, argc + 1);
-}
-
-PyLiteObject* pylt_vm_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, PyLiteTupleObject *args, PyLiteDictObject *kwargs) {
-	pl_int_t argc = (args) ? args->ob_size : 0;
-	kv_pushptr(I->vm.stack, callable);
-	kv_pushptr(I->vm.stack, self);
-
-	if (args) {
-		for (pl_int_t i = 0; i < argc; ++i) {
-			kv_pushptr(I->vm.stack, args->ob_val[i]);
-		}
-	} 
-	if (kwargs) {
-		kv_pushptr(I->vm.stack, kwargs);
-		argc++;
-	}
-
-	return _pylt_vm_call(I, argc + 1);
 }

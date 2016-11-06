@@ -1,7 +1,7 @@
 ﻿
 #include "iter.h"
 #include "../all.h"
-#include "../../vm.h"
+#include "../../api.h"
 #include "../../misc.h"
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
@@ -55,7 +55,7 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
                 PyLiteIterObject *niter;
                 PyLiteObject *obj_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__iter__), NULL);
                 if (obj_func) {
-                    niter = castiter(pylt_vm_call_method(I, obj, obj_func, 0, NULL));
+                    niter = castiter(pl_call_method(I, obj, obj_func, 0, NULL));
                     if (pl_isiter(niter)) {
                         pylt_free_ex(I, iter);
                         return iter;

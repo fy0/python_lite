@@ -135,7 +135,7 @@ pl_int_t pylt_obj_cmp(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b) {
             if (a->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 PyLiteObject *hash_func = pylt_obj_getattr(I, a, castobj(pl_static.str.__cmp__), NULL);
                 if (hash_func) {
-                    PyLiteObject *ret = pylt_vm_call_method(I, a, hash_func, 1, b);
+                    PyLiteObject *ret = pl_call_method(I, a, hash_func, 1, b);
                     if (ret->ob_type == PYLT_OBJ_TYPE_INT) {
                         return castint(ret)->ob_val;
                     }
@@ -159,7 +159,7 @@ pl_bool_t pylt_obj_eq(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b) {
             if (a->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 PyLiteObject *hash_func = pylt_obj_getattr(I, a, castobj(pl_static.str.__eq__), NULL);
                 if (hash_func) {
-                    PyLiteObject *ret = pylt_vm_call_method(I, a, hash_func, 1, b);
+                    PyLiteObject *ret = pl_call_method(I, a, hash_func, 1, b);
                     return pylt_obj_istrue(I, ret);
                 }
             }
@@ -182,7 +182,7 @@ pl_uint32_t pylt_obj_hash(PyLiteInterpreter *I, PyLiteObject *obj) {
                 PyLiteObject *ret;
                 PyLiteObject *hash_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__hash__), NULL);
                 if (hash_func) {
-                    ret = pylt_vm_call_method(I, obj, hash_func, 0, NULL);
+                    ret = pl_call_method(I, obj, hash_func, 0, NULL);
                     if (ret->ob_type == PYLT_OBJ_TYPE_INT) {
                         return (pl_uint32_t)castint(ret)->ob_val;
                     }
@@ -292,7 +292,7 @@ pl_bool_t pylt_obj_setattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObjec
             if (self->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 PyLiteObject *method_func = pylt_obj_getattr(I, self, castobj(pl_static.str.__setattr__), NULL);
                 if (method_func) {
-                    PyLiteObject *ret = pylt_vm_call_method(I, self, method_func, 2, key, value);
+                    PyLiteObject *ret = pl_call_method(I, self, method_func, 2, key, value);
                     return pylt_obj_istrue(I, ret);
                 } else {
                     pylt_obj_custom_setattr(I, castcustom(self), key, value);
@@ -319,7 +319,7 @@ PyLiteObject* pylt_obj_getitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteOb
             if (pl_iscustom(obj)) {
                 PyLiteObject *method_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__getitem__), NULL);
                 if (method_func) {
-                    return pylt_vm_call_method(I, obj, method_func, 1, key);
+                    return pl_call_method(I, obj, method_func, 1, key);
                 } else { 
                     if (castcustom(obj)->base_obj) {
                         return pylt_obj_getitem(I, castcustom(obj)->base_obj, key);
@@ -462,7 +462,7 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteInterpreter *I, PyLiteObject *obj) {
             if (pl_iscustom(obj)) {
                 PyLiteObject *method_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__str__), NULL);
                 if (method_func) {
-                    PyLiteObject *ret = pylt_vm_call_method(I, obj, method_func, 0);
+                    PyLiteObject *ret = pl_call_method(I, obj, method_func, 0);
                     if (!pylt_api_isinstance(I, ret, PYLT_OBJ_TYPE_STR)) {
                         pl_error(I, pl_static.str.TypeError, "__str__ returned non - string(type %s)", pl_type(I, ret)->name);
                         return NULL;
