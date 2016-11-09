@@ -28,14 +28,16 @@ enum {
     BC_FORITER,        // For循环
     BC_DEL_FORCE,      // 强制释放
     BC_GET_ITEM,       // 取下标
+    BC_GET_ITEM_,      // 取下标
     BC_SET_ITEM,       // 存入下标
+    BC_SET_ITEMX,      // 偏移 - 存入下标
     BC_GET_ATTR,       // 取属性
     BC_SET_ATTR,       // 存入属性
+    BC_SET_ATTRX,      // 偏移 - 存入属性
     BC_ASSERT,         // 真值断言
 
-    BC_GET_ITEM_EX,    // 取下标
-    BC_LOAD_VAL_EX,    // 载入变量
-    BC_GET_ATTR_EX,    // 取属性
+    BC_LOAD_VAL_,      // 载入变量
+    BC_GET_ATTR_,      // 取属性
 
     BC_IMPORT_NAME,    // 导入模块
     BC_UNPACK_SEQ,     // 解包

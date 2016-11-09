@@ -58,7 +58,7 @@ PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **a
     }
 
     struct stat stbuf;
-    fstat(_fileno(fp), &stbuf);
+    fstat(fileno(fp), &stbuf);
 
     return castobj(pylt_obj_cptr_new(I, fp));
 }

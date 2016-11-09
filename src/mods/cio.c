@@ -85,7 +85,7 @@ PyLiteObject* pylt_mods_cio_fclose(PyLiteInterpreter *I, int argc, PyLiteObject 
 PyLiteObject* pylt_mods_cio_fsize(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     FILE *fp = castcptr(args[0])->ob_ptr;
     struct stat stbuf;
-    fstat(_fileno(fp), &stbuf);    
+    fstat(fileno(fp), &stbuf);    
     return castobj(pylt_obj_int_new(I, stbuf.st_size));
 }
 

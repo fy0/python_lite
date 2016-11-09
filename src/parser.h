@@ -53,4 +53,9 @@ void pylt_parser_crash_finalize(PyLiteInterpreter *I, ParserState *ps);
 // SyntaxError: 'return' outside function
 #define PYLT_ERR_PARSER_RETURN_OUTSIDE_FUNCTION -8
 
+// SyntaxError: different unpack sequences' size
+#define PYLT_ERR_PARSER_DIFFERENT_UNPACK_SEQUENCES_SIZE -9
+// SyntaxError: not enough values to unpack (expected A, got B)
+#define PYLT_ERR_PARSER_NOT_ENOUGH_VALUES_TO_UNPACK -10
+
 #endif

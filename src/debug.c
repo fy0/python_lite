@@ -48,8 +48,8 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 printf("   %-15s %d", "LOAD_VAL", ins.extra);
                 putchar('\n');
                 break;
-            case BC_LOAD_VAL_EX:
-                printf("   %-15s %d", "LOAD_VAL_EX", ins.extra);
+            case BC_LOAD_VAL_:
+                printf("   %-15s %d", "LOAD_VAL_", ins.extra);
                 putchar('\n');
                 break;
             case BC_LOADNONE:
@@ -102,8 +102,8 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_GET_ITEM:
                 printf("   %-15s\n", "GET_ITEM");
                 break;
-            case BC_GET_ITEM_EX:
-                printf("   %-15s\n", "GET_ITEM_EX");
+            case BC_GET_ITEM_:
+                printf("   %-15s\n", "GET_ITEM_");
                 break;
             case BC_SET_ITEM:
                 printf("   %-15s\n", "SET_ITEM");
@@ -111,8 +111,8 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_GET_ATTR:
                 printf("   %-15s %d\n", "GET_ATTR", ins.extra);
                 break;
-            case BC_GET_ATTR_EX:
-                printf("   %-15s %d\n", "GET_ATTR_EX", ins.extra);
+            case BC_GET_ATTR_:
+                printf("   %-15s %d\n", "GET_ATTR_", ins.extra);
                 break;
             case BC_SET_ATTR:
                 printf("   %-15s %d\n", "SET_ATTR", ins.extra);

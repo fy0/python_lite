@@ -376,7 +376,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 pylt_obj_dict_setitem(I, locals, const_obj(ins.extra), castobj(kv_topn(vm->stack, ins.exarg)));
                 break;
             case BC_LOAD_VAL:
-            case BC_LOAD_VAL_EX:
+            case BC_LOAD_VAL_:
                 // LOAD_VAL     0       const_id
                 tobj = pylt_obj_dict_getitem(I, locals, const_obj(ins.extra));
 
@@ -610,7 +610,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 kv_popn(vm->stack, ins.extra);
                 break;
             case BC_GET_ITEM:
-            case BC_GET_ITEM_EX:
+            case BC_GET_ITEM_:
                 // GET_ITEM     0       0
                 tb = castobj(kv_pop(I->vm.stack));
                 ta = castobj(kv_pop(I->vm.stack));
@@ -628,7 +628,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 kv_pushptr(vm->stack, tb);
                 break;
             case BC_GET_ATTR:
-            case BC_GET_ATTR_EX:
+            case BC_GET_ATTR_:
                 // GET_ATTR     0/1     const_id
                 tobj = castobj(kv_pop(I->vm.stack));
                 tret = pylt_obj_getattr_ex(I, tobj, const_obj(ins.extra), NULL, &at_type);

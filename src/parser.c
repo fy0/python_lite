@@ -272,7 +272,7 @@ bool parse_try_t(ParserState *ps) {
             switch (tk->val) {
                 default:
                     if (ps->lval_check.enable && ps->lval_check.expr_level == 1)
-                        write_ins(ps, BC_LOAD_VAL_EX, 0, store_const(ps, obj));
+                        write_ins(ps, BC_LOAD_VAL_, 0, store_const(ps, obj));
                     else
                         write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, obj));
             }
@@ -333,7 +333,7 @@ bool parse_try_t(ParserState *ps) {
                 if (tk->val == TK_NAME) {
                     if (ps->lval_check.enable && ps->lval_check.expr_level == 1) {
                         ps->lval_check.can_be_left_val = true;
-                        write_ins(ps, BC_GET_ATTR_EX, 0, store_const(ps, tk->obj));
+                        write_ins(ps, BC_GET_ATTR_, 0, store_const(ps, tk->obj));
                     } else write_ins(ps, BC_GET_ATTR, 0, store_const(ps, tk->obj));
                 }
                 ACCEPT(ps, TK_NAME);
@@ -344,7 +344,7 @@ bool parse_try_t(ParserState *ps) {
                 parse_expr(ps);
                 ACCEPT(ps, ']');
                 if (ps->lval_check.enable && ps->lval_check.expr_level == 1) {
-                    write_ins(ps, BC_GET_ITEM_EX, 0, 0);
+                    write_ins(ps, BC_GET_ITEM_, 0, 0);
                     ps->lval_check.can_be_left_val = true;
                 } else  write_ins(ps, BC_GET_ITEM, 0, 0);
                 break;
@@ -355,7 +355,7 @@ bool parse_try_t(ParserState *ps) {
                 ins = kv_top(ps->info->code->opcodes);
 
                 // method trigger
-                if (ins.code == BC_GET_ATTR || ins.code == BC_GET_ATTR_EX) {
+                if (ins.code == BC_GET_ATTR || ins.code == BC_GET_ATTR_) {
                     kv_top(ps->info->code->opcodes).exarg = 1;
                 }
 
@@ -371,7 +371,7 @@ bool parse_try_t(ParserState *ps) {
                         // func(a=1, b=2, ...)
                         ins = kv_top(ps->info->code->opcodes);
                         num--;
-                        if (ins.code == BC_LOAD_VAL || ins.code == BC_LOAD_VAL_EX) {
+                        if (ins.code == BC_LOAD_VAL || ins.code == BC_LOAD_VAL_) {
                             kv_top(ps->info->code->opcodes).code = BC_LOADCONST;
                             num2 = 1;
                             next(ps);
@@ -868,13 +868,18 @@ int value_assign_fix(ParserState *ps) {
     for (pl_int_t i = kv_size(ps->lval_check.bc_cache) - 1; i >= 0;) {
         ins = kv_A(ps->lval_check.bc_cache, i);
         switch (ins.code) {
-            case BC_GET_ITEM_EX:
-            case BC_GET_ATTR_EX:
-                kv_A(ps->lval_check.bc_cache, i).code = (ins.code == BC_GET_ITEM_EX) ? BC_SET_ITEM : BC_SET_ATTR;
+            case BC_GET_ITEM_:
+            case BC_GET_ATTR_:
+                if (seqsize) {
+                    kv_A(ps->lval_check.bc_cache, i).code = (ins.code == BC_GET_ITEM_) ? BC_SET_ITEMX : BC_SET_ATTRX;
+                    kv_A(ps->lval_check.bc_cache, i).exarg = si++;
+                } else {
+                    kv_A(ps->lval_check.bc_cache, i).code = (ins.code == BC_GET_ITEM_) ? BC_SET_ITEM : BC_SET_ATTR;
+                }
                 i -= 1;
                 while (i >= 0) {
                     ins = kv_A(ps->lval_check.bc_cache, i);
-                    if (ins.code == BC_LOAD_VAL_EX) {
+                    if (ins.code == BC_LOAD_VAL_) {
                         kv_A(ps->lval_check.bc_cache, i).code = BC_LOAD_VAL;
                         i -= 1;
                         break;
@@ -882,7 +887,7 @@ int value_assign_fix(ParserState *ps) {
                     i -= 1;
                 }
                 break;
-            case BC_LOAD_VAL_EX:
+            case BC_LOAD_VAL_:
                 if (seqsize) {
                     kv_A(ps->lval_check.bc_cache, i).code = BC_SET_VALX;
                     kv_A(ps->lval_check.bc_cache, i--).exarg = si++;
@@ -893,8 +898,9 @@ int value_assign_fix(ParserState *ps) {
             case BC_NEW_OBJ:
                 // lval is tuple, unpack sequence
                 si = 0;
-                seqsize = kv_A(ps->lval_check.bc_cache, i--).extra;
-                kv_pop(ps->lval_check.bc_cache);
+                seqsize = kv_A(ps->lval_check.bc_cache, i).extra;
+                kv_A(ps->lval_check.bc_cache, i--).code = BC_NOP;
+                //kv_pop(ps->lval_check.bc_cache);
                 break;
             default:
                 i--;
@@ -935,11 +941,7 @@ void parse_inplace_op(ParserState *ps, int op_val) {
 
 void parse_value_assign(ParserState *ps) {
     pl_uint_t size;
-    pl_bool_t unpacked = false;
     int last_seqsize = 0;
-
-    //while (true) { ACCEPT(ps, '='); parse_expr(ps); break; }
-    //return;
 
     if (ps->ls->token.val != '=')
         error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
@@ -962,15 +964,27 @@ void parse_value_assign(ParserState *ps) {
         kv_popn(ps->info->code->opcodes, size);
 
         parse_expr(ps);
+
         int seqsize = value_assign_fix(ps);
-        // TODO: ERROR 
-        // if (unpacked && (seqsize != last_seqsize)) { ... }
+        if (last_seqsize && (seqsize != last_seqsize)) {
+            error(ps, PYLT_ERR_PARSER_DIFFERENT_UNPACK_SEQUENCES_SIZE);
+        }
         last_seqsize = seqsize;
 
-        // lval is tuple
-        if (seqsize) {
-            write_ins(ps, BC_UNPACK_SEQ, 0, seqsize);
-            unpacked = true;
+        // is right val ?
+        if (ps->ls->token.val != '=') {
+            if (last_seqsize) {
+                PyLiteInstruction ins = kv_top(ps->info->code->opcodes);
+                // tuple ? list ?
+                if (ins.code == BC_NEW_OBJ && (ins.exarg == PYLT_OBJ_TYPE_TUPLE || ins.exarg == PYLT_OBJ_TYPE_LIST)) {
+                    kv_pop(ps->info->code->opcodes);
+                    if (ins.extra != last_seqsize) {
+                        error(ps, PYLT_ERR_PARSER_NOT_ENOUGH_VALUES_TO_UNPACK);
+                    }
+                } else {
+                    write_ins(ps, BC_UNPACK_SEQ, 0, last_seqsize);
+                }
+            }
         }
 
         for (pl_uint_t i = 0; i < kv_size(ps->lval_check.bc_cache); ++i) {
@@ -980,7 +994,7 @@ void parse_value_assign(ParserState *ps) {
         kv_clear(ps->lval_check.bc_cache);
     }
 
-    if (unpacked) write_ins(ps, BC_POPN, 0, last_seqsize);
+    if (last_seqsize) write_ins(ps, BC_POPN, 0, last_seqsize);
     else write_ins(ps, BC_POP, 0, 0);
 }
 
