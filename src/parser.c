@@ -870,13 +870,9 @@ int value_assign_fix(ParserState *ps) {
         switch (ins.code) {
             case BC_GET_ITEM_:
             case BC_GET_ATTR_:
-                if (seqsize) {
-                    kv_A(ps->lval_check.bc_cache, i).code = (ins.code == BC_GET_ITEM_) ? BC_SET_ITEMX : BC_SET_ATTRX;
-                    kv_A(ps->lval_check.bc_cache, i).exarg = si++;
-                } else {
-                    kv_A(ps->lval_check.bc_cache, i).code = (ins.code == BC_GET_ITEM_) ? BC_SET_ITEM : BC_SET_ATTR;
-                }
-                i -= 1;
+                kv_A(ps->lval_check.bc_cache, i).code = (ins.code == BC_GET_ITEM_) ? BC_SET_ITEM : BC_SET_ATTR;
+                kv_A(ps->lval_check.bc_cache, i).exarg = seqsize ? si++ : 0;
+                i--;
                 while (i >= 0) {
                     ins = kv_A(ps->lval_check.bc_cache, i);
                     if (ins.code == BC_LOAD_VAL_) {

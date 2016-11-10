@@ -393,6 +393,58 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 }
                 kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
                 break;
+            case BC_GET_ITEM:
+            case BC_GET_ITEM_:
+                // GET_ITEM     0       0
+                tb = castobj(kv_pop(I->vm.stack));
+                ta = castobj(kv_pop(I->vm.stack));
+                tobj = pylt_obj_getitem(I, ta, tb);
+                if (!tobj) break;
+                kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
+                break;
+            case BC_SET_ITEM:
+                // SET_ITEM     offset  0
+                ta = castobj(kv_pop(vm->stack));
+                tobj = castobj(kv_pop(vm->stack));
+                tb = castobj(kv_topn(vm->stack, ins.exarg));
+                pylt_obj_setitem(I, tobj, ta, tb);
+                if (I->error) break;
+                break;
+            case BC_GET_ATTR:
+            case BC_GET_ATTR_:
+                // GET_ATTR     0/1     const_id
+                tobj = castobj(kv_pop(I->vm.stack));
+                tret = pylt_obj_getattr_ex(I, tobj, const_obj(ins.extra), NULL, &at_type);
+                if (I->error) break;
+                kv_pushptr(vm->stack, tret);
+
+                // next instruction is BC_CALL, and it's a method!
+                if (!pl_istype(tobj) && at_type) {
+                    if (ins.exarg) {
+                        kv_pushptr(vm->stack, tobj);
+                        params_offset = 1;
+                        continue;
+                    }
+                    if (tret->ob_type == PYLT_OBJ_TYPE_PROP) {
+                        ins.code = BC_CALL;
+                        ins.exarg = 0;
+                        ins.extra = 1;
+                        kv_pop(vm->stack);
+                        kv_pushptr(vm->stack, castprop(tret)->fget.func);
+                        kv_pushptr(vm->stack, tobj);
+                        goto _BC_CALL;
+                    }
+                }
+                break;
+            case BC_SET_ATTR:
+                // SET_ATTR     offset  const_id
+                tobj = castobj(kv_pop(vm->stack));
+                tb = castobj(kv_topn(vm->stack, ins.exarg));
+                if (!pylt_obj_setattr(I, tobj, const_obj(ins.extra), tb)) {
+                    pl_error(I, pl_static.str.TypeError, "can't set attributes of built-in/extension type %r", pylt_api_type_name(I, tobj->ob_type));
+                    break;
+                }
+                break;
             case BC_OPERATOR:
                 // OPERATOR     0       op
                 switch (ins.extra) {
@@ -608,60 +660,6 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_POPN:
                 // POPN         0       num
                 kv_popn(vm->stack, ins.extra);
-                break;
-            case BC_GET_ITEM:
-            case BC_GET_ITEM_:
-                // GET_ITEM     0       0
-                tb = castobj(kv_pop(I->vm.stack));
-                ta = castobj(kv_pop(I->vm.stack));
-                tobj = pylt_obj_getitem(I, ta, tb);
-                if (!tobj) break;
-                kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
-                break;
-            case BC_SET_ITEM:
-                // SET_ITEM     0       0
-                ta = castobj(kv_pop(I->vm.stack));
-                tobj = castobj(kv_pop(I->vm.stack));
-                tb = castobj(kv_pop(I->vm.stack));
-                pylt_obj_setitem(I, tobj, ta, tb);
-                if (I->error) break;
-                kv_pushptr(vm->stack, tb);
-                break;
-            case BC_GET_ATTR:
-            case BC_GET_ATTR_:
-                // GET_ATTR     0/1     const_id
-                tobj = castobj(kv_pop(I->vm.stack));
-                tret = pylt_obj_getattr_ex(I, tobj, const_obj(ins.extra), NULL, &at_type);
-                if (I->error) break;
-                kv_pushptr(vm->stack, tret);
-
-                // next instruction is BC_CALL, and it's a method!
-                if (!pl_istype(tobj) && at_type) {
-                    if (ins.exarg) {
-                        kv_pushptr(vm->stack, tobj);
-                        params_offset = 1;
-                        continue;
-                    }
-                    if (tret->ob_type == PYLT_OBJ_TYPE_PROP) {
-                        ins.code = BC_CALL;
-                        ins.exarg = 0;
-                        ins.extra = 1;
-                        kv_pop(vm->stack);
-                        kv_pushptr(vm->stack, castprop(tret)->fget.func);
-                        kv_pushptr(vm->stack, tobj);
-                        goto _BC_CALL;
-                    }
-                }
-                break;
-            case BC_SET_ATTR:
-                // SET_ATTR     0       const_id
-                tobj = castobj(kv_pop(I->vm.stack));
-                tb = castobj(kv_pop(I->vm.stack));
-                if (!pylt_obj_setattr(I, tobj, const_obj(ins.extra), tb)) {
-                    pl_error(I, pl_static.str.TypeError, "can't set attributes of built-in/extension type %r", pylt_api_type_name(I, tobj->ob_type));
-                    break;
-                }
-                kv_pushptr(vm->stack, tb);
                 break;
             case BC_ASSERT:
                 // ASSERT       0       extra
