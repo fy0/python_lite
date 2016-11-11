@@ -13,4 +13,7 @@ PyLiteObject* pylt_obj_dict_Egetitem(PyLiteInterpreter *I, PyLiteDictObject *sel
 
 pl_bool_t pylt_obj_list_Esetitem(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *index, PyLiteObject* obj);
 
+PyLiteIterObject* pylt_obj_iter_Enew(PyLiteInterpreter *I, PyLiteObject *obj);
+PyLiteObject* pylt_obj_iter_Enext(PyLiteInterpreter *I, PyLiteIterObject *iter);
+
 #endif

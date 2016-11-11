@@ -8,6 +8,7 @@
 #include "types/all.h"
 #include "mods/builtin.h"
 #include "pybind/typebind.h"
+#include "utils/with_exceptions.h"
 
 PyLiteObject* _pylt_vm_call(PyLiteInterpreter *I, pl_int_t argc);
 
@@ -683,9 +684,9 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 break;
             case BC_UNPACK_SEQ: {
                 tret = castobj(kv_pop(vm->stack));
-                // TODO: 使用带异常版本进行迭代
-                PyLiteIterObject *iter = pylt_obj_iter_new(I, tret);
-                for (PyLiteObject *obj = pylt_obj_iter_next(I, iter); obj; obj = pylt_obj_iter_next(I, iter)) {
+                PyLiteIterObject *iter = pylt_obj_iter_Enew(I, tret);
+                if (I->error) break;
+                for (PyLiteObject *obj = pylt_obj_iter_Enext(I, iter); obj; obj = pylt_obj_iter_Enext(I, iter)) {
                     kv_pushptr(vm->stack, obj);
                 }
                 break;

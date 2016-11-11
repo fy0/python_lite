@@ -29,6 +29,6 @@ PyLiteObject* pl_call(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ..
 PyLiteObject* pl_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, int argc, ...);
 PyLiteObject* pl_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, PyLiteTupleObject *args, PyLiteDictObject *kwargs);
 
-#define pl_new              pl_call
+#define pl_new pl_call
 
 #endif

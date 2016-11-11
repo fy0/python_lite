@@ -38,7 +38,7 @@ PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **a
     }
 
     if (!is_bin) {
-        mode = pylt_obj_str_plus(I, mode, castobj(pylt_obj_str_new_from_cstr(I, "b", true)));
+        mode = caststr(pylt_obj_str_plus(I, mode, castobj(pylt_obj_str_new_from_cstr(I, "b", true))));
     }
 
     if (!fp) {

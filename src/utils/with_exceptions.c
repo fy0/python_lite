@@ -39,3 +39,29 @@ pl_bool_t pylt_obj_list_Esetitem(PyLiteInterpreter *I, PyLiteListObject *self, P
     pl_error(I, pl_static.str.TypeError, "%s indices must be integers, not %s", pl_type(I, castobj(self))->name, pl_type(I, index)->name);
     return false;
 }
+
+PyLiteIterObject* pylt_obj_iter_Enew(PyLiteInterpreter *I, PyLiteObject *obj) {
+    PyLiteIterObject *ret = pylt_obj_iter_new(I, obj);
+    if (!ret) {
+        pl_error(I, pl_static.str.TypeError, "%r object is not iterable", pl_type(I, obj)->name);
+        return NULL;
+    }
+    if (!pl_api_issubclass(I, ret, pl_type_by_code(I, PYLT_OBJ_TYPE_ITER))) {
+        pl_error(I, pl_static.str.TypeError, "iter() returned non-iterator of type %r", pl_type(I, ret)->name);
+        return NULL;
+    }
+    return ret;
+}
+
+PyLiteObject* pylt_obj_iter_Enext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
+    if (!pl_api_issubclass(I, iter, pl_type_by_code(I, PYLT_OBJ_TYPE_ITER))) {
+        pl_error(I, pl_static.str.TypeError, "%r object is not iterable", pl_type(I, iter)->name);
+        return NULL;
+    }
+    PyLiteObject *obj = pylt_obj_iter_next(I, iter);
+    if (!obj) {
+        pl_error(I, pl_static.str.StopIteration, NULL);
+        return NULL;
+    }
+    return obj;
+}
