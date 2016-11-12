@@ -162,7 +162,9 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I) {
 
     // dict
     type = pylt_obj_type_new_with_type(I, pl_static.str.dict, PYLT_OBJ_TYPE_DICT, PYLT_OBJ_TYPE_OBJ);
+    // TODO: dict.new 应有三个参数，对应两种新建字典的情况
 	pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(cls), _S(object)), _NT(I, 2, castobj(&PyLiteParamUndefined), castobj(&PyLiteParamKwargs)), NULL, &pylt_cls_method_dict_new);
+    pylt_cmethod_register(I, type, _S(items), _NT(I, 1, _S(self)), _NT(I, 1, castobj(&PyLiteParamUndefined)), NULL, &pylt_cls_method_dict_items);
     pylt_obj_type_register(I, type);
 
     // type

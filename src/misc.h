@@ -147,6 +147,11 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *insert;
         PyLiteStrObject *reverse;
 
+        // tuple
+
+        // dict
+        PyLiteStrObject *items;
+
         // unusual
         PyLiteStrObject *unknown;
         PyLiteStrObject *useless;

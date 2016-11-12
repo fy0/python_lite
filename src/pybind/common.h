@@ -48,6 +48,7 @@ PyLiteObject* pylt_method_list_sort(PyLiteInterpreter *I, int argc, PyLiteObject
 PyLiteObject* pylt_cls_method_tuple_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 
 PyLiteObject* pylt_cls_method_dict_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);
+PyLiteObject* pylt_cls_method_dict_items(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 
 // A new function returns None
 PyLiteObject* pylt_cls_method_meaningless_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);

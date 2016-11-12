@@ -174,6 +174,9 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(insert);
     sstr_new(reverse);
 
+    // dict
+    sstr_new(items);
+
     // unusual
     sstr_new(unknown);
     sstr_new(useless);

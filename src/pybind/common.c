@@ -260,6 +260,12 @@ PyLiteObject* pylt_cls_method_dict_new(PyLiteInterpreter *I, int argc, PyLiteObj
     return pylt_obj_typecast(I, dcast(type, args[0]), castobj(newdict));
 }
 
+PyLiteObject* pylt_cls_method_dict_items(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    PyLiteIterObject *iter = pylt_obj_iter_new(I, args[0]);
+    iter->iter_func = &pylt_obj_dict_items_iternext;
+    return castobj(iter);
+}
+
 PyLiteObject* pylt_cls_method_meaningless_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     // TODO: 这里取不到cls，值得想个办法
 	return NULL;

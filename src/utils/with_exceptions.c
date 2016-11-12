@@ -46,16 +46,16 @@ PyLiteIterObject* pylt_obj_iter_Enew(PyLiteInterpreter *I, PyLiteObject *obj) {
         pl_error(I, pl_static.str.TypeError, "%r object is not iterable", pl_type(I, obj)->name);
         return NULL;
     }
-    if (!pl_api_issubclass(I, ret, pl_type_by_code(I, PYLT_OBJ_TYPE_ITER))) {
-        pl_error(I, pl_static.str.TypeError, "iter() returned non-iterator of type %r", pl_type(I, ret)->name);
+    if (!pl_api_issubclass(I, pl_type(I, castobj(ret)), pl_type_by_code(I, PYLT_OBJ_TYPE_ITER))) {
+        pl_error(I, pl_static.str.TypeError, "iter() returned non-iterator of type %r", pl_type(I, castobj(ret))->name);
         return NULL;
     }
     return ret;
 }
 
 PyLiteObject* pylt_obj_iter_Enext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
-    if (!pl_api_issubclass(I, iter, pl_type_by_code(I, PYLT_OBJ_TYPE_ITER))) {
-        pl_error(I, pl_static.str.TypeError, "%r object is not iterable", pl_type(I, iter)->name);
+    if (!pl_api_issubclass(I, pl_type(I, castobj(iter)), pl_type_by_code(I, PYLT_OBJ_TYPE_ITER))) {
+        pl_error(I, pl_static.str.TypeError, "%r object is not iterable", pl_type(I, castobj(iter))->name);
         return NULL;
     }
     PyLiteObject *obj = pylt_obj_iter_next(I, iter);

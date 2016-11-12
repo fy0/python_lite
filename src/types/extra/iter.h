@@ -31,6 +31,7 @@ PyLiteObject* pylt_obj_tuple_iternext(PyLiteInterpreter *I, PyLiteIterObject *it
 PyLiteObject* pylt_obj_list_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_set_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_dict_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
+PyLiteObject* pylt_obj_dict_items_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_range_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_custom_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
 

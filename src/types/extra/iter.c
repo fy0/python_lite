@@ -138,6 +138,23 @@ PyLiteObject* pylt_obj_dict_iternext(PyLiteInterpreter *I, PyLiteIterObject *ite
 	return ret;
 }
 
+PyLiteObject* pylt_obj_dict_items_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
+    PyLiteObject *k, *v;
+    PyLiteTupleObject *ret;
+
+    if (pylt_obj_dict_len(I, castdict(iter->base)) != iter->hashmap.count)
+        return NULL;
+
+    pylt_obj_dict_keyvalue(I, castdict(iter->base), iter->hashmap.k, &k, &v);
+    if (!k) return NULL;
+
+    pylt_obj_dict_next(I, castdict(iter->base), &(iter->hashmap.k));
+    ret = pylt_obj_tuple_new(I, 2);
+    ret->ob_val[0] = k;
+    ret->ob_val[1] = v;
+    return castobj(ret);
+}
+
 PyLiteObject* pylt_obj_range_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
     PyLiteRangeObject *range = castrange(iter->base);
     pl_int_t index = iter->array.index;

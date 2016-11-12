@@ -1133,6 +1133,7 @@ void parse_stmt(ParserState *ps) {
                 kv_A(ps->info->code->opcodes, tmp).extra = kv_size(ps->info->code->opcodes) - tmp + 1;
                 write_ins(ps, BC_JMP_BACK, 0, kv_size(ps->info->code->opcodes) - tmp + 1);
 
+                write_ins(ps, BC_POP, 0, 0); // pop iterator
                 write_ins(ps, BC_DEL_FORCE, 0, 0);
             } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
             return;
