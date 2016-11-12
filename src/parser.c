@@ -39,6 +39,12 @@ void parse_class(ParserState *ps);
 void parse_value_assign(ParserState *ps);
 void parse_inplace_op(ParserState *ps, int op_val);
 
+void lval_check_setup(ParserState *ps);
+void lval_check_shutdown(ParserState *ps);
+bool lval_check_judge(ParserState *ps);
+pl_uint_t lval_check_cache_push(ParserState *ps);
+void lval_check_cache_pop(ParserState *ps);
+
 
 void next(ParserState *ps) {
     pylt_lex_next(ps->ls);
@@ -129,6 +135,47 @@ static _INLINE
 void ACCEPT(ParserState *ps, int token) {
     if (ps->ls->token.val != token) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
     next(ps);
+}
+
+void lval_check_setup(ParserState *ps) {
+    ps->lval_check.enable = true;
+    ps->lval_check.can_be_left_val = true;
+    ps->lval_check.startcode = kv_size(ps->info->code->opcodes);
+}
+
+void lval_check_shutdown(ParserState *ps) {
+    ps->lval_check.enable = false;
+}
+
+#define lval_check_valid(ps) (ps->lval_check.enable && ps->lval_check.expr_level == 1)
+
+bool lval_check_judge(ParserState *ps) {
+    if (lval_check_valid(ps)) {
+        ps->lval_check.can_be_left_val = false;
+        return true;
+    }
+    return false;
+}
+
+pl_uint_t lval_check_cache_push(ParserState *ps) {
+    pl_uint_t size;
+
+    size = kv_size(ps->info->code->opcodes) - ps->lval_check.startcode;
+
+    if (ps->lval_check.bc_cache.m < size) {
+        kv_resize(PyLiteInstruction, ps->lval_check.bc_cache, size);
+    }
+
+    ps->lval_check.bc_cache.n = size;
+    memcpy(ps->lval_check.bc_cache.a, ps->info->code->opcodes.a + ps->lval_check.startcode, sizeof(PyLiteInstruction) * size);
+    return size;
+}
+
+void lval_check_cache_pop(ParserState *ps) {
+    for (pl_uint_t i = 0; i < kv_size(ps->lval_check.bc_cache); ++i) {
+        kv_pushins(ps->info->code->opcodes, kv_A(ps->lval_check.bc_cache, i));
+    }
+    kv_clear(ps->lval_check.bc_cache);
 }
 
 PyLiteObject* parse_get_consttype(ParserState *ps) {
@@ -239,7 +286,7 @@ bool parse_basetype(ParserState *ps) {
 
     if (obj) {
         sload_const(ps, obj);
-        if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val = false;
+        lval_check_judge(ps);
         return true;
     } else {
         ret = parse_mutabletype(ps, &times);
@@ -269,13 +316,7 @@ bool parse_try_t(ParserState *ps) {
         case TK_NAME:
             obj = tk->obj;
             next(ps);
-            switch (tk->val) {
-                default:
-                    if (ps->lval_check.enable && ps->lval_check.expr_level == 1)
-                        write_ins(ps, BC_LOAD_VAL_, 0, store_const(ps, obj));
-                    else
-                        write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, obj));
-            }
+            write_ins(ps, lval_check_valid(ps) ? BC_LOAD_VAL_ : BC_LOAD_VAL, 0, store_const(ps, obj));
             break;
         case '(':
             next(ps);
@@ -299,13 +340,13 @@ bool parse_try_t(ParserState *ps) {
             next(ps);
             parse_expr10(ps);
             write_ins(ps, BC_OPERATOR, 0, tk_val == '+' ? OP_POS : OP_NEG);
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val = false;
+            lval_check_judge(ps);
             break;
         case '~':
             next(ps);
             parse_expr10(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_BITNOT);
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val = false;
+            lval_check_judge(ps);
             break;
         case TK_KW_NOT:
             next(ps);
@@ -318,7 +359,7 @@ bool parse_try_t(ParserState *ps) {
             parse_expr4(ps);
             parse_expr3(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_NOT);
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val = false;
+            lval_check_judge(ps);
             break;
         default:
             if (!parse_basetype(ps))
@@ -331,10 +372,7 @@ bool parse_try_t(ParserState *ps) {
                 // is getattr/setattr ?
                 next(ps);
                 if (tk->val == TK_NAME) {
-                    if (ps->lval_check.enable && ps->lval_check.expr_level == 1) {
-                        ps->lval_check.can_be_left_val = true;
-                        write_ins(ps, BC_GET_ATTR_, 0, store_const(ps, tk->obj));
-                    } else write_ins(ps, BC_GET_ATTR, 0, store_const(ps, tk->obj));
+                    write_ins(ps, lval_check_judge(ps) ? BC_GET_ATTR_ : BC_GET_ATTR, 0, store_const(ps, tk->obj));
                 }
                 ACCEPT(ps, TK_NAME);
                 break;
@@ -343,10 +381,7 @@ bool parse_try_t(ParserState *ps) {
                 next(ps);
                 parse_expr(ps);
                 ACCEPT(ps, ']');
-                if (ps->lval_check.enable && ps->lval_check.expr_level == 1) {
-                    write_ins(ps, BC_GET_ITEM_, 0, 0);
-                    ps->lval_check.can_be_left_val = true;
-                } else  write_ins(ps, BC_GET_ITEM, 0, 0);
+                write_ins(ps, lval_check_judge(ps) ? BC_GET_ITEM_ : BC_GET_ITEM, 0, 0);
                 break;
             case '(':
                 // is func call ?
@@ -395,7 +430,7 @@ bool parse_try_t(ParserState *ps) {
                         }
                     } else break;
                 }
-                if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val = false;
+                lval_check_judge(ps);
                 write_ins(ps, BC_CALL, (num2) ? 1 : 0, num);
                 ACCEPT(ps, ')');
                 ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
@@ -479,7 +514,7 @@ _INLINE void parse_expr1(ParserState *ps) {
             parse_expr3(ps);
             parse_expr2(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_OR);
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
+            lval_check_judge(ps);
             parse_expr1(ps);
             break;
     }
@@ -500,7 +535,7 @@ _INLINE void parse_expr2(ParserState *ps) {
             parse_expr4(ps);
             parse_expr3(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_AND);
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
+            lval_check_judge(ps);
             parse_expr2(ps);
             break;
     }
@@ -540,7 +575,7 @@ success:
     parse_expr5(ps);
     parse_expr4(ps);
     write_ins(ps, BC_OPERATOR, 0, op_val);
-    if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
+    lval_check_judge(ps);
     parse_expr3(ps);
 }
 
@@ -558,7 +593,7 @@ _INLINE void parse_expr4(ParserState *ps) {
             parse_expr6(ps);
             parse_expr5(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_BITOR);
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
+            lval_check_judge(ps);
             parse_expr4(ps);
             break;
     }
@@ -577,7 +612,7 @@ _INLINE void parse_expr5(ParserState *ps) {
             parse_expr7(ps);
             parse_expr6(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_BITXOR);
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
+            lval_check_judge(ps);
             parse_expr5(ps);
             break;
     }
@@ -596,7 +631,7 @@ _INLINE void parse_expr6(ParserState *ps) {
             parse_expr8(ps);
             parse_expr7(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_BITAND);
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
+            lval_check_judge(ps);
             parse_expr6(ps);
             break;
     }
@@ -615,7 +650,7 @@ _INLINE void parse_expr7(ParserState *ps) {
             parse_expr9(ps);
             parse_expr8(ps);
             write_ins(ps, BC_OPERATOR, 0, tk_val);
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
+            lval_check_judge(ps);
             parse_expr7(ps);
             break;
     }
@@ -633,7 +668,7 @@ _INLINE void parse_expr8(ParserState *ps) {
             parse_expr10(ps);
             parse_expr9(ps);
             write_ins(ps, BC_OPERATOR, 0, token_to_op_val(tk_val));
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
+            lval_check_judge(ps);
             parse_expr8(ps);
             break;
     }
@@ -650,7 +685,7 @@ _INLINE void parse_expr9(ParserState *ps) {
             next(ps);
             parse_expr10(ps);
             write_ins(ps, BC_OPERATOR, 0, token_to_op_val(tk_val));
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
+            lval_check_judge(ps);
             parse_expr9(ps);
             break;
     }
@@ -665,7 +700,7 @@ _INLINE bool parse_try_expr10(ParserState *ps) {
             next(ps);
             parse_t(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_POW);
-            if (ps->lval_check.enable && ps->lval_check.expr_level == 1) ps->lval_check.can_be_left_val =  false;
+            lval_check_judge(ps);
             break;
     }
     return true;
@@ -908,31 +943,17 @@ int value_assign_fix(ParserState *ps) {
 
 void parse_inplace_op(ParserState *ps, int op_val) {
     pl_uint_t size;
-
     next(ps);
 
     if (!ps->lval_check.can_be_left_val)
         error(ps, PYLT_ERR_PARSER_CANT_ASSIGN_TO_LITERAL);
 
-    size = kv_size(ps->info->code->opcodes) - ps->lval_check.startcode;
-
-    if (ps->lval_check.bc_cache.m < size) {
-        kv_resize(PyLiteInstruction, ps->lval_check.bc_cache, size);
-    }
-
-    ps->lval_check.bc_cache.n = size;
-    memcpy(ps->lval_check.bc_cache.a, ps->info->code->opcodes.a + ps->lval_check.startcode, sizeof(PyLiteInstruction) * size);
-
+    size = lval_check_cache_push(ps);
     parse_expr(ps);
     value_assign_fix(ps);
 
     write_ins(ps, BC_OPERATOR, 0, op_val);
-
-    for (pl_uint_t i = 0; i < kv_size(ps->lval_check.bc_cache); ++i) {
-        kv_pushins(ps->info->code->opcodes, kv_A(ps->lval_check.bc_cache, i));
-    }
-
-    kv_clear(ps->lval_check.bc_cache);
+    lval_check_cache_pop(ps);
 }
 
 void parse_value_assign(ParserState *ps) {
@@ -949,18 +970,10 @@ void parse_value_assign(ParserState *ps) {
         if (!ps->lval_check.can_be_left_val)
             error(ps, PYLT_ERR_PARSER_CANT_ASSIGN_TO_LITERAL);
 
-        size = kv_size(ps->info->code->opcodes) - ps->lval_check.startcode;
-
-        if (ps->lval_check.bc_cache.m < size) {
-            kv_resize(PyLiteInstruction, ps->lval_check.bc_cache, size);
-        }
-
-        ps->lval_check.bc_cache.n = size;
-        memcpy(ps->lval_check.bc_cache.a, ps->info->code->opcodes.a + ps->lval_check.startcode, sizeof(PyLiteInstruction) * size);
+        size = lval_check_cache_push(ps);
         kv_popn(ps->info->code->opcodes, size);
 
         parse_expr(ps);
-
         int seqsize = value_assign_fix(ps);
         if (last_seqsize && (seqsize != last_seqsize)) {
             error(ps, PYLT_ERR_PARSER_DIFFERENT_UNPACK_SEQUENCES_SIZE);
@@ -983,11 +996,7 @@ void parse_value_assign(ParserState *ps) {
             }
         }
 
-        for (pl_uint_t i = 0; i < kv_size(ps->lval_check.bc_cache); ++i) {
-            kv_pushins(ps->info->code->opcodes, kv_A(ps->lval_check.bc_cache, i));
-        }
-
-        kv_clear(ps->lval_check.bc_cache);
+        lval_check_cache_pop(ps);
     }
 
     if (last_seqsize) write_ins(ps, BC_POPN, 0, last_seqsize);
@@ -1108,7 +1117,17 @@ void parse_stmt(ParserState *ps) {
             if (ps->info->loop_depth == 0) error(ps, PYLT_ERR_PARSER_CONTINUE_OUTSIDE_LOOP);
             else write_ins(ps, BC_PH_CONTINUE, 0, ps->info->loop_depth);
             break;
-        case TK_KW_FOR:
+        case TK_KW_FOR: /*{
+            next(ps);
+            write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_ITER, 0);
+            tmp = kv_size(ps->info->code->opcodes);
+
+            // for X
+            write_ins(ps, BC_FORITER, 0, 0);
+            parse_expr(ps);
+            value_assign_fix(ps);
+
+        }*/
             next(ps);
             if (tk->val == TK_NAME) {
                 obj = tk->obj;
@@ -1190,16 +1209,13 @@ void parse_stmt(ParserState *ps) {
             // empty file
             break;
         default:
-            ps->lval_check.enable = true;
-            ps->lval_check.can_be_left_val = true;
-            ps->lval_check.startcode = kv_size(ps->info->code->opcodes);
-
+            lval_check_setup(ps);
             parse_expr(ps);
             switch (tk->val) {
                 case '=':
                     // 这里需要自行处理 POP 的参数个数
                     parse_value_assign(ps);
-                    ps->lval_check.enable = false;
+                    lval_check_shutdown(ps);
                     goto _end;
                 case TK_DE_PLUS_EQ: case TK_DE_MINUS_EQ:  case TK_DE_MUL_EQ: case TK_DE_DIV_EQ:
                 case TK_DE_FLOORDIV_EQ: case TK_DE_MOD_EQ: case TK_DE_MATMUL_EQ:
@@ -1209,7 +1225,7 @@ void parse_stmt(ParserState *ps) {
                     break;
             }
 
-            ps->lval_check.enable = false;
+            lval_check_shutdown(ps);
             write_ins(ps, BC_POP, 0, 0);
     }
 _end:
