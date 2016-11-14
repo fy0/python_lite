@@ -547,7 +547,11 @@ _INLINE void parse_expr3(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     int tk_val, op_val;
     switch (tk->val) {
-        case '<': case TK_OP_LE: case '>': case TK_OP_GE: case TK_OP_NE: case TK_OP_EQ: case TK_KW_IN:
+        case TK_KW_IN:
+            if (ps->disable_op_in_parse && ps->lval_check.expr_level == 1) {
+                return;
+            }
+        case '<': case TK_OP_LE: case '>': case TK_OP_GE: case TK_OP_NE: case TK_OP_EQ:
             tk_val = tk->val;
             op_val = token_to_op_val(tk->val);
             next(ps);
@@ -1006,7 +1010,6 @@ void parse_value_assign(ParserState *ps) {
 
 void parse_stmt(ParserState *ps) {
     Token *tk = &(ps->ls->token);
-    PyLiteObject *obj;
     int tmp, tmp2, tmp3;
     int final_pos;
 
@@ -1117,45 +1120,47 @@ void parse_stmt(ParserState *ps) {
             if (ps->info->loop_depth == 0) error(ps, PYLT_ERR_PARSER_CONTINUE_OUTSIDE_LOOP);
             else write_ins(ps, BC_PH_CONTINUE, 0, ps->info->loop_depth);
             break;
-        case TK_KW_FOR: /*{
+        case TK_KW_FOR: {
+            pl_uint_t size;
             next(ps);
+
+            // left value
+            lval_check_setup(ps);
+            ps->disable_op_in_parse = true;
+            parse_expr(ps);
+            ps->disable_op_in_parse = false;
+            size = lval_check_cache_push(ps);
+            kv_popn(ps->info->code->opcodes, size);
+
+            // in [right_value]
+            ACCEPT(ps, TK_KW_IN);
+            parse_expr(ps);
+            ACCEPT(ps, ':');
             write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_ITER, 0);
             tmp = kv_size(ps->info->code->opcodes);
 
-            // for X
+            // for X in iter
             write_ins(ps, BC_FORITER, 0, 0);
-            parse_expr(ps);
-            value_assign_fix(ps);
+            int seqsize = value_assign_fix(ps);
+            if (seqsize) {
+                write_ins(ps, BC_UNPACK_SEQ, 0, seqsize);
+            }
+            lval_check_cache_pop(ps);
+            write_ins(ps, BC_POPN, 0, seqsize);
 
-        }*/
-            next(ps);
-            if (tk->val == TK_NAME) {
-                obj = tk->obj;
-                next(ps);
-                ACCEPT(ps, TK_KW_IN);
-                parse_expr(ps);
-                ACCEPT(ps, ':');
-                write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_ITER, 0);
-                tmp = kv_size(ps->info->code->opcodes);
+            ++ps->info->loop_depth;
+            ACCEPT(ps, TK_NEWLINE);
+            parse_block(ps);
+            --ps->info->loop_depth;
+            loop_control_replace(ps, tmp);
 
-                // for X
-                write_ins(ps, BC_FORITER, 0, 0);
-                write_ins(ps, BC_SET_VAL, 0, store_const(ps, obj));
-                write_ins(ps, BC_POP, 0, 0);
+            kv_A(ps->info->code->opcodes, tmp).extra = kv_size(ps->info->code->opcodes) - tmp + 1;
+            write_ins(ps, BC_JMP_BACK, 0, kv_size(ps->info->code->opcodes) - tmp + 1);
 
-                ++ps->info->loop_depth;
-                ACCEPT(ps, TK_NEWLINE);
-                parse_block(ps);
-                --ps->info->loop_depth;
-                loop_control_replace(ps, tmp);
-
-                kv_A(ps->info->code->opcodes, tmp).extra = kv_size(ps->info->code->opcodes) - tmp + 1;
-                write_ins(ps, BC_JMP_BACK, 0, kv_size(ps->info->code->opcodes) - tmp + 1);
-
-                write_ins(ps, BC_POP, 0, 0); // pop iterator
-                write_ins(ps, BC_DEL_FORCE, 0, 0);
-            } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+            write_ins(ps, BC_POP, 0, 0); // pop iterator
+            write_ins(ps, BC_DEL_FORCE, 0, 0);
             return;
+        }
         case TK_KW_PASS:
             next(ps);
             break;
@@ -1288,6 +1293,7 @@ void pylt_parser_init(PyLiteInterpreter *I, ParserState *ps, LexState *ls) {
     ps->lval_check.expr_level = 0;
     kv_init(I, ps->lval_check.bc_cache);
 
+    ps->disable_op_in_parse = false;
     ps->disable_expr_tuple_parse = false;
     ps->disable_return_parse = true;
 
