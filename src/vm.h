@@ -34,7 +34,7 @@ enum {
     BC_SET_ATTR,       // 存入属性
     BC_ASSERT,         // 真值断言
 
-    BC_LOAD_VAL_,      // 载入变量
+    BC_LOAD_VAL_,      // 载入变量（入栈）
     BC_GET_ATTR_,      // 取属性
 
     BC_IMPORT_NAME,    // 导入模块

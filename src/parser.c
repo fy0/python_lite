@@ -486,9 +486,13 @@ bool parse_try_expr(ParserState *ps) {
 }
 
 void parse_expr(ParserState *ps) {
-    ps->lval_check.expr_level++;
+    Token *tk = &(ps->ls->token);
+    bool add_expr_level = (tk->val != '[' && tk->val != '(');
+    // 这里回避的情况是：[b,a] = 1,2
+    // 这时候需要生成 BC_LOAD_VAL_ 才能顺利完成后面的批量赋值
+    if (add_expr_level) ps->lval_check.expr_level++;
     if (!parse_try_expr(ps)) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-    ps->lval_check.expr_level--;
+    if (add_expr_level) ps->lval_check.expr_level--;
 }
 
 void parse_expr_without_tuple_parse(ParserState *ps) {
@@ -548,7 +552,7 @@ _INLINE void parse_expr3(ParserState *ps) {
     int tk_val, op_val;
     switch (tk->val) {
         case TK_KW_IN:
-            if (ps->disable_op_in_parse && ps->lval_check.expr_level == 1) {
+            if (ps->disable_op_in_parse && ps->lval_check.expr_level <= 1) {
                 return;
             }
         case '<': case TK_OP_LE: case '>': case TK_OP_GE: case TK_OP_NE: case TK_OP_EQ:
@@ -1145,6 +1149,7 @@ void parse_stmt(ParserState *ps) {
             if (seqsize) {
                 write_ins(ps, BC_UNPACK_SEQ, 0, seqsize);
             }
+
             lval_check_cache_pop(ps);
             write_ins(ps, BC_POPN, 0, seqsize);
 
