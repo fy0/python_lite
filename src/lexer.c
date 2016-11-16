@@ -414,7 +414,7 @@ int pylt_lex_next(LexState *ls) {
         for (;;) {
             switch (ss->current) {
                 case '#':
-                    do { ss_nextc(ss); } while (ss->current != '\n' && ss->current != '\r');
+                    do { ss_nextc(ss); } while (ss->current != '\n' && ss->current != '\r' && ss->current != '\0');
                     break;
                 case '\n':
                     cur_indent = 0;
