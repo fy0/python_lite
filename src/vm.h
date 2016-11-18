@@ -12,6 +12,7 @@ enum {
     BC_SET_VAL,        // 赋值
     BC_SET_VALX,       // 偏移赋值
     BC_LOAD_VAL,       // 载入变量（入栈）
+    BC_LOAD_VAL_,      // 载入变量（入栈）
     BC_LOADNONE,       // 载入 None
     BC_LOADCONST,      // 载入常量
     BC_LOADLOCALS,     // 载入本地变量空间
@@ -31,11 +32,11 @@ enum {
     BC_GET_ITEM_,      // 取下标
     BC_SET_ITEM,       // 存入下标
     BC_GET_ATTR,       // 取属性
-    BC_SET_ATTR,       // 存入属性
-    BC_ASSERT,         // 真值断言
-
-    BC_LOAD_VAL_,      // 载入变量（入栈）
     BC_GET_ATTR_,      // 取属性
+    BC_SET_ATTR,       // 存入属性
+    BC_GET_SLICE,      // 读取分片
+    BC_SET_SLICE,
+    BC_ASSERT,         // 真值断言
 
     BC_IMPORT_NAME,    // 导入模块
     BC_UNPACK_SEQ,     // 解包

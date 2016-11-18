@@ -379,12 +379,75 @@ bool parse_try_t(ParserState *ps) {
             case '[':
                 // is getitem/setitem ?
                 next(ps);
-                parse_expr(ps);
 
+                // get slice [: ?
                 if (tk->val == ':') {
-                    ;
+                    next(ps);
+                    // 补全 start
+                    sload_const(ps, castobj(pylt_obj_int_new(ps->I, 0)));
+                    goto slice_parse_end;
                 }
 
+                // item or start of slice
+                parse_expr(ps);
+
+                // [X:
+                // slice begin
+                if (tk->val == ':') {
+                    next(ps);
+
+                slice_parse_end:
+                    // [X:] ?
+                    if (tk->val == ']') {
+                        next(ps);
+                        // 补全 end 和 step
+                        sload_const(ps, castobj(pylt_obj_int_new(ps->I, -1)));
+                        sload_const(ps, castobj(pylt_obj_int_new(ps->I, 1)));
+                        goto slice_parse_final;
+                    }
+                    // [X:: ?
+                    if (tk->val == ':') {
+                        next(ps);
+                        // 补全 end
+                        sload_const(ps, castobj(pylt_obj_int_new(ps->I, -1)));
+                        goto slice_parse_step;
+                    }
+
+                    // [X:Y
+                    parse_expr(ps);
+
+                    // [X:Y] ?
+                    if (tk->val == ']') {
+                        next(ps);
+                        // 补全 step
+                        sload_const(ps, castobj(pylt_obj_int_new(ps->I, 1)));
+                        goto slice_parse_final;
+                    }
+                    // [X:Y: ?
+                    if (tk->val == ':') {
+                        next(ps);
+                        goto slice_parse_step;
+                    }
+
+                slice_parse_step:
+                    // [X:Y:]
+                    if (tk->val == ']') {
+                        next(ps);
+                        // 补全 step
+                        sload_const(ps, castobj(pylt_obj_int_new(ps->I, 1)));
+                        goto slice_parse_final;
+                    }
+
+                    // [X:Y:Z
+                    parse_expr(ps);
+                    ACCEPT(ps, ']');
+
+                slice_parse_final:
+                    write_ins(ps, BC_GET_SLICE, 0, 0);
+                    break;
+                }
+
+                // getitem/setitem
                 ACCEPT(ps, ']');
                 write_ins(ps, lval_check_judge(ps) ? BC_GET_ITEM_ : BC_GET_ITEM, 0, 0);
                 break;

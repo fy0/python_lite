@@ -117,6 +117,9 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_SET_ATTR:
                 printf("   %-15s %d\n", "SET_ATTR", ins.extra);
                 break;
+            case BC_GET_SLICE:
+                printf("   %-15s\n", "GET_SLICE");
+                break;
             case BC_ASSERT:
                 printf("   %-15s\n", "ASSERT");
                 break;
