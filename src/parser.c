@@ -380,6 +380,11 @@ bool parse_try_t(ParserState *ps) {
                 // is getitem/setitem ?
                 next(ps);
                 parse_expr(ps);
+
+                if (tk->val == ':') {
+                    ;
+                }
+
                 ACCEPT(ps, ']');
                 write_ins(ps, lval_check_judge(ps) ? BC_GET_ITEM_ : BC_GET_ITEM, 0, 0);
                 break;

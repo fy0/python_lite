@@ -30,7 +30,7 @@ PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **a
     FILE *fp = mfopen(I, fn, mode);
 
     pl_bool_t is_bin = false;
-    for (pl_int_t i = 0; i <= mode->ob_size; ++i) {
+    for (pl_uint_t i = 0; i <= mode->ob_size; ++i) {
         if (mode->ob_val[i] == 'b') {
             is_bin = true;
             break;

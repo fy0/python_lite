@@ -76,7 +76,7 @@ pl_bool_t pylt_obj_setattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObjec
 
 PyLiteObject* pylt_obj_getitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key);
 pl_bool_t pylt_obj_setitem(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
-//PyLiteObject* pylt_obj_slice(PyLiteInterpreter *I, PyLiteObject *obj);
+PyLiteObject* pylt_obj_Eslice(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t start, pl_int_t end, pl_int_t step);
 
 pl_bool_t pylt_obj_has(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *obj, pl_bool_t *is_valid);
 

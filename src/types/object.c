@@ -341,6 +341,23 @@ pl_bool_t pylt_obj_setitem(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObjec
     return false;
 }
 
+PyLiteObject* pylt_obj_Eslice(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t start, pl_int_t end, pl_int_t step) {
+    if (step == 0) {
+        pl_error(I, pl_static.str.ValueError, "slice step cannot be zero");
+        return NULL;
+    }
+
+    switch (obj->ob_type) {
+        case PYLT_OBJ_TYPE_LIST:
+            return castobj(pylt_obj_list_slice(I, castlist(obj), start, end, step));
+        case PYLT_OBJ_TYPE_TUPLE:
+            return castobj(pylt_obj_tuple_slice(I, casttuple(obj), start, end, step));
+    }
+
+    pl_error(I, pl_static.str.TypeError, "%r object has no attribute '__getitem__'", pl_type(I, obj)->name);
+    return NULL;
+}
+
 pl_bool_t pylt_obj_has(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *obj, pl_bool_t *is_valid) {
     if (is_valid) *is_valid = true;
     switch (self->ob_type) {

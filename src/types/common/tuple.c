@@ -2,6 +2,18 @@
 #include "tuple.h"
 #include "string.h"
 
+// 将 index 转为标准形式并约束到可用范围
+#define index_fix(__index) \
+    if (__index < 0) __index += self->ob_size; \
+    if (__index < 0) __index = 0; \
+        else if (__index >= self->ob_size) __index = self->ob_size-1;
+
+
+#define index_chk(__index, failret) \
+    if (__index < 0) __index += self->ob_size; \
+    if (__index < 0 || __index >= self->ob_size) return failret;
+
+
 struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteInterpreter *I, PyLiteTupleObject *self) {
     int index = 0;
     PyLiteStrObject *str;
@@ -62,6 +74,26 @@ PyLiteObject* pylt_obj_tuple_getitem(PyLiteInterpreter *I, PyLiteTupleObject *se
     if (index < 0) index += self->ob_size;
     if (index < 0 || index >= self->ob_size) return NULL;
     return self->ob_val[index];
+}
+
+PyLiteTupleObject* pylt_obj_tuple_slice(PyLiteInterpreter *I, PyLiteTupleObject *self, pl_int_t start, pl_int_t end, pl_int_t step) {
+    index_fix(start);
+    index_fix(end);
+    if (step == 0) return NULL;
+
+    pl_int_t count = (pl_int_t)ceil(abs(end - start) / abs(step));
+    PyLiteTupleObject *lst = pylt_obj_tuple_new(I, count);
+
+    if (step == 1) {
+        memcpy(lst->ob_val, self->ob_val + start, count * sizeof(PyLiteObject*));
+    } else {
+        pl_int_t cur_index = start;
+        for (pl_int_t i = 0; i < count; ++i) {
+            lst->ob_val[i] = self->ob_val[cur_index];
+            cur_index += step;
+        }
+    }
+    return lst;
 }
 
 void pylt_obj_tuple_free(PyLiteInterpreter *I, PyLiteTupleObject *self) {
