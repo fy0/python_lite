@@ -4,7 +4,7 @@
 
 typedef PyLiteObject* (*GetItemFunc)(PyLiteInterpreter *I, PyLiteObject *self, int index);
 
-PyLiteObject* pylt_obj_X_Egetitem(PyLiteInterpreter *I, GetItemFunc *func, PyLiteObject *self, PyLiteObject *index) {
+PyLiteObject* pylt_obj_X_Egetitem(PyLiteInterpreter *I, GetItemFunc func, PyLiteObject *self, PyLiteObject *index) {
     if (index->ob_type == PYLT_OBJ_TYPE_INT) {
         PyLiteObject *ret = (*func)(I, self, castint(index)->ob_val);
         if (!ret) pl_error(I, pl_static.str.IndexError, "%s index out of range", pl_type(I, castobj(self))->name);
@@ -16,11 +16,11 @@ PyLiteObject* pylt_obj_X_Egetitem(PyLiteInterpreter *I, GetItemFunc *func, PyLit
 
 
 PyLiteObject* pylt_obj_tuple_Egetitem(PyLiteInterpreter *I, PyLiteTupleObject *self, PyLiteObject *index) {
-    return pylt_obj_X_Egetitem(I, (GetItemFunc*)&pylt_obj_tuple_getitem, castobj(self), index);
+    return pylt_obj_X_Egetitem(I, (GetItemFunc)&pylt_obj_tuple_getitem, castobj(self), index);
 }
 
 PyLiteObject* pylt_obj_list_Egetitem(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *index) {
-    return pylt_obj_X_Egetitem(I, (GetItemFunc*)&pylt_obj_list_getitem, castobj(self), index);
+    return pylt_obj_X_Egetitem(I, (GetItemFunc)&pylt_obj_list_getitem, castobj(self), index);
 }
 
 PyLiteObject* pylt_obj_dict_Egetitem(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *key) {
