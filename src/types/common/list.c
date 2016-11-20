@@ -6,7 +6,7 @@
 #define index_fix(__index) \
     if (__index < 0) __index += self->ob_size; \
     if (__index < 0) __index = 0; \
-    else if (__index >= self->ob_size) __index = self->ob_size-1;
+    else if (__index >= self->ob_size) __index = self->ob_size;
 
 
 #define index_chk(__index, failret) \
@@ -159,8 +159,9 @@ PyLiteListObject* pylt_obj_list_slice(PyLiteInterpreter *I, PyLiteListObject *se
     index_fix(end);
     if (step == 0) return NULL;
 
-    pl_int_t count = (pl_int_t)ceil(abs(end - start) / abs(step));
+    pl_int_t count = (pl_int_t)ceil(abs(end - start) / (float)abs(step));
     PyLiteListObject *lst = pylt_obj_list_new_with_size(I, count);
+    lst->ob_size = count;
 
     if (step == 1) {
         memcpy(lst->ob_val, self->ob_val + start, count * sizeof(PyLiteObject*));

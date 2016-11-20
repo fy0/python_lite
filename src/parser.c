@@ -85,6 +85,10 @@ void sload_const(ParserState *ps, PyLiteObject *obj) {
     else write_ins(ps, BC_LOADCONST, 0, store_const(ps, obj));
 }
 
+void sload_none(ParserState *ps) {
+    write_ins(ps, BC_LOADNONE, 0, 0);
+}
+
 void error(ParserState *ps, int code) {
     Token *tk = &(ps->ls->token);
     printf("ERROR at line [%d]\n", ps->ls->linenumber);
@@ -384,7 +388,7 @@ bool parse_try_t(ParserState *ps) {
                 if (tk->val == ':') {
                     next(ps);
                     // 补全 start
-                    sload_const(ps, castobj(pylt_obj_int_new(ps->I, 0)));
+                    sload_none(ps);
                     goto slice_parse_end;
                 }
 
@@ -401,15 +405,15 @@ bool parse_try_t(ParserState *ps) {
                     if (tk->val == ']') {
                         next(ps);
                         // 补全 end 和 step
-                        sload_const(ps, castobj(pylt_obj_int_new(ps->I, -1)));
-                        sload_const(ps, castobj(pylt_obj_int_new(ps->I, 1)));
+                        sload_none(ps);
+                        sload_none(ps);
                         goto slice_parse_final;
                     }
                     // [X:: ?
                     if (tk->val == ':') {
                         next(ps);
                         // 补全 end
-                        sload_const(ps, castobj(pylt_obj_int_new(ps->I, -1)));
+                        sload_none(ps);
                         goto slice_parse_step;
                     }
 
@@ -420,7 +424,7 @@ bool parse_try_t(ParserState *ps) {
                     if (tk->val == ']') {
                         next(ps);
                         // 补全 step
-                        sload_const(ps, castobj(pylt_obj_int_new(ps->I, 1)));
+                        sload_none(ps);
                         goto slice_parse_final;
                     }
                     // [X:Y: ?
@@ -434,7 +438,7 @@ bool parse_try_t(ParserState *ps) {
                     if (tk->val == ']') {
                         next(ps);
                         // 补全 step
-                        sload_const(ps, castobj(pylt_obj_int_new(ps->I, 1)));
+                        sload_none(ps);
                         goto slice_parse_final;
                     }
 

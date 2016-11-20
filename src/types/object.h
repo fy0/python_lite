@@ -156,6 +156,7 @@ struct PyLiteCustomObject;
 #define pl_istype(i)       (i->ob_type == PYLT_OBJ_TYPE_TYPE)
 #define pl_isunusual(i)    (i->ob_type == PYLT_OBJ_TYPE_UNUSUAL)
 #define pl_isiter(i)       (i->ob_type == PYLT_OBJ_TYPE_ITER)
+#define pl_isnone(i)       (i->ob_type == PYLT_OBJ_TYPE_NONE)
 #define pl_isnum(i)        ((i->ob_type == PYLT_OBJ_TYPE_INT) || (i->ob_type == PYLT_OBJ_TYPE_FLOAT))
 #define pl_isstrkind(i)    ((i->ob_type == PYLT_OBJ_TYPE_STR) || (i->ob_type == PYLT_OBJ_TYPE_BYTES))
 #define pl_iscode(i)       (i->ob_type == PYLT_OBJ_TYPE_CODE)

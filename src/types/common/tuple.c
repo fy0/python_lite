@@ -83,6 +83,7 @@ PyLiteTupleObject* pylt_obj_tuple_slice(PyLiteInterpreter *I, PyLiteTupleObject 
 
     pl_int_t count = (pl_int_t)ceil(abs(end - start) / abs(step));
     PyLiteTupleObject *lst = pylt_obj_tuple_new(I, count);
+    lst->ob_size = count;
 
     if (step == 1) {
         memcpy(lst->ob_val, self->ob_val + start, count * sizeof(PyLiteObject*));
