@@ -446,7 +446,8 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                     break;
                 }
                 break;
-            case BC_GET_SLICE: {
+            case BC_GET_SLICE: 
+            case BC_GET_SLICE_: {
                 // GET_SLICE    0       0
                 PyLiteIntObject *step = castint(kv_pop(vm->stack));
                 PyLiteIntObject *end = castint(kv_pop(vm->stack));

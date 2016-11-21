@@ -120,6 +120,12 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_GET_SLICE:
                 printf("   %-15s\n", "GET_SLICE");
                 break;
+            case BC_GET_SLICE_:
+                printf("   %-15s\n", "GET_SLICE_");
+                break;
+            case BC_SET_SLICE:
+                printf("   %-15s\n", "SET_SLICE");
+                break;
             case BC_ASSERT:
                 printf("   %-15s\n", "ASSERT");
                 break;

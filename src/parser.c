@@ -41,7 +41,7 @@ void parse_inplace_op(ParserState *ps, int op_val);
 
 void lval_check_setup(ParserState *ps);
 void lval_check_shutdown(ParserState *ps);
-bool lval_check_judge(ParserState *ps);
+bool lval_check_judge(ParserState *ps, bool val);
 pl_uint_t lval_check_cache_push(ParserState *ps);
 void lval_check_cache_pop(ParserState *ps);
 
@@ -153,9 +153,9 @@ void lval_check_shutdown(ParserState *ps) {
 
 #define lval_check_valid(ps) (ps->lval_check.enable && ps->lval_check.expr_level == 1)
 
-bool lval_check_judge(ParserState *ps) {
+bool lval_check_judge(ParserState *ps, bool val) {
     if (lval_check_valid(ps)) {
-        ps->lval_check.can_be_left_val = false;
+        ps->lval_check.can_be_left_val = val;
         return true;
     }
     return false;
@@ -290,7 +290,7 @@ bool parse_basetype(ParserState *ps) {
 
     if (obj) {
         sload_const(ps, obj);
-        lval_check_judge(ps);
+        lval_check_judge(ps, false);
         return true;
     } else {
         ret = parse_mutabletype(ps, &times);
@@ -344,13 +344,13 @@ bool parse_try_t(ParserState *ps) {
             next(ps);
             parse_expr10(ps);
             write_ins(ps, BC_OPERATOR, 0, tk_val == '+' ? OP_POS : OP_NEG);
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             break;
         case '~':
             next(ps);
             parse_expr10(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_BITNOT);
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             break;
         case TK_KW_NOT:
             next(ps);
@@ -363,7 +363,7 @@ bool parse_try_t(ParserState *ps) {
             parse_expr4(ps);
             parse_expr3(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_NOT);
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             break;
         default:
             if (!parse_basetype(ps))
@@ -376,7 +376,7 @@ bool parse_try_t(ParserState *ps) {
                 // is getattr/setattr ?
                 next(ps);
                 if (tk->val == TK_NAME) {
-                    write_ins(ps, lval_check_judge(ps) ? BC_GET_ATTR_ : BC_GET_ATTR, 0, store_const(ps, tk->obj));
+                    write_ins(ps, lval_check_judge(ps, true) ? BC_GET_ATTR_ : BC_GET_ATTR, 0, store_const(ps, tk->obj));
                 }
                 ACCEPT(ps, TK_NAME);
                 break;
@@ -447,13 +447,13 @@ bool parse_try_t(ParserState *ps) {
                     ACCEPT(ps, ']');
 
                 slice_parse_final:
-                    write_ins(ps, BC_GET_SLICE, 0, 0);
+                    write_ins(ps, lval_check_judge(ps, true) ? BC_GET_SLICE_ : BC_GET_SLICE, 0, 0);
                     break;
                 }
 
                 // getitem/setitem
                 ACCEPT(ps, ']');
-                write_ins(ps, lval_check_judge(ps) ? BC_GET_ITEM_ : BC_GET_ITEM, 0, 0);
+                write_ins(ps, lval_check_judge(ps, true) ? BC_GET_ITEM_ : BC_GET_ITEM, 0, 0);
                 break;
             case '(':
                 // is func call ?
@@ -502,7 +502,7 @@ bool parse_try_t(ParserState *ps) {
                         }
                     } else break;
                 }
-                lval_check_judge(ps);
+                lval_check_judge(ps, false);
                 write_ins(ps, BC_CALL, (num2) ? 1 : 0, num);
                 ACCEPT(ps, ')');
                 ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
@@ -590,7 +590,7 @@ _INLINE void parse_expr1(ParserState *ps) {
             parse_expr3(ps);
             parse_expr2(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_OR);
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             parse_expr1(ps);
             break;
     }
@@ -611,7 +611,7 @@ _INLINE void parse_expr2(ParserState *ps) {
             parse_expr4(ps);
             parse_expr3(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_AND);
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             parse_expr2(ps);
             break;
     }
@@ -655,7 +655,7 @@ success:
     parse_expr5(ps);
     parse_expr4(ps);
     write_ins(ps, BC_OPERATOR, 0, op_val);
-    lval_check_judge(ps);
+    lval_check_judge(ps, false);
     parse_expr3(ps);
 }
 
@@ -673,7 +673,7 @@ _INLINE void parse_expr4(ParserState *ps) {
             parse_expr6(ps);
             parse_expr5(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_BITOR);
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             parse_expr4(ps);
             break;
     }
@@ -692,7 +692,7 @@ _INLINE void parse_expr5(ParserState *ps) {
             parse_expr7(ps);
             parse_expr6(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_BITXOR);
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             parse_expr5(ps);
             break;
     }
@@ -711,7 +711,7 @@ _INLINE void parse_expr6(ParserState *ps) {
             parse_expr8(ps);
             parse_expr7(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_BITAND);
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             parse_expr6(ps);
             break;
     }
@@ -730,7 +730,7 @@ _INLINE void parse_expr7(ParserState *ps) {
             parse_expr9(ps);
             parse_expr8(ps);
             write_ins(ps, BC_OPERATOR, 0, tk_val);
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             parse_expr7(ps);
             break;
     }
@@ -748,7 +748,7 @@ _INLINE void parse_expr8(ParserState *ps) {
             parse_expr10(ps);
             parse_expr9(ps);
             write_ins(ps, BC_OPERATOR, 0, token_to_op_val(tk_val));
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             parse_expr8(ps);
             break;
     }
@@ -765,7 +765,7 @@ _INLINE void parse_expr9(ParserState *ps) {
             next(ps);
             parse_expr10(ps);
             write_ins(ps, BC_OPERATOR, 0, token_to_op_val(tk_val));
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             parse_expr9(ps);
             break;
     }
@@ -780,7 +780,7 @@ _INLINE bool parse_try_expr10(ParserState *ps) {
             next(ps);
             parse_t(ps);
             write_ins(ps, BC_OPERATOR, 0, OP_POW);
-            lval_check_judge(ps);
+            lval_check_judge(ps, false);
             break;
     }
     return true;
@@ -988,6 +988,23 @@ int value_assign_fix(ParserState *ps) {
                 kv_A(ps->lval_check.bc_cache, i).code = (ins.code == BC_GET_ITEM_) ? BC_SET_ITEM : BC_SET_ATTR;
                 kv_A(ps->lval_check.bc_cache, i).exarg = seqsize ? si++ : 0;
                 i--;
+                while (i >= 0) {
+                    ins = kv_A(ps->lval_check.bc_cache, i);
+                    if (ins.code == BC_LOAD_VAL_) {
+                        kv_A(ps->lval_check.bc_cache, i).code = BC_LOAD_VAL;
+                        i -= 1;
+                        break;
+                    }
+                    i -= 1;
+                }
+                break;
+            case BC_GET_SLICE_:
+                if (seqsize) {
+                    kv_A(ps->lval_check.bc_cache, i).code = BC_SET_SLICE;
+                    kv_A(ps->lval_check.bc_cache, i--).exarg = si++;
+                } else {
+                    kv_A(ps->lval_check.bc_cache, i--).code = BC_SET_SLICE;
+                }
                 while (i >= 0) {
                     ins = kv_A(ps->lval_check.bc_cache, i);
                     if (ins.code == BC_LOAD_VAL_) {

@@ -35,6 +35,7 @@ enum {
     BC_GET_ATTR_,      // 取属性
     BC_SET_ATTR,       // 存入属性
     BC_GET_SLICE,      // 读取分片
+    BC_GET_SLICE_,     // 读取分片
     BC_SET_SLICE,
     BC_ASSERT,         // 真值断言
 
