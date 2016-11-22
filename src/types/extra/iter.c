@@ -3,6 +3,7 @@
 #include "../all.h"
 #include "../../api.h"
 #include "../../misc.h"
+#include "../../utils/with_exceptions.h"
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
     PyLiteIterObject *iter;
@@ -53,7 +54,7 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
         default:
             if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
                 PyLiteIterObject *niter;
-                PyLiteObject *obj_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__iter__), NULL);
+                PyLiteObject *obj_func = pylt_obj_Egetattr(I, obj, castobj(pl_static.str.__iter__), NULL);
                 if (obj_func) {
                     niter = castiter(pl_call_method(I, obj, obj_func, 0, NULL));
                     if (pl_isiter(niter)) {

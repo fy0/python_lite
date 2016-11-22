@@ -136,6 +136,7 @@ void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
 //  2 为当前的参数个数多于参数个数
 //  3 为参数的类型不符合
 // -1 当前对象不是可调用对象
+// -2 外部异常
 //
 // pflag: the kind of the callable object，such as ...
 //  0 tobj is a function or cfunction object
@@ -159,7 +160,8 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
     } else {
         if (tobj->ob_type == PYLT_OBJ_TYPE_TYPE) {
             // __new__
-            obj = pylt_obj_getattr(I, tobj, castobj(pl_static.str.__new__), &at_type);
+            obj = pylt_obj_Egetattr(I, tobj, castobj(pl_static.str.__new__), &at_type);
+            if (I->error) func_call_ret(-2);
 
             if (obj) {
                 info = pylt_obj_func_get_info(I, obj);
@@ -177,7 +179,8 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
             }
         } else {
             // __call__
-            obj = pylt_obj_getattr(I, tobj, castobj(pl_static.str.__call__), &at_type);
+            obj = pylt_obj_Egetattr(I, tobj, castobj(pl_static.str.__call__), &at_type);
+            if (I->error) func_call_ret(-2);
             if (obj) {
                 info = pylt_obj_func_get_info(I, obj);
                 if (!info) func_call_ret(-1);
@@ -299,6 +302,9 @@ _err:
         case -1:
             pl_error(I, pl_static.str.TypeError, "%r object is not callable", pylt_api_type_name(I, tobj->ob_type));
             break;
+        case -2:
+            // 外部异常
+            break;
         case 1: // less than minimal
             // Why TypeError?
             pl_error(I, pl_static.str.TypeError, "%s() missing %d required positional argument (%d given)", info->name, pylt_obj_int_new(I, info->minimal - params_num), pylt_obj_int_new(I, retval_util));
@@ -399,7 +405,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 // GET_ITEM     0       0
                 tb = castobj(kv_pop(I->vm.stack));
                 ta = castobj(kv_pop(I->vm.stack));
-                tobj = pylt_obj_getitem(I, ta, tb);
+                tobj = pylt_obj_Egetitem(I, ta, tb);
                 if (!tobj) break;
                 kv_push(uintptr_t, I->vm.stack, (uintptr_t)tobj);
                 break;
@@ -408,14 +414,14 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 ta = castobj(kv_pop(vm->stack));
                 tobj = castobj(kv_pop(vm->stack));
                 tb = castobj(kv_topn(vm->stack, ins.exarg));
-                pylt_obj_setitem(I, tobj, ta, tb);
+                pylt_obj_Esetitem(I, tobj, ta, tb);
                 if (I->error) break;
                 break;
             case BC_GET_ATTR:
             case BC_GET_ATTR_:
                 // GET_ATTR     0/1     const_id
                 tobj = castobj(kv_pop(I->vm.stack));
-                tret = pylt_obj_getattr_ex(I, tobj, const_obj(ins.extra), NULL, &at_type);
+                tret = pylt_obj_Egetattr_ex(I, tobj, const_obj(ins.extra), NULL, &at_type);
                 if (I->error) break;
                 kv_pushptr(vm->stack, tret);
 
@@ -630,7 +636,8 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
 					tret = castobj(kv_top(vm->stack));
 
 					if ((!pl_istype(tret)) && tret->ob_type == casttype(tobj)->ob_reftype) {
-						PyLiteObject *method_func = pylt_obj_getattr(I, tret, castobj(pl_static.str.__init__), NULL);
+						PyLiteObject *method_func = pylt_obj_Egetattr(I, tret, castobj(pl_static.str.__init__), NULL);
+                        if (I->error) break;
 						if (method_func) {
                             pl_call_method_ex(I, tret, method_func, params_bak, kwargs);
 						}

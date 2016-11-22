@@ -120,6 +120,7 @@ void* basetype_op_func_table[][24] = {
 返回 +1: a < b
 返回  2: 无法比较
 返回  3: False
+返回  4: 无cmp函数
 */
 pl_int_t pylt_obj_cmp(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b) {
     if (a == b) return 0;
@@ -131,16 +132,7 @@ pl_int_t pylt_obj_cmp(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b) {
         case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_cmp(I, castbytes(a), b);
         case PYLT_OBJ_TYPE_SET: return pylt_obj_set_cmp(I, castset(a), b);
         case PYLT_OBJ_TYPE_DICT: return pylt_obj_dict_cmp(I, castdict(a), b);
-        default:
-            if (a->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                PyLiteObject *hash_func = pylt_obj_getattr(I, a, castobj(pl_static.str.__cmp__), NULL);
-                if (hash_func) {
-                    PyLiteObject *ret = pl_call_method(I, a, hash_func, 1, b);
-                    if (ret->ob_type == PYLT_OBJ_TYPE_INT) {
-                        return castint(ret)->ob_val;
-                    }
-                }
-            }
+        default: return 4;
     }
     return 2;
 }
@@ -168,7 +160,7 @@ pl_bool_t pylt_obj_eq(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b) {
 }
 
 // 这个可怜的函数无法添加更多参数了，因为他被 khash 所用。
-// 但愿你们实现的 __hash__ 都是正确的，不过我以后可以在VM中查返回值类型。
+// __hash__ 的错误无法捕获，所以不对外提供。
 pl_uint32_t pylt_obj_hash(PyLiteInterpreter *I, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_INT: return pylt_obj_int_hash(I, castint(obj));
@@ -177,7 +169,7 @@ pl_uint32_t pylt_obj_hash(PyLiteInterpreter *I, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_hash(I, castbytes(obj));
         case PYLT_OBJ_TYPE_STR: return pylt_obj_str_hash(I, caststr(obj));
         case PYLT_OBJ_TYPE_TYPE: return pylt_obj_type_hash(I, casttype(obj));
-        default:
+        /*default:
             if (pl_iscustom(obj)) {
                 PyLiteObject *ret;
                 PyLiteObject *hash_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__hash__), NULL);
@@ -188,7 +180,7 @@ pl_uint32_t pylt_obj_hash(PyLiteInterpreter *I, PyLiteObject *obj) {
                     }
                 }
             }
-            return (pl_uint32_t)obj;
+            return (pl_uint32_t)obj;*/
     }
     return 0;
 }
@@ -200,12 +192,12 @@ pl_bool_t pylt_obj_hashable(PyLiteInterpreter *I, PyLiteObject *obj) {
 		case PYLT_OBJ_TYPE_UNUSUAL:
             return false;
         default:
-            if (pl_iscustom(obj)) {
+            /*if (pl_iscustom(obj)) {
                 PyLiteObject *method_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__hash__), NULL);
                 if (method_func) return true;
                 return pylt_obj_hashable(I, castcustom(obj)->base_obj);
-            }
-            return true;
+            }*/
+            return pl_iscustom(obj) ? false : true;
     }
 }
 
@@ -269,12 +261,6 @@ PyLiteObject* pylt_obj_getattr_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLit
             }
             break;
     }
-    if (!ret) {
-        // if default value is &PyLiteUseless, not found and no exception
-        if (_default) return _default;
-        pl_error(I, pl_static.str.AttributeError, "type object %r has no attribute %r",
-            pylt_api_type_name(I, obj->ob_type), key);
-    }
     return ret;
 }
 
@@ -289,73 +275,13 @@ pl_bool_t pylt_obj_setattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObjec
             pylt_obj_type_setattr(I, casttype(self), key, value);
             return true;
         default:
-            if (self->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
-                PyLiteObject *method_func = pylt_obj_getattr(I, self, castobj(pl_static.str.__setattr__), NULL);
-                if (method_func) {
-                    PyLiteObject *ret = pl_call_method(I, self, method_func, 2, key, value);
-                    return pylt_obj_istrue(I, ret);
-                } else {
-                    pylt_obj_custom_setattr(I, castcustom(self), key, value);
-                }
+            // TODO: 对内置类型做处理
+            if (pl_iscustom(self)) {
+                pylt_obj_custom_setattr(I, castcustom(self), key, value);
+                return true;
             }
-            return true;
     }
     return false;
-}
-
-PyLiteObject* pylt_obj_getitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key) {
-    switch (obj->ob_type) {
-        case PYLT_OBJ_TYPE_BYTES:
-            return castobj(pylt_obj_bytes_Egetitem(I, castbytes(obj), key));
-        case PYLT_OBJ_TYPE_STR:
-            return castobj(pylt_obj_str_Egetitem(I, caststr(obj), key));
-        case PYLT_OBJ_TYPE_LIST:
-            return pylt_obj_list_Egetitem(I, castlist(obj), key);
-        case PYLT_OBJ_TYPE_TUPLE:
-            return pylt_obj_tuple_Egetitem(I, casttuple(obj), key);
-        case PYLT_OBJ_TYPE_DICT:
-            return pylt_obj_dict_Egetitem(I, castdict(obj), key);
-        default:
-            if (pl_iscustom(obj)) {
-                PyLiteObject *method_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__getitem__), NULL);
-                if (method_func) {
-                    return pl_call_method(I, obj, method_func, 1, key);
-                } else { 
-                    if (castcustom(obj)->base_obj) {
-                        return pylt_obj_getitem(I, castcustom(obj)->base_obj, key);
-                    }
-                }
-            } 
-    }
-    return NULL;
-}
-
-pl_bool_t pylt_obj_setitem(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value) {
-    switch (self->ob_type) {
-        case PYLT_OBJ_TYPE_LIST:
-            return pylt_obj_list_Esetitem(I, castlist(self), key, value);
-        case PYLT_OBJ_TYPE_DICT:
-            pylt_obj_dict_setitem(I, castdict(self), key, value);
-            return true;
-    }
-    return false;
-}
-
-PyLiteObject* pylt_obj_Eslice(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t start, pl_int_t end, pl_int_t step) {
-    if (step == 0) {
-        pl_error(I, pl_static.str.ValueError, "slice step cannot be zero");
-        return NULL;
-    }
-
-    switch (obj->ob_type) {
-        case PYLT_OBJ_TYPE_LIST:
-            return castobj(pylt_obj_list_slice(I, castlist(obj), start, end, step));
-        case PYLT_OBJ_TYPE_TUPLE:
-            return castobj(pylt_obj_tuple_slice(I, casttuple(obj), start, end, step));
-    }
-
-    pl_error(I, pl_static.str.TypeError, "%r object has no attribute '__getitem__'", pl_type(I, obj)->name);
-    return NULL;
 }
 
 pl_bool_t pylt_obj_has(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *obj, pl_bool_t *is_valid) {
@@ -476,17 +402,6 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteInterpreter *I, PyLiteObject *obj) {
             return pylt_obj_str_new_from_format(I, pl_static.str.TMPL_CLASS_TO_STR, pylt_api_type_name(I, casttype(obj)->ob_reftype));
         default:
             // TODO: range/exception 也需要折腾
-            if (pl_iscustom(obj)) {
-                PyLiteObject *method_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__str__), NULL);
-                if (method_func) {
-                    PyLiteObject *ret = pl_call_method(I, obj, method_func, 0);
-                    if (!pylt_api_isinstance(I, ret, PYLT_OBJ_TYPE_STR)) {
-                        pl_error(I, pl_static.str.TypeError, "__str__ returned non - string(type %s)", pl_type(I, ret)->name);
-                        return NULL;
-                    }
-                    return caststr(ret);
-                }
-            }
             return pylt_obj_str_new_from_format(I, pl_static.str.TMPL_OBJECT_TO_STR, pylt_api_type_name(I, obj->ob_type), obj);
     }
     return NULL;
