@@ -23,6 +23,8 @@ pl_bool_t pylt_obj_Esetattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObje
 pl_int_t pylt_obj_Ecmp(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b);
 
 PyLiteObject* pylt_obj_Eslice(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t start, pl_int_t end, pl_int_t step);
+void pylt_obj_Eslice_set(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t start, pl_int_t end, pl_int_t step, PyLiteObject *val);
+
 
 PyLiteStrObject* pylt_obj_Eto_str(PyLiteInterpreter *I, PyLiteObject *obj);
 PyLiteStrObject* pylt_obj_Eto_repr(PyLiteInterpreter *I, PyLiteObject *obj);

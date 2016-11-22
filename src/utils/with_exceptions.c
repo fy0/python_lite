@@ -131,6 +131,7 @@ PyLiteObject* pylt_obj_Egetattr_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLi
         pl_error(I, pl_static.str.AttributeError, "type object %r has no attribute %r",
             pylt_api_type_name(I, obj->ob_type), key);
     }
+    return NULL;
 }
 
 PyLiteObject* pylt_obj_Egetattr(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type) {
@@ -189,6 +190,23 @@ PyLiteObject* pylt_obj_Eslice(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t 
     pl_error(I, pl_static.str.TypeError, "%r object has no attribute '__getitem__'", pl_type(I, obj)->name);
     return NULL;
 }
+
+void pylt_obj_Eslice_set(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t start, pl_int_t end, pl_int_t step, PyLiteObject *val) {
+    if (step == 0) {
+        pl_error(I, pl_static.str.ValueError, "slice step cannot be zero");
+        return;
+    }
+
+    switch (obj->ob_type) {
+        case PYLT_OBJ_TYPE_LIST:
+            pylt_obj_list_slice_set(I, castlist(obj), start, end, step, val);
+            return;
+    }
+
+    pl_error(I, pl_static.str.TypeError, "%r object does not support item assignment", pl_type(I, obj)->name);
+    return;
+}
+
 
 PyLiteStrObject* pylt_obj_Eto_str(PyLiteInterpreter *I, PyLiteObject *obj) {
     if (pl_iscustom(obj)) {

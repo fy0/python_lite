@@ -1,6 +1,7 @@
 ﻿
 #include "list.h"
 #include "string.h"
+#include "../extra/iter.h"
 
 // 将 index 转为标准形式并约束到可用范围
 #define index_fix(__index) \
@@ -13,6 +14,13 @@
     if (__index < 0) __index += self->ob_size; \
     if (__index < 0 || __index >= self->ob_size) return failret;
 
+
+void list_resize_maxsize_more_then(PyLiteInterpreter *I, PyLiteListObject *self, pl_int_t size) {
+    if (size > self->ob_maxsize) {
+        self->ob_val = pylt_realloc(I, self->ob_val, self->ob_maxsize * sizeof(PyLiteObject*), size * sizeof(PyLiteObject*));
+        self->ob_maxsize = size;
+    }
+}
 
 PyLiteListObject* pylt_obj_list_new(PyLiteInterpreter *I) {
     PyLiteListObject *obj = pylt_malloc(I, sizeof(PyLiteListObject));
@@ -174,6 +182,50 @@ PyLiteListObject* pylt_obj_list_slice(PyLiteInterpreter *I, PyLiteListObject *se
     }
     return lst;
 }
+
+pl_int_t pylt_obj_list_slice_set(PyLiteInterpreter *I, PyLiteListObject *self, pl_int_t start, pl_int_t end, pl_int_t step, PyLiteObject *val) {
+    index_fix(start);
+    index_fix(end);
+    if (step == 0) return -1;
+
+    PyLiteListObject *lst = NULL;
+    pl_int_t count = (pl_int_t)ceil(abs(end - start) / (float)abs(step));
+    pl_int_t val_count = pylt_obj_len(I, val);
+
+    if (val_count == -1) {
+        lst = pylt_obj_list_new(I);
+        PyLiteIterObject *iter = pylt_obj_iter_new(I, val);
+        for (PyLiteObject *obj = pylt_obj_iter_next(I, iter); obj; obj = pylt_obj_iter_next(I, iter)) {
+            pylt_obj_list_append(I, lst, obj);
+        }
+        val_count = lst->ob_size;
+    }
+
+    if (step != 1 && count != val_count) return -2;
+    if (!lst) {
+        lst = pylt_obj_list_new_with_size(I, val_count);
+        PyLiteIterObject *iter = pylt_obj_iter_new(I, val);
+        for (PyLiteObject *obj = pylt_obj_iter_next(I, iter); obj; obj = pylt_obj_iter_next(I, iter)) {
+            pylt_obj_list_append(I, lst, obj);
+        }
+    }
+
+    if (step == 1) {
+        if (count < val_count) {
+            list_resize_maxsize_more_then(I, self, self->ob_size - count + val_count);
+        }
+        memcpy(self->ob_val + start + val_count, self->ob_val + start + count, (self->ob_size - count) * sizeof(PyLiteObject*));
+        memcpy(self->ob_val + start, lst->ob_val, val_count * sizeof(PyLiteObject*));
+    } else {
+        pl_int_t cur_index = start;
+        for (pl_int_t i = 0; i < count; ++i) {
+            self->ob_val[cur_index] = lst->ob_val[i];
+            cur_index += step;
+        }
+    }
+    return 0;
+}
+
 
 pl_bool_t pylt_obj_list_has(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *obj) {
     return pylt_obj_list_index(I, self, obj) != -1;
