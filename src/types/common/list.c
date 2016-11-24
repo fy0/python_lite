@@ -211,11 +211,13 @@ pl_int_t pylt_obj_list_slice_set(PyLiteInterpreter *I, PyLiteListObject *self, p
     }
 
     if (step == 1) {
+        pl_int_t newsize = self->ob_size - count + val_count;
         if (count < val_count) {
-            list_resize_maxsize_more_then(I, self, self->ob_size - count + val_count);
+            list_resize_maxsize_more_then(I, self, newsize);
         }
         memcpy(self->ob_val + start + val_count, self->ob_val + start + count, (self->ob_size - count) * sizeof(PyLiteObject*));
         memcpy(self->ob_val + start, lst->ob_val, val_count * sizeof(PyLiteObject*));
+        self->ob_size = newsize;
     } else {
         pl_int_t cur_index = start;
         for (pl_int_t i = 0; i < count; ++i) {
@@ -223,6 +225,7 @@ pl_int_t pylt_obj_list_slice_set(PyLiteInterpreter *I, PyLiteListObject *self, p
             cur_index += step;
         }
     }
+    pylt_obj_list_free(I, lst);
     return 0;
 }
 

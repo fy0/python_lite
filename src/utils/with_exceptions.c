@@ -131,7 +131,7 @@ PyLiteObject* pylt_obj_Egetattr_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLi
         pl_error(I, pl_static.str.AttributeError, "type object %r has no attribute %r",
             pylt_api_type_name(I, obj->ob_type), key);
     }
-    return NULL;
+    return ret;
 }
 
 PyLiteObject* pylt_obj_Egetattr(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type) {
@@ -198,9 +198,12 @@ void pylt_obj_Eslice_set(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t start
     }
 
     switch (obj->ob_type) {
-        case PYLT_OBJ_TYPE_LIST:
-            pylt_obj_list_slice_set(I, castlist(obj), start, end, step, val);
+        case PYLT_OBJ_TYPE_LIST: {
+            pl_int_t ret = pylt_obj_list_slice_set(I, castlist(obj), start, end, step, val);
+            // TODO
+            if (ret == -2) pl_error(I, pl_static.str.ValueError, "attempt to assign sequence of size X to extended slice of size Y");
             return;
+        }
     }
 
     pl_error(I, pl_static.str.TypeError, "%r object does not support item assignment", pl_type(I, obj)->name);
