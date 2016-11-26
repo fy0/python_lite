@@ -3,7 +3,7 @@
 #include "number.h"
 #include "bytes.h"
 #include "string.h"
-#include "../../lib/fpconv/fpconv.h"
+#include "../../deps/fpconv/fpconv.h"
 
 pl_int_t pylt_obj_int_cmp(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {

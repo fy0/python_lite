@@ -3,7 +3,7 @@
 #define PYLITE_PARSER_H
 
 #include "lexer.h"
-#include "lib/kvec.h"
+#include "deps/kvec.h"
 #include "types/all.h"
 
 typedef struct ParserInfo {

@@ -5,7 +5,7 @@
 #include "../io.h"
 #include "../misc.h"
 #include "../config.h"
-#include "../lib/khash_obj.h"
+#include "../deps/khash_obj.h"
 
 // Immutable object
 

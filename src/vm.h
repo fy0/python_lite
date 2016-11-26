@@ -3,7 +3,7 @@
 #define PYLITE_VM_H
 
 #include "config.h"
-#include "lib/kvec.h"
+#include "deps/kvec.h"
 #include "types/all.h"
 #include "api.h"
 

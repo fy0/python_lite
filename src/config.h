@@ -2,8 +2,8 @@
 #ifndef PYLITE_CONFIG_H
 #define PYLITE_CONFIG_H
 
-#include "lib/platform.h"
-#include "lib/utf8_lite.h"
+#include "deps/platform.h"
+#include "deps/utf8_lite.h"
 
 #include <stdio.h>
 #include <stdlib.h>

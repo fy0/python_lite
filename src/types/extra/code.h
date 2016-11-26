@@ -4,7 +4,7 @@
 
 #include "../object.h"
 #include "../common/list.h"
-#include "../../lib/kvec.h"
+#include "../../deps/kvec.h"
 
 typedef struct PyLiteInstruction {
     uint8_t code;

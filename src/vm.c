@@ -4,7 +4,7 @@
 #include "intp.h"
 #include "debug.h"
 #include "bind.h"
-#include "lib/kvec.h"
+#include "deps/kvec.h"
 #include "types/all.h"
 #include "mods/builtin.h"
 #include "pybind/typebind.h"

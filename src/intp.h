@@ -6,7 +6,7 @@
 #include "parser.h"
 #include "vm.h"
 #include "gc.h"
-#include "lib/kvec.h"
+#include "deps/kvec.h"
 #include "types/common/set.h"
 #include "types/common/type.h"
 

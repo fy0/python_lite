@@ -13,7 +13,7 @@ A simple, lightweight implementation of python3-like language.
 
 * simple import
 
-* slice grammar
+* ~~slice grammar~~
 
 * simple shell
 
