@@ -43,15 +43,15 @@ extern "C" {
 
 typedef struct linenoiseCompletions {
   size_t len;
-  char **cvec;
+  wchar_t **cvec;
 } linenoiseCompletions;
 
-typedef void(linenoiseCompletionCallback)(const char *, linenoiseCompletions *);
+typedef void(linenoiseCompletionCallback)(const wchar_t *, linenoiseCompletions *);
 void linenoiseSetCompletionCallback(linenoiseCompletionCallback *);
-void linenoiseAddCompletion(linenoiseCompletions *, const char *);
+void linenoiseAddCompletion(linenoiseCompletions *, const wchar_t *);
 
-char *linenoise(const char *prompt);
-int linenoiseHistoryAdd(const char *line);
+wchar_t *linenoise(const wchar_t *prompt);
+int linenoiseHistoryAdd(const wchar_t *line);
 int linenoiseHistorySetMaxLen(int len);
 int linenoiseHistorySave(const char *filename);
 int linenoiseHistoryLoad(const char *filename);

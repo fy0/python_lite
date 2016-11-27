@@ -2,6 +2,8 @@
 #ifndef WIN32_INTEROP_FDAPI_FIX_M_H
 #define WIN32_INTEROP_FDAPI_FIX_M_H
 
+#include "../../utf8_lite.h"
+
 int mycrt_read(int fd, void *buffer, unsigned int count);
 int mycrt_write(int fd, void *buffer, unsigned int count);
 int mycrt_isatty(int fd);
@@ -48,6 +50,8 @@ int mycrt_isatty(int fd);
 #define snprintf    _snprintf
 #define strcasecmp  _stricmp
 #define strtoll     _strtoi64
+
+#define snwprintf   _snwprintf
 
 #ifdef _WIN64
 #define strtol      _strtoi64

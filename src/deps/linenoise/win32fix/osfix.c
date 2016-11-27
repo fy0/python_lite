@@ -1,8 +1,11 @@
 
+#ifdef _WIN32
+
 #include <io.h>
 #include <Windows.h>
 #include "osfix.h"
 #include "Win32_ANSI.h"
+
 
 int mycrt_read(int fd, void *buffer, unsigned int count) {
     return _read(fd, buffer, count);
@@ -37,3 +40,5 @@ int mycrt_write(int fd, void *buffer, unsigned int count) {
 int mycrt_isatty(int fd) {
     return _isatty(fd);
 }
+
+#endif

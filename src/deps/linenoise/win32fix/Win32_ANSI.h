@@ -24,6 +24,7 @@
 #ifndef WIN32_INTEROPA_ANSI_H
 #define WIN32_INTEROPA_ANSI_H
 
+#ifdef _WIN32
 #include <Windows.h>
 
 #ifdef __cplusplus
@@ -31,13 +32,15 @@ extern "C" {
 #endif
 
     BOOL ParseAndPrintANSIString(HANDLE hDev, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten);
-    void ANSI_printf(char *format, ...);
+    void ANSI_wprintf(char *format, ...);
 
     // include this file after stdio.h in order to redirect printf to the one that supports ANSI escape sequences
-#define printf ANSI_printf
+//#define printf ANSI_printf
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif // _WIN32
+
+#endif // WIN32_INTEROPA_ANSI_H

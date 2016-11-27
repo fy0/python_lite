@@ -21,6 +21,9 @@
 */
 
 /* Derived from ANSI.c by Jason Hood, from his ansicon project (https://github.com/adoxa/ansicon), with modifications. */
+/* Added utf-8 support by fy*/
+
+#ifdef _WIN32
 
 #include <windows.h>
 #include <stdio.h>
@@ -640,6 +643,36 @@ void InterpretEscSeq(void) {
     }
 }
 
+
+#define MAXUNICODE    0x10FFFF 
+/*
+** Decode one UTF-8 sequence, returning NULL if byte sequence is invalid.
+*/
+static const char *utf8_decode(const char *o, int *val) {
+    static const unsigned int limits[] = { 0xFF, 0x7F, 0x7FF, 0xFFFF };
+    const unsigned char *s = (const unsigned char *)o;
+    unsigned int c = s[0];
+    unsigned int res = 0;  /* final result */
+    if (c < 0x80)  /* ascii? */
+        res = c;
+    else {
+        int count = 0;  /* to count number of continuation bytes */
+        while (c & 0x40) {  /* still have continuation bytes? */
+            int cc = s[++count];  /* read next byte */
+            if ((cc & 0xC0) != 0x80)  /* not a continuation byte? */
+                return NULL;  /* invalid byte sequence */
+            res = (res << 6) | (cc & 0x3F);  /* add lower 6 bits from cont. byte */
+            c <<= 1;  /* to test next bit */
+        }
+        res |= ((c & 0x7F) << (count * 5));  /* add first byte */
+        if (count > 3 || res > MAXUNICODE || res <= limits[count])
+            return NULL;  /* invalid byte sequence */
+        s += count;  /* skip continuation bytes read */
+    }
+    if (val) *val = res;
+    return (const char *)s + 1;  /* +1 to include first byte */
+}
+
 //-----------------------------------------------------------------------------
 //   ParseAndPrintANSIString(hDev, lpBuffer, nNumberOfBytesToWrite)
 // Parses the string lpBuffer, interprets the escapes sequences and prints the
@@ -648,9 +681,10 @@ void InterpretEscSeq(void) {
 // If the number of arguments es_argc > MAX_ARG, only the MAX_ARG-1 firsts and
 // the last arguments are processed (no es_argv[] overflow).
 //-----------------------------------------------------------------------------
-BOOL ParseAndPrintANSIString(HANDLE hDev, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten) {
+BOOL ParseAndPrintANSIString(HANDLE hDev, wchar_t *lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten) {
     DWORD   i;
-    LPCSTR s;
+    wchar_t* s;
+    int fixed_width = 0;
 
     if (hDev != hConOut)	// reinit if device has changed
     {
@@ -658,12 +692,15 @@ BOOL ParseAndPrintANSIString(HANDLE hDev, LPCVOID lpBuffer, DWORD nNumberOfBytes
         state = 1;
         shifted = FALSE;
     }
-    for (i = nNumberOfBytesToWrite, s = (LPCSTR)lpBuffer; i > 0; i--, s++) {
+    for (i = nNumberOfBytesToWrite, s = (wchar_t*)lpBuffer; i > 0; i--, s++) {
         if (state == 1) {
             if (*s == ESC) state = 2;
             else if (*s == SO) shifted = TRUE;
             else if (*s == SI) shifted = FALSE;
-            else PushBuffer(*s);
+            else {
+                if (*s > 0xff) fixed_width++;
+                PushBuffer(*s);
+            }
         } else if (state == 2) {
             if (*s == ESC);	// \e\e...\e == \e
             else if ((*s == '[') || (*s == ']')) {
@@ -704,6 +741,12 @@ BOOL ParseAndPrintANSIString(HANDLE hDev, LPCVOID lpBuffer, DWORD nNumberOfBytes
             } else {
                 es_argc++;
                 suffix = *s;
+                if (suffix == 'C') {
+                    if (es_argv[0]) {
+                        // 汉字在控制台占宽度2
+                        es_argv[0] += fixed_width;
+                    }
+                }
                 InterpretEscSeq();
                 state = 1;
             }
@@ -722,6 +765,7 @@ BOOL ParseAndPrintANSIString(HANDLE hDev, LPCVOID lpBuffer, DWORD nNumberOfBytes
             // Ignore it (ESC ) 0 is implicit; nothing else is supported).
             state = 1;
         }
+        FlushBuffer();
     }
     FlushBuffer();
     if (lpNumberOfBytesWritten != NULL)
@@ -746,4 +790,4 @@ void ANSI_printf(char *format, ...) {
     }
 }
 
-
+#endif // _WIN32

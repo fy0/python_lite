@@ -138,7 +138,7 @@ bool ucs4str_to_ucs2(uint32_t *ucs4str, int ucs4str_len, uint16_t *buf, bool ign
     return true;
 }
 
-bool ucs2str_to_ucs4(uint32_t *ucs2str, int ucs2str_len, uint16_t *buf) {
+bool ucs2str_to_ucs4(uint16_t *ucs2str, int ucs2str_len, uint32_t *buf) {
     for (int i = 0; i < ucs2str_len; ++i) {
         ucs2_to_ucs4(ucs2str[i], buf + i);
     }
