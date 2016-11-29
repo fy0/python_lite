@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
     BOOL ParseAndPrintANSIString(HANDLE hDev, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten);
-    void ANSI_wprintf(char *format, ...);
+    //void ANSI_wprintf(char *format, ...);
 
     // include this file after stdio.h in order to redirect printf to the one that supports ANSI escape sequences
 //#define printf ANSI_printf

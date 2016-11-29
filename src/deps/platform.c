@@ -7,9 +7,7 @@
 
 
 void platform_init() {
-#ifdef PLATFORM_WINDOWS
     setlocale(LC_CTYPE, "");
-#endif
 }
 
 #ifdef PLATFORM_WINDOWS

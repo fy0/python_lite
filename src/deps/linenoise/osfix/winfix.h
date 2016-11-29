@@ -13,6 +13,9 @@ int mycrt_isatty(int fd);
 #define write(fd,buffer,count)      mycrt_write(fd,buffer,count)
 #define isatty(fd)                  mycrt_isatty(fd)
 
+int mk_wcswidth(const wchar_t *pwcs, size_t n);
+#define wcswidth(pwcs, n)           mk_wcswidth(pwcs, n)
+
 #endif
 
 /*
@@ -51,7 +54,7 @@ int mycrt_isatty(int fd);
 #define strcasecmp  _stricmp
 #define strtoll     _strtoi64
 
-#define snwprintf   _snwprintf
+#define swprintf    _snwprintf
 
 #ifdef _WIN64
 #define strtol      _strtoi64

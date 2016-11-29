@@ -684,7 +684,6 @@ static const char *utf8_decode(const char *o, int *val) {
 BOOL ParseAndPrintANSIString(HANDLE hDev, wchar_t *lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten) {
     DWORD   i;
     wchar_t* s;
-    int fixed_width = 0;
 
     if (hDev != hConOut)	// reinit if device has changed
     {
@@ -698,7 +697,6 @@ BOOL ParseAndPrintANSIString(HANDLE hDev, wchar_t *lpBuffer, DWORD nNumberOfByte
             else if (*s == SO) shifted = TRUE;
             else if (*s == SI) shifted = FALSE;
             else {
-                if (*s > 0xff) fixed_width++;
                 PushBuffer(*s);
             }
         } else if (state == 2) {
@@ -741,12 +739,6 @@ BOOL ParseAndPrintANSIString(HANDLE hDev, wchar_t *lpBuffer, DWORD nNumberOfByte
             } else {
                 es_argc++;
                 suffix = *s;
-                if (suffix == 'C') {
-                    if (es_argv[0]) {
-                        // 汉字在控制台占宽度2
-                        es_argv[0] += fixed_width;
-                    }
-                }
                 InterpretEscSeq();
                 state = 1;
             }
@@ -773,6 +765,7 @@ BOOL ParseAndPrintANSIString(HANDLE hDev, wchar_t *lpBuffer, DWORD nNumberOfByte
     return (i == 0);
 }
 
+/*
 void ANSI_printf(char *format, ...) {
     va_list args;
     int retVal;
@@ -789,5 +782,5 @@ void ANSI_printf(char *format, ...) {
         ParseAndPrintANSIString(GetStdHandle(STD_OUTPUT_HANDLE), buffer, (DWORD)strlen(buffer), &bytesWritten);
     }
 }
-
+*/
 #endif // _WIN32

@@ -103,15 +103,20 @@
  *
  */
 
+#include <wchar.h>
+#include <stdint.h>
+
 #ifdef _WIN32
 #pragma warning (disable: 4996)
-#include "./win32fix/osfix.h"
+#include "./osfix/winfix.h"
 #define REDIS_NOTUSED(V) ((void) V)
 //#include "./Win32_Interop/win32_ANSI.h"
 #else
 #include <termios.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <strings.h>
+#include "./osfix/linuxfix.h"
 #define WIN_PORT_FIX 
 #endif
 #include <stdlib.h>
@@ -123,8 +128,6 @@
 #include <sys/types.h>
 #include "linenoise.h"
 
-#include "../platform.h"
-#define printf printf_u8
 
 #define LINENOISE_DEFAULT_HISTORY_MAX_LEN 100
 #define LINENOISE_MAX_LINE 4096
@@ -157,6 +160,8 @@ struct linenoiseState {
     size_t cols;        /* Number of columns in terminal. */
     size_t maxrows;     /* Maximum num of rows used so far (multiline mode) */
     int history_index;  /* The history index we are currently editing. */
+
+    size_t pwidth;
 };
 
 enum KEY_ACTION{
@@ -304,7 +309,7 @@ int read_one(int ifd, uint32_t *c) {
 #ifdef _WIN32
     nread = win32read(c);
 #else
-    nread = read(l.ifd, &c, 1);
+    nread = read(ifd, c, 1);
 #endif
     return nread;
 }
@@ -432,12 +437,12 @@ static void disableRawMode(int fd) {
  * and return it. On error -1 is returned, on success the position of the
  * cursor. */
 static int getCursorPosition(int ifd, int ofd) {
-    char buf[32];
+    wchar_t buf[32];
     int cols, rows;
     unsigned int i = 0;
 
     /* Report cursor location */
-    if (write(ofd, "\x1b[6n", 4) != 4) return -1;
+    if (write(ofd, L"\x1b[6n", 4) != 4) return -1;
 
     /* Read the response: ESC [ rows ; cols R */
     while (i < sizeof(buf)-1) {
@@ -449,7 +454,7 @@ static int getCursorPosition(int ifd, int ofd) {
 
     /* Parse it. */
     if (buf[0] != ESC || buf[1] != '[') return -1;
-    if (sscanf(buf+2,"%d;%d",&rows,&cols) != 2) return -1;
+    if (wscanf(buf + 2, L"%d;%d", &rows, &cols) != 2) return -1;
     return cols;
 }
 
@@ -473,14 +478,14 @@ static int getColumns(int ifd, int ofd) {
         if (start == -1) goto failed;
 
         /* Go to right margin and get position. */
-        if (write(ofd,"\x1b[999C",6) != 6) goto failed;
+        if (write(ofd,L"\x1b[999C",6) != 6) goto failed;
         cols = getCursorPosition(ifd,ofd);
         if (cols == -1) goto failed;
 
         /* Restore position. */
         if (cols > start) {
-            char seq[32];
-            snwprintf(seq,32,"\x1b[%dD",cols-start);
+            wchar_t seq[32];
+            swprintf(seq,32,L"\x1b[%dD",cols-start);
             if (write(ofd,seq,wcslen(seq)) == -1) {
                 /* Can't recover... */
             }
@@ -572,7 +577,7 @@ static int completeLine(struct linenoiseState *ls) {
                 default:
                     /* Update buffer and return */
                     if (i < lc.len) {
-                        nwritten = snwprintf(ls->buf,ls->buflen,L"%s",lc.cvec[i]);
+                        nwritten = swprintf(ls->buf,ls->buflen,L"%s",lc.cvec[i]);
                         ls->len = ls->pos = nwritten;
                     }
                     stop = 1;
@@ -645,34 +650,37 @@ static void abFree(struct abuf *ab) {
  * cursor position, and number of columns of the terminal. */
 static void refreshSingleLine(struct linenoiseState *l) {
     wchar_t seq[64];
-    size_t plen = wcslen(l->prompt);
+    //size_t plen = wcslen(l->prompt);
+    size_t pwidth = wcswidth(l->prompt, wcslen(l->prompt));
     int fd = l->ofd;
     wchar_t *buf = l->buf;
     size_t len = l->len;
-    size_t pos = l->pos;
+    //size_t pos = l->pos;
+    size_t pos = wcswidth(l->buf, l->pos);
     struct abuf ab;
 
-    while((plen+pos) >= l->cols) {
+    while ((pwidth + pos) >= l->cols) {
         buf++;
         len--;
         pos--;
     }
-    while (plen+len > l->cols) {
+    while (pwidth + len > l->cols) {
         len--;
     }
 
     abInit(&ab);
     /* Cursor to left edge */
-    snwprintf(seq,64,L"\r");
+    swprintf(seq,64,L"\r");
     abAppend(&ab,seq,(int)wcslen(seq));
     /* Write the prompt and the current buffer content */
     abAppend(&ab,l->prompt,(int)wcslen(l->prompt));
     abAppend(&ab,buf,(int)len);
     /* Erase to right */
-    snwprintf(seq,64,L"\x1b[0K");
+    swprintf(seq,64,L"\x1b[0K");
     abAppend(&ab,seq,(int)wcslen(seq));
     /* Move cursor to original position. */
-    snwprintf(seq,64,L"\r\x1b[%dC", (int)(pos+plen));
+
+    swprintf(seq, 64, L"\r\x1b[%dC", (int)(pos + pwidth));
     abAppend(&ab,seq,(int)wcslen(seq));
     if (write(fd,ab.b,ab.len) == -1) {} /* Can't recover from write error. */
     abFree(&ab);
@@ -684,9 +692,10 @@ static void refreshSingleLine(struct linenoiseState *l) {
  * cursor position, and number of columns of the terminal. */
 static void refreshMultiLine(struct linenoiseState *l) {
     wchar_t seq[64];
-    int plen = (int)wcslen(l->prompt);
-    int rows = (int)((plen+l->len+l->cols-1)/l->cols); /* rows used by current buf. */
-    int rpos = (int)((plen+l->oldpos+l->cols)/l->cols); /* cursor relative row. */
+    //int plen = (int)wcslen(l->prompt);
+    int pwidth = (int)wcswidth(l->prompt, wcslen(l->prompt));
+    int rows = (int)((pwidth + l->len + l->cols - 1) / l->cols); /* rows used by current buf. */
+    int rpos = (int)((pwidth + l->oldpos + l->cols) / l->cols); /* cursor relative row. */
     int rpos2; /* rpos after refresh. */
     int col; /* colum position, zero-based. */
     int old_rows = (int)l->maxrows;
@@ -701,20 +710,20 @@ static void refreshMultiLine(struct linenoiseState *l) {
     abInit(&ab);
     if (old_rows-rpos > 0) {
         lndebug("go down %d", old_rows-rpos);
-        snwprintf(seq,64,L"\x1b[%dB", old_rows-rpos);
+        swprintf(seq,64,L"\x1b[%dB", old_rows-rpos);
         abAppend(&ab,seq,(int)wcslen(seq));
     }
 
     /* Now for every row clear it, go up. */
     for (j = 0; j < old_rows-1; j++) {
         lndebug("clear+up");
-        snwprintf(seq,64,L"\r\x1b[0K\x1b[1A");
+        swprintf(seq,64,L"\r\x1b[0K\x1b[1A");
         abAppend(&ab,seq,(int)wcslen(seq));
     }
 
     /* Clean the top line. */
     lndebug("clear");
-    snwprintf(seq,64,L"\r\x1b[0K");
+    swprintf(seq,64,L"\r\x1b[0K");
     abAppend(&ab,seq,(int)wcslen(seq));
 
     /* Write the prompt and the current buffer content */
@@ -725,34 +734,34 @@ static void refreshMultiLine(struct linenoiseState *l) {
      * emit a newline and move the prompt to the first column. */
     if (l->pos &&
         l->pos == l->len &&
-        (l->pos+plen) % l->cols == 0)
+        (l->pos+pwidth) % l->cols == 0)
     {
         lndebug("<newline>");
         abAppend(&ab,L"\n",1);
-        snwprintf(seq,64,L"\r");
+        swprintf(seq,64,L"\r");
         abAppend(&ab,seq,(int)wcslen(seq));
         rows++;
         if (rows > (int)l->maxrows) l->maxrows = rows;
     }
 
     /* Move cursor to right position. */
-    rpos2 = (int)((plen+l->pos+l->cols)/l->cols); /* current cursor relative row. */
+    rpos2 = (int)((pwidth+l->pos+l->cols)/l->cols); /* current cursor relative row. */
     lndebug("rpos2 %d", rpos2);
 
     /* Go up till we reach the expected positon. */
     if (rows-rpos2 > 0) {
         lndebug("go-up %d", rows-rpos2);
-        snwprintf(seq,64,L"\x1b[%dA", rows-rpos2);
+        swprintf(seq,64,L"\x1b[%dA", rows-rpos2);
         abAppend(&ab,seq,(int)wcslen(seq));
     }
 
     /* Set column. */
-    col = (plen+(int)l->pos) % (int)l->cols;
+    col = (pwidth+(int)l->pos) % (int)l->cols;
     lndebug("set col %d", 1+col);
     if (col)
-        snwprintf(seq,64,L"\r\x1b[%dC", col);
+        swprintf(seq,64,L"\r\x1b[%dC", col);
     else
-        snwprintf(seq,64,L"\r");
+        swprintf(seq,64,L"\r");
     abAppend(&ab,seq,(int)wcslen(seq));
 
     lndebug("\n");
@@ -789,7 +798,7 @@ int linenoiseEditInsert(struct linenoiseState *l, wchar_t c) {
                 refreshLine(l);
             }
         } else {
-            memmove(l->buf+l->pos+1,l->buf+l->pos,l->len-l->pos);
+            memmove(l->buf+l->pos+1,l->buf+l->pos,(l->len-l->pos)*sizeof(wchar_t));
             l->buf[l->pos] = c;
             l->len++;
             l->pos++;
@@ -862,7 +871,7 @@ void linenoiseEditHistoryNext(struct linenoiseState *l, int dir) {
  * position. Basically this is what happens with the "Delete" keyboard key. */
 void linenoiseEditDelete(struct linenoiseState *l) {
     if (l->len > 0 && l->pos < l->len) {
-        memmove(l->buf+l->pos,l->buf+l->pos+1,l->len-l->pos-1);
+        memmove(l->buf+l->pos,l->buf+l->pos+1,(l->len-l->pos-1)*sizeof(wchar_t));
         l->len--;
         l->buf[l->len] = '\0';
         refreshLine(l);
@@ -872,7 +881,7 @@ void linenoiseEditDelete(struct linenoiseState *l) {
 /* Backspace implementation. */
 void linenoiseEditBackspace(struct linenoiseState *l) {
     if (l->pos > 0 && l->len > 0) {
-        memmove(l->buf+l->pos-1,l->buf+l->pos,l->len-l->pos);
+        memmove(l->buf+l->pos-1,l->buf+l->pos,(l->len-l->pos)*sizeof(wchar_t));
         l->pos--;
         l->len--;
         l->buf[l->len] = '\0';
@@ -891,7 +900,7 @@ void linenoiseEditDeletePrevWord(struct linenoiseState *l) {
     while (l->pos > 0 && l->buf[l->pos-1] != ' ')
         l->pos--;
     diff = old_pos - l->pos;
-    memmove(l->buf+l->pos,l->buf+old_pos,l->len-old_pos+1);
+    memmove(l->buf+l->pos,l->buf+old_pos,(l->len-old_pos+1)*sizeof(wchar_t));
     l->len -= diff;
     refreshLine(l);
 }
@@ -934,7 +943,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, wchar_t *buf, size_t bufle
     while(1) {
         uint32_t c;
         int nread;
-        char seq[3];
+        wchar_t seq[3];
 
         nread = read_one(l.ifd, &c);
         if (nread <= 0) return (int)l.len;
@@ -1130,7 +1139,7 @@ static int linenoiseRaw(wchar_t *buf, size_t buflen, const wchar_t *prompt) {
         if (enableRawMode(STDIN_FILENO) == -1) return -1;
         count = linenoiseEdit(STDIN_FILENO, STDOUT_FILENO, buf, buflen, prompt);
         disableRawMode(STDIN_FILENO);
-        printf("\n");
+        wprintf(L"\n\r");
     }
     return count;
 }
@@ -1147,7 +1156,7 @@ wchar_t *linenoise(const wchar_t *prompt) {
     if (isUnsupportedTerm()) {
         size_t len;
 
-        printf("%s",prompt);
+        wprintf(L"%ls",prompt);
         fflush(stdout);
         if (fgetws(buf,LINENOISE_MAX_LINE,stdin) == NULL) return NULL;
         len = wcslen(buf);

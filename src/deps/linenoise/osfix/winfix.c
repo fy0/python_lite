@@ -3,9 +3,8 @@
 
 #include <io.h>
 #include <Windows.h>
-#include "osfix.h"
+#include "winfix.h"
 #include "Win32_ANSI.h"
-
 
 int mycrt_read(int fd, void *buffer, unsigned int count) {
     return _read(fd, buffer, count);
