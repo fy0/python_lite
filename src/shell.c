@@ -15,22 +15,12 @@
 
 #include "deps/linenoise/linenoise.h"
 
-void completion(const wchar_t *buf, linenoiseCompletions *lc) {
-    if (buf[0] == L'h') {
-        linenoiseAddCompletion(lc, L"hello");
-        linenoiseAddCompletion(lc, L"hello there");
-        linenoiseAddCompletion(lc, L"测试3");
-    }
-}
-
 int main(int argc, char* argv[]) {
     platform_init();
 
     int size;
     char *buf = read_file("test.py", &size);
     if (!buf) return 0;
-
-    platform_init();
 
     PyLiteInterpreter *I = pylt_intp_new();
 

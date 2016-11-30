@@ -205,6 +205,8 @@ PyLiteObject* parse_get_consttype(ParserState *ps) {
     }
 }
 
+// 为什么我当初没有把 tuple 也放进来？忘记了。
+// 好像是因为 ( 可能是 tuple 也可能是语句的缘故吧
 int parse_mutabletype(ParserState *ps, int *ptimes) {
     Token *tk = &(ps->ls->token);
     int tmp = 0;
@@ -302,73 +304,11 @@ bool parse_basetype(ParserState *ps) {
     }
 }
 
-/*
-T ->    ( EXPR ) |
-        not EXPR |
-        BASETYPE |
-        EXPR[x]  |
-        IDENT
-*/
-bool parse_try_t(ParserState *ps) {
-    int num, num2, tk_val;
+// attr / item / slice / func call
+bool parse_try_suffix(ParserState *ps) {
     Token *tk = &(ps->ls->token);
-    PyLiteObject *obj;
-    PyLiteInstruction ins;
+    pl_bool_t accepted = false;
     pl_bool_t old_disable_expr_tuple_parse;
-
-    switch (tk->val) {
-        case TK_NAME:
-            obj = tk->obj;
-            next(ps);
-            write_ins(ps, lval_check_valid(ps) ? BC_LOAD_VAL_ : BC_LOAD_VAL, 0, store_const(ps, obj));
-            break;
-        case '(':
-            next(ps);
-            parse_expr(ps);
-            // try tuple
-            if (tk->val == ',') {
-                next(ps);
-                num = 1;
-                while (true) {
-                    if (!parse_try_expr(ps)) break;
-                    num++;
-                    if (tk->val != ',') break;
-                    next(ps);
-                }
-                write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TUPLE, num);
-            }
-            ACCEPT(ps, ')');
-            break;
-        case '+': case '-':
-            tk_val = tk->val;
-            next(ps);
-            parse_expr10(ps);
-            write_ins(ps, BC_OPERATOR, 0, tk_val == '+' ? OP_POS : OP_NEG);
-            lval_check_judge(ps, false);
-            break;
-        case '~':
-            next(ps);
-            parse_expr10(ps);
-            write_ins(ps, BC_OPERATOR, 0, OP_BITNOT);
-            lval_check_judge(ps, false);
-            break;
-        case TK_KW_NOT:
-            next(ps);
-            parse_expr10(ps);
-            parse_expr9(ps);
-            parse_expr8(ps);
-            parse_expr7(ps);
-            parse_expr6(ps);
-            parse_expr5(ps);
-            parse_expr4(ps);
-            parse_expr3(ps);
-            write_ins(ps, BC_OPERATOR, 0, OP_NOT);
-            lval_check_judge(ps, false);
-            break;
-        default:
-            if (!parse_basetype(ps))
-                return false;
-    }
 
     while (true) {
         switch (tk->val) {
@@ -377,6 +317,7 @@ bool parse_try_t(ParserState *ps) {
                 next(ps);
                 if (tk->val == TK_NAME) {
                     write_ins(ps, lval_check_judge(ps, true) ? BC_GET_ATTR_ : BC_GET_ATTR, 0, store_const(ps, tk->obj));
+                    accepted = true;
                 }
                 ACCEPT(ps, TK_NAME);
                 break;
@@ -448,18 +389,20 @@ bool parse_try_t(ParserState *ps) {
 
                 slice_parse_final:
                     write_ins(ps, lval_check_judge(ps, true) ? BC_GET_SLICE_ : BC_GET_SLICE, 0, 0);
+                    accepted = true;
                     break;
                 }
 
                 // getitem/setitem
                 ACCEPT(ps, ']');
                 write_ins(ps, lval_check_judge(ps, true) ? BC_GET_ITEM_ : BC_GET_ITEM, 0, 0);
+                accepted = true;
                 break;
-            case '(':
+            case '(': {
                 // is func call ?
                 next(ps);
-                num = num2 = 0;
-                ins = kv_top(ps->info->code->opcodes);
+                int num = 0, num2 = 0;
+                PyLiteInstruction ins = kv_top(ps->info->code->opcodes);
 
                 // method trigger
                 if (ins.code == BC_GET_ATTR || ins.code == BC_GET_ATTR_) {
@@ -507,12 +450,81 @@ bool parse_try_t(ParserState *ps) {
                 ACCEPT(ps, ')');
                 ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
                 break;
+            }
             default:
-                goto _tail;
+                return accepted;
         }
     }
+    return accepted;
+}
 
-_tail:
+/*
+T ->    ( EXPR ) |
+        not EXPR |
+        BASETYPE |
+        EXPR[x]  |
+        IDENT
+*/
+bool parse_try_t(ParserState *ps) {
+    int num, tk_val;
+    Token *tk = &(ps->ls->token);
+    PyLiteObject *obj;
+
+    switch (tk->val) {
+        case TK_NAME:
+            obj = tk->obj;
+            next(ps);
+            write_ins(ps, lval_check_valid(ps) ? BC_LOAD_VAL_ : BC_LOAD_VAL, 0, store_const(ps, obj));
+            break;
+        case '(':
+            next(ps);
+            parse_expr(ps);
+            // try tuple
+            if (tk->val == ',') {
+                next(ps);
+                num = 1;
+                while (true) {
+                    if (!parse_try_expr(ps)) break;
+                    num++;
+                    if (tk->val != ',') break;
+                    next(ps);
+                }
+                write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TUPLE, num);
+            }
+            ACCEPT(ps, ')');
+            break;
+        case '+': case '-':
+            tk_val = tk->val;
+            next(ps);
+            parse_expr10(ps);
+            write_ins(ps, BC_OPERATOR, 0, tk_val == '+' ? OP_POS : OP_NEG);
+            lval_check_judge(ps, false);
+            break;
+        case '~':
+            next(ps);
+            parse_expr10(ps);
+            write_ins(ps, BC_OPERATOR, 0, OP_BITNOT);
+            lval_check_judge(ps, false);
+            break;
+        case TK_KW_NOT:
+            next(ps);
+            parse_expr10(ps);
+            parse_expr9(ps);
+            parse_expr8(ps);
+            parse_expr7(ps);
+            parse_expr6(ps);
+            parse_expr5(ps);
+            parse_expr4(ps);
+            parse_expr3(ps);
+            write_ins(ps, BC_OPERATOR, 0, OP_NOT);
+            lval_check_judge(ps, false);
+            break;
+        default:
+            if (!parse_basetype(ps))
+                return false;
+    }
+
+    parse_try_suffix(ps);
     return true;
 }
 
@@ -1085,6 +1097,73 @@ void parse_value_assign(ParserState *ps) {
 }
 
 
+void parse_del(ParserState *ps) {
+    Token *tk = &(ps->ls->token);
+    PyLiteObject *obj;
+    int num, state = 0;
+    next(ps);
+
+    switch (tk->val) {
+        case TK_NAME:
+            obj = tk->obj;
+            next(ps);
+            write_ins(ps, lval_check_valid(ps) ? BC_LOAD_VAL_ : BC_LOAD_VAL, 0, store_const(ps, obj));
+            state = 1; // LOAD VAL
+            break;
+        case '(':
+            next(ps);
+            parse_expr(ps);
+            // try tuple
+            if (tk->val == ',') {
+                next(ps);
+                num = 1;
+                while (true) {
+                    if (!parse_try_expr(ps)) break;
+                    num++;
+                    if (tk->val != ',') break;
+                    next(ps);
+                }
+                write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TUPLE, num);
+                state = 2; // container
+            }
+            ACCEPT(ps, ')');
+            break;
+        default: {
+            int ret, times;
+            ret = parse_mutabletype(ps, &times);
+            if (ret) {
+                // NEW_OBJ TYPE SIZE
+                write_ins(ps, BC_NEW_OBJ, ret, times);
+                state = 2; // container
+            }
+        }
+    }
+    if (state == 0) {
+        error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+    }
+
+    parse_try_suffix(ps);
+
+    PyLiteInstruction ins = kv_top(ps->info->code->opcodes);
+    switch (ins.code) {
+        case BC_LOAD_VAL:
+        case BC_LOAD_VAL_:
+            break;
+        case BC_GET_ATTR:
+        case BC_GET_ATTR_:
+            break;
+        case BC_GET_ITEM:
+        case BC_GET_ITEM_:
+            break;
+        case BC_GET_SLICE:
+        case BC_GET_SLICE_:
+            break;
+        default:
+            error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+    }
+}
+
+
 void parse_stmt(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     int tmp, tmp2, tmp3;
@@ -1248,6 +1327,9 @@ void parse_stmt(ParserState *ps) {
         case TK_KW_CLASS:
             parse_class(ps);
             return;
+        case TK_KW_DEL:
+            parse_del(ps);
+            break;
         case TK_KW_IMPORT:
             next(ps);
             tmp = 0;
