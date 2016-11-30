@@ -699,6 +699,10 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 if (ta == NULL) i += ins.extra - 1;
                 else kv_push(uintptr_t, I->vm.stack, (uintptr_t)ta);
                 break;
+            case BC_DEL_NAME:
+                // DEL_VAL      0       const_id
+                pylt_obj_dict_remove(I, locals, const_obj(ins.extra));
+                break;
             case BC_DEL_FORCE:
                 // DEL_FORCE    0       0
                 //pylt_free(I, castobj(kv_pop(I->vm.stack)));

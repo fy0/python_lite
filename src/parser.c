@@ -1148,15 +1148,19 @@ void parse_del(ParserState *ps) {
     switch (ins.code) {
         case BC_LOAD_VAL:
         case BC_LOAD_VAL_:
+            kv_top(ps->info->code->opcodes).code = BC_DEL_NAME;
             break;
         case BC_GET_ATTR:
         case BC_GET_ATTR_:
+            kv_top(ps->info->code->opcodes).code = BC_DEL_ATTR;
             break;
         case BC_GET_ITEM:
         case BC_GET_ITEM_:
+            kv_top(ps->info->code->opcodes).code = BC_DEL_ITEM;
             break;
         case BC_GET_SLICE:
         case BC_GET_SLICE_:
+            kv_top(ps->info->code->opcodes).code = BC_DEL_SLICE;
             break;
         default:
             error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);

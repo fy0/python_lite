@@ -27,7 +27,6 @@ enum {
     BC_POP,            // 弹出一个值
     BC_POPN,           // 弹出多个值
     BC_FORITER,        // For循环
-    BC_DEL_FORCE,      // 强制释放
     BC_GET_ITEM,       // 取下标
     BC_GET_ITEM_,      // 取下标
     BC_SET_ITEM,       // 存入下标
@@ -36,7 +35,12 @@ enum {
     BC_SET_ATTR,       // 存入属性
     BC_GET_SLICE,      // 读取分片
     BC_GET_SLICE_,     // 读取分片
-    BC_SET_SLICE,
+    BC_SET_SLICE,      // 设置分片
+    BC_DEL_FORCE,      // 强制释放
+    BC_DEL_NAME,       // 删除变量
+    BC_DEL_ATTR,       // 删除属性
+    BC_DEL_ITEM,       // 删除下标
+    BC_DEL_SLICE,      // 删除分片
     BC_ASSERT,         // 真值断言
 
     BC_IMPORT_NAME,    // 导入模块

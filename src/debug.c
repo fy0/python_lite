@@ -126,6 +126,18 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_SET_SLICE:
                 printf("   %-15s\n", "SET_SLICE");
                 break;
+            case BC_DEL_NAME:
+                printf("   %-15s %d\n", "DEL_NAME", ins.extra);
+                break;
+            case BC_DEL_ATTR:
+                printf("   %-15s %d\n", "DEL_ATTR", ins.extra);
+                break;
+            case BC_DEL_ITEM:
+                printf("   %-15s\n", "DEL_ITEM");
+                break;
+            case BC_DEL_SLICE:
+                printf("   %-15s\n", "DEL_SLICE");
+                break;
             case BC_ASSERT:
                 printf("   %-15s\n", "ASSERT");
                 break;
