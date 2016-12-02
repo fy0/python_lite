@@ -1096,12 +1096,11 @@ void parse_value_assign(ParserState *ps) {
     else write_ins(ps, BC_POP, 0, 0);
 }
 
-
-void parse_del(ParserState *ps) {
+pl_int_t parse_try_del_item(ParserState *ps) {
     Token *tk = &(ps->ls->token);
-    PyLiteObject *obj;
+    pl_int_t codesize = kv_size(ps->info->code->opcodes);
     int num, state = 0;
-    next(ps);
+    PyLiteObject *obj;
 
     switch (tk->val) {
         case TK_NAME:
@@ -1139,7 +1138,9 @@ void parse_del(ParserState *ps) {
         }
     }
     if (state == 0) {
-        error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+        kv_popn(ps->info->code->opcodes, kv_size(ps->info->code->opcodes) - codesize);
+        // SyntaxError: can't delete literal
+        return PYLT_ERR_PARSER_INVALID_SYNTAX;
     }
 
     parse_try_suffix(ps);
@@ -1163,7 +1164,29 @@ void parse_del(ParserState *ps) {
             kv_top(ps->info->code->opcodes).code = BC_DEL_SLICE;
             break;
         default:
-            error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+            // SyntaxError: can't delete literal
+            kv_popn(ps->info->code->opcodes, kv_size(ps->info->code->opcodes) - codesize);
+            return PYLT_ERR_PARSER_INVALID_SYNTAX;
+    }
+    return 0;
+}
+
+void parse_del(ParserState *ps) {
+    pl_bool_t bracket = false;
+    Token *tk = &(ps->ls->token);
+    next(ps);
+
+    pl_int_t ret = parse_try_del_item(ps);
+    if (ret) error(ps, ret);
+
+    while (true) {
+        if (tk->val == ',') next(ps);
+        else break;
+        if (tk->val == TK_NEWLINE) break;
+        else {
+            ret = parse_try_del_item(ps);
+            if (ret) error(ps, ret);
+        }
     }
 }
 
