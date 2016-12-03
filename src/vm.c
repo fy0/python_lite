@@ -701,12 +701,21 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 break;
             case BC_DEL_NAME:
                 // DEL_VAL      0       const_id
-                pylt_obj_dict_remove(I, locals, const_obj(ins.extra));
+                if (!pylt_obj_dict_remove(I, locals, const_obj(ins.extra))) {
+                    pl_error(I, pl_static.str.UnboundLocalError, "local variable %r referenced before assignment", const_obj(ins.extra));
+                }
                 break;
             case BC_DEL_ATTR: {
                 // DEL_ATTR     0       const_id
                 tobj = castobj(kv_pop(vm->stack));
                 pylt_obj_Edelattr(I, tobj, const_obj(ins.extra));
+                break;
+            }
+            case BC_DEL_ITEM: {
+                // DEL_ITEM     0       0
+                PyLiteObject *key = castobj(kv_pop(vm->stack));
+                tobj = castobj(kv_pop(vm->stack));
+                pylt_obj_Edelitem(I, tobj, key);
                 break;
             }
             case BC_DEL_FORCE:

@@ -59,6 +59,14 @@ pl_bool_t pylt_obj_list_Esetitem(PyLiteInterpreter *I, PyLiteListObject *self, P
     return false;
 }
 
+pl_bool_t pylt_obj_dict_Eremove(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *key) {
+    if (!pylt_obj_dict_remove(I, self, key)) {
+        pl_error(I, pl_static.str.KeyError, "%s", key);
+        return false;
+    }
+    return true;
+}
+
 pl_bool_t pylt_obj_Esetitem(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value) {
     switch (self->ob_type) {
         case PYLT_OBJ_TYPE_LIST:
@@ -95,6 +103,29 @@ PyLiteObject* pylt_obj_Egetitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteO
             }
     }
     return NULL;
+}
+
+pl_bool_t pylt_obj_Edelitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key) {
+    switch (obj->ob_type) {
+        case PYLT_OBJ_TYPE_LIST:
+            if (key->ob_type == PYLT_OBJ_TYPE_INT) {
+                pl_bool_t ret = pylt_obj_list_delitem(I, obj, castint(key)->ob_val);
+                if (!ret) pl_error(I, pl_static.str.IndexError, "%s index out of range", pl_type(I, castobj(key))->name);
+                return ret;
+            }
+            pl_error(I, pl_static.str.TypeError, "%s indices must be integers, not %s", pl_type(I, castobj(obj))->name, pl_type(I, key)->name);
+            return false;
+        case PYLT_OBJ_TYPE_DICT:
+            return pylt_obj_dict_Eremove(I, castdict(obj), key);
+        default:
+            if (pl_iscustom(obj)) {
+                PyLiteObject *method_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__delitem__), NULL);
+                if (method_func) {
+                    return pylt_obj_istrue(I, pl_call_method(I, obj, method_func, 1, key));
+                }
+            }
+    }
+    return false;
 }
 
 PyLiteIterObject* pylt_obj_iter_Enew(PyLiteInterpreter *I, PyLiteObject *obj) {

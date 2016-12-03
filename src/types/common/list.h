@@ -26,6 +26,7 @@ void pylt_obj_list_sort(PyLiteInterpreter *I, PyLiteListObject *self);
 
 PyLiteObject* pylt_obj_list_getitem(PyLiteInterpreter *I, PyLiteListObject *self, int index);
 pl_bool_t pylt_obj_list_setitem(PyLiteInterpreter *I, PyLiteListObject *self, int index, PyLiteObject* obj);
+pl_bool_t pylt_obj_list_delitem(PyLiteInterpreter *I, PyLiteListObject *self, int index);
 PyLiteListObject* pylt_obj_list_slice(PyLiteInterpreter *I, PyLiteListObject *self, pl_int_t start, pl_int_t end, pl_int_t step);
 pl_int_t pylt_obj_list_slice_set(PyLiteInterpreter *I, PyLiteListObject *self, pl_int_t start, pl_int_t end, pl_int_t step, PyLiteObject *val);
 

@@ -118,11 +118,7 @@ pl_bool_t pylt_obj_list_insert(PyLiteInterpreter *I, PyLiteListObject *self, pl_
 pl_bool_t pylt_obj_list_remove(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *obj) {
     for (pl_int_t i = 0; i < self->ob_size; ++i) {
         if (pylt_obj_eq(I, self->ob_val[i], obj)) {
-            if (i == self->ob_size - 1) self->ob_size--;
-            else {
-                memcpy(self->ob_val + i, self->ob_val + i + 1, (self->ob_size - i - 1) * sizeof(PyLiteObject*));
-                self->ob_size--;
-            }
+            pylt_obj_list_delitem(I, self, i);
             return true;
         }
     }
@@ -159,6 +155,15 @@ PyLiteObject* pylt_obj_list_getitem(PyLiteInterpreter *I, PyLiteListObject *self
 pl_bool_t pylt_obj_list_setitem(PyLiteInterpreter *I, PyLiteListObject *self, int index, PyLiteObject* obj) {
     index_chk(index, false);
     self->ob_val[index] = obj;
+    return true;
+}
+
+pl_bool_t pylt_obj_list_delitem(PyLiteInterpreter *I, PyLiteListObject *self, int index) {
+    index_chk(index, false);
+    if (index != self->ob_size - 1) {
+        memcpy(self->ob_val + index, self->ob_val + index + 1, (self->ob_size - index - 1) * sizeof(PyLiteObject*));
+    }
+    self->ob_size--;
     return true;
 }
 

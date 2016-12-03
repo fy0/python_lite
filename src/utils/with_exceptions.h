@@ -13,8 +13,11 @@ PyLiteObject* pylt_obj_list_Egetitem(PyLiteInterpreter *I, PyLiteListObject *sel
 PyLiteObject* pylt_obj_dict_Egetitem(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *key);
 pl_bool_t pylt_obj_list_Esetitem(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *index, PyLiteObject* obj);
 
+pl_bool_t pylt_obj_dict_Eremove(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *key);
+
 PyLiteObject* pylt_obj_Egetitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key);
 pl_bool_t pylt_obj_Esetitem(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
+pl_bool_t pylt_obj_Edelitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key);
 
 PyLiteObject* pylt_obj_Egetattr_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, PyLiteObject* _default, pl_bool_t *p_at_type);
 PyLiteObject* pylt_obj_Egetattr(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type);
