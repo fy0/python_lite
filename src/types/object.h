@@ -73,6 +73,7 @@ pl_bool_t pylt_obj_istrue(PyLiteInterpreter *I, PyLiteObject *obj);
 PyLiteObject* pylt_obj_getattr_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, PyLiteObject* _default, pl_bool_t *p_at_type);
 PyLiteObject* pylt_obj_getattr(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type);
 pl_bool_t pylt_obj_setattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
+pl_bool_t pylt_obj_delattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key);
 
 //PyLiteObject* pylt_obj_getitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key);
 //pl_bool_t pylt_obj_setitem(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);

@@ -48,6 +48,11 @@ void pylt_obj_type_setattr(PyLiteInterpreter *I, PyLiteTypeObject *self, PyLiteO
     pylt_obj_dict_setitem(I, self->ob_attrs, key, value);
 }
 
+pl_bool_t pylt_obj_type_delattr(PyLiteInterpreter *I, PyLiteTypeObject *self, PyLiteObject* key) {
+    return pylt_obj_dict_remove(I, self->ob_attrs, key);
+}
+
+
 pl_uint32_t pylt_obj_type_hash(PyLiteInterpreter *I, PyLiteTypeObject *self) {
     return self->ob_reftype;
 }

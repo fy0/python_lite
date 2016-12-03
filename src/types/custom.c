@@ -27,3 +27,7 @@ PyLiteObject* pylt_obj_custom_getattr(PyLiteInterpreter *I, PyLiteCustomObject *
 void pylt_obj_custom_setattr(PyLiteInterpreter *I, PyLiteCustomObject *self, PyLiteObject* key, PyLiteObject* value) {
     pylt_obj_dict_setitem(I, self->ob_attrs, key, value);
 }
+
+pl_bool_t pylt_obj_custom_delattr(PyLiteInterpreter *I, PyLiteCustomObject *self, PyLiteObject* key) {
+    return pylt_obj_dict_remove(I, self->ob_attrs, key);
+}

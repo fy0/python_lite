@@ -20,6 +20,7 @@ PyLiteTypeObject* pylt_obj_type_new(PyLiteInterpreter *I, PyLiteStrObject *name,
 
 PyLiteObject* pylt_obj_type_getattr(PyLiteInterpreter *I, PyLiteTypeObject *self, PyLiteObject *key, pl_bool_t *p_at_type);
 void pylt_obj_type_setattr(PyLiteInterpreter *I, PyLiteTypeObject *self, PyLiteObject* key, PyLiteObject* value);
+pl_bool_t pylt_obj_type_delattr(PyLiteInterpreter *I, PyLiteTypeObject *self, PyLiteObject* key);
 pl_uint32_t pylt_obj_type_hash(PyLiteInterpreter *I, PyLiteTypeObject *self);
 void pylt_obj_type_free(PyLiteInterpreter *I, PyLiteTypeObject *self);
 

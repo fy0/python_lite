@@ -24,5 +24,6 @@ typedef struct PyLiteCustomObject {
 PyLiteObject* pylt_obj_cutstom_create(PyLiteInterpreter *I, uint32_t ob_type, PyLiteObject *base_obj);
 PyLiteObject* pylt_obj_custom_getattr(PyLiteInterpreter *I, PyLiteCustomObject *self, PyLiteObject *key, pl_bool_t *p_at_type);
 void pylt_obj_custom_setattr(PyLiteInterpreter *I, PyLiteCustomObject *self, PyLiteObject* key, PyLiteObject* value);
+pl_bool_t pylt_obj_custom_delattr(PyLiteInterpreter *I, PyLiteCustomObject *self, PyLiteObject* key);
 
 #endif

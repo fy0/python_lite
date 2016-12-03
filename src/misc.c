@@ -38,7 +38,8 @@ void raw_str_print(RawString *rs) {
 void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
 	sstr_new(__base__);
 	sstr_new(__call__);
-	sstr_new(__new__);
+    sstr_new(__del__);
+    sstr_new(__new__);
     sstr_new(__import__);
     sstr_new(__init__);
     sstr_new(__str__);
@@ -60,10 +61,12 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
 	sstr_new(__iter__);
 	sstr_new(__cmp__);
 	sstr_new(__eq__);
-	sstr_new(__setattr__);
-	sstr_new(__getattr__);
-	sstr_new(__setitem__);
-	sstr_new(__getitem__);
+    sstr_new(__setattr__);
+    sstr_new(__getattr__);
+    sstr_new(__delattr__);
+    sstr_new(__setitem__);
+    sstr_new(__getitem__);
+    sstr_new(__delitem__);
 
 	sstr_new(__defaults__);
     sstr_new(__parameters__);

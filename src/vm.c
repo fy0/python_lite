@@ -703,6 +703,12 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 // DEL_VAL      0       const_id
                 pylt_obj_dict_remove(I, locals, const_obj(ins.extra));
                 break;
+            case BC_DEL_ATTR: {
+                // DEL_ATTR     0       const_id
+                tobj = castobj(kv_pop(vm->stack));
+                pylt_obj_Edelattr(I, tobj, const_obj(ins.extra));
+                break;
+            }
             case BC_DEL_FORCE:
                 // DEL_FORCE    0       0
                 //pylt_free(I, castobj(kv_pop(I->vm.stack)));

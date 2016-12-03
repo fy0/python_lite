@@ -19,6 +19,7 @@ pl_bool_t pylt_obj_Esetitem(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObje
 PyLiteObject* pylt_obj_Egetattr_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, PyLiteObject* _default, pl_bool_t *p_at_type);
 PyLiteObject* pylt_obj_Egetattr(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject* key, pl_bool_t *p_at_type);
 pl_bool_t pylt_obj_Esetattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key, PyLiteObject* value);
+pl_bool_t pylt_obj_Edelattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key);
 
 pl_int_t pylt_obj_Ecmp(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b);
 

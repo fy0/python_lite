@@ -150,6 +150,17 @@ pl_bool_t pylt_obj_Esetattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObje
     return pylt_obj_setattr(I, self, key, value);
 }
 
+pl_bool_t pylt_obj_Edelattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key) {
+    if (pl_iscustom(self)) {
+        PyLiteObject *method_func = pylt_obj_getattr(I, self, castobj(pl_static.str.__delattr__), NULL);
+        if (method_func) {
+            PyLiteObject *ret = pl_call_method(I, self, method_func, 1, key);
+            return pylt_obj_istrue(I, ret);
+        }
+    }
+    return pylt_obj_delattr(I, self, key);
+}
+
 pl_int_t pylt_obj_Ecmp(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b) {
     if (a == b) return 0;
     switch (a->ob_type) {

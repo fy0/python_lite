@@ -284,6 +284,20 @@ pl_bool_t pylt_obj_setattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObjec
     return false;
 }
 
+pl_bool_t pylt_obj_delattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject* key) {
+    switch (self->ob_type) {
+        case PYLT_OBJ_TYPE_TYPE:
+            pylt_obj_type_delattr(I, casttype(self), key);
+            return true;
+        default:
+            if (pl_iscustom(self)) {
+                pylt_obj_custom_delattr(I, castcustom(self), key);
+                return true;
+            }
+    }
+    return false;
+}
+
 pl_bool_t pylt_obj_has(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *obj, pl_bool_t *is_valid) {
     if (is_valid) *is_valid = true;
     switch (self->ob_type) {

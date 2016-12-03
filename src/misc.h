@@ -10,6 +10,7 @@ struct PyLiteStaticObjectsType {
     struct {
         PyLiteStrObject *__base__;
         PyLiteStrObject *__call__;
+        PyLiteStrObject *__del__;
         PyLiteStrObject *__new__;
         PyLiteStrObject *__import__;
         PyLiteStrObject *__init__;
@@ -34,8 +35,10 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *__eq__;
         PyLiteStrObject *__setattr__;
         PyLiteStrObject *__getattr__;
+        PyLiteStrObject *__delattr__;
         PyLiteStrObject *__setitem__;
         PyLiteStrObject *__getitem__;
+        PyLiteStrObject *__delitem__;
 
         PyLiteStrObject *__defaults__;
         PyLiteStrObject *__parameters__;
