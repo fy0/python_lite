@@ -26,6 +26,7 @@ pl_int_t pylt_obj_str_index(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteS
 pl_int_t pylt_obj_str_index_full(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end);
 PyLiteStrObject* pylt_obj_str_join(PyLiteInterpreter *I, PyLiteStrObject *separator, PyLiteObject *seq);
 
+PyLiteStrObject* pylt_obj_str_slice(PyLiteInterpreter *I, PyLiteStrObject *self, pl_int_t start, pl_int_t end, pl_int_t step);
 PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *self);
 
 PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size, bool is_raw);

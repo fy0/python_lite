@@ -5,6 +5,13 @@
 #include "../../api.h"
 #include "../../gc.h"
 
+// 将 index 转为标准形式并约束到可用范围
+#define index_fix(__index) \
+    if (__index < 0) __index += self->ob_size; \
+    if (__index < 0) __index = 0; \
+    else if (__index >= (pl_int_t)self->ob_size) __index = self->ob_size;
+
+
 static PyLiteStrObject* hash_and_check_cache(PyLiteInterpreter *I, PyLiteStrObject *obj) {
     obj->ob_hash = pylt_obj_str_forcehash(I, obj);
     return (I) ? pylt_gc_cache_str_add(I, obj) : obj;
@@ -365,6 +372,29 @@ PyLiteStrObject* pylt_obj_str_join(PyLiteInterpreter *I, PyLiteStrObject *separa
         return str;
     }
     return NULL;
+}
+
+PyLiteStrObject* pylt_obj_str_slice(PyLiteInterpreter *I, PyLiteStrObject *self, pl_int_t start, pl_int_t end, pl_int_t step) {
+    index_fix(start);
+    index_fix(end);
+    if (step == 0) return NULL;
+
+    pl_int_t count = (pl_int_t)ceil(abs(end - start) / abs(step));
+    uint32_t *buf = pylt_malloc(I, count * sizeof(uint32_t));
+
+    if (step == 1) {
+        memcpy(buf, self->ob_val + start, count * sizeof(uint32_t));
+    } else {
+        pl_int_t cur_index = start;
+        for (pl_int_t i = 0; i < count; ++i) {
+            buf[i] = self->ob_val[cur_index];
+            cur_index += step;
+        }
+    }
+
+    PyLiteStrObject *str = pylt_obj_str_new(I, buf, count, true);
+    pylt_free(I, buf, count * sizeof(uint32_t));
+    return str;
 }
 
 PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *self) {

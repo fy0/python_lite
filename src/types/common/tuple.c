@@ -6,7 +6,7 @@
 #define index_fix(__index) \
     if (__index < 0) __index += self->ob_size; \
     if (__index < 0) __index = 0; \
-        else if (__index >= self->ob_size) __index = self->ob_size-1;
+    else if (__index >= self->ob_size) __index = self->ob_size;
 
 
 #define index_chk(__index, failret) \

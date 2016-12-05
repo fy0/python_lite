@@ -109,7 +109,7 @@ pl_bool_t pylt_obj_Edelitem(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObjec
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_LIST:
             if (key->ob_type == PYLT_OBJ_TYPE_INT) {
-                pl_bool_t ret = pylt_obj_list_delitem(I, obj, castint(key)->ob_val);
+                pl_bool_t ret = pylt_obj_list_delitem(I, castlist(obj), castint(key)->ob_val);
                 if (!ret) pl_error(I, pl_static.str.IndexError, "%s index out of range", pl_type(I, castobj(key))->name);
                 return ret;
             }
@@ -223,6 +223,8 @@ PyLiteObject* pylt_obj_Eslice(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t 
     }
 
     switch (obj->ob_type) {
+        case PYLT_OBJ_TYPE_STR:
+            return castobj(pylt_obj_str_slice(I, caststr(obj), start, end, step));
         case PYLT_OBJ_TYPE_LIST:
             return castobj(pylt_obj_list_slice(I, castlist(obj), start, end, step));
         case PYLT_OBJ_TYPE_TUPLE:
