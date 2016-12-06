@@ -234,16 +234,15 @@ pl_int_t pylt_obj_bytes_index(PyLiteInterpreter *I, PyLiteBytesObject *self, PyL
 PyLiteBytesObject* pylt_obj_bytes_slice(PyLiteInterpreter *I, PyLiteBytesObject *self, pl_int_t *pstart, pl_int_t *pend, pl_int_t step) {
     pl_int_t start, end;
     if (step == 0) return NULL;
-    start = pstart ? *pstart : 0;
-    end = pend ? *pend : self->ob_size;
+    start = pstart ? *pstart : (step > 0) ? 0 : self->ob_size;
+    end = pend ? *pend : (step > 0) ? self->ob_size : 0;
 
     index_fix(start);
     index_fix(end);
 
     if (step < 0) {
-        swap(start, end, pl_int_t);
         start -= 1;
-        end -= 1;
+        if (!pend) end -= 1;
     }
 
     pl_int_t count = (pl_int_t)ceil(abs(end - start) / abs(step));

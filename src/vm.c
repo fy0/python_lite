@@ -472,17 +472,8 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 PyLiteIntObject *start = castint(kv_pop(vm->stack));
                 PyLiteObject *obj = castobj(kv_pop(vm->stack));
                 PyLiteObject *val = castobj(kv_topn(vm->stack, ins.extra));
-                if (!((pl_isint(start) || pl_isnone(start)) && (pl_isint(end) || pl_isnone(end)) && (pl_isint(step) || pl_isnone(step)))) {
-                    pl_error(I, pl_static.str.TypeError, "slice indices must be integers or None or have an __index__ method");
-                    break;
-                }
-                pylt_obj_Eslice_set(
-                    I, obj,
-                    pl_isint(start) ? start->ob_val : 0,
-                    pl_isint(end) ? end->ob_val : pylt_obj_len(I, obj),
-                    pl_isint(step) ? step->ob_val : 1,
-                    val
-                );
+
+                pylt_obj_Eslice_set_ex(I, obj, start, end, step, val);
                 break;
             }
             case BC_OPERATOR:
