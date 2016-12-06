@@ -26,7 +26,7 @@ pl_bool_t pylt_obj_Edelattr(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObje
 
 pl_int_t pylt_obj_Ecmp(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b);
 
-PyLiteObject* pylt_obj_Eslice(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t start, pl_int_t end, pl_int_t step);
+PyLiteObject* pylt_obj_Eslice_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject *start, PyLiteObject *end, PyLiteObject *step);
 void pylt_obj_Eslice_set(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t start, pl_int_t end, pl_int_t step, PyLiteObject *val);
 
 

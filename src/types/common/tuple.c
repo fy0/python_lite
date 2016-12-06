@@ -76,10 +76,20 @@ PyLiteObject* pylt_obj_tuple_getitem(PyLiteInterpreter *I, PyLiteTupleObject *se
     return self->ob_val[index];
 }
 
-PyLiteTupleObject* pylt_obj_tuple_slice(PyLiteInterpreter *I, PyLiteTupleObject *self, pl_int_t start, pl_int_t end, pl_int_t step) {
+PyLiteTupleObject* pylt_obj_tuple_slice(PyLiteInterpreter *I, PyLiteTupleObject *self, pl_int_t *pstart, pl_int_t *pend, pl_int_t step) {
+    pl_int_t start, end;
+    if (step == 0) return NULL;
+    start = pstart ? *pstart : 0;
+    end = pend ? *pend : self->ob_size;
+
     index_fix(start);
     index_fix(end);
-    if (step == 0) return NULL;
+
+    if (step < 0) {
+        swap(start, end, pl_int_t);
+        start -= 1;
+        end -= 1;
+    }
 
     pl_int_t count = (pl_int_t)ceil(abs(end - start) / abs(step));
     PyLiteTupleObject *lst = pylt_obj_tuple_new(I, count);

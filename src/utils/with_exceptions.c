@@ -216,19 +216,30 @@ pl_int_t pylt_obj_Ecmp(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b) {
     return 2;
 }
 
-PyLiteObject* pylt_obj_Eslice(PyLiteInterpreter *I, PyLiteObject *obj, pl_int_t start, pl_int_t end, pl_int_t step) {
-    if (step == 0) {
+PyLiteObject* pylt_obj_Eslice_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject *start, PyLiteObject *end, PyLiteObject *step) {
+    if (!((pl_isint(start) || pl_isnone(start)) && (pl_isint(end) || pl_isnone(end)) && (pl_isint(step) || pl_isnone(step)))) {
+        pl_error(I, pl_static.str.TypeError, "slice indices must be integers or None"); // TODO:  or have an __index__ method (不过等一下，这个真的需要？)
+        return NULL;
+    }
+
+    pl_int_t *pstart = pl_isnone(start) ? NULL : &castint(start)->ob_val;
+    pl_int_t *pend = pl_isnone(end) ? NULL : &castint(end)->ob_val;
+    pl_int_t istep = pl_isnone(step) ? 1 : castint(step)->ob_val;
+
+    if (istep == 0) {
         pl_error(I, pl_static.str.ValueError, "slice step cannot be zero");
         return NULL;
     }
 
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_STR:
-            return castobj(pylt_obj_str_slice(I, caststr(obj), start, end, step));
+            return castobj(pylt_obj_str_slice(I, caststr(obj), pstart, pend, istep));
+        case PYLT_OBJ_TYPE_BYTES:
+            return castobj(pylt_obj_bytes_slice(I, castbytes(obj), pstart, pend, istep));
         case PYLT_OBJ_TYPE_LIST:
-            return castobj(pylt_obj_list_slice(I, castlist(obj), start, end, step));
+            return castobj(pylt_obj_list_slice(I, castlist(obj), pstart, pend, istep));
         case PYLT_OBJ_TYPE_TUPLE:
-            return castobj(pylt_obj_tuple_slice(I, casttuple(obj), start, end, step));
+            return castobj(pylt_obj_tuple_slice(I, casttuple(obj), pstart, pend, istep));
     }
 
     pl_error(I, pl_static.str.TypeError, "%r object has no attribute '__getitem__'", pl_type(I, obj)->name);

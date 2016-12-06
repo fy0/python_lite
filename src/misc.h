@@ -280,4 +280,6 @@ void raw_str_print(RawString *rs);
 
 void pylt_misc_static_objs_init(PyLiteInterpreter *I);
 
+#define swap(a, b, _type) { _type tmp = a; a = b; b = tmp; }
+
 #endif
