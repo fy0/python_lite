@@ -1,9 +1,9 @@
 ﻿
 #include "common.h"
 #include "../api.h"
-#include "../misc.h"
 #include "../bind.h"
 #include "../types/all.h"
+#include "../utils/misc.h"
 
 PyLiteObject* pylt_cls_method_obj_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_OBJ), _S(__new__), casttype(args[0])))

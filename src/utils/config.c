@@ -1,6 +1,6 @@
 
 #include "config.h"
-#include "intp.h"
+#include "../intp.h"
 
 void* pylt_realloc(PyLiteInterpreter *I, void* m, size_t osize, size_t nsize) {
     if (nsize == 0) {

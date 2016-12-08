@@ -2,7 +2,7 @@
 #include "iter.h"
 #include "../all.h"
 #include "../../api.h"
-#include "../../misc.h"
+#include "../../utils/misc.h"
 #include "../../utils/with_exceptions.h"
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {

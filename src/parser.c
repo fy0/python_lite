@@ -6,6 +6,7 @@
 #include "api.h"
 #include "bind.h"
 #include "types/all.h"
+#include "utils/misc.h"
 
 #define kv_pushobj(v, x) kv_push(PyLiteObject*, (v), (PyLiteObject*)(x))
 #define kv_pushins(v, x) kv_push(PyLiteInstruction, (v), (x))

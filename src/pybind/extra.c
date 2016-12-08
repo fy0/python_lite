@@ -3,6 +3,7 @@
 #include "../api.h"
 #include "../bind.h"
 #include "../types/all.h"
+#include "../utils/misc.h"
 
 PyLiteObject* pylt_cls_method_function_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     // won't supported

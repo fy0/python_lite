@@ -2,7 +2,7 @@
 #include "all.h"
 #include "../vm.h"
 #include "../api.h"
-#include "../misc.h"
+#include "../utils/misc.h"
 #include "../utils/with_exceptions.h"
 
 

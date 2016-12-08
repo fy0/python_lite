@@ -2,7 +2,7 @@
 #ifndef PYLITE_BIND_H
 #define PYLITE_BIND_H
 
-#include "misc.h"
+#include "utils/config.h"
 #include "types/all.h"
 
 pl_bool_t pl_bind_cls_check(PyLiteInterpreter *I, PyLiteTypeObject *defclass, PyLiteStrObject *method_name, PyLiteTypeObject *givenclass);

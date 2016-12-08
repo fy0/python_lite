@@ -7,6 +7,7 @@
 #include "../api.h"
 #include "../bind.h"
 #include "../types/all.h"
+#include "../utils/misc.h"
 
 
 FILE* mfopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode) {

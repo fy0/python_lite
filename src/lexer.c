@@ -1,5 +1,6 @@
 ﻿
 #include "lexer.h"
+#include "utils/misc.h"
 #include "types/common/string.h"
 #include "types/common/bytes.h"
 #include "types/common/number.h"

@@ -1,6 +1,6 @@
 
-#ifndef PYLITE_MISC_H
-#define PYLITE_MISC_H
+#ifndef PYLITE_STATIC_H
+#define PYLITE_STATIC_H
 
 #include "config.h"
 
@@ -270,17 +270,6 @@ struct PyLiteStaticObjectsType {
     } str;
 } pl_static;
 
-typedef struct RawString {
-    const uint8_t *s;
-    const uint8_t *e;
-} RawString;
-
-void putcode(uint32_t code);
-void raw_str_print(RawString *rs);
-
-void pylt_misc_static_objs_init(PyLiteInterpreter *I);
-
-#define swap(a, b, _type) { _type tmp = a; a = b; b = tmp; }
-#define clamp(val, imin, imax) min(max(val, imin), imax) // 这是最优的吗？我不知道
+void pylt_static_objs_init(PyLiteInterpreter *I);
 
 #endif

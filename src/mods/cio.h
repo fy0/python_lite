@@ -2,6 +2,7 @@
 #ifndef PYLITE_MODS_CIO_H
 #define PYLITE_MODS_CIO_H
 
+#include <stdio.h>
 #include "../types/all.h"
 
 FILE* mfopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode);

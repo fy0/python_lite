@@ -4,6 +4,7 @@
 #include "bytes.h"
 #include "string.h"
 #include "../../deps/fpconv/fpconv.h"
+#include "../../utils/misc.h"
 
 pl_int_t pylt_obj_int_cmp(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {

@@ -2,8 +2,9 @@
 #include "bool.h"
 #include "string.h"
 #include "list.h"
-#include "../../api.h"
 #include "../../gc.h"
+#include "../../api.h"
+#include "../../utils/misc.h"
 
 // 将 index 转为标准形式并约束到可用范围
 #define index_fix(__index) \

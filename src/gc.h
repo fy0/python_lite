@@ -2,7 +2,7 @@
 #ifndef PYLITE_GC_H
 #define PYLITE_GC_H
 
-#include "config.h"
+#include "utils/config.h"
 #include "utils/ref.h"
 #include "types/common/set.h"
 #include "types/common/bytes.h"

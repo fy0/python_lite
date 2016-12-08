@@ -2,17 +2,8 @@
 #ifndef PYLITE_CONFIG_H
 #define PYLITE_CONFIG_H
 
-#include "deps/platform.h"
-#include "deps/utf8_lite.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include <stdint.h>
-#include <math.h>
+#include <stdbool.h>
 
 typedef intptr_t pl_int_t;
 typedef uintptr_t pl_uint_t;
@@ -20,9 +11,6 @@ typedef int32_t pl_int32_t;
 typedef uint32_t pl_uint32_t;
 typedef double pl_float_t;
 typedef bool pl_bool_t;
-
-#define max(a,b)    (((a) > (b)) ? (a) : (b))
-#define min(a,b)    (((a) < (b)) ? (a) : (b))
 
 typedef struct PyLiteInterpreter PyLiteInterpreter;
 

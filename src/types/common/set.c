@@ -1,6 +1,7 @@
 ﻿
 #include "set.h"
 #include "string.h"
+#include "../../utils/misc.h"
 
 
 pl_int_t pylt_obj_set_cmp(PyLiteInterpreter *I, PyLiteSetObject *self, PyLiteObject *other) {

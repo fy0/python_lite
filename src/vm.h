@@ -2,8 +2,7 @@
 #ifndef PYLITE_VM_H
 #define PYLITE_VM_H
 
-#include "config.h"
-#include "deps/kvec.h"
+#include "utils/config.h"
 #include "types/all.h"
 #include "api.h"
 
@@ -79,8 +78,6 @@ typedef struct PyLiteVM {
     kvec_t(PyLiteFrame) frames;
     PyLiteModuleObject *builtins;
 } PyLiteVM;
-
-#define kv_pushptr(v, x) kv_push(uintptr_t, (v), (uintptr_t)(x))
 
 void pylt_vm_load_func(PyLiteInterpreter *I, PyLiteFunctionObject *func);
 void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code);

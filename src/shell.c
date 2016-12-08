@@ -1,5 +1,4 @@
 ﻿
-#include "config.h"
 #include "lexer.h"
 #include "parser.h"
 #include "io.h"
@@ -8,6 +7,7 @@
 #include "api.h"
 #include "intp.h"
 
+#include "utils/misc.h"
 #include "types/object.h"
 
 

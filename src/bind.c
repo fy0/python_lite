@@ -2,6 +2,7 @@
 #include "bind.h"
 #include "intp.h"
 #include "api.h"
+#include "utils/misc.h"
 
 pl_bool_t pl_bind_cls_check(PyLiteInterpreter *I, PyLiteTypeObject *defclass, PyLiteStrObject *method_name, PyLiteTypeObject *givenclass) {
     if (!pl_istype(givenclass)) {

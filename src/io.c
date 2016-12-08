@@ -1,6 +1,6 @@
 ﻿
 #include "io.h"
-
+#include <stdio.h>
 
 char* read_file(const char* fn, int *psize) {
     int size;

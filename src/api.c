@@ -1,6 +1,8 @@
 ﻿
 #include "api.h"
 #include "intp.h"
+#include "types/all.h"
+#include "utils/misc.h"
 
 void pylt_api_output_str(PyLiteInterpreter *I, PyLiteStrObject *obj) {
     if (!obj) {

@@ -1,6 +1,6 @@
 ﻿
 #include "intp.h"
-#include "misc.h"
+#include "utils/misc.h"
 #include "mods/io.h"
 #include "mods/cio.h"
 #include "mods/math.h"
@@ -35,7 +35,7 @@ void pylt_intp_init(PyLiteInterpreter *I) {
     pylt_gc_init(I);
     pylt_lex_init(I, I->lexer, NULL);
     pylt_parser_init(I, I->parser, I->lexer);
-    pylt_misc_static_objs_init(I);
+    pylt_static_objs_init(I);
     pylt_vm_init(I, &I->vm);
 
     // be careful, cptrs are not real object!

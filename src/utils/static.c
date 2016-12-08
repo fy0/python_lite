@@ -1,29 +1,6 @@
 
-#include "misc.h"
-#include "intp.h"
-#include "types/all.h"
-
-void putcode(uint32_t code) {
-    if (code < 0xff) {
-        putchar((char)code);
-    } else {
-        int len;
-        char buf[7];
-        if (ucs4_to_utf8(code, (char*)&buf, &len)) {
-            buf[len] = '\0';
-            printf_u8("%s", &buf);
-        }
-    }
-}
-
-void raw_str_print(RawString *rs) {
-    uint32_t code;
-    for (const uint8_t *p = rs->s; p != rs->e;) {
-        p = utf8_decode(p, &code);
-        putcode(code);
-    }
-}
-
+#include "static.h"
+#include "../types/all.h"
 
 #define sstr_new(_name) pl_static.str._name = pylt_obj_str_new_from_cstr_static(I, #_name, true)
 #define sstr_new2(_name, _str) pl_static.str._name = pylt_obj_str_new_from_cstr_static(I, (_str), true);
@@ -35,9 +12,9 @@ void raw_str_print(RawString *rs) {
 // pl_static.str.([^ ]+) = pylt_obj_str_new_from_cstr_static\(I, "([^"]*)", true\);
 // sstr_new2\($1, "$2"\);
 
-void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
-	sstr_new(__base__);
-	sstr_new(__call__);
+void pylt_static_objs_init(PyLiteInterpreter *I) {
+    sstr_new(__base__);
+    sstr_new(__call__);
     sstr_new(__del__);
     sstr_new(__new__);
     sstr_new(__import__);
@@ -45,22 +22,22 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(__str__);
     sstr_new(__repr__);
 
-	sstr_new(__add__);
-	sstr_new(__div__);
-	sstr_new(__floordiv__);
-	sstr_new(__mul__);
-	sstr_new(__neg__);
-	sstr_new(__pos__);
-	sstr_new(__pow__);
-	sstr_new(__sub__);
+    sstr_new(__add__);
+    sstr_new(__div__);
+    sstr_new(__floordiv__);
+    sstr_new(__mul__);
+    sstr_new(__neg__);
+    sstr_new(__pos__);
+    sstr_new(__pow__);
+    sstr_new(__sub__);
 
-	sstr_new(__lshift__);
-	sstr_new(__rshift__);
+    sstr_new(__lshift__);
+    sstr_new(__rshift__);
 
-	sstr_new(__hash__);
-	sstr_new(__iter__);
-	sstr_new(__cmp__);
-	sstr_new(__eq__);
+    sstr_new(__hash__);
+    sstr_new(__iter__);
+    sstr_new(__cmp__);
+    sstr_new(__eq__);
     sstr_new(__setattr__);
     sstr_new(__getattr__);
     sstr_new(__delattr__);
@@ -68,7 +45,7 @@ void pylt_misc_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(__getitem__);
     sstr_new(__delitem__);
 
-	sstr_new(__defaults__);
+    sstr_new(__defaults__);
     sstr_new(__parameters__);
     sstr_new(__args_types__);
 

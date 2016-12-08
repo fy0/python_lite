@@ -49,7 +49,7 @@
 #define AC_KVEC_H
 
 #include <stdlib.h>
-#include "../config.h"
+#include "../utils/config.h"
 
 #ifndef krealloc
 #define krealloc(I,P,O,Z) pylt_realloc(I,P,O,Z)

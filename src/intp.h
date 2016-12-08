@@ -2,10 +2,10 @@
 #ifndef PYLITE_STATE_H
 #define PYLITE_STATE_H
 
-#include "lexer.h"
-#include "parser.h"
 #include "vm.h"
 #include "gc.h"
+#include "lexer.h"
+#include "parser.h"
 #include "deps/kvec.h"
 #include "types/common/set.h"
 #include "types/common/type.h"

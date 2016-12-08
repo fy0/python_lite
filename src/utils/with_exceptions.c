@@ -1,6 +1,7 @@
 
 #include "with_exceptions.h"
 #include "../api.h"
+#include "../utils/misc.h"
 
 typedef PyLiteObject* (*GetItemFunc)(PyLiteInterpreter *I, PyLiteObject *self, int index);
 

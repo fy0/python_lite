@@ -2,7 +2,7 @@
 #ifndef PYLITE_API_H
 #define PYLITE_API_H
 
-#include "config.h"
+#include "utils/config.h"
 #include "types/all.h"
 
 void pylt_api_output_str(PyLiteInterpreter *I, PyLiteStrObject *obj);

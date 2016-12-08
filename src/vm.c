@@ -4,11 +4,11 @@
 #include "intp.h"
 #include "debug.h"
 #include "bind.h"
-#include "deps/kvec.h"
 #include "types/all.h"
 #include "mods/builtin.h"
 #include "pybind/typebind.h"
 #include "utils/with_exceptions.h"
+#include "utils/misc.h"
 
 PyLiteObject* _pylt_vm_call(PyLiteInterpreter *I, pl_int_t argc);
 

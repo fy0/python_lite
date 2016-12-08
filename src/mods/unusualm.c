@@ -2,6 +2,7 @@
 #include "unusualm.h"
 #include "../bind.h"
 #include "../types/all.h"
+#include "../utils/misc.h"
 
 
 PyLiteModuleObject* pylt_mods_unusual_register(PyLiteInterpreter *I) {

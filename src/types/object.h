@@ -2,9 +2,7 @@
 #ifndef PYLITE_TYPES_OBJECT_H
 #define PYLITE_TYPES_OBJECT_H
 
-#include "../io.h"
-#include "../misc.h"
-#include "../config.h"
+#include "../utils/config.h"
 #include "../deps/khash_obj.h"
 
 // Immutable object

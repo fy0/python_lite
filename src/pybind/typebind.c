@@ -2,6 +2,7 @@
 #include "../bind.h"
 #include "../intp.h"
 #include "../types/all.h"
+#include "../utils/misc.h"
 #include "common.h"
 #include "extra.h"
 
