@@ -178,6 +178,7 @@ void pylt_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(cio);
 
     sstr_new(io);
+    sstr_new(BaseIO);
     sstr_new(FileIO);
 
     sstr_new(cls);

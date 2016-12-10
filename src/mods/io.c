@@ -10,13 +10,24 @@
 #include "../utils/misc.h"
 
 /**
-class FileIO:
-    def read(size):
+
+class BaseIO:
+    def read(size=None):
         pass
+    def write(buf):
+        pass
+
+class FileIO(BaseIO):
     def readline(size=-1):
         pass
 
 */
+
+PyLiteObject* pylt_mods_io_BaseIO_read(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    pl_error(I, pl_static.str.NotImplementedError, NULL);
+    return NULL;
+}
+
 
 struct MyFile {
     FILE *fp;
@@ -81,8 +92,13 @@ PyLiteModuleObject* pylt_mods_io_register(PyLiteInterpreter *I) {
 
     pylt_cfunc_register(I, mod, _NS(I, "open"), _NST(I, 2, "fn", "mode"), NULL, NULL, &pylt_mods_io_open);
     pylt_cfunc_register(I, mod, _NS(I, "read"), _NST(I, 2, "file", "size"), _NT(I, 2, &PyLiteParamUndefined, pylt_obj_int_new(I, -1)), NULL, &pylt_mods_io_read);
-
+     
     PyLiteTypeObject *type;
+    type = pylt_obj_type_new(I, pl_static.str.FileIO, PYLT_OBJ_TYPE_OBJ, NULL);
+    pylt_cfunc_register(I, mod, _NS(I, "read"), _NST(I, 1, "size"), _NT(I, 1, &PyLiteNone), NULL, &pylt_mods_io_BaseIO_read);
+    pylt_cfunc_register(I, mod, _NS(I, "write"), _NST(I, 1, "data"), NULL, NULL, &pylt_mods_io_BaseIO_read);
+    pylt_obj_type_register(I, type);
+
     type = pylt_obj_type_new(I, pl_static.str.FileIO, PYLT_OBJ_TYPE_OBJ, NULL);
     //pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_int_new);
     pylt_obj_type_register(I, type);

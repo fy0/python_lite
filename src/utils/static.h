@@ -175,6 +175,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *builtins;
         PyLiteStrObject *cio;
         PyLiteStrObject *io;
+        PyLiteStrObject *BaseIO;
         PyLiteStrObject *FileIO;
 
         PyLiteStrObject *cls;

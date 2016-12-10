@@ -467,12 +467,11 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             }
             case BC_SET_SLICE: {
                 // SET_SLICE    offset  0
-                PyLiteIntObject *step = castint(kv_pop(vm->stack));
-                PyLiteIntObject *end = castint(kv_pop(vm->stack));
-                PyLiteIntObject *start = castint(kv_pop(vm->stack));
+                PyLiteObject *step = castobj(kv_pop(vm->stack));
+                PyLiteObject *end = castobj(kv_pop(vm->stack));
+                PyLiteObject *start = castobj(kv_pop(vm->stack));
                 PyLiteObject *obj = castobj(kv_pop(vm->stack));
                 PyLiteObject *val = castobj(kv_topn(vm->stack, ins.extra));
-
                 pylt_obj_Eslice_set_ex(I, obj, start, end, step, val);
                 break;
             }

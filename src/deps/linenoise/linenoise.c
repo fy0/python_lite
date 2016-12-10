@@ -110,7 +110,6 @@
 #pragma warning (disable: 4996)
 #include "./osfix/winfix.h"
 #define REDIS_NOTUSED(V) ((void) V)
-//#include "./Win32_Interop/win32_ANSI.h"
 #else
 #include <termios.h>
 #include <unistd.h>
@@ -923,7 +922,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, wchar_t *buf, size_t bufle
     l.ofd = stdout_fd;
     l.buf = buf;
     l.buflen = buflen;
-    l.prompt = prompt;
+    l.prompt = (wchar_t*)prompt;
     l.plen = wcslen(prompt);
     l.oldpos = l.pos = 0;
     l.len = 0;
@@ -939,7 +938,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, wchar_t *buf, size_t bufle
      * initially is just an empty string. */
     linenoiseHistoryAdd(L"");
     
-    if (write(l.ofd,prompt,l.plen) == -1) return -1;
+    if (write(l.ofd,(void*)prompt,l.plen) == -1) return -1;
     while(1) {
         uint32_t c;
         int nread;

@@ -1,5 +1,5 @@
 
-# pylite 简蟒 ver 0.0.5
+# pylite 简蟒 ver 0.0.6
 
 A simple, lightweight implementation of python3-like language.
 
