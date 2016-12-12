@@ -43,10 +43,10 @@ A simple, lightweight implementation of python3-like language.
 
 * builtin regex engine
 
+* decorator
+
 
 ### never support
-
-* compare operators (use __cmp__)
 
 * encodings except utf-8/ucs4
 

@@ -7,7 +7,12 @@
 #include "Win32_ANSI.h"
 
 int mycrt_read(int fd, void *buffer, unsigned int count) {
-    return _read(fd, buffer, count);
+    //return _read(fd, buffer, count);
+    wchar_t *s = (wchar_t *)buffer;
+    for (unsigned int i = 0; i < count; ++i) {
+        *s++ = fgetwc(stdin);
+    }
+    return count;
 }
 
 int mycrt_write(int fd, void *buffer, unsigned int count) {

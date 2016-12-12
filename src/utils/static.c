@@ -180,6 +180,12 @@ void pylt_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(io);
     sstr_new(BaseIO);
     sstr_new(FileIO);
+    sstr_new(TextIO);
+    sstr_new2(stdin_, "stdin");
+    sstr_new2(stdout_, "stdout");
+    sstr_new2(stderr_, "stderr");
+
+    sstr_new(sys);
 
     sstr_new(cls);
     sstr_new(self);
@@ -190,6 +196,7 @@ void pylt_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(param3);
     sstr_new(param4);
     sstr_new2(default_, "default");
+    sstr_new(__cobj__);
 
     sstr_new(x);
     sstr_new(y);

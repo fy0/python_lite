@@ -2,18 +2,12 @@
 #ifndef WIN32_INTEROP_FDAPI_FIX_M_H
 #define WIN32_INTEROP_FDAPI_FIX_M_H
 
-#include "../../utf8_lite.h"
-
-int mycrt_read(int fd, void *buffer, unsigned int count);
-int mycrt_write(int fd, void *buffer, unsigned int count);
-int mycrt_isatty(int fd);
-
+#include "_osfix.h"
 
 #define read(fd,buffer,count)       mycrt_read(fd,buffer,count)
 #define write(fd,buffer,count)      mycrt_write(fd,buffer,count)
 #define isatty(fd)                  mycrt_isatty(fd)
 
-int mk_wcswidth(const wchar_t *pwcs, size_t n);
 #define wcswidth(pwcs, n)           mk_wcswidth(pwcs, n)
 
 #endif
