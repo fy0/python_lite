@@ -9,10 +9,19 @@
 #include "deps/kvec.h"
 #include "types/common/set.h"
 #include "types/common/type.h"
+#include "utils/io.h"
+
+typedef struct {
+    PyLiteFile *cin;
+    PyLiteFile *cout;
+    PyLiteFile *cerr;
+} PyLiteSys;
+
 
 typedef struct PyLiteInterpreter {
     PyLiteVM vm;
     PyLiteGC gc;
+    PyLiteSys sys;
     LexState *lexer;
     ParserState *parser;
 

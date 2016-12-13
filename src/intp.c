@@ -1,6 +1,7 @@
 ﻿
 #include "intp.h"
 #include "utils/misc.h"
+#include "utils/io.h"
 #include "mods/io.h"
 #include "mods/cio.h"
 #include "mods/math.h"
@@ -22,8 +23,16 @@ void pylt_intp_free(PyLiteInterpreter *I) {
     pylt_free_ex(NULL, I);
 }
 
+void pylt_intp_sys_init(PyLiteInterpreter *I) {
+    I->sys.cin = pl_io_file_new(I, stdin);
+    I->sys.cout = pl_io_file_new(I, stdout);
+    I->sys.cerr = pl_io_file_new(I, stderr);
+}
+
 void pylt_intp_init(PyLiteInterpreter *I) {
     I->mem_used = 0;
+    pylt_intp_sys_init(I);
+
     kv_init(I, I->cls_base);
     I->modules = pylt_obj_dict_new(I);
     I->inner_module_loaders = pylt_obj_dict_new(I);

@@ -1,13 +1,12 @@
 ﻿
 #include <errno.h>
-#include <sys/stat.h>
 
 #include "io.h"
-#include "cio.h"
 #include "../api.h"
 #include "../bind.h"
 #include "../types/all.h"
 #include "../utils/misc.h"
+#include "../utils/io.h"
 #include "../utils/with_exceptions.h"
 
 /**
@@ -18,7 +17,7 @@ class BaseIO:
     def write(self, buf):
         pass
 
-class TextStdinIO:
+class TextIO:
     def read(self, size=None):
         pass
 
@@ -31,23 +30,6 @@ class FileIO(BaseIO):
 PyLiteObject* pylt_mods_io_BaseIO_read(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     pl_error(I, pl_static.str.NotImplementedError, NULL);
     return NULL;
-}
-
-typedef struct MyFile {
-    FILE *fp;
-    pl_uint_t current;
-    pl_uint_t size;
-} MyFile;
-
-struct MyFile* myfile_new(PyLiteInterpreter *I, FILE *fp) {
-    struct MyFile* mf = pylt_malloc(I, sizeof(struct MyFile));
-    mf->fp = fp;
-    mf->current = 0;
-
-    struct stat stbuf;
-    fstat(fileno(fp), &stbuf);
-    mf->size = stbuf.st_size;
-    return mf;
 }
 
 #include "../deps/linenoise/osfix/_osfix.h"
@@ -65,7 +47,7 @@ PyLiteObject* pylt_mods_io_TextIO_readline(PyLiteInterpreter *I, int argc, PyLit
         return NULL;
     }
 
-    MyFile *mf = (MyFile*)obj->ob_ptr;
+    PyLiteFile *mf = (PyLiteFile*)obj->ob_ptr;
     if (mf->fp == stdin) {
         pl_int_t count = pl_isnone(args[1]) ? 8192 : min(castint(args[1])->ob_val, 8192);
         uint32_t buf[8192];
@@ -97,7 +79,7 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
         return NULL;
     }
 
-    MyFile *mf = (MyFile*)obj->ob_ptr;
+    PyLiteFile *mf = (PyLiteFile*)obj->ob_ptr;
     if (mf->fp == stdin) {
         pl_int_t count = pl_isnone(args[1]) ? 8192 : min(castint(args[1])->ob_val, 8192);
         uint32_t buf[8192];
@@ -114,7 +96,7 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
 PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteStrObject *fn = caststr(args[0]);
     PyLiteStrObject *mode = caststr(args[1]);
-    FILE *fp = mfopen(I, fn, mode);
+    FILE *fp = pl_io_fopen(I, fn, mode);
 
     pl_bool_t is_bin = false;
     for (pl_uint_t i = 0; i <= mode->ob_size; ++i) {
@@ -144,8 +126,8 @@ PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **a
         }
     }
 
-    struct stat stbuf;
-    fstat(fileno(fp), &stbuf);
+    //struct stat stbuf;
+    //fstat(fileno(fp), &stbuf);
 
     return castobj(pylt_obj_cptr_new(I, fp));
 }
@@ -184,17 +166,17 @@ PyLiteModuleObject* pylt_mods_io_register(PyLiteInterpreter *I) {
     //pylt_obj_type_register(I, tFileIO);
 
     PyLiteObject *obj_stdin = pylt_obj_cutstom_create(I, tTextIO->ob_reftype, NULL);
-    struct MyFile *mf = myfile_new(I, stdin);
+    PyLiteFile *mf = pl_io_file_new(I, stdin);
     pylt_obj_setattr(I, obj_stdin, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, mf)));
     pylt_obj_mod_setattr(I, mod, _S(stdin_), obj_stdin);
 
     PyLiteObject *obj_stdout = pylt_obj_cutstom_create(I, tTextIO->ob_reftype, NULL);
-    mf = myfile_new(I, stdout);
+    mf = pl_io_file_new(I, stdout);
     pylt_obj_setattr(I, obj_stdout, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, mf)));
     pylt_obj_mod_setattr(I, mod, _S(stdout_), obj_stdout);
 
     PyLiteObject *obj_stderr = pylt_obj_cutstom_create(I, tTextIO->ob_reftype, NULL);
-    mf = myfile_new(I, stderr);
+    mf = pl_io_file_new(I, stderr);
     pylt_obj_setattr(I, obj_stderr, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, mf)));
     pylt_obj_mod_setattr(I, mod, _S(stderr_), obj_stderr);
 

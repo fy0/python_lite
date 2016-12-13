@@ -22,9 +22,13 @@ int ucs4str_to_utf8_size(uint32_t *ucs4str, int ucs4str_len);
 bool ucs4_to_ucs2(uint32_t u4, uint16_t *u2);
 // 转换字符 ucs2 -> ucs4
 bool ucs2_to_ucs4(uint16_t u2, uint32_t *u4);
+// 转换字符 ucs4 -> wchar_t
+bool ucs4_to_wchar(uint32_t u4, wchar_t *wch);
 // 转换字符串 ucs4 -> ucs2 (末尾补\0)
 bool ucs4str_to_ucs2(uint32_t *ucs4str, int ucs4str_len, uint16_t *buf, bool ignore);
 // 转换字符串 ucs2 -> ucs4 (末尾补\0)
 bool ucs2str_to_ucs4(uint16_t *ucs2str, int ucs2str_len, uint32_t *buf);
+// 转换字符串 ucs4 -> wchar_t (末尾补\0)
+bool ucs4str_to_wchar(uint32_t *ucs4str, int ucs4str_len, wchar_t *buf, bool ignore);
 
 #endif

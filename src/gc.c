@@ -4,6 +4,7 @@
 #include "api.h"
 #include "bind.h"
 #include "intp.h"
+#include "utils/misc.h"
 #include "types/all.h"
 
 int __upset_ret;

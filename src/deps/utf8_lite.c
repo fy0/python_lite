@@ -129,6 +129,16 @@ bool ucs2_to_ucs4(uint16_t u2, uint32_t *u4) {
     return true;
 }
 
+bool ucs4_to_wchar(uint32_t u4, wchar_t *wch) {
+    if (u4 > UINT16_MAX) {
+        *wch = (wchar_t)' ';
+        return false;
+    }
+    *wch = (wchar_t)u4;
+    return true;
+}
+
+
 bool ucs4str_to_ucs2(uint32_t *ucs4str, int ucs4str_len, uint16_t *buf, bool ignore) {
     for (int i = 0; i < ucs4str_len; ++i) {
         bool ret = ucs4_to_ucs2(ucs4str[i], buf + i);
@@ -143,5 +153,14 @@ bool ucs2str_to_ucs4(uint16_t *ucs2str, int ucs2str_len, uint32_t *buf) {
         ucs2_to_ucs4(ucs2str[i], buf + i);
     }
     buf[ucs2str_len] = (uint32_t)'\0';
+    return true;
+}
+
+bool ucs4str_to_wchar(uint32_t *ucs4str, int ucs4str_len, wchar_t *buf, bool ignore) {
+    for (int i = 0; i < ucs4str_len; ++i) {
+        bool ret = ucs4_to_wchar(ucs4str[i], buf + i);
+        if (ignore || (!ret)) return false;
+    }
+    buf[ucs4str_len] = L'\0';
     return true;
 }

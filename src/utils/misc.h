@@ -14,6 +14,12 @@
 #include <stdarg.h>
 #include <math.h>
 
+#ifdef PLATFORM_WINDOWS
+#include <FCNTL.H>
+#else
+#include <fcntl.h>
+#endif
+
 #include "config.h"
 #include "static.h"
 
