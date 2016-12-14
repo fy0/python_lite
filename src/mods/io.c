@@ -48,7 +48,7 @@ PyLiteObject* pylt_mods_io_TextIO_readline(PyLiteInterpreter *I, int argc, PyLit
     }
 
     PyLiteFile *mf = (PyLiteFile*)obj->ob_ptr;
-    if (mf->fp == stdin) {
+    if (mf->fileno ==  _fileno(stdin)) {
         pl_int_t count = pl_isnone(args[1]) ? 8192 : min(castint(args[1])->ob_val, 8192);
         uint32_t buf[8192];
         uint32_t *s = (uint32_t*)&buf;
@@ -80,7 +80,7 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
     }
 
     PyLiteFile *mf = (PyLiteFile*)obj->ob_ptr;
-    if (mf->fp == stdin) {
+    if (mf->fileno == _fileno(stdin)) {
         pl_int_t count = pl_isnone(args[1]) ? 8192 : min(castint(args[1])->ob_val, 8192);
         uint32_t buf[8192];
         uint32_t *s = (uint32_t*)&buf;
@@ -165,7 +165,7 @@ PyLiteModuleObject* pylt_mods_io_register(PyLiteInterpreter *I) {
     //pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_int_new);
     //pylt_obj_type_register(I, tFileIO);
 
-    PyLiteObject *obj_stdin = pylt_obj_cutstom_create(I, tTextIO->ob_reftype, NULL);
+    /*PyLiteObject *obj_stdin = pylt_obj_cutstom_create(I, tTextIO->ob_reftype, NULL);
     PyLiteFile *mf = pl_io_file_new(I, stdin);
     pylt_obj_setattr(I, obj_stdin, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, mf)));
     pylt_obj_mod_setattr(I, mod, _S(stdin_), obj_stdin);
@@ -178,7 +178,7 @@ PyLiteModuleObject* pylt_mods_io_register(PyLiteInterpreter *I) {
     PyLiteObject *obj_stderr = pylt_obj_cutstom_create(I, tTextIO->ob_reftype, NULL);
     mf = pl_io_file_new(I, stderr);
     pylt_obj_setattr(I, obj_stderr, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, mf)));
-    pylt_obj_mod_setattr(I, mod, _S(stderr_), obj_stderr);
+    pylt_obj_mod_setattr(I, mod, _S(stderr_), obj_stderr);*/
 
     return mod;
 }

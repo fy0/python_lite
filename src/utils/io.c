@@ -1,6 +1,7 @@
 ﻿
 #include "io.h"
 #include "../api.h"
+#include "../intp.h"
 #include "../types/all.h"
 
 #include <io.h>
@@ -57,43 +58,72 @@ _err:
 }
 
 
-int file_open(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode) {
+PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode) {
+    int fd;
     int err = 0;
 #ifdef PLATFORM_WINDOWS
     wchar_t cfn[256];
     if (fn->ob_size > 255) {
         pl_error(I, pl_static.str.ValueError, "File name too long: %r", fn);
-        return -1;
+        return NULL;
     }
 
     if (!ucs4str_to_wchar(fn->ob_val, fn->ob_size, (wchar_t*)&cfn, false)) {
         pl_error(I, pl_static.str.UnicodeEncodeError, "invalid filename.");
-        return -1;
+        return NULL;
     }
 
     int flags = check_mode(mode, &err);
-    if (err == 0) return _wopen(cfn, flags);
+    if (err == 0) fd = _wopen(cfn, flags);
     else {
         pl_error(I, pl_static.str.ValueError, "invalid mode: %r", mode);
-        return -1;
+        return NULL;
     }
 #else
     char cfn[1536];
     if (fn->ob_size > 255) {
         pl_error(I, pl_static.str.ValueError, "File name too long: %r", fn);
-        return -1;
+        return NULL;
     }
 
     if (!ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&cfn)) {
         pl_error(I, pl_static.str.UnicodeEncodeError, "invalid filename.");
-        return -1;
+        return NULL;
     }
 
     int flags = check_mode(mode, &err);
-    if (err == 0) {
-        return open(cfn, flags);
+    if (err == 0) fd = open(cfn, flags);
+    else {
+        pl_error(I, pl_static.str.ValueError, "invalid mode: %r", mode);
+        return NULL;
     }
 #endif
+    if (fd != -1) {
+        PyLiteFile* pf = pylt_malloc(I, sizeof(PyLiteFile));
+        pf->fileno = fd;
+        pf->flags = flags;
+        pf->current = 0;
+
+        struct stat stbuf;
+        fstat(fd, &stbuf);
+        pf->size = stbuf.st_size;
+        return pf;
+    } else {
+        switch (errno) {
+            case ENOENT:
+                pl_error(I, pl_static.str.FileNotFoundError, "[Errno 2] No such file or directory: %r", fn);
+                break;
+            case EACCES: // open dir, windows
+                pl_error(I, pl_static.str.PermissionError, "[Errno 13] Permission denied: %r", fn);
+                break;
+            case EISDIR: // open dir, linux
+                pl_error(I, pl_static.str.IsADirectoryError, "[Errno 21] Is a directory: %r", fn);
+                break;
+            default:
+                pl_error(I, pl_static.str.OSError, "[Errno %d] File Open Error: %r", pylt_obj_int_new(I, errno), fn);
+        }
+        return NULL;
+    }
 }
 
 
@@ -141,14 +171,20 @@ FILE* pl_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mo
 #endif
 }
 
-
-PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, FILE *fp) {
-    PyLiteFile* mf = pylt_malloc(I, sizeof(PyLiteFile));
-    mf->fp = fp;
-    mf->current = 0;
-
+PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp) {
     struct stat stbuf;
-    fstat(fileno(fp), &stbuf);
-    mf->size = stbuf.st_size;
-    return mf;
+    fstat(_fileno(fp), &stbuf);
+    PyLiteFile *pf = pylt_malloc(I, sizeof(PyLiteFile));
+    pf->fileno = _fileno(fp); // st_ino is not fileno
+    pf->flags = stbuf.st_mode;
+    pf->size = stbuf.st_size;
+    pf->current = 0;
+    return pf;
+}
+
+
+void pl_io_init(PyLiteInterpreter *I) {
+    I->sys.cout = pl_io_file_new_with_cfile(I, stdin);
+    I->sys.cout = pl_io_file_new_with_cfile(I, stdout);
+    I->sys.cerr = pl_io_file_new_with_cfile(I, stderr);
 }

@@ -24,9 +24,7 @@ void pylt_intp_free(PyLiteInterpreter *I) {
 }
 
 void pylt_intp_sys_init(PyLiteInterpreter *I) {
-    I->sys.cin = pl_io_file_new(I, stdin);
-    I->sys.cout = pl_io_file_new(I, stdout);
-    I->sys.cerr = pl_io_file_new(I, stderr);
+    pl_io_init(I);
 }
 
 void pylt_intp_init(PyLiteInterpreter *I) {
