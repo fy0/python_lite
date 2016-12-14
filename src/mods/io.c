@@ -48,7 +48,7 @@ PyLiteObject* pylt_mods_io_TextIO_readline(PyLiteInterpreter *I, int argc, PyLit
     }
 
     PyLiteFile *mf = (PyLiteFile*)obj->ob_ptr;
-    if (mf->fileno ==  _fileno(stdin)) {
+    if (mf->fno ==  _fileno(stdin)) {
         pl_int_t count = pl_isnone(args[1]) ? 8192 : min(castint(args[1])->ob_val, 8192);
         uint32_t buf[8192];
         uint32_t *s = (uint32_t*)&buf;
@@ -80,7 +80,7 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
     }
 
     PyLiteFile *mf = (PyLiteFile*)obj->ob_ptr;
-    if (mf->fileno == _fileno(stdin)) {
+    if (mf->fno == _fileno(stdin)) {
         pl_int_t count = pl_isnone(args[1]) ? 8192 : min(castint(args[1])->ob_val, 8192);
         uint32_t buf[8192];
         uint32_t *s = (uint32_t*)&buf;

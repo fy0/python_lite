@@ -100,7 +100,7 @@ PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrO
 #endif
     if (fd != -1) {
         PyLiteFile* pf = pylt_malloc(I, sizeof(PyLiteFile));
-        pf->fileno = fd;
+        pf->fno = fd;
         pf->flags = flags;
         pf->current = 0;
 
@@ -175,16 +175,53 @@ PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp) {
     struct stat stbuf;
     fstat(_fileno(fp), &stbuf);
     PyLiteFile *pf = pylt_malloc(I, sizeof(PyLiteFile));
-    pf->fileno = _fileno(fp); // st_ino is not fileno
+    pf->fno = _fileno(fp); // st_ino is not fileno
     pf->flags = stbuf.st_mode;
     pf->size = stbuf.st_size;
     pf->current = 0;
+    pf->encoding = PYLT_IOTE_BYTE;
     return pf;
 }
 
 
 void pl_io_init(PyLiteInterpreter *I) {
-    I->sys.cout = pl_io_file_new_with_cfile(I, stdin);
+    I->sys.cin = pl_io_file_new_with_cfile(I, stdin);
     I->sys.cout = pl_io_file_new_with_cfile(I, stdout);
     I->sys.cerr = pl_io_file_new_with_cfile(I, stderr);
+
+    I->sys.cin->encoding = PYLT_IOTE_UCS4;
+    I->sys.cout->encoding = PYLT_IOTE_UCS4;
+    I->sys.cerr->encoding = PYLT_IOTE_UCS4;
+}
+
+int pl_io_file_read(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count) {
+    return _read(pf->fno, buf, count);
+}
+
+int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count) {
+    switch (pf->encoding) {
+        case PYLT_IOTE_BYTE: {
+            for (pl_uint_t i = 0; i < count; ++i) {
+                uint8_t c = _read(pf->fno, buf, count);
+                *(buf + i) = (uint32_t)c;
+            }
+        }
+        case PYLT_IOTE_UTF8: {
+            for (pl_uint_t i = 0; i < count; ++i) {
+                uint8_t mybuf[6];
+                _read(pf->fno, mybuf, 1);
+                int chsize = utf8ch_size(mybuf[0]);
+                if (chsize == 1) {
+                    *(buf + i) = (uint32_t)mybuf[0];
+                } else {
+                    _read(pf->fno, mybuf + 1, chsize - 1);
+                    utf8_decode(mybuf, buf + i);
+                }
+            }
+        }
+        case PYLT_IOTE_UCS4: {
+            return _read(pf->fno, buf, count * sizeof(uint32_t));
+        }
+    }
+    return 0;
 }

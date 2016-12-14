@@ -9,6 +9,8 @@
 const char *utf8_decode (const char *o, int *val);
 int utf8str_len(const char *s);
 
+int utf8ch_size(const char c);
+
 // 转换字符 ucs4 -> utf8
 bool ucs4_to_utf8(int code, char *buf, int *plen);
 // 计算utf8字串占用的空间
