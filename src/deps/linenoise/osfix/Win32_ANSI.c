@@ -681,7 +681,7 @@ static const char *utf8_decode(const char *o, int *val) {
 // If the number of arguments es_argc > MAX_ARG, only the MAX_ARG-1 firsts and
 // the last arguments are processed (no es_argv[] overflow).
 //-----------------------------------------------------------------------------
-BOOL ParseAndPrintANSIString(HANDLE hDev, wchar_t *lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten) {
+BOOL ParseAndPrintWString(HANDLE hDev, wchar_t *lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten) {
     DWORD   i;
     wchar_t* s;
 

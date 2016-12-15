@@ -18,7 +18,7 @@ int mycrt_read(int fd, void *buffer, unsigned int count) {
 int mycrt_write(int fd, void *buffer, unsigned int count) {
     if (fd == _fileno(stdout)) {
         DWORD bytesWritten = 0;
-        if (FALSE != ParseAndPrintANSIString(GetStdHandle(STD_OUTPUT_HANDLE), buffer, (DWORD)count, &bytesWritten)) {
+        if (FALSE != ParseAndPrintWString(GetStdHandle(STD_OUTPUT_HANDLE), buffer, (DWORD)count, &bytesWritten)) {
             return (int)bytesWritten;
         } else {
             errno = GetLastError();
@@ -26,7 +26,7 @@ int mycrt_write(int fd, void *buffer, unsigned int count) {
         }
     } else if (fd == _fileno(stderr)) {
         DWORD bytesWritten = 0;
-        if (FALSE != ParseAndPrintANSIString(GetStdHandle(STD_ERROR_HANDLE), buffer, (DWORD)count, &bytesWritten)) {
+        if (FALSE != ParseAndPrintWString(GetStdHandle(STD_ERROR_HANDLE), buffer, (DWORD)count, &bytesWritten)) {
             return (int)bytesWritten;
         } else {
             errno = GetLastError();

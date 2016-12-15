@@ -1,5 +1,6 @@
 ﻿
 #include "io.h"
+#include "io_crt.h"
 #include "../api.h"
 #include "../intp.h"
 #include "../types/all.h"
@@ -7,6 +8,11 @@
 #include <io.h>
 #include <errno.h>
 #include <sys/stat.h>
+
+#ifdef PLATFORM_WINDOWS
+#include <Windows.h>
+#include "../deps/linenoise/osfix/Win32_ANSI.h"
+#endif
 
 int check_mode(PyLiteStrObject *mode, int *perr) {
     int err = 0;
@@ -183,45 +189,158 @@ PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp) {
     return pf;
 }
 
-
 void pl_io_init(PyLiteInterpreter *I) {
     I->sys.cin = pl_io_file_new_with_cfile(I, stdin);
     I->sys.cout = pl_io_file_new_with_cfile(I, stdout);
     I->sys.cerr = pl_io_file_new_with_cfile(I, stderr);
 
-    I->sys.cin->encoding = PYLT_IOTE_UCS4;
-    I->sys.cout->encoding = PYLT_IOTE_UCS4;
-    I->sys.cerr->encoding = PYLT_IOTE_UCS4;
+    I->sys.cin->encoding = PYLT_IOTE_WCHAR;
+    I->sys.cout->encoding = PYLT_IOTE_WCHAR;
+    I->sys.cerr->encoding = PYLT_IOTE_WCHAR;
 }
 
 int pl_io_file_read(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count) {
     return _read(pf->fno, buf, count);
 }
 
+// from encoding to ucs4
+// -2 编码问题 -3 异常输入
 int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count) {
+    int read_count = 0;
+
+    pl_bool_t crt_accepted;
+    int ret = crt_read(I, pf->fno, buf, count, &crt_accepted);
+    if (crt_accepted) return ret;
+
     switch (pf->encoding) {
         case PYLT_IOTE_BYTE: {
+            int ret;
+            uint8_t c;
             for (pl_uint_t i = 0; i < count; ++i) {
-                uint8_t c = _read(pf->fno, buf, count);
+                ret = _read(pf->fno, &c, 1);
+                if (ret < 0) return ret;
+                read_count += ret;
                 *(buf + i) = (uint32_t)c;
             }
+            return read_count;
         }
         case PYLT_IOTE_UTF8: {
+            int ret;
             for (pl_uint_t i = 0; i < count; ++i) {
                 uint8_t mybuf[6];
-                _read(pf->fno, mybuf, 1);
+                ret = _read(pf->fno, mybuf, 1);
+                if (ret < 0) return ret;
+                read_count += ret;
                 int chsize = utf8ch_size(mybuf[0]);
-                if (chsize == 1) {
+                if (chsize == 0) return -2;
+                else if (chsize == 1) {
                     *(buf + i) = (uint32_t)mybuf[0];
                 } else {
-                    _read(pf->fno, mybuf + 1, chsize - 1);
-                    utf8_decode(mybuf, buf + i);
+                    ret = _read(pf->fno, mybuf + 1, chsize - 1);
+                    if (ret < 0) return ret;
+                    read_count += ret;
+                    if (!utf8_decode(mybuf, buf + i)) return -2;
                 }
             }
+            return read_count;
+        }
+        case PYLT_IOTE_UCS2: {
+            int ret;
+            uint16_t c;
+            for (pl_uint_t i = 0; i < count; ++i) {
+                ret = _read(pf->fno, &c, sizeof(uint16_t));
+                if (ret < 0) return ret;
+                read_count += ret;
+                *(buf + i) = (uint32_t)c;
+            }
+            return read_count;
         }
         case PYLT_IOTE_UCS4: {
             return _read(pf->fno, buf, count * sizeof(uint32_t));
         }
+        case PYLT_IOTE_WCHAR: {
+            int ret;
+            wchar_t c;
+            for (pl_uint_t i = 0; i < count; ++i) {
+                ret = _read(pf->fno, &c, sizeof(wchar_t));
+                if (ret < 0) return ret;
+                read_count += ret;
+                *(buf + i) = (uint32_t)c;
+            }
+            return read_count;
+        }    
     }
-    return 0;
+    return -3;
+}
+
+int pl_io_file_write(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count) {
+    return _write(pf->fno, buf, count);
+}
+
+
+// ucs4 to encoding
+// -2 编码问题 -3 异常输入
+int pl_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count, uint32_t ignore) {
+    int written = 0;
+
+    pl_bool_t crt_accepted;
+    int ret = crt_write(I, pf->fno, buf, count, ignore, &crt_accepted);
+    if (crt_accepted) return ret;
+
+    switch (pf->encoding) {
+        case PYLT_IOTE_BYTE: {
+            for (pl_uint_t i = 0; i < count; ++i) {
+                uint8_t c8;
+                uint32_t c = buf[i];
+                if (c > UINT8_MAX && ignore) c = ignore;
+                else return -2;
+                c8 = (uint8_t)c;
+                int ret = _write(pf->fno, buf, 1);
+                if (ret < 0) return ret;
+                written += ret;
+            }
+            return written;
+        }
+        case PYLT_IOTE_UTF8: {
+            int len;
+            uint8_t mybuf[6];
+            for (pl_uint_t i = 0; i < count; ++i) {
+                ucs4_to_utf8(buf[i], mybuf, &len);
+                int ret = _write(pf->fno, mybuf, len);
+                if (ret < 0) return ret;
+                written += ret;
+            }
+            return written;
+        }
+        case PYLT_IOTE_UCS2: {
+            for (pl_uint_t i = 0; i < count; ++i) {
+                uint16_t c16;
+                uint32_t c = buf[i];
+                if (c > UINT16_MAX && ignore) c = ignore;
+                else return -2;
+                c16 = (uint16_t)c;
+                int ret = _write(pf->fno, buf, sizeof(uint16_t));
+                if (ret < 0) return ret;
+                written += ret;
+            }
+            return written;
+        }
+        case PYLT_IOTE_UCS4: {
+            return _write(pf->fno, buf, count * sizeof(uint32_t));
+        }
+        case PYLT_IOTE_WCHAR: {
+            for (pl_uint_t i = 0; i < count; ++i) {
+                wchar_t cw;
+                uint32_t c = buf[i];
+                if (c > WCHAR_MAX && ignore) c = ignore;
+                else return -2;
+                cw = (wchar_t)c;
+                int ret = _write(pf->fno, buf, sizeof(wchar_t));
+                if (ret < 0) return ret;
+                written += ret;
+            }
+            return written;
+        }
+    }
+    return -3;
 }
