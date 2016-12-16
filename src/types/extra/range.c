@@ -1,6 +1,6 @@
 
 #include "range.h"
-
+#include "../../utils/misc.h"
 
 PyLiteRangeObject* pylt_obj_range_new(PyLiteInterpreter *I, pl_int_t start, pl_int_t stop, pl_int_t step) {
     PyLiteRangeObject *obj = pylt_malloc(I, sizeof(PyLiteRangeObject));

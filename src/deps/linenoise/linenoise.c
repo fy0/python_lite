@@ -650,12 +650,12 @@ static void abFree(struct abuf *ab) {
 static void refreshSingleLine(struct linenoiseState *l) {
     wchar_t seq[64];
     //size_t plen = wcslen(l->prompt);
-    size_t pwidth = wcswidth(l->prompt, wcslen(l->prompt));
+    size_t pwidth = (size_t)wcswidth(l->prompt, wcslen(l->prompt));
     int fd = l->ofd;
     wchar_t *buf = l->buf;
     size_t len = l->len;
     //size_t pos = l->pos;
-    size_t pos = wcswidth(l->buf, l->pos);
+    size_t pos = (size_t)wcswidth(l->buf, l->pos);
     struct abuf ab;
 
     while ((pwidth + pos) >= l->cols) {

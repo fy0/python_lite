@@ -2,6 +2,7 @@
 #ifndef UTF8_LITE_H
 #define UTF8_LITE_H
 
+#include <wchar.h>
 #include <stdint.h>
 #include <stdbool.h>
 #define MAXUNICODE    0x10FFFF 

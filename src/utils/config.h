@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef intptr_t pl_int_t;
 typedef uintptr_t pl_uint_t;

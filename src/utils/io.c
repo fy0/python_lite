@@ -5,13 +5,19 @@
 #include "../intp.h"
 #include "../types/all.h"
 
-#include <io.h>
 #include <errno.h>
 #include <sys/stat.h>
 
 #ifdef PLATFORM_WINDOWS
+#include <io.h>
 #include <Windows.h>
 #include "../deps/linenoise/osfix/Win32_ANSI.h"
+#define fileno(fp)                  _fileno(fp)
+#define read(fd,buffer,count)       read(fd,buffer,count)
+#define write(fd,buffer,count)      write(fd,buffer,count)
+#else
+#include <unistd.h>
+#include <fcntl.h>
 #endif
 
 int check_mode(PyLiteStrObject *mode, int *perr) {
@@ -92,7 +98,7 @@ PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrO
         return NULL;
     }
 
-    if (!ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&cfn)) {
+    if (!ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&cfn, NULL)) {
         pl_error(I, pl_static.str.UnicodeEncodeError, "invalid filename.");
         return NULL;
     }
@@ -179,9 +185,9 @@ FILE* pl_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mo
 
 PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp) {
     struct stat stbuf;
-    fstat(_fileno(fp), &stbuf);
+    fstat(fileno(fp), &stbuf);
     PyLiteFile *pf = pylt_malloc(I, sizeof(PyLiteFile));
-    pf->fno = _fileno(fp); // st_ino is not fileno
+    pf->fno = fileno(fp); // st_ino is not fileno
     pf->flags = stbuf.st_mode;
     pf->size = stbuf.st_size;
     pf->current = 0;
@@ -200,7 +206,7 @@ void pl_io_init(PyLiteInterpreter *I) {
 }
 
 int pl_io_file_read(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count) {
-    return _read(pf->fno, buf, count);
+    return read(pf->fno, buf, count);
 }
 
 // from encoding to ucs4
@@ -217,7 +223,7 @@ int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_u
             int ret;
             uint8_t c;
             for (pl_uint_t i = 0; i < count; ++i) {
-                ret = _read(pf->fno, &c, 1);
+                ret = read(pf->fno, &c, 1);
                 if (ret < 0) return ret;
                 read_count += ret;
                 *(buf + i) = (uint32_t)c;
@@ -228,7 +234,7 @@ int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_u
             int ret;
             for (pl_uint_t i = 0; i < count; ++i) {
                 uint8_t mybuf[6];
-                ret = _read(pf->fno, mybuf, 1);
+                ret = read(pf->fno, mybuf, 1);
                 if (ret < 0) return ret;
                 read_count += ret;
                 int chsize = utf8ch_size(mybuf[0]);
@@ -236,7 +242,7 @@ int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_u
                 else if (chsize == 1) {
                     *(buf + i) = (uint32_t)mybuf[0];
                 } else {
-                    ret = _read(pf->fno, mybuf + 1, chsize - 1);
+                    ret = read(pf->fno, mybuf + 1, chsize - 1);
                     if (ret < 0) return ret;
                     read_count += ret;
                     if (!utf8_decode(mybuf, buf + i)) return -2;
@@ -248,7 +254,7 @@ int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_u
             int ret;
             uint16_t c;
             for (pl_uint_t i = 0; i < count; ++i) {
-                ret = _read(pf->fno, &c, sizeof(uint16_t));
+                ret = read(pf->fno, &c, sizeof(uint16_t));
                 if (ret < 0) return ret;
                 read_count += ret;
                 *(buf + i) = (uint32_t)c;
@@ -256,13 +262,13 @@ int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_u
             return read_count;
         }
         case PYLT_IOTE_UCS4: {
-            return _read(pf->fno, buf, count * sizeof(uint32_t));
+            return read(pf->fno, buf, count * sizeof(uint32_t));
         }
         case PYLT_IOTE_WCHAR: {
             int ret;
             wchar_t c;
             for (pl_uint_t i = 0; i < count; ++i) {
-                ret = _read(pf->fno, &c, sizeof(wchar_t));
+                ret = read(pf->fno, &c, sizeof(wchar_t));
                 if (ret < 0) return ret;
                 read_count += ret;
                 *(buf + i) = (uint32_t)c;
@@ -274,7 +280,7 @@ int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_u
 }
 
 int pl_io_file_write(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count) {
-    return _write(pf->fno, buf, count);
+    return write(pf->fno, buf, count);
 }
 
 
@@ -295,7 +301,7 @@ int pl_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_
                 if (c > UINT8_MAX && ignore) c = ignore;
                 else return -2;
                 c8 = (uint8_t)c;
-                int ret = _write(pf->fno, buf, 1);
+                int ret = write(pf->fno, buf, 1);
                 if (ret < 0) return ret;
                 written += ret;
             }
@@ -306,7 +312,7 @@ int pl_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_
             uint8_t mybuf[6];
             for (pl_uint_t i = 0; i < count; ++i) {
                 ucs4_to_utf8(buf[i], mybuf, &len);
-                int ret = _write(pf->fno, mybuf, len);
+                int ret = write(pf->fno, mybuf, len);
                 if (ret < 0) return ret;
                 written += ret;
             }
@@ -319,14 +325,14 @@ int pl_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_
                 if (c > UINT16_MAX && ignore) c = ignore;
                 else return -2;
                 c16 = (uint16_t)c;
-                int ret = _write(pf->fno, buf, sizeof(uint16_t));
+                int ret = write(pf->fno, buf, sizeof(uint16_t));
                 if (ret < 0) return ret;
                 written += ret;
             }
             return written;
         }
         case PYLT_IOTE_UCS4: {
-            return _write(pf->fno, buf, count * sizeof(uint32_t));
+            return write(pf->fno, buf, count * sizeof(uint32_t));
         }
         case PYLT_IOTE_WCHAR: {
             for (pl_uint_t i = 0; i < count; ++i) {
@@ -335,7 +341,7 @@ int pl_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_
                 if (c > WCHAR_MAX && ignore) c = ignore;
                 else return -2;
                 cw = (wchar_t)c;
-                int ret = _write(pf->fno, buf, sizeof(wchar_t));
+                int ret = write(pf->fno, buf, sizeof(wchar_t));
                 if (ret < 0) return ret;
                 written += ret;
             }
