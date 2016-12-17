@@ -652,7 +652,7 @@ static pl_int_t _get_arg_count_str(PyLiteStrObject *format) {
         if (format->ob_val[i] == '%') {
             pl_uint32_t last = format->ob_val[i - 1];
             if (last == '%') args_count--;
-            else if (last != '//') {
+            else if (last != (uint32_t)'/') {
                 args_count++;
             }
         }
@@ -668,7 +668,7 @@ static pl_int_t _get_arg_count_cstr(const char *format) {
         if (*p == '%') {
             char last = *(p - 1);
             if (last == '%') args_count--;
-            else if (last != '//') {
+            else if (last != '/') {
                 args_count++;
             }
         }

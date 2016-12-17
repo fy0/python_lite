@@ -655,7 +655,7 @@ static void refreshSingleLine(struct linenoiseState *l) {
     wchar_t *buf = l->buf;
     size_t len = l->len;
     //size_t pos = l->pos;
-    size_t pos = (size_t)wcswidth(l->buf, l->pos);
+    size_t pos = (size_t)wcswidth((const wchar_t*)l->buf, l->pos);
     struct abuf ab;
 
     while ((pwidth + pos) >= l->cols) {
@@ -849,7 +849,7 @@ void linenoiseEditHistoryNext(struct linenoiseState *l, int dir) {
         /* Update the current history entry before to
          * overwrite it with the next one. */
         free(history[history_len - 1 - l->history_index]);
-        history[history_len - 1 - l->history_index] = wcsdup(l->buf);
+        history[history_len - 1 - l->history_index] = wcsdup((const wchar_t*)l->buf);
         /* Show the new entry */
         l->history_index += (dir == LINENOISE_HISTORY_PREV) ? 1 : -1;
         if (l->history_index < 0) {
@@ -1163,11 +1163,11 @@ wchar_t *linenoise(const wchar_t *prompt) {
             len--;
             buf[len] = '\0';
         }
-        return wcsdup(buf);
+        return wcsdup((const wchar_t*)buf);
     } else {
         count = linenoiseRaw(buf,LINENOISE_MAX_LINE,prompt);
         if (count == -1) return NULL;
-        return wcsdup(buf);
+        return wcsdup((const wchar_t*)buf);
     }
 }
 
@@ -1215,7 +1215,7 @@ int linenoiseHistoryAdd(const wchar_t *line) {
 
     /* Add an heap allocated copy of the line in the history.
      * If we reached the max length, remove the older line. */
-    linecopy = wcsdup(line);
+    linecopy = wcsdup((const wchar_t*)line);
     if (!linecopy) return 0;
     if (history_len == history_max_len) {
         free(history[0]);
