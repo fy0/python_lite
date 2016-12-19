@@ -7,6 +7,7 @@ PyLitePropertyObject* pylt_obj_property_new(PyLiteInterpreter *I, PyLiteObject *
     obj->ob_flags = 0;
     obj->fget.func = fget;
     obj->fset.func = fset;
+    obj->ob_owner = NULL;
     return obj;
 }
 

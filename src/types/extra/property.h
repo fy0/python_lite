@@ -17,6 +17,7 @@ typedef struct PyLitePropertyObject {
         PyLiteFunctionObject *pyfunc;
         PyLiteObject *func;
     } fset;
+    PyLiteObject *ob_owner; /* owner of object */
 } PyLitePropertyObject;
 
 PyLitePropertyObject* pylt_obj_property_new(PyLiteInterpreter *I, PyLiteObject *fget, PyLiteObject *fset);

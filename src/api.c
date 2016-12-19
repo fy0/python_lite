@@ -9,18 +9,8 @@ void pylt_api_output_str(PyLiteInterpreter *I, PyLiteStrObject *obj) {
         printf("bad str\n");
         return;
     }
-    switch (obj->ob_type) {
-        case PYLT_OBJ_TYPE_BYTES:
-            printf("%s", castbytes(obj)->ob_val);
-            break;
-        case PYLT_OBJ_TYPE_STR:
-            for (size_t i = 0; i < caststr(obj)->ob_size; i++) {
-                putcode(caststr(obj)->ob_val[i]);
-            }
-            break;
-    }
+    pl_io_file_writestr(I, I->sys.cout, obj->ob_val, obj->ob_size, ' ');
 }
-
 
 PyLiteStrObject* pylt_api_type_name(PyLiteInterpreter *I, int ob_type) {
     return kv_A(I->cls_base, ob_type)->name;

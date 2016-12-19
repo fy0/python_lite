@@ -32,7 +32,7 @@ PyLiteObject* pylt_mods_cio_fopen(PyLiteInterpreter *I, int argc, PyLiteObject *
         }
     }
 
-    return castobj(pylt_obj_cptr_new(I, fp));
+    return castobj(pylt_obj_cptr_new(I, fp, false));
 }
 
 PyLiteObject* pylt_mods_cio_fclose(PyLiteInterpreter *I, int argc, PyLiteObject **args) {

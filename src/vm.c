@@ -83,8 +83,6 @@ void pylt_vm_init(struct PyLiteInterpreter *I, PyLiteVM* vm) {
     kv_init(I, frame->var_tables);
 
     // built-in
-    pylt_bind_all_types_register(I);
-
     vm->builtins = pylt_mods_builtins_register(I);
     kv_push(PyLiteDictObject*, frame->var_tables, vm->builtins->attrs);
 
@@ -146,7 +144,6 @@ void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
 int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, PyLiteDictObject *kwargs, PyLiteObject **pfunc_obj, PyLiteFunctionInfo **pinfo, pl_int_t *pflag, PyLiteTupleObject **params_bak) {
     PyLiteFunctionInfo *info;
     PyLiteObject *obj, *defobj;
-    PyLiteObject *insert_caller = NULL;
     PyLiteObject **args;
 
     int args_i;
@@ -579,7 +576,8 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
 
                         tb = (tb->ob_type == PYLT_OBJ_TYPE_NONE) ? castobj(pylt_api_gettype_by_code(I, PYLT_OBJ_TYPE_OBJ)) : tb;
                         PyLiteTypeObject *type = pylt_obj_type_new(I, caststr(ta), casttype(tb)->ob_reftype, castdict(tc));
-                        pylt_obj_type_register(I, type);
+                        // TOOD: current mod
+                        pylt_type_register(I, NULL, type);
                         pylt_gc_add(I, castobj(type));
                         kv_pushptr(vm->stack, type);
                         break;
@@ -603,6 +601,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 }
 
                 // set locals and execute
+                I->recent_called = tret;
                 if (tret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
 					kv_top(vm->frames).code_pointer_slot = i;
 					pylt_vm_load_func(I, castfunc(tret));

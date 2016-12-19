@@ -76,6 +76,7 @@ PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteInterpreter *I, PyLiteStrObject 
         func->info.minimal -= (defaults->ob_size - skip);
     }
 
+    func->ob_owner = NULL;
     func->info.name = name;
     func->info.doc = NULL;
 	func->info.params = param_names ? param_names : NULL;

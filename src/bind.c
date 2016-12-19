@@ -33,10 +33,11 @@ PyLiteObject* pylt_obj_typecast(PyLiteInterpreter *I, struct PyLiteTypeObject *t
     return obj;
 }
 
-void pylt_obj_type_register(PyLiteInterpreter *I, PyLiteTypeObject* type) {
+void pylt_type_register(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteTypeObject *type) {
     if (type->ob_reftype >= kv_max(I->cls_base)) {
         kv_resize(PyLiteTypeObject*, I->cls_base, type->ob_reftype + 10);
     }
+    type->ob_owner = mod;
     pylt_gc_add(I, castobj(type->name));
     kv_A(I->cls_base, type->ob_reftype) = type;
     I->cls_base.n = type->ob_reftype + 1;
@@ -93,6 +94,7 @@ void gc_register_cfunc(PyLiteInterpreter *I, PyLiteCFunctionObject *cfunc) {
 
 PyLiteCFunctionObject* pylt_cfunc_register(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_obj_cfunc_new(I, name, param_names, defaults, types, cfunc);
+    func->ob_owner = castobj(mod);
     pylt_obj_dict_setitem(I, mod->attrs, castobj(name), castobj(func));
     gc_register_cfunc(I, func);
     return func;
@@ -100,6 +102,7 @@ PyLiteCFunctionObject* pylt_cfunc_register(PyLiteInterpreter *I, PyLiteModuleObj
 
 PyLiteCFunctionObject* pylt_cmethod_register(PyLiteInterpreter *I, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_obj_cfunc_new(I, name, param_names, defaults, types, cfunc);
+    func->ob_owner = castobj(type);
     pylt_obj_type_setattr(I, type, castobj(name), castobj(func));
     gc_register_cfunc(I, func);
     return func;
@@ -116,6 +119,7 @@ PyLiteCFunctionObject* pylt_cmethod_register_1_args(PyLiteInterpreter *I, PyLite
 
 PyLiteCFunctionObject* pylt_cclsmethod_register(PyLiteInterpreter *I, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_obj_cfunc_new(I, name, param_names, defaults, types, cfunc);
+    func->ob_owner = castobj(type);
     pylt_obj_type_setattr(I, type, castobj(name), castobj(func));
     gc_register_cfunc(I, func);
     return func;
@@ -136,7 +140,14 @@ void pylt_cprop_register(PyLiteInterpreter *I, PyLiteTypeObject *type, PyLiteStr
     PyLiteCFunctionObject *fset = cfset ? pylt_obj_cfunc_new(I, _S(fset), _NST(I, 1, "self"), NULL, NULL, cfset) : NULL;
     PyLitePropertyObject *prop = pylt_obj_property_new(I, castobj(fget), castobj(fset));
     pylt_gc_add(I, castobj(key));
-    gc_register_cfunc(I, fget);
-    gc_register_cfunc(I, fset);
+    if (fget) {
+        fget->ob_owner = castobj(prop);
+        gc_register_cfunc(I, fget);
+    }
+    if (fset) {
+        fset->ob_owner = castobj(prop);
+        gc_register_cfunc(I, fset);
+    }
+    prop->ob_owner = type;
     pylt_attr_register(I, type, key, castobj(prop));
 }

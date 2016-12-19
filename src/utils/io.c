@@ -20,12 +20,13 @@
 #include <fcntl.h>
 #endif
 
-int check_mode(PyLiteStrObject *mode, int *perr) {
+int check_mode(PyLiteStrObject *mode, int *perr, pl_bool_t *pbinary) {
     int err = 0;
     int flags = 0;
     char base_mode = 0;
     pl_bool_t _readable = false;
-    pl_bool_t plus = false;
+    pl_bool_t _updating = false;
+    pl_bool_t _binary = false;
 
     for (pl_uint_t i = 0; i < mode->ob_size; ++i) {
         switch (mode->ob_val[i]) {
@@ -36,12 +37,19 @@ int check_mode(PyLiteStrObject *mode, int *perr) {
                 }
                 base_mode = (char)mode->ob_val[i];
                 break;
-            case '+':
-                if (plus) {
+            case 'b':
+                if (_binary) {
                     err = 2;
                     goto _err;
                 }
-                plus = true;
+                _binary = true;
+                break;
+            case '+':
+                if (_updating) {
+                    err = 2;
+                    goto _err;
+                }
+                _updating = true;
                 break;
             default:
                 err = 3;
@@ -56,13 +64,14 @@ int check_mode(PyLiteStrObject *mode, int *perr) {
             case '+': break;
         }
     }
-    
-    if (plus) flags |= O_RDWR;
+
+    if (_updating) flags |= O_RDWR;
     else if (_readable) flags |= O_RDONLY;
     else flags |= O_WRONLY;
 
     flags |= O_BINARY;
 
+    if (pbinary) *pbinary = _binary;
     return flags;
 _err:
     *perr = err;
@@ -73,6 +82,7 @@ _err:
 PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode) {
     int fd;
     int err = 0;
+    pl_bool_t binary;
 #ifdef PLATFORM_WINDOWS
     wchar_t cfn[256];
     if (fn->ob_size > 255) {
@@ -85,7 +95,7 @@ PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrO
         return NULL;
     }
 
-    int flags = check_mode(mode, &err);
+    int flags = check_mode(mode, &err, &binary);
     if (err == 0) fd = _wopen(cfn, flags);
     else {
         pl_error(I, pl_static.str.ValueError, "invalid mode: %r", mode);
@@ -103,7 +113,7 @@ PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrO
         return NULL;
     }
 
-    int flags = check_mode(mode, &err);
+    int flags = check_mode(mode, &err, &binary);
     if (err == 0) fd = open(cfn, flags);
     else {
         pl_error(I, pl_static.str.ValueError, "invalid mode: %r", mode);

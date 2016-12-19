@@ -2,6 +2,7 @@
 #include <errno.h>
 
 #include "io.h"
+#include "../intp.h"
 #include "../api.h"
 #include "../bind.h"
 #include "../types/all.h"
@@ -32,7 +33,11 @@ PyLiteObject* pylt_mods_io_BaseIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
     return NULL;
 }
 
-#include "../deps/linenoise/osfix/_osfix.h"
+PyLiteObject* pylt_mods_io_BaseIO_write(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    pl_error(I, pl_static.str.NotImplementedError, NULL);
+    return NULL;
+}
+
 
 PyLiteObject* pylt_mods_io_TextIO_readline(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteCPtrObject *obj = castcptr(pylt_obj_Egetattr(I, args[0], castobj(_S(__cobj__)), NULL));
@@ -94,42 +99,12 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
 }
 
 PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    PyLiteCFunctionObject *func = castcfunc(I->recent_called);
     PyLiteStrObject *fn = caststr(args[0]);
     PyLiteStrObject *mode = caststr(args[1]);
-    FILE *fp = pl_io_fopen(I, fn, mode);
-
-    pl_bool_t is_bin = false;
-    for (pl_uint_t i = 0; i <= mode->ob_size; ++i) {
-        if (mode->ob_val[i] == 'b') {
-            is_bin = true;
-            break;
-        }
-    }
-
-    if (!is_bin) {
-        mode = caststr(pylt_obj_str_plus(I, mode, castobj(pylt_obj_str_new_from_cstr(I, "b", true))));
-    }
-
-    if (!fp) {
-        switch (errno) {
-            case ENOENT:
-                pl_error(I, pl_static.str.FileNotFoundError, "[Errno 2] No such file or directory: %r", args[0]);
-                break;
-            case EACCES: // open dir, windows
-                pl_error(I, pl_static.str.PermissionError, "[Errno 13] Permission denied: %r", args[0]);
-                break;
-            case EISDIR: // open dir, linux
-                pl_error(I, pl_static.str.IsADirectoryError, "[Errno 21] Is a directory: %r", args[0]);
-                break;
-            default:
-                pl_error(I, pl_static.str.OSError, "[Errno %d] File Open Error: %r", pylt_obj_int_new(I, errno), args[0]);
-        }
-    }
-
-    //struct stat stbuf;
-    //fstat(fileno(fp), &stbuf);
-
-    return castobj(pylt_obj_cptr_new(I, fp));
+    PyLiteFile *pf = pl_io_file_new(I, fn, mode);
+    pl_print(I, "SELF: %r\n", func->ob_owner);
+    return castobj(pylt_obj_cptr_new(I, pf, false));
 }
 
 
@@ -154,12 +129,12 @@ PyLiteModuleObject* pylt_mods_io_register(PyLiteInterpreter *I) {
     type = pylt_obj_type_new(I, pl_static.str.BaseIO, PYLT_OBJ_TYPE_OBJ, NULL);
     pylt_cmethod_register(I, type, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_BaseIO_read);
     pylt_cmethod_register(I, type, _NS(I, "write"), _NST(I, 2, "self", "data"), NULL, NULL, &pylt_mods_io_BaseIO_read);
-    pylt_obj_type_register(I, type);
+    pylt_type_register(I, mod, type);
 
     PyLiteTypeObject *tTextIO = pylt_obj_type_new(I, pl_static.str.TextIO, type->ob_reftype, NULL);
     pylt_cmethod_register(I, tTextIO, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_read);
     pylt_cmethod_register(I, tTextIO, _NS(I, "readline"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_readline);
-    pylt_obj_type_register(I, tTextIO);
+    pylt_type_register(I, mod, tTextIO);
 
     //PyLiteTypeObject *tFileIO = pylt_obj_type_new(I, pl_static.str.FileIO, type->ob_reftype, NULL);
     //pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_int_new);
@@ -179,6 +154,6 @@ PyLiteModuleObject* pylt_mods_io_register(PyLiteInterpreter *I) {
     mf = pl_io_file_new(I, stderr);
     pylt_obj_setattr(I, obj_stderr, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, mf)));
     pylt_obj_mod_setattr(I, mod, _S(stderr_), obj_stderr);*/
-
+    
     return mod;
 }

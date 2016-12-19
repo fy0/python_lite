@@ -12,10 +12,12 @@ typedef struct PyLiteModuleObject {
     PyLiteDictObject *attrs;
     PyLiteCodeObject *code;
 
-	PyLiteStrObject *name;
+	PyLiteStrObject *name; // module name
+    PyLiteObject *ob_owner; // owner of object
 	// __file__, etc.
 } PyLiteModuleObject;
 
+PyLiteModuleObject* pylt_obj_module_new_ex(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteObject *owner, PyLiteStrObject *name);
 PyLiteModuleObject* pylt_obj_module_new(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteStrObject *name);
 void pylt_obj_mod_setattr(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *key, PyLiteObject *value);
 PyLiteObject* pylt_obj_mod_getattr(PyLiteInterpreter *I, PyLiteModuleObject *self, PyLiteObject *key);

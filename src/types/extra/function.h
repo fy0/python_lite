@@ -21,6 +21,7 @@ typedef struct PyLiteFunctionInfo {
 
 typedef struct PyLiteFunctionObject {
     PyLiteObject_HEAD;
+    PyLiteObject *ob_owner; /* owner of object */
     PyLiteFunctionInfo info;
     PyLiteCodeObject code;
 } PyLiteFunctionObject;
@@ -28,6 +29,7 @@ typedef struct PyLiteFunctionObject {
 
 typedef struct PyLiteCFunctionObject {
     PyLiteObject_HEAD;
+    PyLiteObject *ob_owner; /* owner of object */
     PyLiteFunctionInfo info;
     PyLiteCFunctionPtr code;   /* the C pointer */
 } PyLiteCFunctionObject;

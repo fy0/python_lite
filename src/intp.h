@@ -31,6 +31,8 @@ typedef struct PyLiteInterpreter {
     PyLiteDictObject *inner_module_loaders;
     // exception object when error occurred. NULL as default.
     PyLiteObject *error;
+    // the last called func object
+    PyLiteObject *recent_called;
 
     pl_uint_t mem_used;
     pl_int_t class_num;

@@ -15,7 +15,7 @@
 #include <math.h>
 
 #ifdef PLATFORM_WINDOWS
-#include <FCNTL.H>
+#include <fcntl.h>
 #else
 #include <fcntl.h>
 #ifndef O_BINARY

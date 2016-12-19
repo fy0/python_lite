@@ -2,14 +2,19 @@
 #include "module.h"
 #include "../common/dict.h"
 
-PyLiteModuleObject* pylt_obj_module_new(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteStrObject *name) {
-	PyLiteModuleObject *obj = castmod(pylt_malloc(I, sizeof(PyLiteModuleObject)));
+PyLiteModuleObject* pylt_obj_module_new_ex(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteObject *owner, PyLiteStrObject *name) {
+    PyLiteModuleObject *obj = castmod(pylt_malloc(I, sizeof(PyLiteModuleObject)));
     obj->ob_type = PYLT_OBJ_TYPE_MODULE;
     obj->ob_flags = 0;
     obj->attrs = pylt_obj_dict_new(I);
     obj->code = code;
+    obj->ob_owner = owner;
 	obj->name = name;
     return obj;
+}
+
+PyLiteModuleObject* pylt_obj_module_new(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteStrObject *name) {
+    return pylt_obj_module_new_ex(I, code, NULL, name); // owner NULL is interpreter
 }
 
 void pylt_obj_mod_setattr(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *key, PyLiteObject *value) {
