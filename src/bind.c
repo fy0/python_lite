@@ -37,7 +37,7 @@ void pylt_type_register(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteTyp
     if (type->ob_reftype >= kv_max(I->cls_base)) {
         kv_resize(PyLiteTypeObject*, I->cls_base, type->ob_reftype + 10);
     }
-    type->ob_owner = mod;
+    type->ob_owner = castobj(mod);
     pylt_gc_add(I, castobj(type->name));
     kv_A(I->cls_base, type->ob_reftype) = type;
     I->cls_base.n = type->ob_reftype + 1;
@@ -148,6 +148,6 @@ void pylt_cprop_register(PyLiteInterpreter *I, PyLiteTypeObject *type, PyLiteStr
         fset->ob_owner = castobj(prop);
         gc_register_cfunc(I, fset);
     }
-    prop->ob_owner = type;
+    prop->ob_owner = castobj(type);
     pylt_attr_register(I, type, key, castobj(prop));
 }

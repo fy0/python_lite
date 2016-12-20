@@ -103,7 +103,8 @@ PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **a
     PyLiteStrObject *fn = caststr(args[0]);
     PyLiteStrObject *mode = caststr(args[1]);
     PyLiteFile *pf = pl_io_file_new(I, fn, mode);
-    pl_print(I, "SELF: %r\n", func->ob_owner);
+    PyLiteModuleObject *mod = castmod(func->ob_owner);
+    pl_assert(I, pl_ismod(mod), NULL);
     return castobj(pylt_obj_cptr_new(I, pf, false));
 }
 

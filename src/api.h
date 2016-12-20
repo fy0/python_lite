@@ -31,4 +31,6 @@ PyLiteObject* pl_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLite
 
 #define pl_new pl_call
 
+#define pl_assert(I, stmt, ret) if (!(stmt)) { pl_error(I, pl_static.str.RuntimeError, "panic"); return (ret); }
+
 #endif
