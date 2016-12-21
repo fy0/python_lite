@@ -84,7 +84,7 @@ void pylt_vm_init(struct PyLiteInterpreter *I, PyLiteVM* vm) {
 
     // built-in
     vm->builtins = pylt_mods_builtins_register(I);
-    kv_push(PyLiteDictObject*, frame->var_tables, vm->builtins->attrs);
+    kv_push(PyLiteDictObject*, frame->var_tables, vm->builtins->ob_attrs);
 
     // first local
     kv_push(PyLiteDictObject*, frame->var_tables, pylt_obj_dict_new(I));

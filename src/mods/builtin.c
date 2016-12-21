@@ -71,8 +71,8 @@ PyLiteObject* pylt_mods_builtins_dir(PyLiteInterpreter *I, int argc, PyLiteObjec
 
     switch (args[0]->ob_type) {
         case PYLT_OBJ_TYPE_MODULE:
-            for (pl_int32_t it = pylt_obj_dict_begin(I, castmod(args[0])->attrs); it != pylt_obj_dict_end(I, castmod(args[0])->attrs); pylt_obj_dict_next(I, castmod(args[0])->attrs, &it)) {
-                pylt_obj_list_append(I, lst, pylt_obj_dict_itemkey(I, castmod(args[0])->attrs, it));
+            for (pl_int32_t it = pylt_obj_dict_begin(I, castmod(args[0])->ob_attrs); it != pylt_obj_dict_end(I, castmod(args[0])->ob_attrs); pylt_obj_dict_next(I, castmod(args[0])->ob_attrs, &it)) {
+                pylt_obj_list_append(I, lst, pylt_obj_dict_itemkey(I, castmod(args[0])->ob_attrs, it));
             }
             break;
         default:

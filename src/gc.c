@@ -164,7 +164,7 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
                 break;
             case PYLT_OBJ_TYPE_MODULE: {
                 // attr
-                PyLiteDictObject *dict = castmod(obj)->attrs;
+                PyLiteDictObject *dict = castmod(obj)->ob_attrs;
                 for (pl_int32_t it = pylt_obj_dict_begin(I, dict); it != pylt_obj_dict_end(I, dict); pylt_obj_dict_next(I, dict, &it)) {
                     pylt_obj_dict_keyvalue(I, dict, it, &k, &v);
                     MOVE_WHITE(k);

@@ -9,7 +9,7 @@
 
 typedef struct PyLiteModuleObject {
     PyLiteObject_HEAD;
-    PyLiteDictObject *attrs;
+    PyLiteDictObject *ob_attrs;
     PyLiteCodeObject *code;
 
 	PyLiteStrObject *name; // module name

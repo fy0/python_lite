@@ -95,7 +95,7 @@ void gc_register_cfunc(PyLiteInterpreter *I, PyLiteCFunctionObject *cfunc) {
 PyLiteCFunctionObject* pylt_cfunc_register(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_obj_cfunc_new(I, name, param_names, defaults, types, cfunc);
     func->ob_owner = castobj(mod);
-    pylt_obj_dict_setitem(I, mod->attrs, castobj(name), castobj(func));
+    pylt_obj_dict_setitem(I, mod->ob_attrs, castobj(name), castobj(func));
     gc_register_cfunc(I, func);
     return func;
 }
