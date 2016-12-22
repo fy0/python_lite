@@ -76,7 +76,7 @@ bool ucs4_to_utf8(int code, char *buf, int *plen) {
     return true;
 }
 
-int utf8ch_size(const char c) {
+int utf8ch_size(const unsigned char c) {
     // <= 0x7f 1
     // >= 0xfc 6  >= 0xf8 5  >= 0xf0 4  >= 0xe0 3  >= 0xc0 2
     uint8_t size_limits[] = { 0xfc, 0xf8, 0xf0, 0xe0, 0xc0 };

@@ -176,7 +176,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *cio;
         PyLiteStrObject *io;
         PyLiteStrObject *BaseIO;
-        PyLiteStrObject *FileIO;
+        PyLiteStrObject *BytesIO;
         PyLiteStrObject *TextIO;
         PyLiteStrObject *stdin_;
         PyLiteStrObject *stdout_;

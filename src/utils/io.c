@@ -79,7 +79,7 @@ _err:
 }
 
 
-PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode) {
+PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode, int encoding) {
     int fd;
     int err = 0;
     pl_bool_t binary;
@@ -129,6 +129,8 @@ PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrO
         struct stat stbuf;
         fstat(fd, &stbuf);
         pf->size = stbuf.st_size;
+        pf->is_binary = binary;
+        pf->encoding = encoding;
         return pf;
     } else {
         switch (errno) {
@@ -193,7 +195,7 @@ FILE* pl_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mo
 #endif
 }
 
-PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp) {
+PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp, int encoding) {
     struct stat stbuf;
     fstat(fileno(fp), &stbuf);
     PyLiteFile *pf = pylt_malloc(I, sizeof(PyLiteFile));
@@ -201,18 +203,14 @@ PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp) {
     pf->flags = stbuf.st_mode;
     pf->size = stbuf.st_size;
     pf->current = 0;
-    pf->encoding = PYLT_IOTE_BYTE;
+    pf->encoding = encoding;
     return pf;
 }
 
 void pl_io_init(PyLiteInterpreter *I) {
-    I->sys.cin = pl_io_file_new_with_cfile(I, stdin);
-    I->sys.cout = pl_io_file_new_with_cfile(I, stdout);
-    I->sys.cerr = pl_io_file_new_with_cfile(I, stderr);
-
-    I->sys.cin->encoding = PYLT_IOTE_WCHAR;
-    I->sys.cout->encoding = PYLT_IOTE_WCHAR;
-    I->sys.cerr->encoding = PYLT_IOTE_WCHAR;
+    I->sys.cin = pl_io_file_new_with_cfile(I, stdin, PYLT_IOTE_WCHAR);
+    I->sys.cout = pl_io_file_new_with_cfile(I, stdout, PYLT_IOTE_WCHAR);
+    I->sys.cerr = pl_io_file_new_with_cfile(I, stderr, PYLT_IOTE_WCHAR);
 }
 
 int pl_io_file_read(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count) {
@@ -235,7 +233,8 @@ int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_u
             for (pl_uint_t i = 0; i < count; ++i) {
                 ret = read(pf->fno, &c, 1);
                 if (ret < 0) return ret;
-                read_count += ret;
+                if (ret == 0) break;
+                read_count += 1;
                 *(buf + i) = (uint32_t)c;
             }
             return read_count;
@@ -246,16 +245,17 @@ int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_u
                 uint8_t mybuf[6];
                 ret = read(pf->fno, mybuf, 1);
                 if (ret < 0) return ret;
-                read_count += ret;
+                if (ret == 0) break;
                 int chsize = utf8ch_size(mybuf[0]);
                 if (chsize == 0) return -2;
                 else if (chsize == 1) {
+                    read_count += 1;
                     *(buf + i) = (uint32_t)mybuf[0];
                 } else {
                     ret = read(pf->fno, mybuf + 1, chsize - 1);
                     if (ret < 0) return ret;
-                    read_count += ret;
                     if (!utf8_decode(mybuf, buf + i)) return -2;
+                    read_count += 1;
                 }
             }
             return read_count;
@@ -266,7 +266,8 @@ int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_u
             for (pl_uint_t i = 0; i < count; ++i) {
                 ret = read(pf->fno, &c, sizeof(uint16_t));
                 if (ret < 0) return ret;
-                read_count += ret;
+                if (ret == 0) break;
+                read_count += 1;
                 *(buf + i) = (uint32_t)c;
             }
             return read_count;
@@ -280,11 +281,12 @@ int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_u
             for (pl_uint_t i = 0; i < count; ++i) {
                 ret = read(pf->fno, &c, sizeof(wchar_t));
                 if (ret < 0) return ret;
-                read_count += ret;
+                if (ret == 0) break;
+                read_count += 1;
                 *(buf + i) = (uint32_t)c;
             }
             return read_count;
-        }    
+        }
     }
     return -3;
 }

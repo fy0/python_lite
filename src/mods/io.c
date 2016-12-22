@@ -52,22 +52,6 @@ PyLiteObject* pylt_mods_io_TextIO_readline(PyLiteInterpreter *I, int argc, PyLit
         return NULL;
     }
 
-    PyLiteFile *mf = (PyLiteFile*)obj->ob_ptr;
-    if (mf->fno == fileno(stdin)) {
-        pl_int_t count = pl_isnone(args[1]) ? 8192 : min(castint(args[1])->ob_val, 8192);
-        uint32_t buf[8192];
-        uint32_t *s = (uint32_t*)&buf;
-        for (pl_int_t i = 0; i < count; ++i) {
-            *s = (uint32_t)fgetwc(stdin);
-            if (*s == '\n') {
-                count = i + 1;
-                break;
-            }
-            s++;
-        }
-        return castobj(pylt_obj_str_new(I, buf, count, true));
-    }
-
     return NULL;
 }
 
@@ -84,28 +68,54 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
         return NULL;
     }
 
-    PyLiteFile *mf = (PyLiteFile*)obj->ob_ptr;
-    if (mf->fno == fileno(stdin)) {
-        pl_int_t count = pl_isnone(args[1]) ? 8192 : min(castint(args[1])->ob_val, 8192);
-        uint32_t buf[8192];
-        uint32_t *s = (uint32_t*)&buf;
-        for (pl_int_t i = 0; i < count; ++i) {
-            *s++ = (uint32_t)fgetwc(stdin);
-        }
-        return castobj(pylt_obj_str_new(I, buf, count, true));
-    }
+    pl_int_t finalcount = 0;
+    uint32_t tmpbuf[8192];
+    uint32_t *buf = (uint32_t*)tmpbuf;
+    PyLiteFile *pf = (PyLiteFile*)obj->ob_ptr;
 
-    return NULL;
+    if (pl_isint(args[1])) {
+        pl_int_t count = castint(args[1])->ob_val;
+        if (count < 8192) {
+            finalcount = pl_io_file_readstr(I, pf, buf, count);
+        } else {
+            buf = NULL;
+            pl_int_t current = 8192;
+            while (true) {
+                pl_int_t tmp = pl_io_file_readstr(I, pf, tmpbuf, current);
+                buf = pylt_realloc(I, buf, sizeof(uint32_t) * finalcount, sizeof(uint32_t) * (finalcount + tmp));
+                memcpy(buf + finalcount, tmpbuf, sizeof(uint32_t) * tmp);
+                finalcount += tmp;
+                if (tmp < 8192) break;
+                count -= 8192;
+                if (count == 0) break;
+                current = min(count, 8192);
+            }
+        }
+    } else {
+        buf = NULL;
+        while (true) {
+            pl_int_t tmp = pl_io_file_readstr(I, pf, tmpbuf, 8192);
+            buf = pylt_realloc(I, buf, sizeof(uint32_t) * finalcount, sizeof(uint32_t) * (finalcount + tmp));
+            memcpy(buf + finalcount, tmpbuf, sizeof(uint32_t) * tmp);
+            finalcount += tmp;
+            if (tmp < 8192) break;
+        }
+    }
+    return castobj(pylt_obj_str_new(I, buf, finalcount, true));
 }
 
 PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteCFunctionObject *func = castcfunc(I->recent_called);
-    PyLiteStrObject *fn = caststr(args[0]);
-    PyLiteStrObject *mode = caststr(args[1]);
-    PyLiteFile *pf = pl_io_file_new(I, fn, mode);
+    PyLiteFile *pf = pl_io_file_new(I, caststr(args[0]), caststr(args[1]), PYLT_IOTE_UTF8);
+    if (!pf) return NULL;
+
     PyLiteModuleObject *mod = castmod(func->ob_owner);
     pl_assert(I, pl_ismod(mod), NULL);
-    return castobj(pylt_obj_cptr_new(I, pf, false));
+
+    PyLiteTypeObject *iotype = casttype(pylt_obj_mod_getattr(I, mod, castobj((pf->is_binary) ? _S(BytesIO) : _S(TextIO))));
+    PyLiteObject *ret = pylt_obj_cutstom_create(I, iotype->ob_reftype, NULL);
+    pylt_obj_setattr(I, ret, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, pf, false)));
+    return ret;
 }
 
 
@@ -129,7 +139,7 @@ PyLiteModuleObject* pylt_mods_io_register(PyLiteInterpreter *I) {
     PyLiteTypeObject *type;
     type = pylt_obj_type_new(I, pl_static.str.BaseIO, PYLT_OBJ_TYPE_OBJ, NULL);
     pylt_cmethod_register(I, type, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_BaseIO_read);
-    pylt_cmethod_register(I, type, _NS(I, "write"), _NST(I, 2, "self", "data"), NULL, NULL, &pylt_mods_io_BaseIO_read);
+    pylt_cmethod_register(I, type, _NS(I, "write"), _NST(I, 2, "self", "data"), NULL, NULL, &pylt_mods_io_BaseIO_write);
     pylt_type_register(I, mod, type);
 
     PyLiteTypeObject *tTextIO = pylt_obj_type_new(I, pl_static.str.TextIO, type->ob_reftype, NULL);
@@ -137,24 +147,10 @@ PyLiteModuleObject* pylt_mods_io_register(PyLiteInterpreter *I) {
     pylt_cmethod_register(I, tTextIO, _NS(I, "readline"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_readline);
     pylt_type_register(I, mod, tTextIO);
 
-    //PyLiteTypeObject *tFileIO = pylt_obj_type_new(I, pl_static.str.FileIO, type->ob_reftype, NULL);
-    //pylt_cclsmethod_register_0_args(I, type, _S(__new__), &pylt_cls_method_int_new);
-    //pylt_obj_type_register(I, tFileIO);
+    PyLiteTypeObject *tBytesIO = pylt_obj_type_new(I, pl_static.str.BytesIO, type->ob_reftype, NULL);
+    pylt_cmethod_register(I, tBytesIO, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_read);
+    pylt_cmethod_register(I, tBytesIO, _NS(I, "readline"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_readline);
+    pylt_type_register(I, mod, tBytesIO);
 
-    /*PyLiteObject *obj_stdin = pylt_obj_cutstom_create(I, tTextIO->ob_reftype, NULL);
-    PyLiteFile *mf = pl_io_file_new(I, stdin);
-    pylt_obj_setattr(I, obj_stdin, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, mf)));
-    pylt_obj_mod_setattr(I, mod, _S(stdin_), obj_stdin);
-
-    PyLiteObject *obj_stdout = pylt_obj_cutstom_create(I, tTextIO->ob_reftype, NULL);
-    mf = pl_io_file_new(I, stdout);
-    pylt_obj_setattr(I, obj_stdout, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, mf)));
-    pylt_obj_mod_setattr(I, mod, _S(stdout_), obj_stdout);
-
-    PyLiteObject *obj_stderr = pylt_obj_cutstom_create(I, tTextIO->ob_reftype, NULL);
-    mf = pl_io_file_new(I, stderr);
-    pylt_obj_setattr(I, obj_stderr, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, mf)));
-    pylt_obj_mod_setattr(I, mod, _S(stderr_), obj_stderr);*/
-    
     return mod;
 }

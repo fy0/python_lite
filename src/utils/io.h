@@ -24,8 +24,8 @@ typedef struct {
 
 
 FILE* pl_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode);
-PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode);
-PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp);
+PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode, int encoding);
+PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp, int encoding);
 
 int pl_io_file_read(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count);
 int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count);

@@ -38,6 +38,7 @@ void pylt_type_register(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteTyp
         kv_resize(PyLiteTypeObject*, I->cls_base, type->ob_reftype + 10);
     }
     type->ob_owner = castobj(mod);
+    if (mod) pylt_obj_mod_setattr(I, mod, type->name, castobj(type));
     pylt_gc_add(I, castobj(type->name));
     kv_A(I->cls_base, type->ob_reftype) = type;
     I->cls_base.n = type->ob_reftype + 1;
