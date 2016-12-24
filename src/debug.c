@@ -161,8 +161,8 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     }
 }
 
-void debug_test_lexer(PyLiteInterpreter *I, StringStream *ss) {
-    I->lexer->ss = ss;
+void debug_test_lexer(PyLiteInterpreter *I, PyLiteFile *input) {
+    I->lexer->input = input;
 
     for (;;) {
         int code = pylt_lex_next(I->lexer);

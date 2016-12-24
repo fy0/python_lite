@@ -45,7 +45,7 @@ void pylt_intp_free(PyLiteInterpreter *I);
 void pylt_intp_init(PyLiteInterpreter *I);
 void pylt_intp_finalize(PyLiteInterpreter *I);
 void pylt_intp_run(PyLiteInterpreter *I);
-void pylt_intp_load_stream(PyLiteInterpreter *I, StringStream *ss);
+void pylt_intp_loadf(PyLiteInterpreter *I, PyLiteFile *input);
 //void pylt_intp_err(PyLiteInterpreter *I);
 
 #endif

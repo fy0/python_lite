@@ -85,10 +85,9 @@ void pylt_intp_finalize(PyLiteInterpreter *I) {
     pylt_free_ex(I, I->parser);
 }
 
-void pylt_intp_load_stream(PyLiteInterpreter *I, StringStream *ss) {
-    PyLiteCodeObject *code;
-    I->lexer->ss = ss;
-    code = pylt_parser_parse(I->parser);
+void pylt_intp_loadf(PyLiteInterpreter *I, PyLiteFile *input) {
+    I->lexer->input = input;
+    PyLiteCodeObject *code = pylt_parser_parse(I->parser);
     pylt_obj_code_add_to_gc(I, code);
     pylt_vm_load_code(I, code);
 }

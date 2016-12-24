@@ -101,7 +101,11 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
             if (tmp < 8192) break;
         }
     }
-    return castobj(pylt_obj_str_new(I, buf, finalcount, true));
+    PyLiteObject *ret = castobj(pylt_obj_str_new(I, buf, finalcount, true));
+    if (buf != tmpbuf) {
+        pylt_free(I, buf, sizeof(uint32_t) * finalcount);
+    }
+    return ret;
 }
 
 PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **args) {

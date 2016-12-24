@@ -3,7 +3,7 @@
 #define PYLITE_LEXER_H
 
 #include "utils/config.h"
-#include "io.h"
+#include "utils/io.h"
 
 #define FIRST_TOKEN    128
 
@@ -67,15 +67,22 @@ typedef struct LexExtraData {
         int pos;
         int size;
     } str;
+
+    struct {
+        bool on;
+        int count;
+        uint32_t buf[8];
+    } _record;
 } LexExtraData;
 
 typedef struct LexState {
     int linenumber;
     Token token; /* current token */
     LexExtraData le;
-    StringStream* ss;
+    PyLiteFile* input;
     PyLiteInterpreter *I;
 
+    uint32_t ch;
     int current_indent;
     int inside_couples; /* [...] (...) {...} */
     IndentInfo *indent; /* indent stack */
@@ -83,7 +90,7 @@ typedef struct LexState {
 } LexState;
 
 
-void pylt_lex_init(PyLiteInterpreter *I, LexState *ls, StringStream *ss);
+void pylt_lex_init(PyLiteInterpreter *I, LexState *ls, PyLiteFile *input);
 void pylt_lex_finalize(PyLiteInterpreter *I, LexState *ls);
 void pylt_lex_err(LexState *ls, int code);
 

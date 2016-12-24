@@ -78,6 +78,10 @@ _err:
     return 0;
 }
 
+PyLiteFile* pl_io_file_new_ex(PyLiteInterpreter *I, char *fn, char *mode, int encoding) {
+    return pl_io_file_new(I, pylt_obj_str_new_from_cstr(I, fn, true), pylt_obj_str_new_from_cstr(I, mode, true), encoding);
+}
+
 
 PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode, int encoding) {
     int fd;

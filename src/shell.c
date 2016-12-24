@@ -1,7 +1,7 @@
 ﻿
 #include "lexer.h"
 #include "parser.h"
-#include "io.h"
+#include "utils/io.h"
 #include "debug.h"
 #include "vm.h"
 #include "api.h"
@@ -18,21 +18,15 @@
 int main(int argc, char* argv[]) {
     platform_init();
 
-    int size;
-    char *buf = read_file("test.py", &size);
-    if (!buf) return 0;
-
     PyLiteInterpreter *I = pylt_intp_new();
-
-    StringStream *ss = ss_new(buf, size);
-    //printf(buf);
+    PyLiteFile *input = pl_io_file_new_ex(I, "test.py", "r", PYLT_IOTE_UTF8);
     putchar('\n');
 
-    /*debug_test_lexer(&I, ss);
+    /*debug_test_lexer(I, input);
     system("pause");
     return 0;*/
 
-    pylt_intp_load_stream(I, ss);
+    pylt_intp_loadf(I, input);
     PyLiteCodeObject *code = kv_top(I->vm.frames).code;
 
     putchar('\n');
