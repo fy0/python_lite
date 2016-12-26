@@ -17,6 +17,7 @@ typedef struct PyLiteFunctionInfo {
     pl_int_t *type_codes;         /* parameters' type code */
     PyLiteTupleObject *defaults;  /* default values of parameters */
     PyLiteStrObject *doc;
+    PyLiteDictObject *scope;
 } PyLiteFunctionInfo;
 
 typedef struct PyLiteFunctionObject {
@@ -25,7 +26,6 @@ typedef struct PyLiteFunctionObject {
     PyLiteFunctionInfo info;
     PyLiteCodeObject code;
 } PyLiteFunctionObject;
-
 
 typedef struct PyLiteCFunctionObject {
     PyLiteObject_HEAD;

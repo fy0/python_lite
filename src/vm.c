@@ -755,6 +755,11 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
 _end:;
 }
 
+PyLiteDictObject *pl_vm_get_locals(PyLiteInterpreter *I) {
+    PyLiteFrame *frame = &kv_top(I->vm.frames);
+    return kv_size(frame->var_tables) ? kv_top(frame->var_tables) : NULL;
+}
+
 PyLiteFrame* pylt_vm_curframe(PyLiteInterpreter *I) {
     return &kv_top(I->vm.frames);
 }

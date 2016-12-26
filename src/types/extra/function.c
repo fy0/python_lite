@@ -1,5 +1,6 @@
 ﻿
 #include "function.h"
+#include "../../vm.h"
 #include "../../bind.h"
 
 PyLiteFunctionObject* pylt_obj_func_new(PyLiteInterpreter *I, PyLiteCodeObject *code) {
@@ -13,6 +14,7 @@ PyLiteFunctionObject* pylt_obj_func_new(PyLiteInterpreter *I, PyLiteCodeObject *
         obj->code.const_val = pylt_obj_list_new(I);
         kv_init(I, obj->code.opcodes);
     }
+    obj->info.scope = pl_vm_get_locals(I);
     return obj;
 }
 
@@ -82,6 +84,7 @@ PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteInterpreter *I, PyLiteStrObject 
 	func->info.params = param_names ? param_names : NULL;
     func->info.defaults = defaults ? defaults : NULL;
     func->info.type_codes = types;
+    func->info.scope = pl_vm_get_locals(I);
     func->code = cfunc;
 
     return func;

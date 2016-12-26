@@ -70,6 +70,8 @@ typedef struct PyLiteFrame {
     PyLiteCodeObject *code;
     pl_uint_t code_pointer_slot;
 	pl_bool_t halt_when_ret;
+    // 这样的结构是为了生成器函数准备的。。。
+    // 但还不知道是否靠谱
     kvec_t(PyLiteDictObject*) var_tables;
 } PyLiteFrame;
 
@@ -86,6 +88,7 @@ const char* pylt_vm_get_op_name(int op);
 int token_to_op_val(uint32_t tk);
 int token_de_to_op_val(uint32_t tk);
 
+PyLiteDictObject *pl_vm_get_locals(PyLiteInterpreter *I);
 PyLiteFrame* pylt_vm_curframe(PyLiteInterpreter *I);
 
 void pylt_vm_init(PyLiteInterpreter *I, PyLiteVM *vm);

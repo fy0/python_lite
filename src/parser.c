@@ -901,7 +901,7 @@ void parse_func(ParserState *ps) {
     ACCEPT(ps, TK_INDENT);
     parse_stmts(ps);
     ACCEPT(ps, TK_DEDENT);
-    write_ins(ps, BC_RET, 0, 1);
+    write_ins(ps, BC_RET, 0, 0);
     info = func_pop(ps);
     ps->disable_return_parse = old_disable_return;
 
