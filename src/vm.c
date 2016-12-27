@@ -114,6 +114,13 @@ void pylt_vm_load_func(PyLiteInterpreter *I, PyLiteFunctionObject *func) {
         kv_copy1(PyLiteDictObject*, frame->var_tables, kv_A(vm->frames, index - 1).var_tables);
     }
 
+    pl_uint_t i = 0;
+    for (; i < kv_size(frame->var_tables); ++i) {
+        PyLiteDictObject *a = kv_A(frame->var_tables, i);
+        if (kv_A(frame->var_tables, i) == func->info.scope)
+            break;
+    }
+    kv_popn(frame->var_tables, kv_size(frame->var_tables) - i - 1);
     kv_push(PyLiteDictObject*, frame->var_tables, pylt_obj_dict_new(I));
 }
 
