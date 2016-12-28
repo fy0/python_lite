@@ -2,7 +2,7 @@
 #ifndef PYLITE_WITH_EXCEPTIONS_H
 #define PYLITE_WITH_EXCEPTIONS_H
 
-#include "../types/all.h"
+#include "all.h"
 
 // object api with exceptions
 

@@ -6,9 +6,9 @@
 #include "../api.h"
 #include "../bind.h"
 #include "../types/all.h"
+#include "../types/objectE.h"
 #include "../utils/misc.h"
 #include "../utils/io.h"
-#include "../utils/with_exceptions.h"
 
 /**
 
@@ -22,7 +22,7 @@ class TextIO:
     def read(self, size=None):
         pass
 
-class FileIO(BaseIO):
+class BytesIO(BaseIO):
     def readline(self, size=-1):
         pass
 

@@ -3,7 +3,7 @@
 #include "../vm.h"
 #include "../api.h"
 #include "../utils/misc.h"
-#include "../utils/with_exceptions.h"
+#include "objectE.h"
 
 
 void* basetype_op_func_table[][24] = {
