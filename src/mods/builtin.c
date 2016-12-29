@@ -46,8 +46,8 @@ PyLiteObject* pylt_mods_builtins_next(PyLiteInterpreter *I, int argc, PyLiteObje
 	PyLiteObject *obj = pylt_obj_iter_next(I, castiter(args[0]));
 	if (!obj) {
 		if (args[1] == castobj(&PyLiteUseless)) {
-			// TODO: 抛出异常
-			return NULL;
+            pl_error(I, pl_static.str.StopIteration, NULL);
+            return NULL;
 		}
 		return args[1];
 	}
@@ -60,7 +60,8 @@ PyLiteObject* pylt_mods_builtins_pow(PyLiteInterpreter *I, int argc, PyLiteObjec
     if (pl_isnum(args[0]) && pl_isnum(args[1])) {
         return castobj(pylt_obj_float_new(I, pow(get_numval(args[0]), get_numval(args[1]))));
     } else {
-        // TODO
+        pl_error(I, pl_static.str.TypeError, "unsupported operand type(s) for ** or pow(): %r and %r", pl_type(I, args[0]), pl_type(I, args[1]));
+        return NULL;
     }
     return NULL;
 }

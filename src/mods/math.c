@@ -14,110 +14,138 @@
 
 PyLiteObject* pylt_mods_math_acos(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, acos(get_val(args[0]))));
+        double ret = acos(get_val(args[0]));
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "%d is out of range", args[0]);
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_acosh(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, acosh(get_val(args[0]))));
+        double ret = acosh(get_val(args[0]));
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "%d is less than 1", args[0]);
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_asin(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, asin(get_val(args[0]))));
+        double ret = asin(get_val(args[0]));
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "%d is outside the range [-1, 1]", args[0]);
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_asinh(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, asinh(get_val(args[0]))));
+        double ret = asinh(get_val(args[0]));
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "%d is outside the range [-1, 1]", args[0]);
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 
 PyLiteObject* pylt_mods_math_atan(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(I, atan(get_val(args[0]))));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_atan2(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0]) && pl_isnum(args[1])) {
         return castobj(pylt_obj_float_new(I, atan2(get_val(args[0]), get_val(args[1]))));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_atanh(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, atanh(get_val(args[0]))));
+        double ret = atanh(get_val(args[0]));
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "%d less than -1 or greater than +1", args[0]);
+            return NULL;
+        } else if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "%d is +1 or -1", args[0]);
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_ceil(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(I, ceil(get_val(args[0]))));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_copysign(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0]) && pl_isnum(args[1])) {
         return castobj(pylt_obj_float_new(I, copysign(get_val(args[0]), get_val(args[1]))));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_cos(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, cos(get_val(args[0]))));
+        double ret = cos(get_val(args[0]));
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "x is an infinity");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
 
-
 PyLiteObject* pylt_mods_math_cosh(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, cosh(get_val(args[0]))));
+        double ret = cosh(get_val(args[0]));
+        if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "result overflow");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
@@ -126,72 +154,94 @@ PyLiteObject* pylt_mods_math_degrees(PyLiteInterpreter *I, int argc, PyLiteObjec
     if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(I, get_val(args[0]) * 180.0 / MATH_PI));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_erf(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, erf(get_val(args[0]))));
+        double ret = erf(get_val(args[0]));
+        if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "result underflow (x is subnormal)");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_erfc(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, erfc(get_val(args[0]))));
+        double ret = erfc(get_val(args[0]));
+        if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "result underflow (x is subnormal)");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_exp(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, exp(get_val(args[0]))));
+        double ret = exp(get_val(args[0]));
+        if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "overflow or underflow");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_expm1(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, expm1(get_val(args[0]))));
+        double ret = expm1(get_val(args[0]));
+        if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "overflow");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_fabs(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(I, fabs(get_val(args[0]))));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
 
-
 PyLiteObject* pylt_mods_math_factorial(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (pl_isint(args[0])) {
+        pl_int_t ret = 1;
+        for (pl_int_t i = 1; i <= castint(args[0])->ob_val; ++i) {
+            ret *= i;
+        }
+        return castobj(pylt_obj_int_new(I,  ret));
+    } else {
+        pl_error(I, _S(TypeError), "int required");
+    }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_floor(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(I, floor(get_val(args[0]))));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
@@ -199,118 +249,190 @@ PyLiteObject* pylt_mods_math_floor(PyLiteInterpreter *I, int argc, PyLiteObject 
 
 PyLiteObject* pylt_mods_math_fmod(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0]) && pl_isnum(args[1])) {
-        return castobj(pylt_obj_float_new(I, fmod(get_val(args[0]), get_val(args[1]))));
+        if (get_val(args[1]) == 0) {
+            pl_error(I, _S(ValueError), "y is zero");
+            return NULL;
+        }
+        double ret = fmod(get_val(args[0]), get_val(args[1]));
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "x is an infinity");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
 
-
 PyLiteObject* pylt_mods_math_frexp(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    // TODO
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_fsum(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    // TODO
     return NULL;
 }
 
-
 PyLiteObject* pylt_mods_math_gamma(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (pl_isnum(args[0])) {
+        if (get_val(args[0]) == 0) {
+            pl_error(I, _S(ValueError), "x is +0 or -0");
+            return NULL;
+        }
+        double ret = tgamma(get_val(args[0]));
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "x is a negative integer, or negative infinity");
+            return NULL;
+        } else if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "result overflow");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
+    } else {
+        pl_error(I, _S(TypeError), "int or float required");
+    }
     return NULL;
 }
 
 PyLiteObject* pylt_mods_math_hypot(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (pl_isnum(args[0]) && pl_isnum(args[1])) {
+        double ret = hypot(get_val(args[0]), get_val(args[1]));
+        if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "overflow or underflow");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
+    } else {
+        pl_error(I, _S(TypeError), "int or float required");
+    }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_isfinite(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, isfinite(get_val(args[0]))));
+        return castobj(pylt_obj_bool_new(I, isfinite(get_val(args[0]))));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_isinf(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, isinf(get_val(args[0]))));
+        return castobj(pylt_obj_bool_new(I, isinf(get_val(args[0]))));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_isnan(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, isnan(get_val(args[0]))));
+        return castobj(pylt_obj_bool_new(I, isnan(get_val(args[0]))));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_ldexp(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0]) && pl_isnum(args[1])) {
-        return castobj(pylt_obj_float_new(I, ldexp(get_val(args[0]), (int)(get_val(args[1])))));
+        double ret = ldexp(get_val(args[0]), (int)(get_val(args[1])));
+        if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "overflow or underflow");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_lgamma(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, lgamma(get_val(args[0]))));
+        if (get_val(args[0]) <= 0) {
+            pl_error(I, _S(ValueError), "x is a nonpositive integer");
+            return NULL;
+        }
+        double ret = lgamma(get_val(args[0]));
+        if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "result overflow");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_log(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, log(get_val(args[0]))));
+        double val = get_val(args[0]);
+        if (val == 0) {
+            pl_error(I, _S(ValueError), "x is zero");
+            return NULL;
+        } else if (val < 0) {
+            pl_error(I, _S(ValueError), "x is negative");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, log(val)));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_log10(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, log10(get_val(args[0]))));
+        double val = get_val(args[0]);
+        if (val == 0) {
+            pl_error(I, _S(ValueError), "x is zero");
+            return NULL;
+        } else if (val < 0) {
+            pl_error(I, _S(ValueError), "x is negative");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, log10(val)));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_log1p(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, log1p(get_val(args[0]))));
+        double val = get_val(args[0]);
+        if (val == -1) {
+            pl_error(I, _S(ValueError), "x is -1");
+            return NULL;
+        } else if (val < -1) {
+            pl_error(I, _S(ValueError), "x is less than -1");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, log1p(val)));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
 
-
 PyLiteObject* pylt_mods_math_log2(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, log2(get_val(args[0]))));
+        double val = get_val(args[0]);
+        if (val == 0) {
+            pl_error(I, _S(ValueError), "x is zero");
+            return NULL;
+        } else if (val < 0) {
+            pl_error(I, _S(ValueError), "x is negative");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, log2(val)));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
@@ -328,9 +450,23 @@ PyLiteObject* pylt_mods_math_modf(PyLiteInterpreter *I, int argc, PyLiteObject *
 
 PyLiteObject* pylt_mods_math_pow(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0]) && pl_isnum(args[1])) {
-        return castobj(pylt_obj_float_new(I, pow(get_val(args[0]), get_val(args[1]))));
+        double valx = get_val(args[0]);
+        double valy = get_val(args[1]);
+        if (valx == 0 && valy < 0) {
+            pl_error(I, _S(ValueError), "x is zero, and y is negative");
+            return NULL;
+        }
+        double ret = pow(valx, valy);
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "x is negative, and y is a finite noninteger");
+            return NULL;
+        } else if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "result overflows or underflows");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
@@ -340,27 +476,35 @@ PyLiteObject* pylt_mods_math_radians(PyLiteInterpreter *I, int argc, PyLiteObjec
     if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(I, get_val(args[0]) * MATH_PI / 180.0));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
-
 
 PyLiteObject* pylt_mods_math_sin(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, sin(get_val(args[0]))));
+        double ret = sin(get_val(args[0]));
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "x is an infinity");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
 
-
 PyLiteObject* pylt_mods_math_sinh(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, sinh(get_val(args[0]))));
+        double ret = sinh(get_val(args[0]));
+        if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "result overflow");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
@@ -368,19 +512,30 @@ PyLiteObject* pylt_mods_math_sinh(PyLiteInterpreter *I, int argc, PyLiteObject *
 
 PyLiteObject* pylt_mods_math_sqrt(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, sqrt(get_val(args[0]))));
+        double ret = sqrt(get_val(args[0]));
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "x less than -0");
+            return NULL;
+        }
+        return castobj(pylt_obj_float_new(I, ret));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
 
-
 PyLiteObject* pylt_mods_math_tan(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (pl_isnum(args[0])) {
-        return castobj(pylt_obj_float_new(I, tan(get_val(args[0]))));
+        double ret = tan(get_val(args[0]));
+        if (errno == EDOM) {
+            pl_error(I, _S(ValueError), "x is an infinity");
+        } else if (errno == ERANGE) {
+            pl_error(I, _S(ValueError), "result overflow");
+        } else {
+            return castobj(pylt_obj_float_new(I, ret));
+        }
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
@@ -390,7 +545,16 @@ PyLiteObject* pylt_mods_math_tanh(PyLiteInterpreter *I, int argc, PyLiteObject *
     if (pl_isnum(args[0])) {
         return castobj(pylt_obj_float_new(I, tanh(get_val(args[0]))));
     } else {
-        // TODO
+        pl_error(I, _S(TypeError), "int or float required");
+    }
+    return NULL;
+}
+
+PyLiteObject* pylt_mods_math_trunc(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (pl_isnum(args[0])) {
+        return castobj(pylt_obj_float_new(I, trunc(get_val(args[0]))));
+    } else {
+        pl_error(I, _S(TypeError), "int or float required");
     }
     return NULL;
 }
@@ -440,7 +604,7 @@ PyLiteModuleObject* pylt_mods_math_register(PyLiteInterpreter *I) {
     pylt_cfunc_register(I, mod, _NS(I, "sqrt"), _NST(I, 1, "x"), NULL, NULL, &pylt_mods_math_sqrt);
     pylt_cfunc_register(I, mod, _NS(I, "tan"), _NST(I, 1, "x"), NULL, NULL, &pylt_mods_math_tan);
     pylt_cfunc_register(I, mod, _NS(I, "tanh"), _NST(I, 1, "x"), NULL, NULL, &pylt_mods_math_tanh);
-    //pylt_cfunc_register(I, mod, _NS(I, "trunc"), _NST(I, 1, "val"), NULL, NULL, &pylt_mods_math_trunc);
+    pylt_cfunc_register(I, mod, _NS(I, "trunc"), _NST(I, 1, "x"), NULL, NULL, &pylt_mods_math_trunc);
 
     pylt_obj_mod_setattr(I, mod, _NS(I, "e"), castobj(pylt_obj_float_new(I, 2.718281828459045)));
     pylt_obj_mod_setattr(I, mod, _NS(I, "pi"), castobj(pylt_obj_float_new(I, MATH_PI)));
