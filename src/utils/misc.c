@@ -5,7 +5,7 @@
 
 void putcode(uint32_t code) {
     if (code < 0xff) {
-        putchar((char)code);
+        putwchar((char)code);
     } else {
         int len;
         char buf[7];

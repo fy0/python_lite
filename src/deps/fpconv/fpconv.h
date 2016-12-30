@@ -21,7 +21,7 @@
  *      int str_len = fpconv_dtoa(d, buf);
  *
  *      buf[str_len] = '\0';
- *      printf("%s", buf);
+ *      wprintf(L"%s", buf);
  * }
  *
  */

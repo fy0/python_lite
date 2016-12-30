@@ -6,7 +6,7 @@
 
 void pylt_api_output_str(PyLiteInterpreter *I, PyLiteStrObject *obj) {
     if (!obj) {
-        printf("bad str\n");
+        wprintf(L"bad str\n");
         return;
     }
     pl_io_file_writestr(I, I->sys.cout, obj->ob_val, obj->ob_size, ' ');

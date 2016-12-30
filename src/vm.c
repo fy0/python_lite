@@ -759,7 +759,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_PRINT:
                 if (kv_size(I->vm.stack) != 0) {
                     debug_print_obj(I, castobj(kv_top(I->vm.stack)));
-                    putchar('\n');
+                    putwchar('\n');
                 }
                 pl_print(I, "locals: %s\n", castobj(locals));
             case BC_HALT:

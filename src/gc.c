@@ -91,9 +91,9 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
     PyLiteFrame *frame = pylt_vm_curframe(I);
 
     /*for (pl_int_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
-        //printf("GC: ");
+        //wprintf(L"GC: ");
         //debug_print_obj(I, upset_item(white, k));
-        //putchar('\n');
+        //putwchar('\n');
     }*/
 
 #define MOVE_WHITE(__obj) \
@@ -226,7 +226,7 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
         }
     }
 
-	printf("gc collect %dw %db\n", (int)upset_len(white), (int)upset_len(I->gc.black));
+	wprintf(L"gc collect %dw %db\n", (int)upset_len(white), (int)upset_len(I->gc.black));
 
     // 将未标记对象全部释放
     for (pl_uint32_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
@@ -234,7 +234,7 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
 
         // check static before free
         if (!(obj->ob_flags | PYLT_OBJ_FLAG_STATIC)) {
-            printf("gc free 0x%7x [%d]\n", (unsigned int)(pl_uint_t)obj, (int)obj->ob_type);
+            wprintf(L"gc free 0x%7x [%d]\n", (unsigned int)(pl_uint_t)obj, (int)obj->ob_type);
             if (pl_isstrkind(obj)) {
                 pylt_obj_set_remove(I, I->gc.str_cached, obj);
             }
@@ -256,16 +256,16 @@ void pylt_gc_finalize(PyLiteInterpreter *I) {
     upset_free(I->gc.refs);
     upset_free(I->gc.statics);
     pylt_obj_set_free(I, I->gc.str_cached);
-    printf("mem unfreed: %ud\n", (unsigned int)I->mem_used);
+    wprintf(L"mem unfreed: %ud\n", (unsigned int)I->mem_used);
 }
 
 void pylt_gc_freeall(PyLiteInterpreter *I) {
     PyLiteUPSet *white = I->gc.white;
     for (pl_int32_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
         /*PyLiteObject *obj = upset_item(white, k);
-        printf("[%d] ", obj->ob_type);
+        wprintf(L"[%d] ", obj->ob_type);
         if (obj->ob_type == 5) pylt_api_output_str(I, obj);
-        putchar('\n'); */
+        putwchar('\n'); */
         pylt_obj_free(I, upset_item(white, k));
     }
 }

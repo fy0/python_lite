@@ -20,7 +20,8 @@ int main(int argc, char* argv[]) {
 
     PyLiteInterpreter *I = pylt_intp_new();
     PyLiteFile *input = pl_io_file_new_ex(I, "test.py", "r", PYLT_IOTE_UTF8);
-    putchar('\n');
+    if (!input) return 0;
+    putwchar('\n');
 
     /*debug_test_lexer(I, input);
     system("pause");
@@ -29,10 +30,9 @@ int main(int argc, char* argv[]) {
     pylt_intp_loadf(I, input);
     PyLiteCodeObject *code = kv_top(I->vm.frames).code;
 
-    putchar('\n');
     debug_print_const_vals(I, code);
     debug_print_opcodes(I, code);
-    putchar('\n');
+    putwchar('\n');
 
     pylt_intp_run(I);
     pylt_intp_finalize(I);

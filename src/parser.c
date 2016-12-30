@@ -92,30 +92,30 @@ void sload_none(ParserState *ps) {
 
 void error(ParserState *ps, int code) {
     Token *tk = &(ps->ls->token);
-    printf("ERROR at line [%d]\n", ps->ls->linenumber);
+    wprintf(L"ERROR at line [%d]\n", ps->ls->linenumber);
     //if (tk->val == TK_INT) raw_str_print(&(tk->str));
     const char *name = pylt_lex_get_token_name(tk->val);
-    if (name) printf("%s", name);
-    else putchar(tk->val);
-    putchar('\n');
+    if (name) wprintf(L"%s", name);
+    else putwchar(tk->val);
+    putwchar('\n');
     switch (code) {
         case PYLT_ERR_PARSER_INVALID_SYNTAX:
-            printf("SyntaxError: invalid syntax\n");
+            wprintf(L"SyntaxError: invalid syntax\n");
             break;
         case PYLT_ERR_PARSER_BYTES_INVALID_ESCAPE:
-            printf("SyntaxError: (value error) invalid escape\n");
+            wprintf(L"SyntaxError: (value error) invalid escape\n");
             break;
         case PYLT_ERR_PARSER_BREAK_OUTSIDE_LOOP:
-            printf("SyntaxError: 'break' outside loop\n");
+            wprintf(L"SyntaxError: 'break' outside loop\n");
             break;
         case PYLT_ERR_PARSER_CONTINUE_OUTSIDE_LOOP:
-            printf("SyntaxError: 'continue' not properly in loop\n");
+            wprintf(L"SyntaxError: 'continue' not properly in loop\n");
             break;
         case PYLT_ERR_PARSER_CANT_ASSIGN_TO_LITERAL:
-            printf("SyntaxError: can't assign to literal\n");
+            wprintf(L"SyntaxError: can't assign to literal\n");
             break;
         case PYLT_ERR_PARSER_RETURN_OUTSIDE_FUNCTION:
-            printf("SyntaxError: 'return' outside function\n");
+            wprintf(L"SyntaxError: 'return' outside function\n");
             break;
     }
     system("pause");
@@ -124,16 +124,16 @@ void error(ParserState *ps, int code) {
 
 void print_tk(Token *tk) {
     const char *name = pylt_lex_get_token_name(tk->val);
-    if (name) printf("%s", name);
-    else putchar(tk->val);
-    putchar('\n');
+    if (name) wprintf(L"%s", name);
+    else putwchar(tk->val);
+    putwchar('\n');
 }
 
 void print_tk_val(int tk_val) {
     const char *name = pylt_lex_get_token_name(tk_val);
-    if (name) printf("%s", name);
-    else putchar(tk_val);
-    putchar('\n');
+    if (name) wprintf(L"%s", name);
+    else putwchar(tk_val);
+    putwchar('\n');
 }
 
 static _INLINE

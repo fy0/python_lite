@@ -13,11 +13,10 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <math.h>
+#include <errno.h>
+#include <fcntl.h>
 
-#ifdef PLATFORM_WINDOWS
-#include <fcntl.h>
-#else
-#include <fcntl.h>
+#ifndef PLATFORM_WINDOWS
 #ifndef O_BINARY
 #define O_BINARY  0
 #endif
