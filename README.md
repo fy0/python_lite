@@ -30,7 +30,7 @@ A simple, lightweight implementation of python3-like language.
 
 * filesystem
 
-* IO stream
+* ~~IO stream~~
 
 * super type
 
@@ -48,11 +48,11 @@ A simple, lightweight implementation of python3-like language.
 
 ### never support
 
-* encodings except utf-8/ucs4
+* encodings except utf-8/ucs2/ucs4
 
 * while/for - else 
 
-* multiple inheritance (maybe)
+* multiple inheritance
 
 
 License: zlib
