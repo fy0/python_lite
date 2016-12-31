@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project (pylite)
 set(CMAKE_BUILD_TYPE Debug)
-set(build_target shell)
+#set(build_target shell)
+set(build_target playground)
 
 cmake_policy(SET CMP0015 OLD)
 
@@ -47,6 +48,14 @@ source_group_by_dir(SRC_LIST)
 IF(${build_target} MATCHES "shell")
     # shell
     add_definitions(-DSHELL)
+    add_executable(pylite ${SRC_LIST})
+
+    if (NOT MSVC)
+        target_link_libraries(pylite m)
+    endif(NOT MSVC)
+ELSEIF(${build_target} MATCHES "playground")
+    # playground
+    add_definitions(-DPLAYGROUND)
     add_executable(pylite ${SRC_LIST})
 
     if (NOT MSVC)
