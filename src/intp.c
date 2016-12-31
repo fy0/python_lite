@@ -36,12 +36,10 @@ void pylt_intp_init(PyLiteInterpreter *I) {
     I->inner_module_loaders = pylt_obj_dict_new(I);
     I->error = NULL;
 
-    I->lexer = pylt_malloc(I, sizeof(LexState));
-    I->parser = pylt_malloc(I, sizeof(ParserState));
+    I->lexer = NULL;
+    I->parser = NULL;
 
     pylt_gc_init(I);
-    pylt_lex_init(I, I->lexer, NULL);
-    pylt_parser_init(I, I->parser, I->lexer);
     pylt_static_objs_init(I);
     pylt_vm_init(I, &I->vm);
 
@@ -86,10 +84,19 @@ void pylt_intp_finalize(PyLiteInterpreter *I) {
 }
 
 void pylt_intp_loadf(PyLiteInterpreter *I, PyLiteFile *input) {
-    I->lexer->input = input;
+    PyLiteCodeObject *code = pylt_intp_parsef(I, input);
+    pylt_vm_load_code(I, code);
+}
+
+PyLiteCodeObject* pylt_intp_parsef(PyLiteInterpreter *I, PyLiteFile *input) {
+    if (!I->lexer) I->lexer = pylt_lex_new(I, input);
+    else pylt_lex_reset(I->lexer, input);
+    if (!I->parser) I->parser = pylt_parser_new(I, I->lexer);
+    else pylt_parser_reset(I, I->parser, I->lexer);
+
     PyLiteCodeObject *code = pylt_parser_parse(I->parser);
     pylt_obj_code_add_to_gc(I, code);
-    pylt_vm_load_code(I, code);
+    return code;
 }
 
 void pylt_intp_run(PyLiteInterpreter *I) {

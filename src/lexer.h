@@ -90,9 +90,11 @@ typedef struct LexState {
 } LexState;
 
 
+LexState* pylt_lex_new(PyLiteInterpreter *I, PyLiteFile *input);
 void pylt_lex_init(PyLiteInterpreter *I, LexState *ls, PyLiteFile *input);
 void pylt_lex_finalize(PyLiteInterpreter *I, LexState *ls);
 void pylt_lex_err(LexState *ls, int code);
+void pylt_lex_reset(LexState *ls, PyLiteFile *input);
 
 int pylt_lex_next(LexState *ls);
 const char* pylt_lex_get_token_name(uint32_t token);

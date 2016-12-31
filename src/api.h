@@ -30,6 +30,7 @@ PyLiteObject* pl_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObj
 PyLiteObject* pl_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, PyLiteTupleObject *args, PyLiteDictObject *kwargs);
 
 #define pl_new pl_call
+#define pl_format pylt_obj_str_new_from_cformat
 
 #define pl_assert(I, stmt, ret) if (!(stmt)) { pl_error(I, pl_static.str.RuntimeError, "panic"); return (ret); }
 

@@ -11,7 +11,7 @@ A simple, lightweight implementation of python3-like language.
 
 * exception, try - except grammar
 
-* simple import
+* ~~simple import~~
 
 * ~~slice grammar~~
 

@@ -33,7 +33,9 @@ typedef struct ParserState {
 } ParserState;
 
 PyLiteCodeObject* pylt_parser_parse(ParserState *ps);
+ParserState* pylt_parser_new(PyLiteInterpreter *I, LexState *ls);
 void pylt_parser_init(PyLiteInterpreter *I, ParserState *ps, LexState *ls);
+void pylt_parser_reset(PyLiteInterpreter *I, ParserState *ps, LexState *ls);
 void pylt_parser_finalize(PyLiteInterpreter *I, ParserState *ps);
 void pylt_parser_crash_finalize(PyLiteInterpreter *I, ParserState *ps);
 

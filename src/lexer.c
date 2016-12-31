@@ -96,6 +96,36 @@ void pylt_lex_init(PyLiteInterpreter *I, LexState *ls, PyLiteFile *input) {
     ls->le._record.count = 0;
 }
 
+LexState* pylt_lex_new(PyLiteInterpreter *I, PyLiteFile *input) {
+    LexState *lex = pylt_malloc(I, sizeof(LexState));
+    pylt_lex_init(I, lex, input);
+    return lex;
+}
+
+void pylt_lex_reset(LexState *ls, PyLiteFile *input) {
+    ls->linenumber = 1;
+    ls->current_indent = -1;
+    ls->inside_couples = 0;
+    ls->input = input;
+
+    IndentInfo *idt = ls->indent;
+    IndentInfo *idt_used = ls->indent_used;
+    idt->val = 0;
+
+    if (idt->prev) {
+        if (idt_used) {
+            while (idt_used->prev) {
+                idt_used = idt_used->prev;
+            }
+        }
+        ls->indent_used = idt->prev;
+        idt->prev = NULL;
+    }
+
+    ls->le._record.on = false;
+    ls->le._record.count = 0;
+}
+
 void pylt_lex_finalize(PyLiteInterpreter *I, LexState *ls) {
     IndentInfo *idt, *idt2;
 
@@ -276,7 +306,7 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
                 if (ls->ch == '\n') nextc(ls);
                 break;
             }
-            //case '\\': {} TODO
+            //case '\\': {} TODO: multiline support
             default:
                 if ((!is_str_type) && (ls->ch >= 0x80)) {
                     //SyntaxError: bytes can only contain ASCII literal characters.

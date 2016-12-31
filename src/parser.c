@@ -1470,6 +1470,12 @@ ParserInfo* func_pop(ParserState *ps) {
     return info;
 }
 
+ParserState* pylt_parser_new(PyLiteInterpreter *I, LexState *ls) {
+    ParserState *parser = pylt_malloc(I, sizeof(ParserState));
+    pylt_parser_init(I, parser, ls);
+    return parser;
+}
+
 void pylt_parser_init(PyLiteInterpreter *I, ParserState *ps, LexState *ls) {
     ps->I = I;
     ps->ls = ls;
@@ -1486,6 +1492,11 @@ void pylt_parser_init(PyLiteInterpreter *I, ParserState *ps, LexState *ls) {
     ps->disable_return_parse = true;
 
     func_push(ps);
+}
+
+void pylt_parser_reset(PyLiteInterpreter *I, ParserState *ps, LexState *ls) {
+    pylt_parser_finalize(I, ps);
+    pylt_parser_init(I, ps, ls);
 }
 
 // release memory if compile failed

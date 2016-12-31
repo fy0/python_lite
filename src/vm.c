@@ -95,7 +95,22 @@ void pylt_vm_finalize(PyLiteInterpreter *I) {
     kv_destroy(I->vm.frames);
 }
 
-void pylt_vm_load_func(PyLiteInterpreter *I, PyLiteFunctionObject *func) {
+void pylt_vm_push_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
+    PyLiteFrame *frame;
+    PyLiteVM *vm = &I->vm;
+
+    kv_pushp(PyLiteFrame, vm->frames);
+    frame = &kv_top(vm->frames);
+    frame->func = NULL;
+    frame->code = code;
+    frame->halt_when_ret = false;
+    kv_init(I, frame->var_tables);
+
+    kv_push(PyLiteDictObject*, frame->var_tables, vm->builtins->ob_attrs);
+    kv_push(PyLiteDictObject*, frame->var_tables, pylt_obj_dict_new(I));
+}
+
+void pylt_vm_push_func(PyLiteInterpreter *I, PyLiteFunctionObject *func) {
     PyLiteFrame *frame;
     PyLiteVM *vm = &I->vm;
     int index = kv_size(vm->frames);
@@ -326,7 +341,7 @@ _err:
 
 #define const_obj(__index) pylt_obj_list_getitem(I, code->const_val, (__index))
 
-void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
+PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     PyLiteVM *vm = &I->vm;
     PyLiteDictObject *locals;
     PyLiteInstruction ins;
@@ -340,8 +355,9 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     pl_uint_t params_offset = 0;
 
     if (code) pylt_vm_load_code(I, code);
-    else if (!kv_top(vm->frames).code) return;
+    else if (!kv_top(vm->frames).code) return NULL;
     code = kv_top(vm->frames).code;
+//#define code kv_top(vm->frames).code;
 
     locals = kv_top(kv_top(vm->frames).var_tables);
 
@@ -360,7 +376,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 PyLiteObject *output = args->ob_size == 1 ? args->ob_val[0] : castobj(args);
                 pl_print(I, "%s: %s\n", pl_type(I, I->error)->name, output);
             }
-            return;
+            return NULL;
         }
         ins = kv_A(code->opcodes, i);
         //if (...) pylt_gc_collect(I);
@@ -528,12 +544,12 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                         kv_push(uintptr_t, I->vm.stack, (uintptr_t)tret);
                         break;
                     case PYLT_OBJ_TYPE_FUNCTION: {
-                        PyLiteObject *kwargs_name = castobj(kv_pop(I->vm.stack)); // kwargs_name
-                        PyLiteObject *args_name = castobj(kv_pop(I->vm.stack)); // args_name
-                        PyLiteObject *params = castobj(kv_pop(I->vm.stack)); // params
-                        PyLiteObject *code = castobj(kv_pop(I->vm.stack)); // code
-                        PyLiteObject *name = castobj(kv_pop(I->vm.stack)); // name
-                        PyLiteObject *defaults = castobj(kv_pop(I->vm.stack)); // defaults
+                        PyLiteObject *kwargs_name = castobj(kv_pop(I->vm.stack));
+                        PyLiteObject *args_name = castobj(kv_pop(I->vm.stack));
+                        PyLiteObject *params = castobj(kv_pop(I->vm.stack));
+                        PyLiteObject *code = castobj(kv_pop(I->vm.stack));
+                        PyLiteObject *name = castobj(kv_pop(I->vm.stack));
+                        PyLiteObject *defaults = castobj(kv_pop(I->vm.stack));
 
                         tfunc = pylt_obj_func_new_ex(
                             I,
@@ -617,7 +633,7 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 I->recent_called = tret;
                 if (tret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
 					kv_top(vm->frames).code_pointer_slot = i;
-					pylt_vm_load_func(I, castfunc(tret));
+					pylt_vm_push_func(I, castfunc(tret));
 					locals = kv_top(kv_top(vm->frames).var_tables);
 					if (func_info->length > 0) {
 						for (int k = 0; k < func_info->length; ++k) {
@@ -733,18 +749,36 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 }
                 break;
             }
-            case BC_IMPORT_NAME:
+            case BC_IMPORT_NAME: {
                 // IMPORT_NAME  0       N
-                tobj = castobj(kv_topn(vm->stack, ins.extra - 1)); // name
-                tret = pylt_obj_dict_getitem(I, I->inner_module_loaders, tobj);
+                if (ins.extra > 1) {
+                    pl_error(I, pl_static.str.NotImplementedError, NULL);
+                    break;
+                }
+                PyLiteObject *name = castobj(kv_topn(vm->stack, ins.extra - 1));
+                tret = pylt_obj_dict_getitem(I, I->inner_module_loaders, name);
                 if (tret) {
                     PyLiteModuleRegisterFunc func = (PyLiteModuleRegisterFunc)tret;
-                    pylt_obj_dict_setitem(I, locals, tobj, castobj((func)(I)));
+                    pylt_obj_dict_setitem(I, locals, name, castobj((func)(I)));
+                    kv_popn(vm->stack, ins.extra);
                 } else {
-                    // TODO: import from disk
+                    PyLiteFile *input = pl_io_file_new(I, pl_format(I, "%s.py", name), pl_format(I, "r"), PYLT_IOTE_UTF8);
+                    if (!input) break;
+                    PyLiteCodeObject *tcode = pylt_intp_parsef(I, input);
+                    pl_print(I, "======== module load: %s ========\n", name);
+                    debug_print_const_vals(I, tcode);
+                    debug_print_opcodes(I, tcode);
+                    kv_popn(vm->stack, ins.extra);
+                    pylt_vm_push_code(I, tcode);
+                    PyLiteDictObject *scope = pylt_vm_run(I, NULL);
+                    pl_print(I, "======== module end: %s ========\n", name);
+                    if (I->error) goto _end;
+                    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, caststr(name));
+                    mod->ob_attrs = scope;
+                    pylt_obj_dict_setitem(I, locals, name, castobj(mod));
                 }
-                kv_popn(vm->stack, ins.extra);
                 break;
+            }
             case BC_UNPACK_SEQ: {
                 tret = castobj(kv_pop(vm->stack));
                 PyLiteIterObject *iter = pylt_obj_iter_Enew(I, tret);
@@ -767,7 +801,8 @@ void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 break;
         }
     }
-_end:;
+_end:
+    return locals;
 }
 
 PyLiteDictObject *pl_vm_get_locals(PyLiteInterpreter *I) {

@@ -81,7 +81,7 @@ typedef struct PyLiteVM {
     PyLiteModuleObject *builtins;
 } PyLiteVM;
 
-void pylt_vm_load_func(PyLiteInterpreter *I, PyLiteFunctionObject *func);
+void pylt_vm_push_func(PyLiteInterpreter *I, PyLiteFunctionObject *func);
 void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code);
 
 const char* pylt_vm_get_op_name(int op);
@@ -93,6 +93,6 @@ PyLiteFrame* pylt_vm_curframe(PyLiteInterpreter *I);
 
 void pylt_vm_init(PyLiteInterpreter *I, PyLiteVM *vm);
 void pylt_vm_finalize(PyLiteInterpreter *I);
-void pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code);
+PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code);
 
 #endif
