@@ -123,7 +123,7 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
     // 3. types
     for (pl_uint_t i = 1; i < kv_size(I->cls_base); ++i) {
         PyLiteDictObject *dict = kv_A(I->cls_base, i)->ob_attrs;
-        PyLiteTypeObject *type = pylt_api_gettype_by_code(I, i);
+        PyLiteTypeObject *type = pl_type_by_code(I, i);
         MOVE_WHITE(type->name);
         for (pl_int32_t it = pylt_obj_dict_begin(I, dict); it != pylt_obj_dict_end(I, dict); pylt_obj_dict_next(I, dict, &it)) {
             pylt_obj_dict_keyvalue(I, dict, it, &k, &v);
@@ -264,7 +264,7 @@ void pylt_gc_freeall(PyLiteInterpreter *I) {
     for (pl_int32_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
         /*PyLiteObject *obj = upset_item(white, k);
         wprintf(L"[%d] ", obj->ob_type);
-        if (obj->ob_type == 5) pylt_api_output_str(I, obj);
+        if (obj->ob_type == 5) pl_outputstr(I, obj);
         putwchar('\n'); */
         pylt_obj_free(I, upset_item(white, k));
     }

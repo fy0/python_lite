@@ -17,7 +17,7 @@ PyLiteObject* pylt_method_obj_repr(PyLiteInterpreter *I, int argc, PyLiteObject 
 }
 
 PyLiteObject* pylt_method_obj_str(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    return castobj(pylt_obj_str_new_from_format(I, pl_static.str.TMPL_OBJECT_TO_STR, pylt_api_type_name(I, args[0]->ob_type), args[0]));
+    return castobj(pl_format(I, pl_static.str.TMPL_OBJECT_TO_STR, pl_type(I, args[0])->name, args[0]));
 }
 
 PyLiteObject* pylt_method_type_mro(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
@@ -26,7 +26,7 @@ PyLiteObject* pylt_method_type_mro(PyLiteInterpreter *I, int argc, PyLiteObject 
     pl_uint32_t ob_type = dcast(type, args[0])->ob_reftype;
 
     while (ob_type) {
-        type = pylt_api_gettype_by_code(I, ob_type);
+        type = pl_type_by_code(I, ob_type);
         pylt_obj_list_append(I, lst, castobj(type));
         ob_type = type->ob_base;
     }
@@ -35,15 +35,15 @@ PyLiteObject* pylt_method_type_mro(PyLiteInterpreter *I, int argc, PyLiteObject 
 }
 
 PyLiteObject* pylt_prop_type_base_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    PyLiteTypeObject *type = pylt_api_gettype_by_code(I, dcast(type, args[0])->ob_reftype);
-    return castobj(pylt_api_gettype_by_code(I, type->ob_base));
+    PyLiteTypeObject *type = pl_type_by_code(I, dcast(type, args[0])->ob_reftype);
+    return castobj(pl_type_by_code(I, type->ob_base));
 }
 
 PyLiteObject* pylt_cls_method_type_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     // TODO: type.__new__ 的含义其实比较丰富，但我认为不太重要。有机会再抉择一下
     if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_TYPE), _S(__new__), casttype(args[0])))
         return NULL;
-    return castobj(pylt_api_gettype_by_code(I, args[1]->ob_type));
+    return castobj(pl_type_by_code(I, args[1]->ob_type));
 }
 
 
@@ -107,7 +107,7 @@ PyLiteObject* pylt_cls_method_set_new(PyLiteInterpreter *I, int argc, PyLiteObje
     PyLiteObject *obj;
     PyLiteSetObject *set;
 
-    if (!pl_bind_cls_check(I, pylt_api_gettype_by_code(I, PYLT_OBJ_TYPE_SET), _S(__new__), casttype(args[0])))
+    if (!pl_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_SET), _S(__new__), casttype(args[0])))
         return NULL;
 
     if (pylt_obj_iterable(I, args[1])) {

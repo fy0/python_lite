@@ -16,15 +16,15 @@ PyLiteObject* pylt_mods_builtins_print(PyLiteInterpreter *I, int argc, PyLiteObj
     for (int i = 0; i < values->ob_size; ++i) {
         obj = values->ob_val[i];
         if (obj->ob_type == PYLT_OBJ_TYPE_STR) {
-            pylt_api_output_str(I, caststr(obj));
+            pl_outputstr(I, caststr(obj));
         } else {
             //debug_print_obj(I, obj);
-            pylt_api_output_str(I, pylt_obj_to_str(I, obj));
+            pl_outputstr(I, pylt_obj_to_str(I, obj));
         }
-        if (i != values->ob_size - 1) pylt_api_output_str(I, caststr(args[1]));
+        if (i != values->ob_size - 1) pl_outputstr(I, caststr(args[1]));
     }
 
-    pylt_api_output_str(I, caststr(args[2]));
+    pl_outputstr(I, caststr(args[2]));
     return NULL;
 }
 
@@ -85,7 +85,7 @@ PyLiteObject* pylt_mods_builtins_dir(PyLiteInterpreter *I, int argc, PyLiteObjec
             }
     }
 
-    PyLiteTypeObject *type = pylt_api_gettype_by_code(I, args[0]->ob_type);
+    PyLiteTypeObject *type = pl_type_by_code(I, args[0]->ob_type);
     while (true) {
         for (pl_int32_t it = pylt_obj_dict_begin(I, type->ob_attrs); it != pylt_obj_dict_end(I, type->ob_attrs); pylt_obj_dict_next(I, type->ob_attrs, &it)) {
             PyLiteObject *key = pylt_obj_dict_itemkey(I, type->ob_attrs, it);
@@ -94,7 +94,7 @@ PyLiteObject* pylt_mods_builtins_dir(PyLiteInterpreter *I, int argc, PyLiteObjec
             }
         }
         if (type->ob_reftype == PYLT_OBJ_TYPE_OBJ) break;
-        type = pylt_api_gettype_by_code(I, type->ob_base);
+        type = pl_type_by_code(I, type->ob_base);
     };
 
     return castobj(lst);
@@ -106,13 +106,13 @@ PyLiteObject* pylt_mods_builtins_iter(PyLiteInterpreter *I, int argc, PyLiteObje
 
 PyLiteObject* pylt_mods_builtins_isinstance(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (args[1]->ob_type == PYLT_OBJ_TYPE_TYPE) {
-        return castobj(pylt_obj_bool_new(I, pylt_api_isinstance(I, args[0], casttype(args[1])->ob_reftype)));
+        return castobj(pylt_obj_bool_new(I, pl_isinstance(I, args[0], casttype(args[1])->ob_reftype)));
     }
     if (args[1]->ob_type == PYLT_OBJ_TYPE_TUPLE) {
         for (int i = 0; i < casttuple(args[1])->ob_size; ++i) {
             PyLiteTypeObject *type = casttype(casttuple(args[1])->ob_val[i]);
             if (type->ob_type != PYLT_OBJ_TYPE_TYPE) return NULL;
-            if (pylt_api_isinstance(I, args[0], type->ob_reftype)) {
+            if (pl_isinstance(I, args[0], type->ob_reftype)) {
                 return castobj(pylt_obj_bool_new(I, true));
             }
         }
@@ -133,20 +133,13 @@ PyLiteObject* pylt_mods_builtins_repr(PyLiteInterpreter *I, int argc, PyLiteObje
 
 
 PyLiteObject* pylt_mods_builtins_super(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    PyLiteTypeObject *type = pylt_api_gettype_by_code(I, args[0]->ob_type);
+    PyLiteTypeObject *type = pl_type_by_code(I, args[0]->ob_type);
     return castobj(type);
 }
 
 PyLiteObject* pylt_mods_builtins_setattr(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     pylt_obj_setattr(I, args[0], args[1], args[2]);
     return NULL;
-}
-
-
-PyLiteObject* pylt_mods_builtins_strtest(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    return castobj(pylt_obj_str_new_from_format(I, _NS(I, "测试%d滑%f稽%p"), pylt_obj_int_new(I, 100), pylt_obj_float_new(I, 1.2113), pylt_obj_int_new(I, 100)));
-    //return castobj(_NS(I, "测试 滑稽  END"));
-    return castobj(pylt_obj_to_str(I, args[0]));
 }
 
 
@@ -168,7 +161,6 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteInterpreter *I) {
     pylt_cfunc_register(I, mod, pl_static.str.repr, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_repr);
     pylt_cfunc_register(I, mod, pl_static.str.super, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_super);
     pylt_cfunc_register(I, mod, pl_static.str.pow, _NT(I, 2, pl_static.str.x, pl_static.str.y), NULL, NULL, &pylt_mods_builtins_pow);
-    pylt_cfunc_register(I, mod, _NS(I, "strtest"), _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_strtest);
 
     pylt_obj_mod_setattr(I, mod, pl_static.str.None, castobj(&PyLiteNone));
     pylt_gc_add(I, castobj(mod));

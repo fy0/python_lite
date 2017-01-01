@@ -31,12 +31,12 @@ PyLiteObject* pylt_obj_type_getattr(PyLiteInterpreter *I, PyLiteTypeObject *self
         obj = pylt_obj_dict_getitem(I, self->ob_attrs, key);
         if (obj) return obj;
         if (self->ob_reftype == PYLT_OBJ_TYPE_OBJ) break;
-        self = pylt_api_gettype_by_code(I, self->ob_base);
+        self = pl_type_by_code(I, self->ob_base);
         if (p_at_type) *p_at_type = true;
     }
 
     if (self->ob_reftype != PYLT_OBJ_TYPE_TYPE) {
-        obj = pylt_obj_dict_getitem(I, pylt_api_gettype_by_code(I, PYLT_OBJ_TYPE_TYPE)->ob_attrs, key);
+        obj = pylt_obj_dict_getitem(I, pl_type_by_code(I, PYLT_OBJ_TYPE_TYPE)->ob_attrs, key);
         if (p_at_type) *p_at_type = true;
         if (obj) return obj;
     }

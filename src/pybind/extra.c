@@ -15,12 +15,12 @@ PyLiteObject* pylt_prop_function_args_types_get(PyLiteInterpreter *I, int argc, 
     PyLiteTupleObject *data = pylt_obj_tuple_new(I, info->length);
     if (!info->type_codes) {
         for (pl_int_t i = 0; i < data->ob_size; ++i) {
-            data->ob_val[i] = castobj(pylt_api_gettype_by_code(I, PYLT_OBJ_TYPE_OBJ));
+            data->ob_val[i] = castobj(pl_type_by_code(I, PYLT_OBJ_TYPE_OBJ));
         }
     } else {
         for (pl_int_t i = 0; i < data->ob_size; ++i) {
             pl_int_t typecode = info->type_codes[i];
-            data->ob_val[i] = castobj(pylt_api_gettype_by_code(I, typecode ? typecode : PYLT_OBJ_TYPE_OBJ));
+            data->ob_val[i] = castobj(pl_type_by_code(I, typecode ? typecode : PYLT_OBJ_TYPE_OBJ));
         }
     }
     return castobj(data);

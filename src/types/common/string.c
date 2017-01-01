@@ -85,12 +85,12 @@ PyLiteObject* pylt_obj_str_mul(PyLiteInterpreter *I, PyLiteStrObject *self, PyLi
 
 PyLiteObject* pylt_obj_str_mod(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteObject *other) {
     if (pl_istuple(other)) {
-        return castobj(pylt_obj_str_new_from_format_with_tuple(I, self, casttuple(other)));
+        return castobj(pl_formatT(I, self, casttuple(other)));
     } else {
         PyLiteStrObject *ret;
         PyLiteTupleObject *tuple = pylt_obj_tuple_new(I, 1);
         tuple->ob_val[0] = other;
-        ret = pylt_obj_str_new_from_format_with_tuple(I, self, tuple);
+        ret = pl_formatT(I, self, tuple);
         pylt_obj_tuple_free(I, tuple);
         return castobj(ret);
     }

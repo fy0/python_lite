@@ -4,7 +4,7 @@
 #include "types/all.h"
 #include "utils/misc.h"
 
-void pylt_api_output_str(PyLiteInterpreter *I, PyLiteStrObject *obj) {
+void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj) {
     if (!obj) {
         wprintf(L"bad str\n");
         return;
@@ -12,35 +12,27 @@ void pylt_api_output_str(PyLiteInterpreter *I, PyLiteStrObject *obj) {
     pl_io_file_writestr(I, I->sys.cout, obj->ob_val, obj->ob_size, ' ');
 }
 
-PyLiteStrObject* pylt_api_type_name(PyLiteInterpreter *I, int ob_type) {
-    return kv_A(I->cls_base, ob_type)->name;
+PyLiteTypeObject* pl_getbuiltintype(PyLiteInterpreter *I, PyLiteStrObject *name) {
+    return pl_gettype_from_mod(I, I->vm.builtins, name);
 }
 
-PyLiteTypeObject* pylt_api_getbuiltintype(PyLiteInterpreter *I, PyLiteStrObject *name) {
-    return pylt_api_gettype_from_mod(I, I->vm.builtins, name);
-}
-
-PyLiteTypeObject* pylt_api_gettype_by_code(PyLiteInterpreter *I, pl_uint32_t type_code) {
-    return kv_A(I->cls_base, type_code);
-}
-
-PyLiteTypeObject* pylt_api_gettype_from_mod(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
+PyLiteTypeObject* pl_gettype_from_mod(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
 	PyLiteObject *obj = pylt_obj_mod_getattr(I, mod, castobj(name));
 	return pl_istype(obj) ? casttype(obj) : NULL;
 }
 
-pl_uint32_t pylt_api_get_base_typecode(PyLiteInterpreter *I, pl_uint32_t type_code) {
+pl_uint32_t pl_getbase_by_code(PyLiteInterpreter *I, pl_uint32_t type_code) {
     pl_int_t top_base;
 
     top_base = type_code;
     while (top_base >= PYLT_OBJ_TYPE_USERCLASS) {
-        top_base = pylt_api_gettype_by_code(I, top_base)->ob_base;
+        top_base = pl_type_by_code(I, top_base)->ob_base;
     }
 
     return top_base;
 }
 
-pl_bool_t pylt_api_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32_t type_code) {
+pl_bool_t pl_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32_t type_code) {
     PyLiteTypeObject* type;
     pl_uint32_t ob_type = obj->ob_type;
 
@@ -50,7 +42,7 @@ pl_bool_t pylt_api_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32
 
     while (ob_type != PYLT_OBJ_TYPE_OBJ) {
         if (ob_type == type_code) return true;
-        type = pylt_api_gettype_by_code(I, ob_type);
+        type = pl_type_by_code(I, ob_type);
         ob_type = type->ob_base;
     }
 
@@ -73,12 +65,12 @@ static pl_int_t _get_arg_count_cstr(const char *format) {
     return args_count;
 }
 
-pl_bool_t pl_api_issubclass(PyLiteInterpreter *I, PyLiteTypeObject *a, PyLiteTypeObject *b) {
+pl_bool_t pl_issubclass(PyLiteInterpreter *I, PyLiteTypeObject *a, PyLiteTypeObject *b) {
     if (a == b) return true;
     else {
         PyLiteTypeObject* type = a;
         while (type->ob_reftype != PYLT_OBJ_TYPE_OBJ) {
-            type = pylt_api_gettype_by_code(I, type->ob_base);
+            type = pl_type_by_code(I, type->ob_base);
             if (type == b) return true;
         }
     }
@@ -105,15 +97,15 @@ void pl_print(PyLiteInterpreter *I, const char *format, ...) {
     }
     va_end(args);
 
-    str = pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
+    str = pl_formatT(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
     pylt_obj_tuple_free(I, targs);
-    pylt_api_output_str(I, str);
+    pl_outputstr(I, str);
 }
 
 void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char *format, ...) {
     PyLiteObject *error;
     PyLiteStrObject *str;
-    PyLiteTypeObject *type = pylt_api_getbuiltintype(I, exception_name);
+    PyLiteTypeObject *type = pl_getbuiltintype(I, exception_name);
     va_list args;
 
     if (format) {
@@ -127,12 +119,12 @@ void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char 
         }
         va_end(args);
 
-         str = pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
-         pylt_obj_tuple_free(I, targs);
+        str = pl_formatT(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
+        pylt_obj_tuple_free(I, targs);
 
-         // new Exception
-         error = pl_call(I, castobj(type), 1, str);
-         I->error = error;
+        // new Exception
+        error = pl_call(I, castobj(type), 1, str);
+        I->error = error;
     } else {
         error = pl_call(I, castobj(type), 0);
     }

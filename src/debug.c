@@ -12,7 +12,7 @@ const char* get_op_name(uint32_t val) {
 }
 
 void debug_print_obj(PyLiteInterpreter *I, PyLiteObject *obj) {
-    pylt_api_output_str(I, pylt_obj_to_repr(I, obj));
+    pl_outputstr(I, pylt_obj_to_repr(I, obj));
 }
 
 void debug_print_const_vals(PyLiteInterpreter *I, PyLiteCodeObject *code) {
@@ -22,7 +22,7 @@ void debug_print_const_vals(PyLiteInterpreter *I, PyLiteCodeObject *code) {
         /*wprintf(L"    %-4d %-12s ", i, pylt_api_type_name_cstr(I, obj->ob_type));
         debug_print_obj(I, obj);
         putwchar('\n');*/
-        pl_print(I, "   %-4d %-12s %s\n", pylt_obj_int_new(I, i), pylt_api_type_name(I, obj->ob_type), pylt_obj_to_repr(I, obj));
+        pl_print(I, "   %-4d %-12s %s\n", pylt_obj_int_new(I, i), pl_type(I, obj)->name, pylt_obj_to_repr(I, obj));
     }
 }
 
@@ -64,7 +64,7 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 break;
             case BC_NEW_OBJ:
                 wprintf(L"   %-15ls ", L"NEW_OBJ");
-                pylt_api_output_str(I, pylt_api_type_name(I, ins.exarg));
+                pl_outputstr(I, pl_type_by_code(I, ins.exarg)->name);
                 wprintf(L" %d\n", ins.extra);
                 break;
             case BC_CALL:

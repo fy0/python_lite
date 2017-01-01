@@ -135,7 +135,7 @@ PyLiteIterObject* pylt_obj_iter_Enew(PyLiteInterpreter *I, PyLiteObject *obj) {
         pl_error(I, pl_static.str.TypeError, "%r object is not iterable", pl_type(I, obj)->name);
         return NULL;
     }
-    if (!pl_api_issubclass(I, pl_type(I, castobj(ret)), pl_type_by_code(I, PYLT_OBJ_TYPE_ITER))) {
+    if (!pl_issubclass(I, pl_type(I, castobj(ret)), pl_type_by_code(I, PYLT_OBJ_TYPE_ITER))) {
         pl_error(I, pl_static.str.TypeError, "iter() returned non-iterator of type %r", pl_type(I, castobj(ret))->name);
         return NULL;
     }
@@ -143,7 +143,7 @@ PyLiteIterObject* pylt_obj_iter_Enew(PyLiteInterpreter *I, PyLiteObject *obj) {
 }
 
 PyLiteObject* pylt_obj_iter_Enext(PyLiteInterpreter *I, PyLiteIterObject *iter) {
-    if (!pl_api_issubclass(I, pl_type(I, castobj(iter)), pl_type_by_code(I, PYLT_OBJ_TYPE_ITER))) {
+    if (!pl_issubclass(I, pl_type(I, castobj(iter)), pl_type_by_code(I, PYLT_OBJ_TYPE_ITER))) {
         pl_error(I, pl_static.str.TypeError, "%r object is not iterable", pl_type(I, castobj(iter))->name);
         return NULL;
     }
@@ -161,7 +161,7 @@ PyLiteObject* pylt_obj_Egetattr_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLi
         // if default value is &PyLiteUseless, not found and no exception
         if (_default) return _default;
         pl_error(I, pl_static.str.AttributeError, "type object %r has no attribute %r",
-            pylt_api_type_name(I, obj->ob_type), key);
+            pl_type(I, obj)->name, key);
     }
     return ret;
 }
@@ -278,7 +278,7 @@ PyLiteStrObject* pylt_obj_Eto_str(PyLiteInterpreter *I, PyLiteObject *obj) {
         PyLiteObject *method_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__str__), NULL);
         if (method_func) {
             PyLiteObject *ret = pl_call_method(I, obj, method_func, 0);
-            if (!pylt_api_isinstance(I, ret, PYLT_OBJ_TYPE_STR)) {
+            if (!pl_isinstance(I, ret, PYLT_OBJ_TYPE_STR)) {
                 pl_error(I, pl_static.str.TypeError, "__str__ returned non - string(type %s)", pl_type(I, ret)->name);
                 return NULL;
             }

@@ -10,7 +10,7 @@ pl_bool_t pl_bind_cls_check(PyLiteInterpreter *I, PyLiteTypeObject *defclass, Py
         pl_error(I, pl_static.str.TypeError, "%s.%s(X) : X is not a type object(%s)", defclass->name, method_name, pl_type(I, castobj(givenclass))->name);
         return false;
     }
-    if (!pl_api_issubclass(I, givenclass, defclass)) {
+    if (!pl_issubclass(I, givenclass, defclass)) {
         // test: set.__new__(dict)
         pl_error(I, pl_static.str.TypeError, "%s.%s(X) : %s is not a subtype of %s", defclass->name, method_name, givenclass->name, defclass->name);
         return false;
@@ -22,10 +22,10 @@ pl_bool_t pl_bind_cls_check(PyLiteInterpreter *I, PyLiteTypeObject *defclass, Py
 // 先创建其基本类，然后包一层自定义类的外壳
 PyLiteObject* pylt_obj_typecast(PyLiteInterpreter *I, struct PyLiteTypeObject *type, PyLiteObject *obj) {
     if (pl_iscustomtype(type) && (obj->ob_type != type->ob_reftype)) {
-        pl_uint32_t type_code = pylt_api_get_base_typecode(I, type->ob_base);
+        pl_uint32_t type_code = pl_getbase_by_code(I, type->ob_base);
         if (type_code != obj->ob_type) {
             // TODO: 这里不太对劲，但又说不上来哪里不对劲
-            pl_error(I, pl_static.str.TypeError, "%s is not a subtype of %s", pl_type(I, castobj(type))->name, pylt_api_type_name(I, type_code));
+            pl_error(I, pl_static.str.TypeError, "%s is not a subtype of %s", pl_type(I, castobj(type))->name, pl_type_by_code(I, type_code));
             return NULL;
         }
         return pylt_obj_cutstom_create(I, type->ob_reftype, obj);
