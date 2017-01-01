@@ -225,16 +225,18 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
                 }
         }
     }
-
+#ifdef PL_DEBUG_INFO
 	wprintf(L"gc collect %dw %db\n", (int)upset_len(white), (int)upset_len(I->gc.black));
-
+#endif
     // 将未标记对象全部释放
     for (pl_uint32_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
         PyLiteObject *obj = upset_item(white, k);
 
         // check static before free
         if (!(obj->ob_flags | PYLT_OBJ_FLAG_STATIC)) {
+#ifdef PL_DEBUG_INFO
             wprintf(L"gc free 0x%7x [%d]\n", (unsigned int)(pl_uint_t)obj, (int)obj->ob_type);
+#endif
             if (pl_isstrkind(obj)) {
                 pylt_obj_set_remove(I, I->gc.str_cached, obj);
             }
@@ -256,7 +258,9 @@ void pylt_gc_finalize(PyLiteInterpreter *I) {
     upset_free(I->gc.refs);
     upset_free(I->gc.statics);
     pylt_obj_set_free(I, I->gc.str_cached);
+#ifdef PL_DEBUG_INFO
     wprintf(L"mem unfreed: %ud\n", (unsigned int)I->mem_used);
+#endif
 }
 
 void pylt_gc_freeall(PyLiteInterpreter *I) {

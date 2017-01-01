@@ -24,11 +24,13 @@ int main(int argc, char* argv[]) {
     return 0;*/
 
     pylt_intp_loadf(I, input);
-    PyLiteCodeObject *code = kv_top(I->vm.frames).code;
 
+#ifdef PL_DEBUG_INFO
+    PyLiteCodeObject *code = kv_top(I->vm.frames).code;
     debug_print_const_vals(I, code);
     debug_print_opcodes(I, code);
     putwchar('\n');
+#endif
 
     pylt_intp_run(I);
     pylt_intp_finalize(I);

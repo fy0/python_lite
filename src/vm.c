@@ -357,7 +357,6 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     if (code) pylt_vm_load_code(I, code);
     else if (!kv_top(vm->frames).code) return NULL;
     code = kv_top(vm->frames).code;
-//#define code kv_top(vm->frames).code;
 
     locals = kv_top(kv_top(vm->frames).var_tables);
 
@@ -765,13 +764,15 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                     PyLiteFile *input = pl_io_file_new(I, pl_cformat(I, "%s.py", name), pl_cformat(I, "r"), PYLT_IOTE_UTF8);
                     if (!input) break;
                     PyLiteCodeObject *tcode = pylt_intp_parsef(I, input);
+#ifdef PL_DEBUG_INFO
                     pl_print(I, "======== module load: %s ========\n", name);
                     debug_print_const_vals(I, tcode);
                     debug_print_opcodes(I, tcode);
+                    pl_print(I, "======== module end: %s ========\n", name);
+#endif
                     kv_popn(vm->stack, ins.extra);
                     pylt_vm_push_code(I, tcode);
                     PyLiteDictObject *scope = pylt_vm_run(I, NULL);
-                    pl_print(I, "======== module end: %s ========\n", name);
                     if (I->error) goto _end;
                     PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, caststr(name));
                     mod->ob_attrs = scope;

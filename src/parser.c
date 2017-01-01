@@ -1436,7 +1436,13 @@ PyLiteCodeObject* pylt_parser_parse(ParserState *ps) {
     PyLiteCodeObject *ret;
     next(ps);
     parse_stmts(ps);
+#ifdef PL_DEBUG_INFO
     write_ins(ps, BC_PRINT, 0, 0);
+#else
+    // TODO: 只有一个HALT会出段错误
+    // 不太明白缘由，日后再改
+    write_ins(ps, BC_NOP, 0, 0);
+#endif
     write_ins(ps, BC_HALT, 0, 0);
     ret = ps->info->code;
     func_pop(ps);
