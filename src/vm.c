@@ -543,18 +543,18 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                         kv_push(uintptr_t, I->vm.stack, (uintptr_t)tret);
                         break;
                     case PYLT_OBJ_TYPE_FUNCTION: {
-                        PyLiteObject *kwargs_name = castobj(kv_pop(I->vm.stack));
-                        PyLiteObject *args_name = castobj(kv_pop(I->vm.stack));
-                        PyLiteObject *params = castobj(kv_pop(I->vm.stack));
-                        PyLiteObject *code = castobj(kv_pop(I->vm.stack));
-                        PyLiteObject *name = castobj(kv_pop(I->vm.stack));
-                        PyLiteObject *defaults = castobj(kv_pop(I->vm.stack));
+                        PyLiteObject *kwargs_name = castobj(kv_pop(vm->stack));
+                        PyLiteObject *args_name = castobj(kv_pop(vm->stack));
+                        PyLiteObject *params = castobj(kv_pop(vm->stack));
+                        PyLiteObject *tcode = castobj(kv_pop(vm->stack));
+                        PyLiteObject *name = castobj(kv_pop(vm->stack));
+                        PyLiteObject *defaults = castobj(kv_pop(vm->stack));
 
                         tfunc = pylt_obj_func_new_ex(
                             I,
                             caststr(name), // name
                             castlist(params), // params
-                            (PyLiteCodeObject*)code, // code
+                            (PyLiteCodeObject*)tcode, // code
                             castdict((defaults != castobj(&PyLiteNone)) ? defaults : NULL), // defaults
                             caststr((args_name != castobj(&PyLiteNone)) ? args_name : NULL), // args_name
                             caststr((kwargs_name != castobj(&PyLiteNone)) ? kwargs_name : NULL) // kwargs_name
@@ -761,6 +761,8 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                     pylt_obj_dict_setitem(I, locals, name, castobj((func)(I)));
                     kv_popn(vm->stack, ins.extra);
                 } else {
+                    pl_error(I, pl_static.str.NotImplementedError, NULL);
+                    break;
                     PyLiteFile *input = pl_io_file_new(I, pl_cformat(I, "%s.py", name), pl_cformat(I, "r"), PYLT_IOTE_UTF8);
                     if (!input) break;
                     PyLiteCodeObject *tcode = pylt_intp_parsef(I, input);

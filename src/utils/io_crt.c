@@ -156,7 +156,7 @@ int crt_write(PyLiteInterpreter *I, int fd, uint32_t *buffer, pl_uint_t count, u
     }
 
     DWORD bytesWritten = 0;
-    wchar_t *wbuf = pylt_malloc(I, count * sizeof(wchar_t));
+    wchar_t *wbuf = pylt_malloc(I, (count + 1) * sizeof(wchar_t));
     if (!ucs4str_to_wchar(buffer, count, wbuf, ignore)) {
         pylt_free(I, wbuf, count * sizeof(wchar_t));
         return -2;
