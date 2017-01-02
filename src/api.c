@@ -4,12 +4,17 @@
 #include "types/all.h"
 #include "utils/misc.h"
 
-void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj) {
-    if (!obj) {
-        wprintf(L"bad str\n");
-        return;
+PyLiteModuleObject* pl_getmod(PyLiteInterpreter *I, PyLiteStrObject *modpath) {
+    PyLiteModuleObject *mod = castmod(pylt_obj_dict_getitem(I, I->modules, castobj(modpath)));
+    if (!mod) {
+        PyLiteCPtrObject *cptr = castcptr(pylt_obj_dict_getitem(I, I->cmodules_loader, castobj(modpath)));
+        if (cptr) {
+            PyLiteModuleLoaderFunc loader = (PyLiteModuleLoaderFunc)cptr->ob_ptr;
+            mod = (*loader)(I);
+            mod->name = modpath;
+        }
     }
-    pl_io_file_writestr(I, I->sys.cout, obj->ob_val, obj->ob_size, ' ');
+    return mod;
 }
 
 PyLiteTypeObject* pl_getbuiltintype(PyLiteInterpreter *I, PyLiteStrObject *name) {
@@ -83,6 +88,13 @@ PyLiteTypeObject* pl_type(PyLiteInterpreter *I, PyLiteObject *obj) {
 
 PyLiteTypeObject* pl_type_by_code(PyLiteInterpreter *I, pl_uint32_t type_code) {
     return kv_A(I->cls_base, type_code);
+}
+void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj) {
+    if (!obj) {
+        wprintf(L"bad str\n");
+        return;
+    }
+    pl_io_file_writestr(I, I->sys.cout, obj->ob_val, obj->ob_size, ' ');
 }
 
 void pl_print(PyLiteInterpreter *I, const char *format, ...) {

@@ -182,6 +182,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *stdout_;
         PyLiteStrObject *stderr_;
         PyLiteStrObject *sys;
+        PyLiteStrObject *os;
 
         PyLiteStrObject *cls;
         PyLiteStrObject *self;

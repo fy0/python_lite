@@ -134,8 +134,12 @@ PyLiteObject* pylt_mods_io_read(PyLiteInterpreter *I, int argc, PyLiteObject **a
     return NULL;
 }
 
-PyLiteModuleObject* pylt_mods_io_register(PyLiteInterpreter *I) {
+PyLiteModuleObject* pylt_mods_io_loader(PyLiteInterpreter *I) {
 	PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(io));
+
+    pylt_obj_mod_setattr(I, mod, _NS(I, "SEEK_CUR"), castobj(pylt_obj_int_new(I, SEEK_CUR)));
+    pylt_obj_mod_setattr(I, mod, _NS(I, "SEEK_END"), castobj(pylt_obj_int_new(I, SEEK_END)));
+    pylt_obj_mod_setattr(I, mod, _NS(I, "SEEK_SET"), castobj(pylt_obj_int_new(I, SEEK_SET)));
 
     pylt_cfunc_register(I, mod, _NS(I, "open"), _NST(I, 2, "fn", "mode"), NULL, NULL, &pylt_mods_io_open);
     pylt_cfunc_register(I, mod, _NS(I, "read"), _NST(I, 2, "file", "size"), _NT(I, 2, &PyLiteParamUndefined, pylt_obj_int_new(I, -1)), NULL, &pylt_mods_io_read);
@@ -157,4 +161,8 @@ PyLiteModuleObject* pylt_mods_io_register(PyLiteInterpreter *I) {
     pylt_type_register(I, mod, tBytesIO);
 
     return mod;
+}
+
+pl_bool_t pylt_mods_io_register(PyLiteInterpreter *I) {
+    return pylt_mod_register(I, _S(io), &pylt_mods_io_loader, true);
 }

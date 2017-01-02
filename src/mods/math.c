@@ -560,7 +560,7 @@ PyLiteObject* pylt_mods_math_trunc(PyLiteInterpreter *I, int argc, PyLiteObject 
 }
 
 
-PyLiteModuleObject* pylt_mods_math_register(PyLiteInterpreter *I) {
+PyLiteModuleObject* pylt_mods_math_loader(PyLiteInterpreter *I) {
     PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(math));
 
     pylt_cfunc_register(I, mod, _NS(I, "acos"), _NST(I, 1, "x"), NULL, NULL, &pylt_mods_math_acos);
@@ -609,4 +609,8 @@ PyLiteModuleObject* pylt_mods_math_register(PyLiteInterpreter *I) {
     pylt_obj_mod_setattr(I, mod, _NS(I, "e"), castobj(pylt_obj_float_new(I, 2.718281828459045)));
     pylt_obj_mod_setattr(I, mod, _NS(I, "pi"), castobj(pylt_obj_float_new(I, MATH_PI)));
     return mod;
+}
+
+pl_bool_t pylt_mods_math_register(PyLiteInterpreter *I) {
+    return pylt_mod_register(I, _S(math), &pylt_mods_math_loader, true);
 }

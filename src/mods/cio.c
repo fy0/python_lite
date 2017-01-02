@@ -90,8 +90,8 @@ PyLiteObject* pylt_mods_cio_fseek(PyLiteInterpreter *I, int argc, PyLiteObject *
 }
 
 
-PyLiteModuleObject* pylt_mods_cio_register(PyLiteInterpreter *I) {
-	PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(io));
+PyLiteModuleObject* pylt_mods_cio_loader(PyLiteInterpreter *I) {
+	PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(cio));
 
     pylt_obj_mod_setattr(I, mod, _NS(I, "SEEK_CUR"), castobj(pylt_obj_int_new(I, SEEK_CUR)));
     pylt_obj_mod_setattr(I, mod, _NS(I, "SEEK_END"), castobj(pylt_obj_int_new(I, SEEK_END)));
@@ -106,4 +106,8 @@ PyLiteModuleObject* pylt_mods_cio_register(PyLiteInterpreter *I) {
     pylt_cfunc_register(I, mod, _NS(I, "fseek"), _NST(I, 3, "file", "offset", "origin"), _NT(I, 3, &PyLiteParamUndefined, &PyLiteParamUndefined, pylt_obj_int_new(I, SEEK_CUR)), NULL, &pylt_mods_cio_fseek);
 
     return mod;
+}
+
+pl_bool_t pylt_mods_cio_register(PyLiteInterpreter *I) {
+    return pylt_mod_register(I, _S(cio), &pylt_mods_cio_loader, true);
 }

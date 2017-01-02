@@ -27,8 +27,8 @@ typedef struct PyLiteInterpreter {
 
     // loaded modules
     PyLiteDictObject *modules;
-    // builtin modules' name and their load function (C ptr)
-    PyLiteDictObject *inner_module_loaders;
+    // keys are modpaths(os/re/test.a) and values are their load functions
+    PyLiteDictObject *cmodules_loader;
     // exception object when error occurred. NULL as default.
     PyLiteObject *error;
     // the last called func object

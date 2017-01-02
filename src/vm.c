@@ -83,7 +83,7 @@ void pylt_vm_init(struct PyLiteInterpreter *I, PyLiteVM* vm) {
     kv_init(I, frame->var_tables);
 
     // built-in
-    vm->builtins = pylt_mods_builtins_register(I);
+    vm->builtins = pl_getmod(I, pl_static.str.builtins);
     kv_push(PyLiteDictObject*, frame->var_tables, vm->builtins->ob_attrs);
 
     // first local
@@ -755,10 +755,9 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                     break;
                 }
                 PyLiteObject *name = castobj(kv_topn(vm->stack, ins.extra - 1));
-                tret = pylt_obj_dict_getitem(I, I->inner_module_loaders, name);
-                if (tret) {
-                    PyLiteModuleRegisterFunc func = (PyLiteModuleRegisterFunc)tret;
-                    pylt_obj_dict_setitem(I, locals, name, castobj((func)(I)));
+                PyLiteModuleObject *mod = pl_getmod(I, caststr(name));
+                if (mod) {
+                    pylt_obj_dict_setitem(I, locals, name, castobj(mod));
                     kv_popn(vm->stack, ins.extra);
                 } else {
                     pl_error(I, pl_static.str.NotImplementedError, NULL);

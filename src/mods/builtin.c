@@ -143,8 +143,8 @@ PyLiteObject* pylt_mods_builtins_setattr(PyLiteInterpreter *I, int argc, PyLiteO
 }
 
 
-PyLiteModuleObject* pylt_mods_builtins_register(PyLiteInterpreter *I) {
-    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(builtins));
+PyLiteModuleObject* pylt_mods_builtins_loader(PyLiteInterpreter *I) {
+    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, NULL);
     pylt_bind_all_types_register(I, mod);
 
 	pylt_cfunc_register(I, mod, _S(print), _NST(I, 3, "values", "sep", "end"), _NT(I, 3, castobj(&PyLiteParamArgs), _NS(I, " "), _NS(I, "\n")), _UINTS(I, 3, NULL , PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_print);
@@ -165,4 +165,8 @@ PyLiteModuleObject* pylt_mods_builtins_register(PyLiteInterpreter *I) {
     pylt_obj_mod_setattr(I, mod, pl_static.str.None, castobj(&PyLiteNone));
     pylt_gc_add(I, castobj(mod));
     return mod;
+}
+
+pl_bool_t pylt_mods_builtins_register(PyLiteInterpreter *I) {
+    return pylt_mod_register(I, _S(builtins), &pylt_mods_builtins_loader, true);
 }

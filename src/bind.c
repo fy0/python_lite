@@ -4,7 +4,7 @@
 #include "api.h"
 #include "utils/misc.h"
 
-pl_bool_t pl_bind_cls_check(PyLiteInterpreter *I, PyLiteTypeObject *defclass, PyLiteStrObject *method_name, PyLiteTypeObject *givenclass) {
+pl_bool_t pylt_bind_cls_check(PyLiteInterpreter *I, PyLiteTypeObject *defclass, PyLiteStrObject *method_name, PyLiteTypeObject *givenclass) {
     if (!pl_istype(givenclass)) {
         // test: set.__new__(1)
         pl_error(I, pl_static.str.TypeError, "%s.%s(X) : X is not a type object(%s)", defclass->name, method_name, pl_type(I, castobj(givenclass))->name);
@@ -33,6 +33,23 @@ PyLiteObject* pylt_obj_typecast(PyLiteInterpreter *I, struct PyLiteTypeObject *t
     return obj;
 }
 
+void gc_register_cfunc(PyLiteInterpreter *I, PyLiteCFunctionObject *cfunc) {
+    if (!cfunc) return;
+    pylt_gc_add(I, castobj(cfunc));
+    pylt_gc_add(I, castobj(cfunc->info.name));
+    pylt_gc_add(I, castobj(cfunc->info.doc));
+    pylt_gc_add(I, castobj(cfunc->info.params));
+    pylt_gc_add(I, castobj(cfunc->info.defaults));
+}
+
+pl_bool_t pylt_mod_register(PyLiteInterpreter *I, PyLiteStrObject *modpath, PyLiteModuleLoaderFunc regfunc, pl_bool_t force) {
+    if (force || (!pylt_obj_dict_getitem(I, I->cmodules_loader, castobj(modpath)))) {
+        pylt_obj_dict_setitem(I, I->cmodules_loader, castobj(modpath), castobj(pylt_obj_cptr_new(I, (void*)regfunc, false)));
+        return true;
+    }
+    return false;
+}
+
 void pylt_type_register(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteTypeObject *type) {
     if (type->ob_reftype >= kv_max(I->cls_base)) {
         kv_resize(PyLiteTypeObject*, I->cls_base, type->ob_reftype + 10);
@@ -42,6 +59,29 @@ void pylt_type_register(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteTyp
     pylt_gc_add(I, castobj(type->name));
     kv_A(I->cls_base, type->ob_reftype) = type;
     I->cls_base.n = type->ob_reftype + 1;
+}
+
+void pylt_attr_register(PyLiteInterpreter *I, PyLiteTypeObject *type, PyLiteStrObject *key, PyLiteObject *value) {
+    pylt_obj_type_setattr(I, type, castobj(key), castobj(value));
+    pylt_gc_add(I, castobj(key));
+    pylt_gc_add(I, value);
+}
+
+void pylt_cprop_register(PyLiteInterpreter *I, PyLiteTypeObject *type, PyLiteStrObject *key, PyLiteCFunctionPtr cfget, PyLiteCFunctionPtr cfset) {
+    PyLiteCFunctionObject *fget = cfget ? pylt_obj_cfunc_new(I, _S(fget), _NST(I, 1, "self"), NULL, NULL, cfget) : NULL;
+    PyLiteCFunctionObject *fset = cfset ? pylt_obj_cfunc_new(I, _S(fset), _NST(I, 1, "self"), NULL, NULL, cfset) : NULL;
+    PyLitePropertyObject *prop = pylt_obj_property_new(I, castobj(fget), castobj(fset));
+    pylt_gc_add(I, castobj(key));
+    if (fget) {
+        fget->ob_owner = castobj(prop);
+        gc_register_cfunc(I, fget);
+    }
+    if (fset) {
+        fset->ob_owner = castobj(prop);
+        gc_register_cfunc(I, fset);
+    }
+    prop->ob_owner = castobj(type);
+    pylt_attr_register(I, type, key, castobj(prop));
 }
 
 PyLiteTupleObject* _NT(PyLiteInterpreter *I, int n, ...) {
@@ -84,15 +124,6 @@ pl_uint_t* _UINTS(PyLiteInterpreter *I, pl_uint_t n, ...) {
     return ret;
 }
 
-void gc_register_cfunc(PyLiteInterpreter *I, PyLiteCFunctionObject *cfunc) {
-	if (!cfunc) return;
-	pylt_gc_add(I, castobj(cfunc));
-	pylt_gc_add(I, castobj(cfunc->info.name));
-	pylt_gc_add(I, castobj(cfunc->info.doc));
-	pylt_gc_add(I, castobj(cfunc->info.params));
-	pylt_gc_add(I, castobj(cfunc->info.defaults));
-}
-
 PyLiteCFunctionObject* pylt_cfunc_register(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name, PyLiteTupleObject *param_names, PyLiteTupleObject *defaults, pl_uint_t *types, PyLiteCFunctionPtr cfunc) {
     PyLiteCFunctionObject *func = pylt_obj_cfunc_new(I, name, param_names, defaults, types, cfunc);
     func->ob_owner = castobj(mod);
@@ -128,27 +159,4 @@ PyLiteCFunctionObject* pylt_cclsmethod_register(PyLiteInterpreter *I, PyLiteType
 
 PyLiteCFunctionObject* pylt_cclsmethod_register_0_args(PyLiteInterpreter *I, PyLiteTypeObject *type, PyLiteStrObject *name, PyLiteCFunctionPtr cfunc) {
     return pylt_cmethod_register(I, type, name, _NST(I, 1, "cls"), NULL, NULL, cfunc);
-}
-
-void pylt_attr_register(PyLiteInterpreter *I, PyLiteTypeObject *type, PyLiteStrObject *key, PyLiteObject *value) {
-    pylt_obj_type_setattr(I, type, castobj(key), castobj(value));
-    pylt_gc_add(I, castobj(key));
-    pylt_gc_add(I, value);
-}
-
-void pylt_cprop_register(PyLiteInterpreter *I, PyLiteTypeObject *type, PyLiteStrObject *key, PyLiteCFunctionPtr cfget, PyLiteCFunctionPtr cfset) {
-    PyLiteCFunctionObject *fget = cfget ? pylt_obj_cfunc_new(I, _S(fget), _NST(I, 1, "self"), NULL, NULL, cfget) : NULL;
-    PyLiteCFunctionObject *fset = cfset ? pylt_obj_cfunc_new(I, _S(fset), _NST(I, 1, "self"), NULL, NULL, cfset) : NULL;
-    PyLitePropertyObject *prop = pylt_obj_property_new(I, castobj(fget), castobj(fset));
-    pylt_gc_add(I, castobj(key));
-    if (fget) {
-        fget->ob_owner = castobj(prop);
-        gc_register_cfunc(I, fget);
-    }
-    if (fset) {
-        fset->ob_owner = castobj(prop);
-        gc_register_cfunc(I, fset);
-    }
-    prop->ob_owner = castobj(type);
-    pylt_attr_register(I, type, key, castobj(prop));
 }

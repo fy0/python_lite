@@ -6,6 +6,6 @@
 
 #include "../types/all.h"
 
-PyLiteModuleObject* pylt_mods_sys_register(PyLiteInterpreter *I);
+pl_bool_t pylt_mods_sys_register(PyLiteInterpreter *I);
 
 #endif

@@ -3,6 +3,8 @@
 #include "utils/misc.h"
 #include "utils/io.h"
 #include "mods/io.h"
+#include "mods/os.h"
+#include "mods/sys.h"
 #include "mods/cio.h"
 #include "mods/math.h"
 #include "mods/builtin.h"
@@ -33,7 +35,7 @@ void pylt_intp_init(PyLiteInterpreter *I) {
 
     kv_init(I, I->cls_base);
     I->modules = pylt_obj_dict_new(I);
-    I->inner_module_loaders = pylt_obj_dict_new(I);
+    I->cmodules_loader = pylt_obj_dict_new(I);
     I->error = NULL;
 
     I->lexer = NULL;
@@ -41,20 +43,23 @@ void pylt_intp_init(PyLiteInterpreter *I) {
 
     pylt_gc_init(I);
     pylt_static_objs_init(I);
-    pylt_vm_init(I, &I->vm);
 
-    // be careful, cptrs are not real object!
-    pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.builtins), castobj(&pylt_mods_builtins_register));
-    pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.math), castobj(&pylt_mods_math_register));
-    pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.unusual), castobj(&pylt_mods_unusual_register));
-    pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.io), castobj(&pylt_mods_io_register));
-    pylt_obj_dict_setitem(I, I->inner_module_loaders, castobj(pl_static.str.cio), castobj(&pylt_mods_cio_register));
+    // register builtins
+    pylt_mods_io_register(I);
+    pylt_mods_cio_register(I);
+    pylt_mods_math_register(I);
+    pylt_mods_os_register(I);
+    pylt_mods_sys_register(I);
+    pylt_mods_unusual_register(I);
+
+    pylt_mods_builtins_register(I);
+    pylt_vm_init(I, &I->vm);
 }
 
 void pylt_intp_finalize(PyLiteInterpreter *I) {
     pylt_gc_collect(I);
-    pylt_lex_finalize(I, I->lexer);
-    pylt_parser_finalize(I, I->parser);
+    if (I->lexer) pylt_lex_finalize(I, I->lexer);
+    if (I->parser) pylt_parser_finalize(I, I->parser);
     pylt_vm_finalize(I);
 
     // free types
@@ -77,10 +82,10 @@ void pylt_intp_finalize(PyLiteInterpreter *I) {
     pylt_gc_finalize(I);
 
     pylt_obj_dict_free(I, I->modules);
-    pylt_obj_dict_free(I, I->inner_module_loaders);
+    pylt_obj_dict_free(I, I->cmodules_loader);
 
-    pylt_free_ex(I, I->lexer);
-    pylt_free_ex(I, I->parser);
+    if (I->lexer) pylt_free_ex(I, I->lexer);
+    if (I->parser) pylt_free_ex(I, I->parser);
 }
 
 void pylt_intp_loadf(PyLiteInterpreter *I, PyLiteFile *input) {

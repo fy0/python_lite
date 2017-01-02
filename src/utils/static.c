@@ -186,6 +186,7 @@ void pylt_static_objs_init(PyLiteInterpreter *I) {
     sstr_new2(stderr_, "stderr");
 
     sstr_new(sys);
+    sstr_new(os);
 
     sstr_new(cls);
     sstr_new(self);
