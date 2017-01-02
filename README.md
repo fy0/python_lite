@@ -39,7 +39,7 @@ A simple, lightweight implementation of python3-like language.
 
 * DLL load
 
-* multiple value assign
+* ~~multiple value assign~~
 
 * builtin regex engine
 
