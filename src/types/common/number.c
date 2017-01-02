@@ -155,8 +155,11 @@ PyLiteObject* pylt_obj_int_bitnot(PyLiteInterpreter *I, PyLiteIntObject *self) {
 
 PyLiteObject* pylt_obj_int_pow(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
-        case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_int_new(I, (uint32_t)powl(self->ob_val, castint(other)->ob_val)));
+        case PYLT_OBJ_TYPE_INT: {
+            pl_int_t oint = castint(other)->ob_val;
+            if (oint < 0) return castobj(pylt_obj_float_new(I, pow(self->ob_val, oint)));
+            else return castobj(pylt_obj_int_new(I, (pl_int_t)powl(self->ob_val, castint(other)->ob_val)));
+        }
         case PYLT_OBJ_TYPE_FLOAT:
             return castobj(pylt_obj_float_new(I, pow(self->ob_val, castfloat(other)->ob_val)));
         default: return NULL;
