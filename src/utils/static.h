@@ -170,20 +170,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *True;
         PyLiteStrObject *False;
 
-        // modules
-        PyLiteStrObject *math;
-        PyLiteStrObject *builtins;
-        PyLiteStrObject *cio;
-        PyLiteStrObject *io;
-        PyLiteStrObject *BaseIO;
-        PyLiteStrObject *BytesIO;
-        PyLiteStrObject *TextIO;
-        PyLiteStrObject *stdin_;
-        PyLiteStrObject *stdout_;
-        PyLiteStrObject *stderr_;
-        PyLiteStrObject *sys;
-        PyLiteStrObject *os;
-
+        // misc
         PyLiteStrObject *cls;
         PyLiteStrObject *self;
         PyLiteStrObject *args;
@@ -198,7 +185,28 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *x;
         PyLiteStrObject *y;
 
-        // exceptions
+        // modules
+        PyLiteStrObject *math;
+        PyLiteStrObject *builtins;
+        PyLiteStrObject *cio;
+
+        // module - io
+        PyLiteStrObject *io;
+        PyLiteStrObject *BaseIO;
+        PyLiteStrObject *BytesIO;
+        PyLiteStrObject *TextIO;
+        PyLiteStrObject *UnsupportedOperation;
+
+        // module - sys
+        PyLiteStrObject *sys;
+        PyLiteStrObject *stdin_;
+        PyLiteStrObject *stdout_;
+        PyLiteStrObject *stderr_;
+
+        PyLiteStrObject *os;
+        PyLiteStrObject *pltypes;
+
+        // module - exceptions
         PyLiteStrObject *BaseException;
         PyLiteStrObject *SystemExit;
         PyLiteStrObject *KeyboardInterrupt;

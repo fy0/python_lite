@@ -15,7 +15,7 @@
 int main(int argc, char* argv[]) {
     platform_init();
     PyLiteInterpreter *I = pylt_intp_new();
-    PyLiteFile *input = pl_io_file_new_ex(I, (argc == 2) ? argv[1] : "test.py", "r", PYLT_IOTE_UTF8);
+    PyLiteFile *input = pylt_io_file_new_ex(I, (argc == 2) ? argv[1] : "test.py", "r", PYLT_IOTE_UTF8);
     if (!input) return 0;
     putwchar('\n');
 

@@ -46,8 +46,8 @@ enum {
     BC_UNPACK_SEQ,     // 解包
     BC_NOP,            // 空指令
 
-    BC_PH_BREAK,     // 伪指令，break (ph == placeholder)
-    BC_PH_CONTINUE,  // 伪指令，continue
+    BC_PH_BREAK,       // 伪指令，break (ph == placeholder)
+    BC_PH_CONTINUE,    // 伪指令，continue
 };
 
 enum {

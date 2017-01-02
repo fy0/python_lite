@@ -259,7 +259,7 @@ void pylt_gc_finalize(PyLiteInterpreter *I) {
     upset_free(I->gc.statics);
     pylt_obj_set_free(I, I->gc.str_cached);
 #ifdef PL_DEBUG_INFO
-    wprintf(L"mem unfreed: %ud\n", (unsigned int)I->mem_used);
+    wprintf(L"mem unfreed: %u\n", (unsigned int)I->mem_used);
 #endif
 }
 

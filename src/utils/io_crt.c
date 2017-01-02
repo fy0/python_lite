@@ -155,15 +155,15 @@ int crt_write(PyLiteInterpreter *I, int fd, uint32_t *buffer, pl_uint_t count, u
         return -1;
     }
 
-    DWORD bytesWritten = 0;
+    DWORD written = 0;
     wchar_t *wbuf = pylt_malloc(I, (count + 1) * sizeof(wchar_t));
     if (!ucs4str_to_wchar(buffer, count, wbuf, ignore)) {
         pylt_free(I, wbuf, count * sizeof(wchar_t));
         return -2;
     }
 
-    if (FALSE != ParseAndPrintWString(hDev, wbuf, (DWORD)count, &bytesWritten)) {
-        return (int)bytesWritten * sizeof(wchar_t);
+    if (FALSE != ParseAndPrintWString(hDev, wbuf, (DWORD)count, &written)) {
+        return (int)written;
     } else {
         errno = GetLastError();
         return -1;

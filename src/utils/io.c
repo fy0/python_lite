@@ -78,12 +78,12 @@ _err:
     return 0;
 }
 
-PyLiteFile* pl_io_file_new_ex(PyLiteInterpreter *I, char *fn, char *mode, int encoding) {
-    return pl_io_file_new(I, pylt_obj_str_new_from_cstr(I, fn, true), pylt_obj_str_new_from_cstr(I, mode, true), encoding);
+PyLiteFile* pylt_io_file_new_ex(PyLiteInterpreter *I, char *fn, char *mode, int encoding) {
+    return pylt_io_file_new(I, pylt_obj_str_new_from_cstr(I, fn, true), pylt_obj_str_new_from_cstr(I, mode, true), encoding);
 }
 
 
-PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode, int encoding) {
+PyLiteFile* pylt_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode, int encoding) {
     int fd;
     int err = 0;
     pl_bool_t binary;
@@ -155,7 +155,7 @@ PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrO
 }
 
 
-FILE* pl_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode) {
+FILE* pylt_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode) {
     if (fn->ob_size > 255) {
         pl_error(I, pl_static.str.ValueError, "File name too long: %r", fn);
         return NULL;
@@ -199,7 +199,7 @@ FILE* pl_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mo
 #endif
 }
 
-PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp, int encoding) {
+PyLiteFile* pylt_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp, int encoding) {
     struct stat stbuf;
     fstat(fileno(fp), &stbuf);
     PyLiteFile *pf = pylt_malloc(I, sizeof(PyLiteFile));
@@ -211,19 +211,13 @@ PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp, int encodi
     return pf;
 }
 
-void pl_io_init(PyLiteInterpreter *I) {
-    I->sys.cin = pl_io_file_new_with_cfile(I, stdin, PYLT_IOTE_WCHAR);
-    I->sys.cout = pl_io_file_new_with_cfile(I, stdout, PYLT_IOTE_WCHAR);
-    I->sys.cerr = pl_io_file_new_with_cfile(I, stderr, PYLT_IOTE_WCHAR);
-}
-
-int pl_io_file_read(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count) {
+int pylt_io_file_read(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count) {
     return read(pf->fno, buf, count);
 }
 
 // from encoding to ucs4
 // -2 编码问题 -3 异常输入
-int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count) {
+int pylt_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count) {
     int read_count = 0;
 
     pl_bool_t crt_accepted;
@@ -295,14 +289,14 @@ int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_u
     return -3;
 }
 
-int pl_io_file_write(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count) {
+int pylt_io_file_write(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count) {
     return write(pf->fno, buf, count);
 }
 
 
 // ucs4 to encoding
 // -2 编码问题 -3 异常输入
-int pl_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count, uint32_t ignore) {
+int pylt_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count, uint32_t ignore) {
     int written = 0;
 
     pl_bool_t crt_accepted;
@@ -365,4 +359,18 @@ int pl_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_
         }
     }
     return -3;
+}
+
+pl_bool_t pylt_io_file_writeable(PyLiteInterpreter *I, PyLiteFile *pf) {
+    return (pf->flags & O_WRONLY) || (pf->flags & O_RDWR);
+}
+
+pl_bool_t pylt_io_file_readable(PyLiteInterpreter *I, PyLiteFile *pf) {
+    return (pf->flags & O_RDONLY) || (pf->flags & O_RDWR);
+}
+
+void pylt_io_init(PyLiteInterpreter *I) {
+    I->sys.cin = pylt_io_file_new_with_cfile(I, stdin, PYLT_IOTE_WCHAR);
+    I->sys.cout = pylt_io_file_new_with_cfile(I, stdout, PYLT_IOTE_WCHAR);
+    I->sys.cerr = pylt_io_file_new_with_cfile(I, stderr, PYLT_IOTE_WCHAR);
 }

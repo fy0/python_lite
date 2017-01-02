@@ -18,10 +18,10 @@ PyLiteModuleObject* pl_getmod(PyLiteInterpreter *I, PyLiteStrObject *modpath) {
 }
 
 PyLiteTypeObject* pl_getbuiltintype(PyLiteInterpreter *I, PyLiteStrObject *name) {
-    return pl_gettype_from_mod(I, I->vm.builtins, name);
+    return pl_gettype(I, I->vm.builtins, name);
 }
 
-PyLiteTypeObject* pl_gettype_from_mod(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
+PyLiteTypeObject* pl_gettype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
 	PyLiteObject *obj = pylt_obj_mod_getattr(I, mod, castobj(name));
 	return pl_istype(obj) ? casttype(obj) : NULL;
 }
@@ -94,7 +94,7 @@ void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj) {
         wprintf(L"bad str\n");
         return;
     }
-    pl_io_file_writestr(I, I->sys.cout, obj->ob_val, obj->ob_size, ' ');
+    pylt_io_file_writestr(I, I->sys.cout, obj->ob_val, obj->ob_size, ' ');
 }
 
 void pl_print(PyLiteInterpreter *I, const char *format, ...) {

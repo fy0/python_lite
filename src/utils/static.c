@@ -172,22 +172,7 @@ void pylt_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(True);
     sstr_new(False);
 
-    // modules
-    sstr_new(math);
-    sstr_new(builtins);
-    sstr_new(cio);
-
-    sstr_new(io);
-    sstr_new(BaseIO);
-    sstr_new(BytesIO);
-    sstr_new(TextIO);
-    sstr_new2(stdin_, "stdin");
-    sstr_new2(stdout_, "stdout");
-    sstr_new2(stderr_, "stderr");
-
-    sstr_new(sys);
-    sstr_new(os);
-
+    // misc
     sstr_new(cls);
     sstr_new(self);
     sstr_new(args);
@@ -201,6 +186,26 @@ void pylt_static_objs_init(PyLiteInterpreter *I) {
 
     sstr_new(x);
     sstr_new(y);
+
+    // modules
+    sstr_new(math);
+    sstr_new(builtins);
+    sstr_new(cio);
+
+    sstr_new(io);
+    sstr_new(BaseIO);
+    sstr_new(BytesIO);
+    sstr_new(TextIO);
+    sstr_new(UnsupportedOperation);
+    
+    sstr_new(sys);
+    sstr_new2(stdin_, "stdin");
+    sstr_new2(stdout_, "stdout");
+    sstr_new2(stderr_, "stderr");
+
+    sstr_new(os);
+
+    sstr_new(pltypes);
 
     // exceptions
     sstr_new(BaseException);

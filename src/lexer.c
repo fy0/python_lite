@@ -7,14 +7,14 @@
 
 uint32_t nextc(LexState *ls) {
     if (ls->le._record.on) {
-        if (!pl_io_file_readstr(ls->I, ls->input, &(ls->ch), 1)) ls->ch = '\0';
+        if (!pylt_io_file_readstr(ls->I, ls->input, &(ls->ch), 1)) ls->ch = '\0';
         ls->le._record.buf[ls->le._record.count++] = ls->ch; // TODO: set limit
     } else if (ls->le._record.count) {
         ls->ch = ls->le._record.buf[0];
         ls->le._record.count--;
         memcpy(ls->le._record.buf, ls->le._record.buf + 1, ls->le._record.count * sizeof(uint32_t));
     } else {
-        if (!pl_io_file_readstr(ls->I, ls->input, &(ls->ch), 1)) ls->ch = '\0';
+        if (!pylt_io_file_readstr(ls->I, ls->input, &(ls->ch), 1)) ls->ch = '\0';
     }
     return ls->ch;
 }

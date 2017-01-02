@@ -1196,11 +1196,17 @@ void parse_stmt(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     int tmp, tmp2, tmp3;
     int final_pos;
+    //pl_bool_t old;
 
     switch (tk->val) {
         case TK_KW_IF:
             next(ps);
+            // if 1,2,3: pass 语法错
+            // 这是一个好特性吗？
+            //old = ps->disable_expr_tuple_parse;
+            //ps->disable_expr_tuple_parse = true;
             parse_expr(ps);
+            //ps->disable_expr_tuple_parse = old;
             ACCEPT(ps, ':');
             // test 0 X
             write_ins(ps, BC_TEST, 0, 0);

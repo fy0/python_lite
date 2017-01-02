@@ -6,7 +6,6 @@
 #include "../bind.h"
 #include "../types/all.h"
 #include "../utils/misc.h"
-#include "../pybind/typebind.h"
 
 
 PyLiteObject* pylt_mods_builtins_print(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
@@ -145,7 +144,6 @@ PyLiteObject* pylt_mods_builtins_setattr(PyLiteInterpreter *I, int argc, PyLiteO
 
 PyLiteModuleObject* pylt_mods_builtins_loader(PyLiteInterpreter *I) {
     PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, NULL);
-    pylt_bind_all_types_register(I, mod);
 
 	pylt_cfunc_register(I, mod, _S(print), _NST(I, 3, "values", "sep", "end"), _NT(I, 3, castobj(&PyLiteParamArgs), _NS(I, " "), _NS(I, "\n")), _UINTS(I, 3, NULL , PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_print);
     pylt_cfunc_register(I, mod, pl_static.str.__import__, _NST(I, 1, "name", "globals", "locals"), NULL, _UINTS(I, 1, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_import);
@@ -163,6 +161,15 @@ PyLiteModuleObject* pylt_mods_builtins_loader(PyLiteInterpreter *I) {
     pylt_cfunc_register(I, mod, pl_static.str.pow, _NT(I, 2, pl_static.str.x, pl_static.str.y), NULL, NULL, &pylt_mods_builtins_pow);
 
     pylt_obj_mod_setattr(I, mod, pl_static.str.None, castobj(&PyLiteNone));
+
+    PyLiteObject *key;
+    PyLiteObject *value;
+    PyLiteModuleObject *pltypes = pl_getmod(I, _S(pltypes));
+    pl_foreach_dict(I, it, pltypes->ob_attrs) {
+        pylt_obj_dict_keyvalue(I, pltypes->ob_attrs, it, &key, &value);
+        pylt_obj_mod_setattr(I, mod, caststr(key), value);
+    }
+
     pylt_gc_add(I, castobj(mod));
     return mod;
 }

@@ -23,20 +23,21 @@ typedef struct {
 } PyLiteFile;
 
 
-FILE* pl_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode);
-PyLiteFile* pl_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode, int encoding);
-PyLiteFile* pl_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp, int encoding);
+FILE* pylt_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode);
+PyLiteFile* pylt_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode, int encoding);
+PyLiteFile* pylt_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp, int encoding);
 
-PyLiteFile* pl_io_file_new_ex(PyLiteInterpreter *I, char *fn, char *mode, int encoding);
+PyLiteFile* pylt_io_file_new_ex(PyLiteInterpreter *I, char *fn, char *mode, int encoding);
 
+int pylt_io_file_read(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count);
+int pylt_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count);
 
-int pl_io_file_read(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count);
-int pl_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count);
+int pylt_io_file_write(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count);
+int pylt_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count, uint32_t ignore);
 
-int pl_io_file_write(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t count);
-int pl_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count, uint32_t ignore);
+pl_bool_t pylt_io_file_writeable(PyLiteInterpreter *I, PyLiteFile *pf);
+pl_bool_t pylt_io_file_readable(PyLiteInterpreter *I, PyLiteFile *pf);
 
-
-void pl_io_init(PyLiteInterpreter *I);
+void pylt_io_init(PyLiteInterpreter *I);
 
 #endif

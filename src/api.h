@@ -11,7 +11,7 @@
 PyLiteModuleObject* pl_getmod(PyLiteInterpreter *I, PyLiteStrObject *modpath);
 
 PyLiteTypeObject* pl_getbuiltintype(PyLiteInterpreter *I, PyLiteStrObject *name);
-PyLiteTypeObject* pl_gettype_from_mod(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name);
+PyLiteTypeObject* pl_gettype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name);
 // get first builtin parent type (type of ob_base for custom type)
 pl_uint32_t pl_getbase_by_code(PyLiteInterpreter *I, pl_uint32_t type_code);
 pl_bool_t pl_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32_t type_code);
@@ -41,6 +41,7 @@ void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj);
 
 #define pl_assert(I, stmt, ret) if (!(stmt)) { pl_error(I, pl_static.str.RuntimeError, "panic"); return (ret); }
 #define pl_next pylt_obj_iter_next
+#define pl_foreach_dict(I, it, dictobj) for (pl_int32_t it = pylt_obj_dict_begin(I, dictobj); it != pylt_obj_dict_end(I, dictobj); pylt_obj_dict_next(I, dictobj, &it))
 
 void pl_print(PyLiteInterpreter *I, const char *format, ...);
 void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char *format, ...);

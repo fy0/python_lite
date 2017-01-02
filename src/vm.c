@@ -762,7 +762,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 } else {
                     pl_error(I, pl_static.str.NotImplementedError, NULL);
                     break;
-                    PyLiteFile *input = pl_io_file_new(I, pl_cformat(I, "%s.py", name), pl_cformat(I, "r"), PYLT_IOTE_UTF8);
+                    PyLiteFile *input = pylt_io_file_new(I, pl_cformat(I, "%s.py", name), pl_cformat(I, "r"), PYLT_IOTE_UTF8);
                     if (!input) break;
                     PyLiteCodeObject *tcode = pylt_intp_parsef(I, input);
 #ifdef PL_DEBUG_INFO
@@ -800,7 +800,6 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 pl_print(I, "locals: %s\n", castobj(locals));
             case BC_HALT:
                 goto _end;
-                break;
         }
     }
 _end:

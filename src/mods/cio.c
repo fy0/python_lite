@@ -14,7 +14,7 @@
 PyLiteObject* pylt_mods_cio_fopen(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteStrObject *fn = caststr(args[0]);
     PyLiteStrObject *mode = caststr(args[1]);
-    FILE *fp = pl_io_fopen(I, fn, mode);
+    FILE *fp = pylt_io_fopen(I, fn, mode);
 
     if (!fp) {
         switch (errno) {

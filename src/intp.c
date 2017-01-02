@@ -2,6 +2,7 @@
 #include "intp.h"
 #include "utils/misc.h"
 #include "utils/io.h"
+#include "mods/pltypes.h"
 #include "mods/io.h"
 #include "mods/os.h"
 #include "mods/sys.h"
@@ -26,7 +27,7 @@ void pylt_intp_free(PyLiteInterpreter *I) {
 }
 
 void pylt_intp_sys_init(PyLiteInterpreter *I) {
-    pl_io_init(I);
+    pylt_io_init(I);
 }
 
 void pylt_intp_init(PyLiteInterpreter *I) {
@@ -45,6 +46,7 @@ void pylt_intp_init(PyLiteInterpreter *I) {
     pylt_static_objs_init(I);
 
     // register builtins
+    pylt_mods_pltypes_register(I);
     pylt_mods_io_register(I);
     pylt_mods_cio_register(I);
     pylt_mods_math_register(I);
