@@ -33,5 +33,7 @@ bool ucs4str_to_ucs2(uint32_t *ucs4str, int ucs4str_len, uint16_t *buf, bool ign
 bool ucs2str_to_ucs4(uint16_t *ucs2str, int ucs2str_len, uint32_t *buf);
 // 转换字符串 ucs4 -> wchar_t (末尾补\0)
 bool ucs4str_to_wchar(uint32_t *ucs4str, int ucs4str_len, wchar_t *buf, bool ignore);
+// 转换字符串 wchar -> ucs4 (末尾补\0)
+bool wchar_to_ucs4str(wchar_t *wstr, int wstr_len, uint32_t *buf);
 
 #endif

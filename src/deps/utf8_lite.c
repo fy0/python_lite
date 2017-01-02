@@ -177,3 +177,11 @@ bool ucs4str_to_wchar(uint32_t *ucs4str, int ucs4str_len, wchar_t *buf, bool ign
     buf[ucs4str_len] = L'\0';
     return true;
 }
+
+bool wchar_to_ucs4str(wchar_t *wstr, int wstr_len, uint32_t *buf) {
+    for (int i = 0; i < wstr_len; ++i) {
+        buf[i] = (uint32_t)wstr[i];
+    }
+    buf[wstr_len] = L'\0';
+    return true;
+}

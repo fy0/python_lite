@@ -36,32 +36,24 @@ void record_halt(LexState *ls) {
 
 uint32_t get_token_1(LexState *ls, uint32_t next1_eq_token, uint32_t next1_token, uint32_t next2_token);
 
-const char* pylt_lex_tokens[] = {
-    "<END>", "<COMMENTS>", "<NEWLINE>", "<INDENT>", "<DEDENT>",
-    "<NAME>", "<INT>", "<FLOAT>", "<STRING>", "<BYTES>",
+const wchar_t *pylt_lex_tokens[] = {
+    L"<END>", L"<COMMENTS>", L"<NEWLINE>", L"<INDENT>", L"<DEDENT>",
+    L"<NAME>", L"<INT>", L"<FLOAT>", L"<STRING>", L"<BYTES>",
 
-    "False", "None", "True", "and", "as", "assert", "break",
-    "class", "continue", "def", "del", "elif", "else", "except",
-    "finally", "for", "from", "global", "if", "import", "in",
-    "is", "lambda", "nonlocal", "not", "or", "pass", "raise",
-    "return", "try", "while", "with", "yield",
+    L"False", L"None", L"True", L"and", L"as", L"assert", L"break",
+    L"class", L"continue", L"def", L"del", L"elif", L"else", L"except",
+    L"finally", L"for", L"from", L"global", L"if", L"import", L"in",
+    L"is", L"lambda", L"nonlocal", L"not", L"or", L"pass", L"raise",
+    L"return", L"try", L"while", L"with", L"yield",
 
-    "**", "//", "<<", ">>", "<=", ">=", "==", "!=",
+    L"**", L"//", L"<<", L">>", L"<=", L">=", L"==", L"!=",
 
-    "->",
-    "+=", "-=", "*=", "/=", "//=", "%=", "@=",
-    "&=", "|=", "^=", ">>=", "<<=", "**=",
+    L"->",
+    L"+=", L"-=", L"*=", L"/=", L"//=", L"%=", L"@=",
+    L"&=", L"|=", L"^=", L">>=", L"<<=", L"**=",
 };
 
-const char* pylt_lex_get_token_name(uint32_t token) {
-    switch (token) {
-        case '+': return "+"; case '-': return "-"; case '*': return "*"; case '/': return "/";
-        case '%': return "%"; case '@': return "@"; case '&': return "&"; case '|': return "|";
-        case '^': return "^"; case '~': return "~"; case '<': return "<"; case '>': return ">";
-        case '(': return "("; case ')': return ")"; case '[': return "["; case ']': return "]";
-        case '{': return "{"; case '}': return "}"; case ',': return ","; case ':': return ":";
-        case '.': return "."; case '=': return "=";
-    }
+const wchar_t* pylt_lex_get_token_name(uint32_t token) {
     if (token >= FIRST_TOKEN)
         return pylt_lex_tokens[token - FIRST_TOKEN];
     return NULL;

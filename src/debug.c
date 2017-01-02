@@ -7,7 +7,7 @@
 #include "api.h"
 #include "intp.h"
 
-const char* get_op_name(uint32_t val) {
+const wchar_t* get_op_name(uint32_t val) {
     return pylt_vm_get_op_name(val);
 }
 

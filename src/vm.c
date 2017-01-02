@@ -12,22 +12,22 @@
 
 PyLiteObject* _pylt_vm_call(PyLiteInterpreter *I, pl_int_t argc);
 
-const char* op_vals[] = {
-    "or",
-    "and",
-    "not",
-    "in", "not in", "is", "is not", "<", "<=", ">", ">=", "!=", "==",
-    "|",
-    "^",
-    "&",
-    "<<", ">>",
-    "+", "-",
-    "*", "@", "/", "//", "%",
-    "+x", "-x", "~x",
-    "**",
+const wchar_t *op_vals[] = {
+    L"or",
+    L"and",
+    L"not",
+    L"in", L"not in", L"is", L"is not", L"<", L"<=", L">", L">=", L"!=", L"==",
+    L"|",
+    L"^",
+    L"&",
+    L"<<", L">>",
+    L"+", L"-",
+    L"*", L"@", L"/", L"//", L"%",
+    L"+x", L"-x", L"~x",
+    L"**",
 };
 
-const char* pylt_vm_get_op_name(int op) {
+const wchar_t* pylt_vm_get_op_name(int op) {
     return op_vals[op];
 }
 
@@ -509,7 +509,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                         tret = pylt_obj_op_binary(I, ins.extra, obja, objb);
                         if (!tret) {
                             pl_error(I, pl_static.str.TypeError, "unsupported operand type(s) for %s: %r and %r",
-                                pl_strnew_u8(I, pylt_vm_get_op_name(ins.extra), true),
+                                pl_strnew_w(I, pylt_vm_get_op_name(ins.extra), true),
                                 pl_type(I, obja)->name,
                                 pl_type(I, objb)->name
                             );
@@ -524,7 +524,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                         tret = pylt_obj_op_unary(I, ins.extra, obj);
                         if (!tret) {
                             pl_error(I, pl_static.str.TypeError, "bad operand type for unary %s: %r",
-                                pl_strnew_u8(I, pylt_vm_get_op_name(ins.extra), true),
+                                pl_strnew_w(I, pylt_vm_get_op_name(ins.extra), true),
                                 pl_type(I, obj)->name
                             );
                             break;

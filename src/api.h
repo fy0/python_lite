@@ -31,6 +31,7 @@ PyLiteObject* pl_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLite
 /* Str utils */
 
 #define pl_strnew_u8 pylt_obj_str_new_from_cstr
+#define pl_strnew_w pylt_obj_str_new_from_wstr
 #define pl_format pylt_obj_str_new_from_format
 #define pl_formatT pylt_obj_str_new_from_format_with_tuple
 #define pl_cformat pylt_obj_str_new_from_cformat

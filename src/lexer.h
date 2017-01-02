@@ -97,7 +97,7 @@ void pylt_lex_err(LexState *ls, int code);
 void pylt_lex_reset(LexState *ls, PyLiteFile *input);
 
 int pylt_lex_next(LexState *ls);
-const char* pylt_lex_get_token_name(uint32_t token);
+const wchar_t* pylt_lex_get_token_name(uint32_t token);
 
 #define PYLT_ERR_LEX_INVALID_CHARACTER -1
 #define PYLT_ERR_LEX_INVALID_NUMBER -2

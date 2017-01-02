@@ -284,6 +284,17 @@ PyLiteStrObject* pylt_obj_str_new_from_cstr(PyLiteInterpreter *I, const char *st
     }
 
     obj = pylt_obj_str_new(I, buf, len, is_raw);
+    pylt_free(I, buf, (len + 1) * sizeof(uint32_t));
+    return obj;
+}
+
+PyLiteStrObject* pylt_obj_str_new_from_wstr(PyLiteInterpreter *I, const wchar_t *str, bool is_raw) {
+    PyLiteStrObject *obj;
+    pl_int_t len = wcslen(str);
+    uint32_t *buf = pylt_malloc(I, (len + 1) * sizeof(uint32_t));
+    wchar_to_ucs4str((wchar_t*)str, len, buf);
+    obj = pylt_obj_str_new(I, buf, len, is_raw);
+    pylt_free(I, buf, (len + 1) * sizeof(uint32_t));
     return obj;
 }
 

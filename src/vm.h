@@ -84,7 +84,7 @@ typedef struct PyLiteVM {
 void pylt_vm_push_func(PyLiteInterpreter *I, PyLiteFunctionObject *func);
 void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code);
 
-const char* pylt_vm_get_op_name(int op);
+const wchar_t* pylt_vm_get_op_name(int op);
 int token_to_op_val(uint32_t tk);
 int token_de_to_op_val(uint32_t tk);
 
