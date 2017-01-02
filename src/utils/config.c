@@ -5,7 +5,7 @@
 void* pylt_realloc(PyLiteInterpreter *I, void* m, size_t osize, size_t nsize) {
     if (nsize == 0) {
         free(m);
-        if (I) I->mem_used -= osize;
+        if (I && m) I->mem_used -= osize;
         return NULL;
     } else {
         void* ret = realloc(m, nsize);

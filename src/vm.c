@@ -654,6 +654,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 } else if (tret->ob_type == PYLT_OBJ_TYPE_CFUNCTION) {
                     tret = castcfunc(tret)->code(I, func_info->length, (PyLiteObject**)(&kv_topn(vm->stack, func_info->length - 1)));
 					kv_popn(vm->stack, func_info->length + 1);
+                    if (I->error) break;
 					if (tret) kv_pushptr(I->vm.stack, tret);
 					else kv_pushptr(I->vm.stack, (uintptr_t)pylt_obj_none_new(I));
                 }

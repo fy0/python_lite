@@ -12,16 +12,17 @@ PyLiteModuleObject* pl_getmod(PyLiteInterpreter *I, PyLiteStrObject *modpath) {
             PyLiteModuleLoaderFunc loader = (PyLiteModuleLoaderFunc)cptr->ob_ptr;
             mod = (*loader)(I);
             mod->name = modpath;
+            pylt_obj_dict_setitem(I, I->modules, castobj(modpath), castobj(mod));
         }
     }
     return mod;
 }
 
-PyLiteTypeObject* pl_getbuiltintype(PyLiteInterpreter *I, PyLiteStrObject *name) {
-    return pl_gettype(I, I->vm.builtins, name);
+PyLiteTypeObject* pl_builtintype(PyLiteInterpreter *I, PyLiteStrObject *name) {
+    return pl_modtype(I, I->vm.builtins, name);
 }
 
-PyLiteTypeObject* pl_gettype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
+PyLiteTypeObject* pl_modtype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
 	PyLiteObject *obj = pylt_obj_mod_getattr(I, mod, castobj(name));
 	return pl_istype(obj) ? casttype(obj) : NULL;
 }
@@ -117,7 +118,7 @@ void pl_print(PyLiteInterpreter *I, const char *format, ...) {
 void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char *format, ...) {
     PyLiteObject *error;
     PyLiteStrObject *str;
-    PyLiteTypeObject *type = pl_getbuiltintype(I, exception_name);
+    PyLiteTypeObject *type = pl_builtintype(I, exception_name);
     va_list args;
 
     if (format) {
@@ -139,6 +140,35 @@ void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char 
         I->error = error;
     } else {
         error = pl_call(I, castobj(type), 0);
+    }
+    I->error = error;
+}
+
+
+void pl_error_ex(PyLiteInterpreter *I, PyLiteTypeObject *exception_type, const char *format, ...) {
+    PyLiteObject *error;
+    PyLiteStrObject *str;
+    va_list args;
+
+    if (format) {
+        // build error string
+        pl_int_t args_count = _get_arg_count_cstr(format);
+        PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
+
+        va_start(args, format);
+        for (pl_int_t i = 0; i < args_count; ++i) {
+            targs->ob_val[i] = va_arg(args, PyLiteObject*);
+        }
+        va_end(args);
+
+        str = pl_formatT(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
+        pylt_obj_tuple_free(I, targs);
+
+        // new Exception
+        error = pl_call(I, castobj(exception_type), 1, str);
+        I->error = error;
+    } else {
+        error = pl_call(I, castobj(exception_type), 0);
     }
     I->error = error;
 }

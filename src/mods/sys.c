@@ -15,7 +15,7 @@ PyLiteModuleObject* pylt_mods_sys_loader(PyLiteInterpreter *I) {
 	PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(sys));
 
     PyLiteModuleObject *mio = pl_getmod(I, _S(io));
-    PyLiteTypeObject *tTextIO = pl_gettype(I, mio, _S(TextIO));
+    PyLiteTypeObject *tTextIO = pl_modtype(I, mio, _S(TextIO));
 
     PyLiteObject *obj_stdin = pylt_obj_cutstom_create(I, tTextIO->ob_reftype, NULL);
     pylt_obj_setattr(I, obj_stdin, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, I->sys.cin, false)));

@@ -366,7 +366,7 @@ pl_bool_t pylt_io_file_writeable(PyLiteInterpreter *I, PyLiteFile *pf) {
 }
 
 pl_bool_t pylt_io_file_readable(PyLiteInterpreter *I, PyLiteFile *pf) {
-    return (pf->flags & O_RDONLY) || (pf->flags & O_RDWR);
+    return (pf == I->sys.cin) || (pf->flags & O_RDONLY) || (pf->flags & O_RDWR);
 }
 
 void pylt_io_init(PyLiteInterpreter *I) {

@@ -10,8 +10,8 @@
 // get module instance, load builtin module if not loaded.
 PyLiteModuleObject* pl_getmod(PyLiteInterpreter *I, PyLiteStrObject *modpath);
 
-PyLiteTypeObject* pl_getbuiltintype(PyLiteInterpreter *I, PyLiteStrObject *name);
-PyLiteTypeObject* pl_gettype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name);
+PyLiteTypeObject* pl_builtintype(PyLiteInterpreter *I, PyLiteStrObject *name);
+PyLiteTypeObject* pl_modtype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name);
 // get first builtin parent type (type of ob_base for custom type)
 pl_uint32_t pl_getbase_by_code(PyLiteInterpreter *I, pl_uint32_t type_code);
 pl_bool_t pl_isinstance(PyLiteInterpreter *I, PyLiteObject *obj, pl_uint32_t type_code);
@@ -45,5 +45,6 @@ void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj);
 
 void pl_print(PyLiteInterpreter *I, const char *format, ...);
 void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char *format, ...);
+void pl_error_ex(PyLiteInterpreter *I, PyLiteTypeObject *exception_type, const char *format, ...);
 
 #endif

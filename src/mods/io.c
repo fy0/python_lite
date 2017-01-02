@@ -29,6 +29,13 @@ class BytesIO(BaseIO):
 
 */
 
+#define IO_VALUE_CHK(io_ret) \
+    if (io_ret == -1) { \
+        pl_error(I, _S(OSError), "[Errno %d] IO Error", pylt_obj_int_new(I, errno)); \
+        return NULL; \
+    }
+
+
 PyLiteObject* pylt_mods_io_BaseIO_read(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     pl_error(I, pl_static.str.NotImplementedError, NULL);
     return NULL;
@@ -48,7 +55,6 @@ PyLiteObject* pylt_mods_io_TextIO_readline(PyLiteInterpreter *I, int argc, PyLit
     }
 
     if (!(pl_isnone(args[1]) || pl_isint(args[1]))) {
-        pl_print(I, "%s\n", args[1]);
         pl_error(I, pl_static.str.TypeError, "'size' must be integer or None, got %r", pl_type(I, args[1]));
         return NULL;
     }
@@ -64,7 +70,6 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
     }
 
     if (!(pl_isnone(args[1]) || pl_isint(args[1]))) {
-        pl_print(I, "%s\n", args[1]);
         pl_error(I, pl_static.str.TypeError, "'size' must be integer or None, got %r", pl_type(I, args[1]));
         return NULL;
     }
@@ -74,9 +79,9 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
     uint32_t *buf = (uint32_t*)tmpbuf;
     PyLiteFile *pf = (PyLiteFile*)obj->ob_ptr;
 
-    if (pylt_io_file_readable(I, pf)) {
+    if (!pylt_io_file_readable(I, pf)) {
         PyLiteModuleObject *mod = pl_getmod(I, _S(io));
-
+        pl_error_ex(I, pl_modtype(I, mod, _S(UnsupportedOperation)), "not readable");
         return NULL;
     }
 
@@ -84,11 +89,14 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
         pl_int_t count = castint(args[1])->ob_val;
         if (count < 8192) {
             finalcount = pylt_io_file_readstr(I, pf, buf, count);
+            IO_VALUE_CHK(finalcount);
         } else {
             buf = NULL;
             pl_int_t current = 8192;
             while (true) {
                 pl_int_t tmp = pylt_io_file_readstr(I, pf, tmpbuf, current);
+                if (tmp == -1) pylt_free(I, buf, sizeof(uint32_t) * finalcount);
+                IO_VALUE_CHK(tmp);
                 buf = pylt_realloc(I, buf, sizeof(uint32_t) * finalcount, sizeof(uint32_t) * (finalcount + tmp));
                 memcpy(buf + finalcount, tmpbuf, sizeof(uint32_t) * tmp);
                 finalcount += tmp;
@@ -119,6 +127,11 @@ PyLiteObject* pylt_mods_io_TextIO_write(PyLiteInterpreter *I, int argc, PyLiteOb
     PyLiteCPtrObject *obj = castcptr(pylt_obj_Egetattr(I, args[0], castobj(_S(__cobj__)), NULL));
     if (!obj) {
         pl_error(I, pl_static.str.RuntimeError, "lost attribute: %r", _S(__cobj__));
+        return NULL;
+    }
+
+    if (!pl_isstr(args[1])) {
+        pl_error(I, pl_static.str.TypeError, "write() argument must be str, not %s", pl_type(I, args[1])->name);
         return NULL;
     }
 
@@ -178,11 +191,13 @@ PyLiteModuleObject* pylt_mods_io_loader(PyLiteInterpreter *I) {
 
     PyLiteTypeObject *tBytesIO = pylt_obj_type_new(I, pl_static.str.BytesIO, type->ob_reftype, NULL);
     pylt_cmethod_register(I, tBytesIO, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_read);
+
     pylt_cmethod_register(I, tBytesIO, _NS(I, "readline"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_readline);
     pylt_type_register(I, mod, tBytesIO);
 
-    //PyLiteTypeObject *EUnsupportedOperation = pylt_obj_type_new(I, _S(UnsupportedOperation), , NULL);
-    //pylt_type_register(I, mod, tBytesIO);
+    PyLiteTypeObject *tOSError = casttype(pylt_obj_mod_getattr(I, pl_getmod(I, _S(pltypes)), castobj(_S(OSError))));
+    PyLiteTypeObject *EUnsupportedOperation = pylt_obj_type_new(I, _S(UnsupportedOperation), tOSError->ob_reftype, NULL);
+    pylt_type_register(I, mod, EUnsupportedOperation);
 
     return mod;
 }
