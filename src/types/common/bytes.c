@@ -156,8 +156,10 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int
                         case 'n': obj->ob_val[pos++] = 10; i++; break;
                         case 'r': obj->ob_val[pos++] = 13; i++; break;
                         case 't': obj->ob_val[pos++] = 9; i++; break;
-                        case 'v': obj->ob_val[pos++] = 11; break;
-                        case '\\': obj->ob_val[pos++] = '\\'; break;
+                        case 'v': obj->ob_val[pos++] = 11; i++; break;
+                        case '\'': obj->ob_val[pos++] = '\''; i++; break;
+                        case '\"': obj->ob_val[pos++] = '\"'; i++; break;
+                        case '\\': obj->ob_val[pos++] = '\\'; i++; break;
                         case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
 							obj->ob_val[pos++] = _read_x_int(str + i, 8, _oct, &num, min(size - i, 3));
                             i += num;
@@ -174,7 +176,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int
                             break;
                         default:
                             obj->ob_val[pos++] = '\\';
-                            obj->ob_val[pos++] = str[++i];
+                            obj->ob_val[pos++] = str[i++];
                             break;
                     }
 					break;
@@ -182,7 +184,9 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int
                     obj->ob_val[pos++] = str[i++];
             }
         }
-        obj->ob_val = pylt_realloc(I, obj->ob_val, sizeof(uint8_t)*pos, sizeof(uint8_t)*pos + 1);
+        if (pos != size) {
+            obj->ob_val = pylt_realloc(I, obj->ob_val, sizeof(uint8_t)*pos, sizeof(uint8_t)*pos + 1);
+        }
         obj->ob_size = pos;
         obj->ob_val[pos] = '\0';
     }

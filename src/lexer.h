@@ -99,8 +99,9 @@ void pylt_lex_reset(LexState *ls, PyLiteFile *input);
 int pylt_lex_next(LexState *ls);
 const wchar_t* pylt_lex_get_token_name(uint32_t token);
 
-#define PYLT_ERR_LEX_INVALID_CHARACTER -1
-#define PYLT_ERR_LEX_INVALID_NUMBER -2
-#define PYLT_ERR_LEX_INVALID_STR_OR_BYTES -3
+#define PYLT_ERR_LEX_INVALID_CHARACTER -11
+#define PYLT_ERR_LEX_INVALID_NUMBER -12
+// SyntaxError: EOL while scanning string literal
+#define PYLT_ERR_LEX_INVALID_STR_OR_BYTES -13
 
 #endif

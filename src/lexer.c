@@ -232,9 +232,9 @@ _INLINE static bool bs_next(LexState *ls, uint32_t chr, bool is_str) {
     return (is_str) ? str_next(ls, chr) : bytes_next(ls, chr);
 }
 
-
 bool read_str_or_bytes(LexState *ls, bool is_raw) {
     uint32_t sign = ls->ch;
+    bool escape_flag = false; // set by '\', reset by next
     bool is_str_type = ls->token.val == TK_STRING;
     bool is_long_string_or_bytes = false;
 
@@ -263,6 +263,10 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
     for (;;) {
         switch (ls->ch) {
             case '\'': case '"':
+                if (escape_flag) {
+                    escape_flag = false;
+                    goto _default;
+                }
                 if (ls->ch == sign) {
                     if (is_long_string_or_bytes) {
                         nextc(ls);
@@ -285,6 +289,7 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
                 }
                 goto _default;
             case '\n': {
+                escape_flag = false;
                 ls->linenumber++;
                 if (!is_long_string_or_bytes) return false;
                 bs_next(ls, ls->ch, is_str_type);
@@ -292,6 +297,7 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
                 break;
             }
             case '\r': {
+                escape_flag = false;
                 ls->linenumber++;
                 if (!is_long_string_or_bytes) return false;
                 bs_next(ls, '\n', is_str_type);
@@ -300,7 +306,11 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
                 break;
             }
             //case '\\': {} TODO: multiline support
+            case '\\':
+                escape_flag = true;
+                goto _default;
             default:
+                escape_flag = false;
             _default:
                 if ((!is_str_type) && (ls->ch >= 0x80)) {
                     //SyntaxError: bytes can only contain ASCII literal characters.

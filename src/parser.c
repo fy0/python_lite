@@ -46,9 +46,13 @@ bool lval_check_judge(ParserState *ps, bool val);
 pl_uint_t lval_check_cache_push(ParserState *ps);
 void lval_check_cache_pop(ParserState *ps);
 
+void error(ParserState *ps, int code);
 
 void next(ParserState *ps) {
-    pylt_lex_next(ps->ls);
+    int ret = pylt_lex_next(ps->ls);
+    if (ret < 0) {
+        error(ps, ret);
+    }
 }
 
 /**
@@ -94,8 +98,8 @@ void error(ParserState *ps, int code) {
     Token *tk = &(ps->ls->token);
     wprintf(L"ERROR at line [%d]\n", ps->ls->linenumber);
     //if (tk->val == TK_INT) raw_str_print(&(tk->str));
-    const char *name = pylt_lex_get_token_name(tk->val);
-    if (name) wprintf(L"%s", name);
+    const wchar_t *name = pylt_lex_get_token_name(tk->val);
+    if (name) wprintf(L"%ls", name);
     else putwchar(tk->val);
     putwchar('\n');
     switch (code) {
@@ -117,23 +121,12 @@ void error(ParserState *ps, int code) {
         case PYLT_ERR_PARSER_RETURN_OUTSIDE_FUNCTION:
             wprintf(L"SyntaxError: 'return' outside function\n");
             break;
+        case PYLT_ERR_LEX_INVALID_STR_OR_BYTES:
+            wprintf(L"SyntaxError: bad string literal\n");
+            break;
     }
     system("pause");
     exit(-1);
-}
-
-void print_tk(Token *tk) {
-    const char *name = pylt_lex_get_token_name(tk->val);
-    if (name) wprintf(L"%s", name);
-    else putwchar(tk->val);
-    putwchar('\n');
-}
-
-void print_tk_val(int tk_val) {
-    const char *name = pylt_lex_get_token_name(tk_val);
-    if (name) wprintf(L"%s", name);
-    else putwchar(tk_val);
-    putwchar('\n');
 }
 
 static _INLINE
