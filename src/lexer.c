@@ -283,6 +283,7 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
                         goto the_end;
                     }
                 }
+                goto _default;
             case '\n': {
                 ls->linenumber++;
                 if (!is_long_string_or_bytes) return false;
@@ -300,6 +301,7 @@ bool read_str_or_bytes(LexState *ls, bool is_raw) {
             }
             //case '\\': {} TODO: multiline support
             default:
+            _default:
                 if ((!is_str_type) && (ls->ch >= 0x80)) {
                     //SyntaxError: bytes can only contain ASCII literal characters.
                     return false;

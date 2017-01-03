@@ -422,19 +422,17 @@ PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *sel
 	pl_uint32_t c;
 	pl_uint32_t *data;
 	pl_uint_t i, j = 0;
-	int ext_count = 0;
+    int old_size = self->ob_size + 2;
 
-	for (i = 0; i < self->ob_size; ++i) {
-		c = self->ob_val[i];
-		if (c == '\'') ext_count++;
-		else if ((0 <= c && c <= 32) || (127 <= c && c <= 160)) ext_count += 3;
-	}
-
-    data = pylt_malloc(I, (self->ob_size + ext_count + 2) * sizeof(uint32_t));
+    data = pylt_malloc(I, old_size * sizeof(uint32_t));
 	data[0] = '\'';
 	j = 1;
 
 	for (i = 0; i < self->ob_size; ++i) {
+        if ((old_size - j) < 4) {
+            data = pylt_realloc(I, data, old_size * sizeof(uint32_t), (old_size + 15) * sizeof(uint32_t));
+            old_size += 15;
+        }
 		switch (self->ob_val[i]) {
 			case '\a': data[j++] = '\\'; data[j++] = 'a'; break;
 			case '\b': data[j++] = '\\'; data[j++] = 'b'; break;
@@ -461,7 +459,7 @@ PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *sel
 
 	data[j++] = '\'';
 	PyLiteStrObject *str = pylt_obj_str_new(I, data, j, true);
-    pylt_free(I, data, (self->ob_size + ext_count + 2) * sizeof(uint32_t));
+    pylt_free(I, data, old_size * sizeof(uint32_t));
 	return str;
 }
 

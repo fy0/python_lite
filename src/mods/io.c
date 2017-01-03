@@ -1,5 +1,4 @@
 ﻿
-#include <io.h>
 #include <errno.h>
 
 #include "io.h"
