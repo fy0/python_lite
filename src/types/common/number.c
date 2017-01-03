@@ -134,9 +134,18 @@ PyLiteObject* pylt_obj_int_floordiv(PyLiteInterpreter *I, PyLiteIntObject *self,
 PyLiteObject* pylt_obj_int_mod(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
-            return castobj(pylt_obj_int_new(I, self->ob_val % castint(other)->ob_val));
+            if (castint(other)->ob_val < 0) {
+                pl_int_t ret = self->ob_val % castint(other)->ob_val;
+                ret = (ret) ? ret + castint(other)->ob_val : 0;
+                return castobj(pylt_obj_int_new(I, ret));
+            } else return castobj(pylt_obj_int_new(I, self->ob_val % castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
-            return castobj(pylt_obj_float_new(I, fmod(self->ob_val, castfloat(other)->ob_val)));
+            if (castfloat(other)->ob_val < 0) {
+                double ret = fmod(self->ob_val, castfloat(other)->ob_val);
+                ret = (ret) ? ret + castfloat(other)->ob_val : 0;
+                return castobj(pylt_obj_float_new(I, ret));
+            }
+            else return castobj(pylt_obj_float_new(I, fmod(self->ob_val, castfloat(other)->ob_val)));
         default: return NULL;
     }
 }

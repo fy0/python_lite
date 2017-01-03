@@ -1298,7 +1298,7 @@ void parse_stmt(ParserState *ps) {
             loop_control_replace(ps, tmp2);
 
             write_ins(ps, BC_JMP_BACK, 0, (kv_size(ps->info->code->opcodes) - tmp + 1));
-            kv_A(ps->info->code->opcodes, tmp2).extra = kv_size(ps->info->code->opcodes) - tmp2;
+            kv_A(ps->info->code->opcodes, tmp2).extra = kv_size(ps->info->code->opcodes) - tmp2 - 1;
             return;
         case TK_KW_BREAK:
             next(ps);
