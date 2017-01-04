@@ -366,7 +366,22 @@ pl_bool_t pylt_io_file_writeable(PyLiteInterpreter *I, PyLiteFile *pf) {
 }
 
 pl_bool_t pylt_io_file_readable(PyLiteInterpreter *I, PyLiteFile *pf) {
-    return (pf == I->sys.cin) || (pf->flags & O_RDONLY) || (pf->flags & O_RDWR);
+    return !(pf->flags & O_WRONLY);
+}
+
+pl_bool_t pylt_io_file_isatty(PyLiteInterpreter *I, PyLiteFile *pf) {
+    return isatty(pf->fno);
+}
+
+PyLiteStrObject* pylt_io_file_getencoding(PyLiteInterpreter *I, PyLiteFile *pf) {
+    switch (pf->encoding) {
+        case PYLT_IOTE_BYTE: return pl_strnew_w(I, L"byte", true);
+        case PYLT_IOTE_UTF8: return pl_strnew_w(I, L"utf8", true);
+        case PYLT_IOTE_UCS2: return pl_strnew_w(I, L"ucs2", true);
+        case PYLT_IOTE_UCS4: return pl_strnew_w(I, L"ucs4", true);
+        case PYLT_IOTE_WCHAR: return pl_strnew_w(I, L"wchar", true);
+    }
+    return NULL;
 }
 
 void pylt_io_init(PyLiteInterpreter *I) {

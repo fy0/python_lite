@@ -14,7 +14,6 @@ static int win32read(HANDLE hIn, uint32_t *c) {
     KEY_EVENT_RECORD e;
     BOOL altgr;
 
-
     while (1) {
         if (!ReadConsoleInput(hIn, &b, 1, &foo)) return 0;
         if (!foo) return 0;
@@ -75,7 +74,8 @@ static int win32read(HANDLE hIn, uint32_t *c) {
                         *c = 3;
                         return 1;
                     case VK_RETURN:  /* enter */
-                        *c = 13;
+                        *c = 10; // fixed
+                        WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), c, 1, NULL, NULL);
                         return 1;
                     case VK_LEFT:   /* left */
                         *c = 2;

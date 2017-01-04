@@ -38,6 +38,9 @@ int pylt_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, p
 pl_bool_t pylt_io_file_writeable(PyLiteInterpreter *I, PyLiteFile *pf);
 pl_bool_t pylt_io_file_readable(PyLiteInterpreter *I, PyLiteFile *pf);
 
+pl_bool_t pylt_io_file_isatty(PyLiteInterpreter *I, PyLiteFile *pf);
+PyLiteStrObject* pylt_io_file_getencoding(PyLiteInterpreter *I, PyLiteFile *pf);
+
 void pylt_io_init(PyLiteInterpreter *I);
 
 #endif

@@ -247,7 +247,7 @@ PyLiteObject* pylt_obj_getattr_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLit
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_MODULE:
             if (p_at_type) *p_at_type = false;
-            ret = pylt_obj_mod_getattr(I, castmod(obj), key);
+            ret = pylt_obj_mod_getattr(I, castmod(obj), caststr(key));
             break;
         case PYLT_OBJ_TYPE_TYPE:
             ret = pylt_obj_type_getattr(I, casttype(obj), key, p_at_type);

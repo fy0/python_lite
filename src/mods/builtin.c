@@ -170,6 +170,9 @@ PyLiteModuleObject* pylt_mods_builtins_loader(PyLiteInterpreter *I) {
         pylt_obj_mod_setattr(I, mod, caststr(key), value);
     }
 
+    PyLiteModuleObject *io = pl_getmod(I, _S(io));
+    pylt_obj_mod_setattr(I, mod, _S(open), pylt_obj_mod_getattr(I, io, _S(open)));
+
     pylt_gc_add(I, castobj(mod));
     return mod;
 }

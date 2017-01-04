@@ -21,8 +21,8 @@ void pylt_obj_mod_setattr(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteS
     pylt_obj_dict_setitem(I, (mod)->ob_attrs, castobj(key), value);
 }
 
-PyLiteObject* pylt_obj_mod_getattr(PyLiteInterpreter *I, PyLiteModuleObject *self, PyLiteObject *key) {
-    return pylt_obj_dict_getitem(I, self->ob_attrs, key);
+PyLiteObject* pylt_obj_mod_getattr(PyLiteInterpreter *I, PyLiteModuleObject *self, PyLiteStrObject *key) {
+    return pylt_obj_dict_getitem(I, self->ob_attrs, castobj(key));
 }
 
 void pylt_obj_module_free(PyLiteInterpreter *I, PyLiteModuleObject *self) {

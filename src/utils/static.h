@@ -196,6 +196,7 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *BytesIO;
         PyLiteStrObject *TextIO;
         PyLiteStrObject *UnsupportedOperation;
+        PyLiteStrObject *encoding;
 
         // module - sys
         PyLiteStrObject *sys;

@@ -34,6 +34,14 @@ class BytesIO(BaseIO):
         return NULL; \
     }
 
+PyLiteFile* getPF(PyLiteInterpreter *I, PyLiteObject *a) {
+    PyLiteCPtrObject *obj = castcptr(pylt_obj_Egetattr(I, a, castobj(_S(__cobj__)), NULL));
+    if (!obj) {
+        pl_error(I, pl_static.str.RuntimeError, "lost attribute: %r", _S(__cobj__));
+        return NULL;
+    }
+    return (PyLiteFile*)obj->ob_ptr;
+}
 
 PyLiteObject* pylt_mods_io_BaseIO_read(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     pl_error(I, pl_static.str.NotImplementedError, NULL);
@@ -45,28 +53,89 @@ PyLiteObject* pylt_mods_io_BaseIO_write(PyLiteInterpreter *I, int argc, PyLiteOb
     return NULL;
 }
 
+PyLiteObject* pylt_mods_io_BaseIO_fileno(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    PyLiteFile *pf = getPF(I, args[0]);
+    if (!pf) return NULL;
+    return castobj(pylt_obj_int_new(I, pf->fno));
+}
+
+PyLiteObject* pylt_mods_io_BaseIO_isatty(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    PyLiteFile *pf = getPF(I, args[0]);
+    if (!pf) return NULL;
+    return castobj(pylt_obj_bool_new(I, pylt_io_file_isatty(I, pf)));
+}
+
+PyLiteObject* pylt_mods_io_BaseIO_prop_encoding_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    PyLiteFile *pf = getPF(I, args[0]);
+    if (!pf) return NULL;
+    return castobj(pylt_io_file_getencoding(I, pf));
+}
+
+PyLiteObject* pylt_mods_io_TextIO_readuntil(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    PyLiteFile *pf = getPF(I, args[0]);
+    if (!pf) return NULL;
+
+    if (!(pl_isnone(args[2]) || pl_isint(args[2]))) {
+        pl_error(I, pl_static.str.TypeError, "'size' must be integer or None, got %r", pl_type(I, args[2]));
+        return NULL;
+    }
+
+    if (!pylt_io_file_readable(I, pf)) {
+        PyLiteModuleObject *mod = pl_getmod(I, _S(io));
+        pl_error_ex(I, pl_modtype(I, mod, _S(UnsupportedOperation)), "not readable");
+        return NULL;
+    }
+
+    if (!pl_isstr(args[1])) {
+        pl_error(I, pl_static.str.TypeError, "text must be str, got %r", pl_type(I, args[1]));
+        return NULL;
+    }
+
+    pl_int_t bsize = 64;
+    pl_int_t read_count = 0;
+    pl_int_t maxval = pl_isnone(args[2]) ? -1 : castint(args[2])->ob_val;
+
+    pl_int_t pindex = 0;
+    uint32_t *ptext = caststr(args[1])->ob_val;
+
+    pl_int_t index = 0;
+    uint32_t *buf = (uint32_t*)pylt_malloc(I, sizeof(uint32_t) * bsize);
+
+    while (maxval == -1 || read_count < maxval) {
+        pl_int_t ret = pylt_io_file_readstr(I, pf, buf + index, 1);
+        IO_VALUE_CHK(ret);
+        read_count += ret;
+        if (buf[index] == ptext[pindex]) {
+            if (++pindex == caststr(args[1])->ob_size) break;
+        } else {
+            if (pindex) pindex = 0;
+        }
+        index++;
+        if (index >= bsize) {
+            buf = pylt_realloc(I, buf, sizeof(uint32_t) * bsize, sizeof(uint32_t) * (bsize + 64));
+            bsize += 64;
+        }
+    }
+
+    PyLiteObject *ret = castobj(pylt_obj_str_new(I, buf, read_count, true));
+    pylt_free(I, buf, sizeof(uint32_t) * bsize);
+    return ret;
+}
 
 PyLiteObject* pylt_mods_io_TextIO_readline(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    PyLiteCPtrObject *obj = castcptr(pylt_obj_Egetattr(I, args[0], castobj(_S(__cobj__)), NULL));
-    if (!obj) {
-        pl_error(I, pl_static.str.RuntimeError, "lost attribute: %r", _S(__cobj__));
-        return NULL;
-    }
+    PyLiteTupleObject *t = pylt_obj_tuple_new(I, 3);
+    t->ob_val[0] = args[0];
+    t->ob_val[1] = castobj(pl_strnew_w(I, L"\n", true));
+    t->ob_val[2] = args[1];
 
-    if (!(pl_isnone(args[1]) || pl_isint(args[1]))) {
-        pl_error(I, pl_static.str.TypeError, "'size' must be integer or None, got %r", pl_type(I, args[1]));
-        return NULL;
-    }
-
-    return NULL;
+    PyLiteObject *ret = pylt_mods_io_TextIO_readuntil(I, 3, t->ob_val);
+    pylt_obj_tuple_free(I, t);
+    return ret;
 }
 
 PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    PyLiteCPtrObject *obj = castcptr(pylt_obj_Egetattr(I, args[0], castobj(_S(__cobj__)), NULL));
-    if (!obj) {
-        pl_error(I, pl_static.str.RuntimeError, "lost attribute: %r", _S(__cobj__));
-        return NULL;
-    }
+    PyLiteFile *pf = getPF(I, args[0]);
+    if (!pf) return NULL;
 
     if (!(pl_isnone(args[1]) || pl_isint(args[1]))) {
         pl_error(I, pl_static.str.TypeError, "'size' must be integer or None, got %r", pl_type(I, args[1]));
@@ -76,7 +145,6 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
     pl_int_t finalcount = 0;
     uint32_t tmpbuf[8192];
     uint32_t *buf = (uint32_t*)tmpbuf;
-    PyLiteFile *pf = (PyLiteFile*)obj->ob_ptr;
 
     if (!pylt_io_file_readable(I, pf)) {
         PyLiteModuleObject *mod = pl_getmod(I, _S(io));
@@ -123,19 +191,21 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
 }
 
 PyLiteObject* pylt_mods_io_TextIO_write(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    PyLiteCPtrObject *obj = castcptr(pylt_obj_Egetattr(I, args[0], castobj(_S(__cobj__)), NULL));
-    if (!obj) {
-        pl_error(I, pl_static.str.RuntimeError, "lost attribute: %r", _S(__cobj__));
-        return NULL;
-    }
+    PyLiteFile *pf = getPF(I, args[0]);
+    if (!pf) return NULL;
 
     if (!pl_isstr(args[1])) {
         pl_error(I, pl_static.str.TypeError, "write() argument must be str, not %s", pl_type(I, args[1])->name);
         return NULL;
     }
 
-    PyLiteFile *pf = (PyLiteFile*)obj->ob_ptr;
     PyLiteStrObject *str = caststr(args[1]);
+
+    if (!pylt_io_file_writeable(I, pf)) {
+        PyLiteModuleObject *mod = pl_getmod(I, _S(io));
+        pl_error_ex(I, pl_modtype(I, mod, _S(UnsupportedOperation)), "not writeable");
+        return NULL;
+    }
 
     return castobj(pylt_obj_int_new(I, pylt_io_file_writestr(I, pf, str->ob_val, str->ob_size, ' ')));
 }
@@ -148,23 +218,12 @@ PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **a
     PyLiteModuleObject *mod = castmod(func->ob_owner);
     pl_assert(I, pl_ismod(mod), NULL);
 
-    PyLiteTypeObject *iotype = casttype(pylt_obj_mod_getattr(I, mod, castobj((pf->is_binary) ? _S(BytesIO) : _S(TextIO))));
+    PyLiteTypeObject *iotype = casttype(pylt_obj_mod_getattr(I, mod, (pf->is_binary) ? _S(BytesIO) : _S(TextIO)));
     PyLiteObject *ret = pylt_obj_cutstom_create(I, iotype->ob_reftype, NULL);
     pylt_obj_setattr(I, ret, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, pf, false)));
     return ret;
 }
 
-
-PyLiteObject* pylt_mods_io_read(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    pl_int_t size = castint(args[1])->ob_val;
-    uint8_t *buf = pylt_malloc(I, size);
-    size_t read = fread(buf, size, 1, castcptr(args[0])->ob_ptr);
-    if (read == 0) return NULL;
-    else {
-        return castobj(pylt_obj_bytes_new(I, (const char*)buf, size, true));
-    }
-    return NULL;
-}
 
 PyLiteModuleObject* pylt_mods_io_loader(PyLiteInterpreter *I) {
 	PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(io));
@@ -174,27 +233,29 @@ PyLiteModuleObject* pylt_mods_io_loader(PyLiteInterpreter *I) {
     pylt_obj_mod_setattr(I, mod, _NS(I, "SEEK_SET"), castobj(pylt_obj_int_new(I, SEEK_SET)));
 
     pylt_cfunc_register(I, mod, _NS(I, "open"), _NST(I, 2, "fn", "mode"), NULL, NULL, &pylt_mods_io_open);
-    pylt_cfunc_register(I, mod, _NS(I, "read"), _NST(I, 2, "file", "size"), _NT(I, 2, &PyLiteParamUndefined, pylt_obj_int_new(I, -1)), NULL, &pylt_mods_io_read);
 
     PyLiteTypeObject *type;
     type = pylt_obj_type_new(I, pl_static.str.BaseIO, PYLT_OBJ_TYPE_OBJ, NULL);
     pylt_cmethod_register(I, type, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_BaseIO_read);
     pylt_cmethod_register(I, type, _NS(I, "write"), _NST(I, 2, "self", "data"), NULL, NULL, &pylt_mods_io_BaseIO_write);
+    pylt_cmethod_register_0_args(I, type, _NS(I, "fileno"), &pylt_mods_io_BaseIO_fileno);
+    pylt_cmethod_register_0_args(I, type, _NS(I, "isatty"), &pylt_mods_io_BaseIO_isatty);
+    pylt_cprop_register(I, type, _S(encoding), &pylt_mods_io_BaseIO_prop_encoding_get, NULL);
     pylt_type_register(I, mod, type);
 
     PyLiteTypeObject *tTextIO = pylt_obj_type_new(I, pl_static.str.TextIO, type->ob_reftype, NULL);
     pylt_cmethod_register(I, tTextIO, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_read);
-    pylt_cmethod_register(I, tTextIO, _NS(I, "write"), _NST(I, 2, "self", "str"), NULL, NULL, &pylt_mods_io_TextIO_write);
+    pylt_cmethod_register(I, tTextIO, _NS(I, "readuntil"), _NST(I, 3, "self", "text", "size"), _NT(I, 3, &PyLiteParamUndefined, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_readuntil);
     pylt_cmethod_register(I, tTextIO, _NS(I, "readline"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_readline);
+    pylt_cmethod_register(I, tTextIO, _NS(I, "write"), _NST(I, 2, "self", "str"), NULL, NULL, &pylt_mods_io_TextIO_write);
     pylt_type_register(I, mod, tTextIO);
 
     PyLiteTypeObject *tBytesIO = pylt_obj_type_new(I, pl_static.str.BytesIO, type->ob_reftype, NULL);
-    pylt_cmethod_register(I, tBytesIO, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_read);
-
-    pylt_cmethod_register(I, tBytesIO, _NS(I, "readline"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_readline);
+    //pylt_cmethod_register(I, tBytesIO, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_read);
+    //pylt_cmethod_register(I, tBytesIO, _NS(I, "write"), _NST(I, 2, "self", "str"), NULL, NULL, &pylt_mods_io_TextIO_write);
     pylt_type_register(I, mod, tBytesIO);
 
-    PyLiteTypeObject *tOSError = casttype(pylt_obj_mod_getattr(I, pl_getmod(I, _S(pltypes)), castobj(_S(OSError))));
+    PyLiteTypeObject *tOSError = casttype(pylt_obj_mod_getattr(I, pl_getmod(I, _S(pltypes)), _S(OSError)));
     PyLiteTypeObject *EUnsupportedOperation = pylt_obj_type_new(I, _S(UnsupportedOperation), tOSError->ob_reftype, NULL);
     pylt_type_register(I, mod, EUnsupportedOperation);
 
