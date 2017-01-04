@@ -576,7 +576,7 @@ static int completeLine(struct linenoiseState *ls) {
                 default:
                     /* Update buffer and return */
                     if (i < lc.len) {
-                        nwritten = swprintf(ls->buf,ls->buflen,L"%s",lc.cvec[i]);
+                        nwritten = swprintf(ls->buf,ls->buflen,L"%ls",lc.cvec[i]);
                         ls->len = ls->pos = nwritten;
                     }
                     stop = 1;

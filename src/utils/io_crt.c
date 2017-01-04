@@ -1,7 +1,8 @@
 
-#include "io_crt.h"
-#include "misc.h"
 #include <errno.h>
+#include "misc.h"
+#include "io_crt.h"
+#include "../intp.h"
 
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
@@ -12,6 +13,7 @@ static int win32read(HANDLE hIn, uint32_t *c) {
     INPUT_RECORD b;
     KEY_EVENT_RECORD e;
     BOOL altgr;
+
 
     while (1) {
         if (!ReadConsoleInput(hIn, &b, 1, &foo)) return 0;
@@ -65,10 +67,8 @@ static int win32read(HANDLE hIn, uint32_t *c) {
                         *c = 5;
                         return 1;
                 }
-
                 /* Other Ctrl+KEYs ignored */
             } else {
-
                 switch (e.wVirtualKeyCode) {
 
                     case VK_ESCAPE: /* ignore - send ctrl-c, will return -1 */
@@ -102,6 +102,8 @@ static int win32read(HANDLE hIn, uint32_t *c) {
                         *c = 127;
                         return 1;
                     default:
+                        // 我是真不知道为什么没有回显，手动输出一下吧
+                        WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), c, 1, NULL, NULL);
                         if (*c) return 1;
                 }
             }
