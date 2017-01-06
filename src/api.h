@@ -42,6 +42,7 @@ void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj);
 
 #define pl_assert(I, stmt, ret) if (!(stmt)) { pl_error(I, pl_static.str.RuntimeError, "panic"); return (ret); }
 #define pl_next pylt_obj_iter_next
+#define pl_foreach_set(I, it, setobj) for (pl_int32_t it = pylt_obj_set_begin(I, setobj); it != pylt_obj_set_end(I, setobj); pylt_obj_set_next(I, setobj, &it))
 #define pl_foreach_dict(I, it, dictobj) for (pl_int32_t it = pylt_obj_dict_begin(I, dictobj); it != pylt_obj_dict_end(I, dictobj); pylt_obj_dict_next(I, dictobj, &it))
 
 void pl_print(PyLiteInterpreter *I, const char *format, ...);

@@ -19,6 +19,7 @@ PyLiteCodeObject* pylt_obj_code_new(PyLiteInterpreter *I, pl_bool_t with_debug_i
     obj->ob_type = PYLT_OBJ_TYPE_CODE;
     obj->ob_flags = 0;
     obj->const_val = pylt_obj_list_new(I);
+    obj->closure = NULL;
     kv_init(I, obj->opcodes);
 	obj->with_debug_info = with_debug_info;
 	if (with_debug_info) {

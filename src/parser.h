@@ -27,6 +27,8 @@ typedef struct ParserState {
         kvec_t(PyLiteInstruction) bc_cache;
     } lval_check;
 
+    kvec_t(PyLiteDictObject*) var_tables;
+
     bool disable_op_in_parse;
 	bool disable_expr_tuple_parse;
     bool disable_return_parse;

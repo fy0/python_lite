@@ -13,6 +13,7 @@
 
 void func_push(ParserState *ps);
 ParserInfo* func_pop(ParserState *ps);
+void func_scope_check(ParserState *ps, PyLiteListObject *args);
 
 void parse_t(ParserState *ps);
 
@@ -895,6 +896,7 @@ void parse_func(ParserState *ps) {
     parse_stmts(ps);
     ACCEPT(ps, TK_DEDENT);
     write_ins(ps, BC_RET, 0, 0);
+    func_scope_check(ps, lst);
     info = func_pop(ps);
     ps->disable_return_parse = old_disable_return;
 
@@ -954,6 +956,7 @@ void parse_class(ParserState *ps) {
     ACCEPT(ps, TK_DEDENT);
     write_ins(ps, BC_LOADLOCALS, 0, 0);
     write_ins(ps, BC_RET, 0, 1);
+    func_scope_check(ps, lst);
     info = func_pop(ps);
     ps->disable_return_parse = old_disable_return;
 
@@ -1444,6 +1447,7 @@ PyLiteCodeObject* pylt_parser_parse(ParserState *ps) {
 #endif
     write_ins(ps, BC_HALT, 0, 0);
     ret = ps->info->code;
+    func_scope_check(ps, NULL);
     func_pop(ps);
     return ret;
 }
@@ -1473,6 +1477,42 @@ ParserInfo* func_pop(ParserState *ps) {
     info->prev = ps->info_used;
     ps->info_used = info;
     return info;
+}
+
+void func_scope_check(ParserState *ps, PyLiteListObject *args) {
+    PyLiteInstruction ins;
+    PyLiteCodeObject *code = ps->info->code;
+    PyLiteSetObject *storeset = pylt_obj_set_new(ps->I);
+    PyLiteSetObject *upvalue = pylt_obj_set_new(ps->I);
+
+    if (args) {
+        for (pl_int_t i = 0; i < args->ob_size; ++i) {
+            pylt_obj_set_add(ps->I, storeset, args->ob_val[i]);
+        }
+    }
+
+    for (unsigned int i = 0; i < kv_size(code->opcodes); ++i) {
+        ins = kv_A(code->opcodes, i);
+        switch (ins.code) {
+            case BC_LOAD_VAL:
+            case BC_LOAD_VAL_: {
+                PyLiteObject *name = code->const_val->ob_val[ins.extra];
+                if (!pylt_obj_set_has(ps->I, storeset, name)) {
+                    pylt_obj_set_add(ps->I, upvalue, castobj(name));
+                }
+                break;
+            }
+            case BC_SET_VAL:
+            case BC_SET_VALX: {
+                PyLiteObject *name = code->const_val->ob_val[ins.extra];
+                pylt_obj_set_add(ps->I, storeset, name);
+                break;
+            }
+        }
+    }
+
+    code->closure = upvalue;
+    pylt_obj_set_free(ps->I, storeset);
 }
 
 ParserState* pylt_parser_new(PyLiteInterpreter *I, LexState *ls) {
