@@ -763,8 +763,6 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                     pylt_obj_dict_setitem(I, frame->locals, name, castobj(mod));
                     kv_popn(ctx->stack, ins.extra);
                 } else {
-                    pl_error(I, pl_static.str.NotImplementedError, NULL);
-                    break;
                     PyLiteFile *input = pylt_io_file_new(I, pl_cformat(I, "%s.py", name), pl_cformat(I, "r"), PYLT_IOTE_UTF8);
                     if (!input) break;
                     PyLiteCodeObject *tcode = pylt_intp_parsef(I, input);
@@ -776,7 +774,9 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
 #endif
                     kv_popn(ctx->stack, ins.extra);
                     pylt_vm_push_code(I, tcode);
+                    kv_top(ctx->frames).halt_when_ret = true;
                     PyLiteDictObject *scope = pylt_vm_run(I);
+                    kv_pop(ctx->frames);
                     if (I->error) goto _end;
                     PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, caststr(name));
                     mod->ob_attrs = scope;
@@ -801,6 +801,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                     putwchar('\n');
                 }
                 pl_print(I, "locals: %s\n", castobj(frame->locals));
+                break;
             case BC_HALT:
                 goto _end;
         }
