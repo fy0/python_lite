@@ -226,7 +226,7 @@ PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **a
 
 
 PyLiteModuleObject* pylt_mods_io_loader(PyLiteInterpreter *I) {
-	PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(io));
+    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(io));
 
     pylt_obj_mod_setattr(I, mod, _NS(I, "SEEK_CUR"), castobj(pylt_obj_int_new(I, SEEK_CUR)));
     pylt_obj_mod_setattr(I, mod, _NS(I, "SEEK_END"), castobj(pylt_obj_int_new(I, SEEK_END)));

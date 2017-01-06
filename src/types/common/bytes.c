@@ -116,22 +116,22 @@ _INLINE static uint8_t _oct(uint32_t code) {
 
 _INLINE static
 int _read_x_int(const char *p, int n, uint8_t(*func)(uint32_t code), int *pnum, int max_size) {
-	const char *e = p + max_size;
-	int ret = 0, num = 0, val = (int)pow(n, e - p - 1);
+    const char *e = p + max_size;
+    int ret = 0, num = 0, val = (int)pow(n, e - p - 1);
 
-	do {
-		uint8_t c = (*func)(*p++);
-		if (c == 0xff) {
-			ret = (int)(ret * pow(n, -max_size + num));
-			break;
-		}
-		ret += c * val;
-		val /= n;
-		num++;
-	} while (p != e);
+    do {
+        uint8_t c = (*func)(*p++);
+        if (c == 0xff) {
+            ret = (int)(ret * pow(n, -max_size + num));
+            break;
+        }
+        ret += c * val;
+        val /= n;
+        num++;
+    } while (p != e);
 
-	*pnum = num;
-	return ret;
+    *pnum = num;
+    return ret;
 }
 
 PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int size, bool is_raw) {
@@ -161,7 +161,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int
                         case '\"': obj->ob_val[pos++] = '\"'; i++; break;
                         case '\\': obj->ob_val[pos++] = '\\'; i++; break;
                         case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
-							obj->ob_val[pos++] = _read_x_int(str + i, 8, _oct, &num, min(size - i, 3));
+                            obj->ob_val[pos++] = _read_x_int(str + i, 8, _oct, &num, min(size - i, 3));
                             i += num;
                             break;
                         case 'x':
@@ -179,7 +179,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int
                             obj->ob_val[pos++] = str[i++];
                             break;
                     }
-					break;
+                    break;
                 default: _def:
                     obj->ob_val[pos++] = str[i++];
             }

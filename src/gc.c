@@ -88,7 +88,7 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
     PyLiteObject *k, *v;
     PyLiteUPSet *white = I->gc.white;
     PyLiteUPSet *grey = I->gc.grey;
-    PyLiteFrame *frame = pylt_vm_curframe(I);
+    PyLiteContext *ctx = I->vm.ctx;
 
     /*for (pl_int_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
         //wprintf(L"GC: ");
@@ -104,8 +104,9 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
 
     // 将被引用到的对象从 White 放到 Grey 集合中
     // 1. locals
-    for (int i = kv_size(frame->var_tables) - 1; i >= 0; --i) {
-        PyLiteDictObject *scope = kv_A(frame->var_tables, i);
+    for (int i = kv_size(ctx->frames) - 1; i >= 0; --i) {
+        PyLiteFrame *frame = &kv_A(ctx->frames, i);
+        PyLiteDictObject *scope = frame->locals;
 
         for (pl_int32_t it = pylt_obj_dict_begin(I, scope); it != pylt_obj_dict_end(I, scope); pylt_obj_dict_next(I, scope, &it)) {
             pylt_obj_dict_keyvalue(I, scope, it, &k, &v);
@@ -116,8 +117,8 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
         MOVE_WHITE(frame->func);
     }
     // 2. stack
-    for (pl_uint_t i = 0; i < kv_size(I->vm.stack); ++i) {
-        PyLiteObject *obj = castobj(kv_A(I->vm.stack, i));
+    for (pl_uint_t i = 0; i < kv_size(ctx->stack); ++i) {
+        PyLiteObject *obj = castobj(kv_A(ctx->stack, i));
         MOVE_WHITE(obj);
     }
     // 3. types
@@ -136,8 +137,6 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
         PyLiteRef *ref = (PyLiteRef*)upset_item(I->gc.refs, k);
         MOVE_WHITE(ref->obj);
     }
-    // 5. frame code
-    MOVE_WHITE(frame->code);
     // 6. builtins
     MOVE_WHITE(I->vm.builtins);
 
@@ -178,17 +177,28 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
                 for (pl_int_t i = 0; i < lst->ob_size; ++i) {
                     MOVE_WHITE(lst->ob_val[i]);
                 }
+
+                pl_foreach_dict(I, it, castfunc(obj)->info.closure) {
+                    PyLiteObject *key, *value;
+                    pylt_obj_dict_keyvalue(I, castfunc(obj)->info.closure, it, &key, &value);
+                    MOVE_WHITE(key);
+                    MOVE_WHITE(value);
+                }
             }
             case PYLT_OBJ_TYPE_CFUNCTION:
-				MOVE_WHITE(castfunc(obj)->info.name);
-				MOVE_WHITE(castfunc(obj)->info.doc);
-				MOVE_WHITE(castfunc(obj)->info.params);
-				MOVE_WHITE(castfunc(obj)->info.defaults);
+                MOVE_WHITE(castfunc(obj)->info.name);
+                MOVE_WHITE(castfunc(obj)->info.doc);
+                MOVE_WHITE(castfunc(obj)->info.params);
+                MOVE_WHITE(castfunc(obj)->info.defaults);
                 break;
             case PYLT_OBJ_TYPE_CODE: {
                 PyLiteListObject *lst = castcode(obj)->const_val;
                 for (pl_int_t i = 0; i < lst->ob_size; ++i) {
                     MOVE_WHITE(lst->ob_val[i]);
+                }
+                pl_foreach_set(I, it, castcode(obj)->closure) {
+                    PyLiteObject *key = pylt_obj_set_itemvalue(I, castcode(obj)->closure, it);
+                    MOVE_WHITE(key);
                 }
                 break;
             }
@@ -226,7 +236,7 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
         }
     }
 #ifdef PL_DEBUG_INFO
-	wprintf(L"gc collect %dw %db\n", (int)upset_len(white), (int)upset_len(I->gc.black));
+    wprintf(L"gc collect %dw %db\n", (int)upset_len(white), (int)upset_len(I->gc.black));
 #endif
     // 将未标记对象全部释放
     for (pl_uint32_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {

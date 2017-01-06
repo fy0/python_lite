@@ -7,7 +7,7 @@
 
 
 PyLiteModuleObject* pylt_mods_pltypes_loader(PyLiteInterpreter *I) {
-	PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, NULL);
+    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, NULL);
     pylt_bind_all_types_register(I, mod);
     return mod;
 }

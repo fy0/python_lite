@@ -105,7 +105,3 @@ PyLiteCodeObject* pylt_intp_parsef(PyLiteInterpreter *I, PyLiteFile *input) {
     pylt_obj_code_add_to_gc(I, code);
     return code;
 }
-
-void pylt_intp_run(PyLiteInterpreter *I) {
-    pylt_vm_run(I, NULL);
-}

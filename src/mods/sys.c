@@ -12,7 +12,7 @@
 
 
 PyLiteModuleObject* pylt_mods_sys_loader(PyLiteInterpreter *I) {
-	PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(sys));
+    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(sys));
 
     PyLiteModuleObject *mio = pl_getmod(I, _S(io));
     PyLiteTypeObject *tTextIO = pl_modtype(I, mio, _S(TextIO));

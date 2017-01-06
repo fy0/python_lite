@@ -12,9 +12,9 @@ typedef struct PyLiteModuleObject {
     PyLiteDictObject *ob_attrs;
     PyLiteCodeObject *code;
 
-	PyLiteStrObject *name; // module name
+    PyLiteStrObject *name; // module name
     PyLiteObject *ob_owner; // owner of object
-	// __file__, etc.
+    // __file__, etc.
 } PyLiteModuleObject;
 
 PyLiteModuleObject* pylt_obj_module_new_ex(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteObject *owner, PyLiteStrObject *name);

@@ -66,18 +66,20 @@ enum {
 } OperatorValue;
 
 typedef struct PyLiteFrame {
+    PyLiteDictObject *locals;
     PyLiteFunctionObject *func;
     PyLiteCodeObject *code;
     pl_uint_t code_pointer_slot;
-	pl_bool_t halt_when_ret;
-    // 这样的结构是为了生成器函数准备的。。。
-    // 但还不知道是否靠谱
-    kvec_t(PyLiteDictObject*) var_tables;
+    pl_bool_t halt_when_ret;
 } PyLiteFrame;
 
-typedef struct PyLiteVM {
+typedef struct PyLiteContext {
     kvec_t(uintptr_t) stack;
     kvec_t(PyLiteFrame) frames;
+} PyLiteContext;
+
+typedef struct PyLiteVM {
+    PyLiteContext *ctx;
     PyLiteModuleObject *builtins;
 } PyLiteVM;
 
@@ -93,6 +95,6 @@ PyLiteFrame* pylt_vm_curframe(PyLiteInterpreter *I);
 
 void pylt_vm_init(PyLiteInterpreter *I, PyLiteVM *vm);
 void pylt_vm_finalize(PyLiteInterpreter *I);
-PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I, PyLiteCodeObject *code);
+PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I);
 
 #endif

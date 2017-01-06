@@ -19,8 +19,8 @@ typedef struct PyLiteCodeObject {
     PyLiteSetObject *closure;
     kvec_t(PyLiteInstruction) opcodes;
 
-	pl_bool_t with_debug_info;
-	kvec_t(uint32_t) lnotab;
+    pl_bool_t with_debug_info;
+    kvec_t(uint32_t) lnotab;
 } PyLiteCodeObject;
 
 void pylt_obj_code_add_to_gc(PyLiteInterpreter *I, PyLiteCodeObject *self);

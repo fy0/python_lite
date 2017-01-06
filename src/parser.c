@@ -75,7 +75,7 @@ opcode    extarg     extra
 */
 void write_ins(ParserState *ps, uint8_t opcode, uint8_t exarg, int16_t extra) {
     PyLiteInstruction ins = build_ins(opcode, exarg, extra);
-	kv_push(uint32_t, ps->info->code->lnotab, (uint32_t)(ps->ls->linenumber));
+    kv_push(uint32_t, ps->info->code->lnotab, (uint32_t)(ps->ls->linenumber));
     kv_pushins(ps->info->code->opcodes, ins);
 }
 

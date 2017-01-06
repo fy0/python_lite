@@ -40,12 +40,12 @@ void* basetype_op_func_table[][24] = {
     },
     { // bytes
         NULL, NULL, NULL, NULL, NULL,
-		&pylt_obj_bytes_plus, NULL, &pylt_obj_bytes_plus, NULL, NULL, NULL, NULL,
+        &pylt_obj_bytes_plus, NULL, &pylt_obj_bytes_plus, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // set
-		NULL, NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // list
@@ -54,24 +54,24 @@ void* basetype_op_func_table[][24] = {
         NULL, NULL, NULL, NULL
     },
     { // tuple
-		NULL, NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // dict
-		NULL, NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
-	},
-	{ // unusual
-		NULL, NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL
-	},
+    },
+    { // unusual
+        NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL
+    },
 
     { // module
-		NULL, NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL
     },
     { // function
@@ -187,9 +187,9 @@ pl_uint32_t pylt_obj_hash(PyLiteInterpreter *I, PyLiteObject *obj) {
 
 pl_bool_t pylt_obj_hashable(PyLiteInterpreter *I, PyLiteObject *obj) {
     switch (obj->ob_type) {
-		case PYLT_OBJ_TYPE_SET:
-		case PYLT_OBJ_TYPE_DICT:
-		case PYLT_OBJ_TYPE_UNUSUAL:
+        case PYLT_OBJ_TYPE_SET:
+        case PYLT_OBJ_TYPE_DICT:
+        case PYLT_OBJ_TYPE_UNUSUAL:
             return false;
         default:
             /*if (pl_iscustom(obj)) {
@@ -402,18 +402,18 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteInterpreter *I, PyLiteObject *obj) {
             return pylt_obj_tuple_to_str(I, casttuple(obj));
         case PYLT_OBJ_TYPE_DICT:
             return pylt_obj_dict_to_str(I, castdict(obj));
-		case PYLT_OBJ_TYPE_UNUSUAL:
-			return pylt_obj_unusual_to_str(I, castunusual(obj));
+        case PYLT_OBJ_TYPE_UNUSUAL:
+            return pylt_obj_unusual_to_str(I, castunusual(obj));
         case PYLT_OBJ_TYPE_MODULE:
             return pl_format(I, pl_static.str.TMPL_MODULE_TO_STR, castmod(obj)->name ? castmod(obj)->name : caststr(&PyLiteUnknown));
-		case PYLT_OBJ_TYPE_FUNCTION:
+        case PYLT_OBJ_TYPE_FUNCTION:
             return pl_format(I, pl_static.str.TMPL_FUNCTION_TO_STR, castfunc(obj)->info.name, obj);
         case PYLT_OBJ_TYPE_CFUNCTION:
             return pl_format(I, pl_static.str.TMPL_CFUNCTION_TO_STR, castcfunc(obj)->info.name, obj);
         case PYLT_OBJ_TYPE_NONE:
             return pl_static.str.None;
         case PYLT_OBJ_TYPE_TYPE:
-            return pl_format(I, pl_static.str.TMPL_CLASS_TO_STR, pl_type_by_code(I, casttype(obj)->ob_reftype));
+            return pl_format(I, pl_static.str.TMPL_CLASS_TO_STR, pl_type_by_code(I, casttype(obj)->ob_reftype)->name);
         default:
             // TODO: range/exception 也需要折腾
             return pl_format(I, pl_static.str.TMPL_OBJECT_TO_STR, pl_type(I, obj)->name, obj);
@@ -423,7 +423,7 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteInterpreter *I, PyLiteObject *obj) {
 
 struct PyLiteStrObject* pylt_obj_to_repr(PyLiteInterpreter *I, PyLiteObject *obj) {
     switch (obj->ob_type) {
-		case PYLT_OBJ_TYPE_STR: return pylt_obj_str_to_repr(I, caststr(obj));
+        case PYLT_OBJ_TYPE_STR: return pylt_obj_str_to_repr(I, caststr(obj));
         default: return pylt_obj_to_str(I, obj);
     }
     return NULL;

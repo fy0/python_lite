@@ -9,7 +9,7 @@ PyLiteModuleObject* pylt_obj_module_new_ex(PyLiteInterpreter *I, PyLiteCodeObjec
     obj->ob_attrs = pylt_obj_dict_new(I);
     obj->code = code;
     obj->ob_owner = owner;
-	obj->name = name;
+    obj->name = name;
     return obj;
 }
 

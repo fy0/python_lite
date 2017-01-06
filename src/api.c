@@ -23,8 +23,8 @@ PyLiteTypeObject* pl_builtintype(PyLiteInterpreter *I, PyLiteStrObject *name) {
 }
 
 PyLiteTypeObject* pl_modtype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
-	PyLiteObject *obj = pylt_obj_mod_getattr(I, mod, name);
-	return pl_istype(obj) ? casttype(obj) : NULL;
+    PyLiteObject *obj = pylt_obj_mod_getattr(I, mod, name);
+    return pl_istype(obj) ? casttype(obj) : NULL;
 }
 
 pl_uint32_t pl_getbase_by_code(PyLiteInterpreter *I, pl_uint32_t type_code) {
@@ -179,23 +179,26 @@ PyLiteObject* _pl_call(PyLiteInterpreter *I, pl_int_t argc) {
     PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc };
     PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
     PyLiteCodeObject *code = pylt_obj_code_new(I, false);
-    PyLiteFrame frame_bak = kv_top(I->vm.frames);
 
     kv_pushins(code->opcodes, bc_call);
     kv_pushins(code->opcodes, bc_halt);
-    pylt_vm_run(I, code);
+    pylt_vm_load_code(I, code);
 
-    kv_top(I->vm.frames) = frame_bak;
-    return castobj(kv_pop(I->vm.stack));
+    PyLiteFrame *frame = &kv_top(I->vm.ctx->frames);
+    frame->halt_when_ret = true;
+    pylt_vm_run(I);
+
+    return castobj(kv_pop(I->vm.ctx->stack));
 }
 
 PyLiteObject* pl_call(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ...) {
     va_list args;
-    kv_pushptr(I->vm.stack, callable);
+    PyLiteContext *ctx = I->vm.ctx;
+    kv_pushptr(ctx->stack, callable);
 
     va_start(args, argc);
     for (pl_int_t i = 0; i < argc; ++i) {
-        kv_pushptr(I->vm.stack, va_arg(args, PyLiteObject*));
+        kv_pushptr(ctx->stack, va_arg(args, PyLiteObject*));
     }
     va_end(args);
 
@@ -204,13 +207,14 @@ PyLiteObject* pl_call(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ..
 
 PyLiteObject* pl_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, int argc, ...) {
     va_list args;
+    PyLiteContext *ctx = I->vm.ctx;
 
-    kv_pushptr(I->vm.stack, callable);
-    kv_pushptr(I->vm.stack, self);
+    kv_pushptr(ctx->stack, callable);
+    kv_pushptr(ctx->stack, self);
 
     va_start(args, argc);
     for (pl_int_t i = 0; i < argc; ++i) {
-        kv_pushptr(I->vm.stack, va_arg(args, PyLiteObject*));
+        kv_pushptr(ctx->stack, va_arg(args, PyLiteObject*));
     }
     va_end(args);
 
@@ -219,16 +223,17 @@ PyLiteObject* pl_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObj
 
 PyLiteObject* pl_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, PyLiteTupleObject *args, PyLiteDictObject *kwargs) {
     pl_int_t argc = (args) ? args->ob_size : 0;
-    kv_pushptr(I->vm.stack, callable);
-    kv_pushptr(I->vm.stack, self);
+    PyLiteContext *ctx = I->vm.ctx;
+    kv_pushptr(ctx->stack, callable);
+    kv_pushptr(ctx->stack, self);
 
     if (args) {
         for (pl_int_t i = 0; i < argc; ++i) {
-            kv_pushptr(I->vm.stack, args->ob_val[i]);
+            kv_pushptr(ctx->stack, args->ob_val[i]);
         }
     }
     if (kwargs) {
-        kv_pushptr(I->vm.stack, kwargs);
+        kv_pushptr(ctx->stack, kwargs);
         argc++;
     }
 

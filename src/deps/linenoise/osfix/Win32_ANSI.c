@@ -33,35 +33,35 @@
 #define lenof(array) (sizeof(array)/sizeof(*(array)))
 
 typedef struct {
-    BYTE foreground;	// ANSI base color (0 to 7; add 30)
-    BYTE background;	// ANSI base color (0 to 7; add 40)
-    BYTE bold;	// console FOREGROUND_INTENSITY bit
-    BYTE underline;	// console BACKGROUND_INTENSITY bit
-    BYTE rvideo;	// swap foreground/bold & background/underline
-    BYTE concealed;	// set foreground/bold to background/underline
+    BYTE foreground;    // ANSI base color (0 to 7; add 30)
+    BYTE background;    // ANSI base color (0 to 7; add 40)
+    BYTE bold;    // console FOREGROUND_INTENSITY bit
+    BYTE underline;    // console BACKGROUND_INTENSITY bit
+    BYTE rvideo;    // swap foreground/bold & background/underline
+    BYTE concealed;    // set foreground/bold to background/underline
     BYTE reverse; // swap console foreground & background attributes
-} GRM, *PGRM;	// Graphic Rendition Mode
+} GRM, *PGRM;    // Graphic Rendition Mode
 
 
 #define is_digit(c) ('0' <= (c) && (c) <= '9')
 
 // ========== Global variables and constants
 
-HANDLE	  hConOut;		// handle to CONOUT$
+HANDLE      hConOut;        // handle to CONOUT$
 
-#define ESC	'\x1B'          // ESCape character
-#define BEL	'\x07'
-#define SO	'\x0E'          // Shift Out
-#define SI	'\x0F'          // Shift In
+#define ESC    '\x1B'          // ESCape character
+#define BEL    '\x07'
+#define SO    '\x0E'          // Shift Out
+#define SI    '\x0F'          // Shift In
 
-#define MAX_ARG 16		// max number of args in an escape sequence
-int   state;			// automata state
-TCHAR prefix;			// escape sequence prefix ( '[', ']' or '(' );
-TCHAR prefix2;			// secondary prefix ( '?' or '>' );
-TCHAR suffix;			// escape sequence suffix
-int   es_argc;			// escape sequence args count
-int   es_argv[MAX_ARG]; 	// escape sequence args
-TCHAR Pt_arg[MAX_PATH * 2];	// text parameter for Operating System Command
+#define MAX_ARG 16        // max number of args in an escape sequence
+int   state;            // automata state
+TCHAR prefix;            // escape sequence prefix ( '[', ']' or '(' );
+TCHAR prefix2;            // secondary prefix ( '?' or '>' );
+TCHAR suffix;            // escape sequence suffix
+int   es_argc;            // escape sequence args count
+int   es_argv[MAX_ARG];     // escape sequence args
+TCHAR Pt_arg[MAX_PATH * 2];    // text parameter for Operating System Command
 int   Pt_len;
 BOOL  shifted;
 
@@ -120,38 +120,38 @@ const WCHAR G1[] =
 
 const BYTE foregroundcolor[8] =
 {
-    FOREGROUND_BLACK,			// black foreground
-    FOREGROUND_RED,			// red foreground
-    FOREGROUND_GREEN,			// green foreground
-    FOREGROUND_RED | FOREGROUND_GREEN,	// yellow foreground
-    FOREGROUND_BLUE,			// blue foreground
-    FOREGROUND_BLUE | FOREGROUND_RED,	// magenta foreground
-    FOREGROUND_BLUE | FOREGROUND_GREEN,	// cyan foreground
-    FOREGROUND_WHITE			// white foreground
+    FOREGROUND_BLACK,            // black foreground
+    FOREGROUND_RED,            // red foreground
+    FOREGROUND_GREEN,            // green foreground
+    FOREGROUND_RED | FOREGROUND_GREEN,    // yellow foreground
+    FOREGROUND_BLUE,            // blue foreground
+    FOREGROUND_BLUE | FOREGROUND_RED,    // magenta foreground
+    FOREGROUND_BLUE | FOREGROUND_GREEN,    // cyan foreground
+    FOREGROUND_WHITE            // white foreground
 };
 
 const BYTE backgroundcolor[8] =
 {
-    BACKGROUND_BLACK,			// black background
-    BACKGROUND_RED,			// red background
-    BACKGROUND_GREEN,			// green background
-    BACKGROUND_RED | BACKGROUND_GREEN,	// yellow background
-    BACKGROUND_BLUE,			// blue background
-    BACKGROUND_BLUE | BACKGROUND_RED,	// magenta background
-    BACKGROUND_BLUE | BACKGROUND_GREEN,	// cyan background
-    BACKGROUND_WHITE,			// white background
+    BACKGROUND_BLACK,            // black background
+    BACKGROUND_RED,            // red background
+    BACKGROUND_GREEN,            // green background
+    BACKGROUND_RED | BACKGROUND_GREEN,    // yellow background
+    BACKGROUND_BLUE,            // blue background
+    BACKGROUND_BLUE | BACKGROUND_RED,    // magenta background
+    BACKGROUND_BLUE | BACKGROUND_GREEN,    // cyan background
+    BACKGROUND_WHITE,            // white background
 };
 
-const BYTE attr2ansi[8] =		// map console attribute to ANSI number
+const BYTE attr2ansi[8] =        // map console attribute to ANSI number
 {
-    0,					// black
-    4,					// blue
-    2,					// green
-    6,					// cyan
-    1,					// red
-    5,					// magenta
-    3,					// yellow
-    7					// white
+    0,                    // black
+    4,                    // blue
+    2,                    // green
+    6,                    // cyan
+    1,                    // red
+    5,                    // magenta
+    3,                    // yellow
+    7                    // white
 };
 
 GRM grm;
@@ -338,7 +338,7 @@ void InterpretEscSeq(void) {
                 if (es_argc == 0) es_argv[es_argc++] = 0; // ESC[J == ESC[0J
                 if (es_argc != 1) return;
                 switch (es_argv[0]) {
-                    case 0:		// ESC[0J erase from cursor to end of display
+                    case 0:        // ESC[0J erase from cursor to end of display
                         len = (Info.dwSize.Y - Info.dwCursorPosition.Y - 1) * Info.dwSize.X
                             + Info.dwSize.X - Info.dwCursorPosition.X - 1;
                         FillConsoleOutputCharacter(hConOut, ' ', len,
@@ -349,7 +349,7 @@ void InterpretEscSeq(void) {
                             &NumberOfCharsWritten);
                         return;
 
-                    case 1:		// ESC[1J erase from start to cursor.
+                    case 1:        // ESC[1J erase from start to cursor.
                         Pos.X = 0;
                         Pos.Y = 0;
                         len = Info.dwCursorPosition.Y * Info.dwSize.X
@@ -360,7 +360,7 @@ void InterpretEscSeq(void) {
                             &NumberOfCharsWritten);
                         return;
 
-                    case 2:		// ESC[2J Clear screen and home cursor
+                    case 2:        // ESC[2J Clear screen and home cursor
                         Pos.X = 0;
                         Pos.Y = 0;
                         len = Info.dwSize.X * Info.dwSize.Y;
@@ -379,7 +379,7 @@ void InterpretEscSeq(void) {
                 if (es_argc == 0) es_argv[es_argc++] = 0; // ESC[K == ESC[0K
                 if (es_argc != 1) return;
                 switch (es_argv[0]) {
-                    case 0:		// ESC[0K Clear to end of line
+                    case 0:        // ESC[0K Clear to end of line
                         len = Info.dwSize.X - Info.dwCursorPosition.X + 1;
                         FillConsoleOutputCharacter(hConOut, ' ', len,
                             Info.dwCursorPosition,
@@ -389,7 +389,7 @@ void InterpretEscSeq(void) {
                             &NumberOfCharsWritten);
                         return;
 
-                    case 1:		// ESC[1K Clear from start of line to cursor
+                    case 1:        // ESC[1K Clear from start of line to cursor
                         Pos.X = 0;
                         Pos.Y = Info.dwCursorPosition.Y;
                         FillConsoleOutputCharacter(hConOut, ' ',
@@ -400,7 +400,7 @@ void InterpretEscSeq(void) {
                             &NumberOfCharsWritten);
                         return;
 
-                    case 2:		// ESC[2K Clear whole line.
+                    case 2:        // ESC[2K Clear whole line.
                         Pos.X = 0;
                         Pos.Y = Info.dwCursorPosition.Y;
                         FillConsoleOutputCharacter(hConOut, ' ', Info.dwSize.X, Pos,
@@ -593,11 +593,11 @@ void InterpretEscSeq(void) {
             case 'n':                 // ESC[#n Device status report
                 if (es_argc != 1) return; // ESC[n == ESC[0n -> ignored
                 switch (es_argv[0]) {
-                    case 5:		// ESC[5n Report status
+                    case 5:        // ESC[5n Report status
                         SendSequence(L"\33[0n"); // "OK"
                         return;
 
-                    case 6:		// ESC[6n Report cursor position
+                    case 6:        // ESC[6n Report cursor position
                     {
                                     TCHAR buf[32];
                                     wsprintf(buf, L"\33[%d;%dR", Info.dwCursorPosition.Y + 1,
@@ -612,7 +612,7 @@ void InterpretEscSeq(void) {
 
             case 't':                 // ESC[#t Window manipulation
                 if (es_argc != 1) return;
-                if (es_argv[0] == 21)	// ESC[21t Report xterm window's title
+                if (es_argv[0] == 21)    // ESC[21t Report xterm window's title
                 {
                     TCHAR buf[MAX_PATH * 2];
                     DWORD len = GetConsoleTitle(buf + 3, lenof(buf) - 3 - 2);
@@ -685,7 +685,7 @@ BOOL ParseAndPrintWString(HANDLE hDev, wchar_t *lpBuffer, DWORD nNumberOfBytesTo
     DWORD   i;
     wchar_t* s;
 
-    if (hDev != hConOut)	// reinit if device has changed
+    if (hDev != hConOut)    // reinit if device has changed
     {
         hConOut = hDev;
         state = 1;
@@ -700,7 +700,7 @@ BOOL ParseAndPrintWString(HANDLE hDev, wchar_t *lpBuffer, DWORD nNumberOfBytesTo
                 PushBuffer(*s);
             }
         } else if (state == 2) {
-            if (*s == ESC);	// \e\e...\e == \e
+            if (*s == ESC);    // \e\e...\e == \e
             else if ((*s == '[') || (*s == ']')) {
                 FlushBuffer();
                 prefix = *s;

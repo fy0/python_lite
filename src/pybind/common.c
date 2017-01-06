@@ -268,5 +268,5 @@ PyLiteObject* pylt_cls_method_dict_items(PyLiteInterpreter *I, int argc, PyLiteO
 
 PyLiteObject* pylt_cls_method_meaningless_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     // TODO: 这里取不到cls，值得想个办法
-	return NULL;
+    return NULL;
 }

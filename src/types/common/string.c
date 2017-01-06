@@ -134,11 +134,11 @@ int _read_x_int(uint32_t *p, int n, uint8_t(*func)(uint32_t code), int *pnum, in
     int ret = 0, num = 0, val = (int)pow(n, e - p - 1);
 
     do {
-		uint8_t c = (*func)(*p++);
-		if (c == 0xff) {
-			ret = (int)(ret * pow(n, -max_size + num));
-			break;
-		}
+        uint8_t c = (*func)(*p++);
+        if (c == 0xff) {
+            ret = (int)(ret * pow(n, -max_size + num));
+            break;
+        }
         ret += c * val;
         val /= n;
         num++;
@@ -176,7 +176,7 @@ pl_int_t str_escape_next(PyLiteInterpreter *I, str_writer_t *w) {
                 case 'v': str->ob_val[w->dindex++] = 11; break;
                 case '\\': str->ob_val[w->dindex++] = '\\'; break;
                 case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
-					str->ob_val[w->dindex++] = _read_x_int(format->ob_val + w->findex, 8, _oct, &num, min(format_size - w->findex, 3));
+                    str->ob_val[w->dindex++] = _read_x_int(format->ob_val + w->findex, 8, _oct, &num, min(format_size - w->findex, 3));
                     w->findex += num;
                     break;
                 case 'x':
@@ -199,7 +199,7 @@ pl_int_t str_escape_next(PyLiteInterpreter *I, str_writer_t *w) {
                     str->ob_val[w->dindex++] = format->ob_val[w->findex];
                     break;
             }
-			break;
+            break;
         default: _def :
             str->ob_val[w->dindex++] = format->ob_val[w->findex++];
     }
@@ -235,7 +235,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size,
                         case '\"': obj->ob_val[pos++] = '\"'; i++; break;
                         case '\\': obj->ob_val[pos++] = '\\'; i++; break;
                         case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
-							obj->ob_val[pos++] = _read_x_int(str + i, 8, _oct, &num, min(size - i, 3));
+                            obj->ob_val[pos++] = _read_x_int(str + i, 8, _oct, &num, min(size - i, 3));
                             i += num;
                             break;
                         case 'x':
@@ -257,7 +257,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size,
                             obj->ob_val[pos++] = str[i++];
                             break;
                     }
-					break;
+                    break;
                 default: _def :
                     obj->ob_val[pos++] = str[i++];
             }
@@ -423,49 +423,49 @@ PyLiteStrObject* pylt_obj_str_slice(PyLiteInterpreter *I, PyLiteStrObject *self,
 }
 
 PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *self) {
-	pl_uint32_t c;
-	pl_uint32_t *data;
-	pl_uint_t i, j = 0;
+    pl_uint32_t c;
+    pl_uint32_t *data;
+    pl_uint_t i, j = 0;
     int old_size = self->ob_size + 2;
 
     data = pylt_malloc(I, old_size * sizeof(uint32_t));
-	data[0] = '\'';
-	j = 1;
+    data[0] = '\'';
+    j = 1;
 
-	for (i = 0; i < self->ob_size; ++i) {
+    for (i = 0; i < self->ob_size; ++i) {
         if ((old_size - j) < 4) {
             data = pylt_realloc(I, data, old_size * sizeof(uint32_t), (old_size + 15) * sizeof(uint32_t));
             old_size += 15;
         }
-		switch (self->ob_val[i]) {
-			case '\a': data[j++] = '\\'; data[j++] = 'a'; break;
-			case '\b': data[j++] = '\\'; data[j++] = 'b'; break;
-			case '\f': data[j++] = '\\'; data[j++] = 'f'; break;
-			case '\n': data[j++] = '\\'; data[j++] = 'n'; break;
-			case '\r': data[j++] = '\\'; data[j++] = 'r'; break;
-			case '\t': data[j++] = '\\'; data[j++] = 't'; break;
-			case '\v': data[j++] = '\\'; data[j++] = 'v'; break;
-			case '\\': data[j++] = '\\'; data[j++] = '\\'; break;
+        switch (self->ob_val[i]) {
+            case '\a': data[j++] = '\\'; data[j++] = 'a'; break;
+            case '\b': data[j++] = '\\'; data[j++] = 'b'; break;
+            case '\f': data[j++] = '\\'; data[j++] = 'f'; break;
+            case '\n': data[j++] = '\\'; data[j++] = 'n'; break;
+            case '\r': data[j++] = '\\'; data[j++] = 'r'; break;
+            case '\t': data[j++] = '\\'; data[j++] = 't'; break;
+            case '\v': data[j++] = '\\'; data[j++] = 'v'; break;
+            case '\\': data[j++] = '\\'; data[j++] = '\\'; break;
             case '\'': data[j++] = '\\'; data[j++] = '\''; break;
-			default: {
-				c = self->ob_val[i];
-				if ((0 <= c && c <= 32) || (127 <= c && c <= 160)) {
-					data[j++] = '\\';
-					data[j++] = 'x';
-					data[j++] = (c / 16) >= 10 ? (c / 16) - 10 + 'a' : (c / 16) + '0';
-					data[j++] = (c % 16) >= 10 ? (c % 16) - 10 + 'a' : (c % 16) + '0';
-				} else {
-					data[j++] = self->ob_val[i];
-				}
-				break;
-			}
-		}
-	}
+            default: {
+                c = self->ob_val[i];
+                if ((0 <= c && c <= 32) || (127 <= c && c <= 160)) {
+                    data[j++] = '\\';
+                    data[j++] = 'x';
+                    data[j++] = (c / 16) >= 10 ? (c / 16) - 10 + 'a' : (c / 16) + '0';
+                    data[j++] = (c % 16) >= 10 ? (c % 16) - 10 + 'a' : (c % 16) + '0';
+                } else {
+                    data[j++] = self->ob_val[i];
+                }
+                break;
+            }
+        }
+    }
 
-	data[j++] = '\'';
-	PyLiteStrObject *str = pylt_obj_str_new(I, data, j, true);
+    data[j++] = '\'';
+    PyLiteStrObject *str = pylt_obj_str_new(I, data, j, true);
     pylt_free(I, data, old_size * sizeof(uint32_t));
-	return str;
+    return str;
 }
 
 PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, PyLiteStrObject *format, PyLiteTupleObject *args) {

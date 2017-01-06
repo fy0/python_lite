@@ -44,7 +44,6 @@ void pylt_intp_free(PyLiteInterpreter *I);
 
 void pylt_intp_init(PyLiteInterpreter *I);
 void pylt_intp_finalize(PyLiteInterpreter *I);
-void pylt_intp_run(PyLiteInterpreter *I);
 void pylt_intp_loadf(PyLiteInterpreter *I, PyLiteFile *input);
 PyLiteCodeObject* pylt_intp_parsef(PyLiteInterpreter *I, PyLiteFile *input);
 
