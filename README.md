@@ -1,5 +1,5 @@
 
-# pylite 简蟒 ver 0.0.7
+# pylite 简蟒 ver 0.0.8
 
 A simple, lightweight implementation of python3-like language.
 
@@ -7,7 +7,7 @@ A simple, lightweight implementation of python3-like language.
 
 ### ver 0.1
 
-* lexcial scope
+* ~~lexical scope~~
 
 * exception, try - except grammar
 
@@ -16,6 +16,8 @@ A simple, lightweight implementation of python3-like language.
 * ~~slice grammar~~
 
 * simple shell
+
+* global/nonlocal
 
 
 ### ver 0.2
@@ -32,7 +34,9 @@ A simple, lightweight implementation of python3-like language.
 
 * ~~IO stream~~
 
-* super type
+* 'super' type
+
+* tests
 
 
 ### ver 0.3
