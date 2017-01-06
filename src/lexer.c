@@ -211,7 +211,7 @@ _not_str:
 }
 
 _INLINE static bool bytes_next(LexState *ls, uint32_t chr) {
-    if (ls->le.bytes.pos+1 == ls->le.bytes.size) {
+    if (ls->le.bytes.pos >= ls->le.bytes.size) {
         ls->le.bytes.buf = pylt_realloc(ls->I, ls->le.bytes.buf, ls->le.bytes.size, ls->le.bytes.size + PYLT_LEX_BYTES_DEFAULT_BUFFER_INC_STEP);
         ls->le.bytes.size += PYLT_LEX_BYTES_DEFAULT_BUFFER_INC_STEP;
     }
@@ -220,9 +220,9 @@ _INLINE static bool bytes_next(LexState *ls, uint32_t chr) {
 }
 
 _INLINE static bool str_next(LexState *ls, uint32_t chr) {
-    if (ls->le.str.pos + 1 == ls->le.str.size) {
+    if (ls->le.str.pos >= ls->le.str.size) {
         ls->le.str.buf = pylt_realloc(ls->I, ls->le.str.buf, ls->le.str.size * sizeof(uint32_t), (ls->le.str.size + PYLT_LEX_STR_DEFAULT_BUFFER_INC_STEP) * sizeof(uint32_t));
-        ls->le.str.size += (PYLT_LEX_STR_DEFAULT_BUFFER_INC_STEP) * sizeof(uint32_t);
+        ls->le.str.size += (PYLT_LEX_STR_DEFAULT_BUFFER_INC_STEP);
     }
     ls->le.str.buf[ls->le.str.pos++] = chr;
     return true;
