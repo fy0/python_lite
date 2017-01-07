@@ -1333,7 +1333,7 @@ void parse_stmt(ParserState *ps) {
             }
 
             lval_check_cache_pop(ps);
-            write_ins(ps, BC_POPN, 0, seqsize);
+            write_ins(ps, (seqsize) ? BC_POPN : BC_POP, 0, seqsize);
 
             ++ps->info->loop_depth;
             ACCEPT(ps, TK_NEWLINE);
@@ -1341,7 +1341,7 @@ void parse_stmt(ParserState *ps) {
             --ps->info->loop_depth;
             loop_control_replace(ps, tmp);
 
-            kv_A(ps->info->code->opcodes, tmp).extra = kv_size(ps->info->code->opcodes) - tmp + 1;
+            kv_A(ps->info->code->opcodes, tmp).extra = kv_size(ps->info->code->opcodes) - tmp;
             write_ins(ps, BC_JMP_BACK, 0, kv_size(ps->info->code->opcodes) - tmp + 1);
 
             write_ins(ps, BC_POP, 0, 0); // pop iterator
