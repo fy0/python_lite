@@ -8,7 +8,7 @@ typedef struct PyLiteRef {
     PyLiteObject *obj;
 } PyLiteRef;
 
-PyLiteRef* pl_ref_new(PyLiteInterpreter *I, PyLiteObject *obj);
-void pl_ref_free(PyLiteInterpreter *I, PyLiteRef *ref);
+PyLiteRef* pylt_ref_new(PyLiteInterpreter *I, PyLiteObject *obj);
+void pylt_ref_free(PyLiteInterpreter *I, PyLiteRef *ref);
 
 #endif

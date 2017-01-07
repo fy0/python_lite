@@ -71,26 +71,19 @@ int token_de_to_op_val(uint32_t tk) {
 
 void pylt_vm_init(struct PyLiteInterpreter *I, PyLiteVM* vm) {
     PyLiteContext *ctx;
-    PyLiteFrame *frame;
 
     ctx = vm->ctx = pylt_malloc(I, sizeof(PyLiteContext));
-    kv_init(I, ctx->frames);
+    ctx->ip = 0;
+    ctx->params_offset = 0;
     kv_init(I, ctx->stack);
-
-    // first frame
-    kv_pushp(PyLiteFrame, ctx->frames);
-    frame = &kv_A(ctx->frames, 0);
-    frame->func = NULL;
-	frame->halt_when_ret = false;
-    frame->locals = pylt_obj_dict_new(I);
+    kv_init(I, ctx->frames);
+    kv_init(I, ctx->expt_stack);
 
     // built-in
     vm->builtins = pl_getmod(I, pl_static.str.builtins);
-    /*pl_foreach_dict(I, it, vm->builtins->ob_attrs) {
-        PyLiteObject *key, *value;
-        pylt_obj_dict_keyvalue(I, vm->builtins->ob_attrs, it, &key, &value);
-        pylt_obj_dict_setitem(I, frame->locals, key, value);
-    }*/
+
+    // first frame
+    pylt_vm_push_code(I, NULL);
 }
 
 void pylt_vm_finalize(PyLiteInterpreter *I) {
@@ -329,32 +322,24 @@ _err:
     return retval;
 }
 
-#define const_obj(__index) pylt_obj_list_getitem(I, code->const_val, (__index))
+#define const_obj(__index) pylt_obj_list_getitem(I, frame->code->const_val, (__index))
 
 PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
-    pl_int_t tflag;
-    pl_bool_t at_type;
-    PyLiteFunctionObject *tfunc;
-    PyLiteObject *tobj, *tret;
-
-    pl_uint_t params_num;
-    pl_uint_t params_offset = 0;
-
-    PyLiteInstruction ins;
     PyLiteVM *vm = &I->vm;
     PyLiteContext *ctx = I->vm.ctx;
-
-    if (!kv_top(ctx->frames).code) return NULL;
-    PyLiteCodeObject *code = kv_top(ctx->frames).code;
     PyLiteFrame *frame = &kv_top(ctx->frames);
+    PyLiteObject *tobj, *tret;
+    ctx->ip = &kv_A(frame->code->opcodes, 0);
 
-    for (pl_uint_t i = 0; ; ++i) {
+    for (;;) {
+        PyLiteInstruction ins = *(ctx->ip++);
+
         // raise error
         if (I->error) {
             // TOOD: except
             pl_print(I, "Traceback (most recent call last):\n");
-            if (code->with_debug_info) {
-                pl_print(I, "  File \"<stdin>\", line %d, in <module>\n", pylt_obj_int_new(I, kv_A(code->lnotab, i-1)));
+            if (frame->code->with_debug_info) {
+                pl_print(I, "  File \"<stdin>\", line %d, in <module>\n", pylt_obj_int_new(I, kv_A(frame->code->lnotab, ctx->ip - &kv_A(frame->code->opcodes, 1))));
             }
             PyLiteTupleObject *args = dcast(except, I->error)->args;
             if (args->ob_size == 0) {
@@ -365,7 +350,6 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
             }
             return NULL;
         }
-        ins = kv_A(code->opcodes, i);
         //if (...) pylt_gc_collect(I);
 
         switch (ins.code) {
@@ -439,8 +423,9 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                 break;
             }
             case BC_GET_ATTR:
-            case BC_GET_ATTR_:
+            case BC_GET_ATTR_: {
                 // GET_ATTR     0/1     const_id
+                pl_bool_t at_type;
                 tobj = castobj(kv_pop(ctx->stack));
                 tret = pylt_obj_Egetattr_ex(I, tobj, const_obj(ins.extra), NULL, &at_type);
                 if (I->error) break;
@@ -450,7 +435,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                 if (!pl_istype(tobj) && at_type) {
                     if (ins.exarg) {
                         kv_pushptr(ctx->stack, tobj);
-                        params_offset = 1;
+                        ctx->params_offset = 1;
                         continue;
                     }
                     if (tret->ob_type == PYLT_OBJ_TYPE_PROP) {
@@ -464,6 +449,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                     }
                 }
                 break;
+            }
             case BC_SET_ATTR: {
                 // SET_ATTR     offset  const_id
                 tobj = castobj(kv_pop(ctx->stack));
@@ -550,7 +536,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                         PyLiteObject *name = castobj(kv_pop(ctx->stack));
                         PyLiteObject *defaults = castobj(kv_pop(ctx->stack));
 
-                        tfunc = pylt_obj_func_new_ex(
+                        PyLiteFunctionObject *tfunc = pylt_obj_func_new_ex(
                             I,
                             caststr(name), // name
                             castlist(params), // params
@@ -612,11 +598,12 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                     }
                 }
                 break;
-			case BC_CALL: {
-                _BC_CALL:
+			case BC_CALL:
+                _BC_CALL: {
                 // BC_CALL      0       params_num
-                params_num = ins.extra + params_offset;
-                params_offset = 0;
+                pl_int_t tflag;
+                pl_uint_t params_num = ins.extra + ctx->params_offset;
+                ctx->params_offset = 0;
 
                 PyLiteDictObject *kwargs = ins.exarg ? castdict(kv_pop(ctx->stack)) : NULL; // kwargs
                 tobj = castobj(kv_topn(ctx->stack, params_num)); // 函数对象
@@ -631,9 +618,8 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                 // set frame->locals and execute
                 I->recent_called = tret;
                 if (tret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
-					frame->code_pointer_slot = i;
+					frame->ip_saved = ctx->ip;
                     pylt_vm_push_func(I, castfunc(tret));
-                    //code = kv_top(ctx->frames).code;
                     frame = &kv_top(ctx->frames);
 
 					if (func_info->length > 0) {
@@ -645,8 +631,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
 
 					if (tflag != 1) {
 						// tobj is func or has a __call__ method
-						code = frame->code;
-						i = -1;
+                        ctx->ip = &kv_A(frame->code->opcodes, 0);
 					} else {
 						// tobj is a type, new object
 						frame->halt_when_ret = true;
@@ -687,27 +672,26 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
 
                 kv_pop(ctx->frames);
                 frame = &kv_top(ctx->frames);
-                code = frame->code;
-                i = frame->code_pointer_slot;
+                ctx->ip = frame->ip_saved;
                 break;
             case BC_TEST:
                 // TEST         0       jump_offset
                 if (!pylt_obj_istrue(I, castobj(kv_pop(ctx->stack)))) {
-                    i += ins.extra;
+                    ctx->ip += ins.extra;
                 }
                 break;
             case BC_JMP:
                 // JMP          0       offset
-                i += ins.extra;
+                ctx->ip += ins.extra;
                 break;
             case BC_JMP_BACK:
                 // JMP_BACK     0       offset
-                i -= ins.extra;
+                ctx->ip -= ins.extra;
                 break;
             case BC_FORITER: {
                 // FORITER      0       jump_offset
                 tret = pylt_obj_iter_next(I, castiter(kv_top(ctx->stack)));
-                if (tret == NULL) i += ins.extra - 1;
+                if (tret == NULL) ctx->ip += ins.extra;
                 else kv_push(uintptr_t, ctx->stack, (uintptr_t)tret);
                 break;
             }
@@ -774,8 +758,9 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
 #endif
                     kv_popn(ctx->stack, ins.extra);
                     pylt_vm_push_code(I, tcode);
-                    kv_top(ctx->frames).halt_when_ret = true;
+                    PyLiteInstruction *ip_saved = ctx->ip;
                     PyLiteDictObject *scope = pylt_vm_run(I);
+                    ctx->ip = ip_saved;
                     kv_pop(ctx->frames);
                     if (I->error) goto _end;
                     PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, caststr(name));

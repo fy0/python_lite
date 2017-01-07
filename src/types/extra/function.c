@@ -11,7 +11,6 @@ PyLiteDictObject* make_closure(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     pl_foreach_set(I, it, code->closure) {
         PyLiteObject *obj = NULL;
         PyLiteObject *name = pylt_obj_set_itemvalue(I, code->closure, it);
-        pl_print(I, "%s\n", name);
         for (int i = kv_size(ctx->frames) - 1; i >= 0; --i) {
             obj = pylt_obj_dict_getitem(I, kv_A(ctx->frames, i).locals, name);
             if (obj) {

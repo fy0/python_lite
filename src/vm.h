@@ -69,13 +69,22 @@ typedef struct PyLiteFrame {
     PyLiteDictObject *locals;
     PyLiteFunctionObject *func;
     PyLiteCodeObject *code;
-    pl_uint_t code_pointer_slot;
+    PyLiteInstruction *ip_saved;
     pl_bool_t halt_when_ret;
 } PyLiteFrame;
 
+typedef struct {
+    pl_uint32_t typecode;
+    PyLiteInstruction *ip_solve;
+    PyLiteFrame *frame;
+} PyLiteExceptionInfo;
+
 typedef struct PyLiteContext {
+    PyLiteInstruction *ip;
+    pl_uint_t params_offset;
     kvec_t(uintptr_t) stack;
     kvec_t(PyLiteFrame) frames;
+    kvec_t(PyLiteExceptionInfo) expt_stack;
 } PyLiteContext;
 
 typedef struct PyLiteVM {
@@ -83,8 +92,9 @@ typedef struct PyLiteVM {
     PyLiteModuleObject *builtins;
 } PyLiteVM;
 
-void pylt_vm_push_func(PyLiteInterpreter *I, PyLiteFunctionObject *func);
 void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code);
+void pylt_vm_push_code(PyLiteInterpreter *I, PyLiteCodeObject *code);
+void pylt_vm_push_func(PyLiteInterpreter *I, PyLiteFunctionObject *func);
 
 const wchar_t* pylt_vm_get_op_name(int op);
 int token_to_op_val(uint32_t tk);

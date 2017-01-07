@@ -4,6 +4,7 @@
 
 #include "utils/config.h"
 #include "types/all.h"
+#include "utils/ref.h"
 
 /* Class utils */
 
@@ -22,7 +23,7 @@ pl_bool_t pl_issubclass(PyLiteInterpreter *I, PyLiteTypeObject *a, PyLiteTypeObj
 PyLiteTypeObject* pl_type(PyLiteInterpreter *I, PyLiteObject *obj);
 PyLiteTypeObject* pl_type_by_code(PyLiteInterpreter *I, pl_uint32_t type_code);
 
-/* Execute */
+/* Code Execute */
 
 PyLiteObject* pl_call(PyLiteInterpreter *I, PyLiteObject *callable, int argc, ...);
 PyLiteObject* pl_call_method(PyLiteInterpreter *I, PyLiteObject *self, PyLiteObject *callable, int argc, ...);
@@ -39,6 +40,10 @@ PyLiteObject* pl_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLite
 void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj);
 
 /* Misc */
+
+#define pl_objref pylt_ref_new
+PyLiteObject* pl_objesc(PyLiteInterpreter *I, PyLiteObject *obj);
+
 
 #define pl_assert(I, stmt, ret) if (!(stmt)) { pl_error(I, pl_static.str.RuntimeError, "panic"); return (ret); }
 #define pl_next pylt_obj_iter_next

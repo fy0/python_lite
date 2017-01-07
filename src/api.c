@@ -98,6 +98,12 @@ void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj) {
     pylt_io_file_writestr(I, I->sys.cout, obj->ob_val, obj->ob_size, ' ');
 }
 
+
+PyLiteObject* pl_objesc(PyLiteInterpreter *I, PyLiteObject *obj) {
+    pylt_gc_remove(I, obj);
+    return obj;
+}
+
 void pl_print(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
     PyLiteStrObject *str;
