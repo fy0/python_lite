@@ -73,7 +73,6 @@ void pylt_vm_init(struct PyLiteInterpreter *I, PyLiteVM* vm) {
     PyLiteContext *ctx;
 
     ctx = vm->ctx = pylt_malloc(I, sizeof(PyLiteContext));
-    ctx->ip = 0;
     ctx->params_offset = 0;
     kv_init(I, ctx->stack);
     kv_init(I, ctx->frames);
@@ -103,6 +102,8 @@ void pylt_vm_push_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     frame->code = code;
     frame->halt_when_ret = false;
     frame->locals = pylt_obj_dict_new(I);
+
+    if (code) ctx->ip = &kv_A(frame->code->opcodes, 0);
 }
 
 void pylt_vm_push_func(PyLiteInterpreter *I, PyLiteFunctionObject *func) {
@@ -118,6 +119,7 @@ void pylt_vm_push_func(PyLiteInterpreter *I, PyLiteFunctionObject *func) {
 
     pylt_gc_add(I, castobj(func));
     //pylt_gc_add(I, castobj(func->code));
+    if (func) ctx->ip = &kv_A(frame->code->opcodes, 0);
 }
 
 
@@ -128,8 +130,15 @@ void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     frame->func = NULL;
 	frame->code = code;
 	frame->halt_when_ret = false;
+
     pylt_gc_add(I, castobj(code));
+    if (code) ctx->ip = &kv_A(frame->code->opcodes, 0);
 }
+
+void pylt_vm_pop_frame(PyLiteInterpreter *I) {
+    kv_pop(I->vm.ctx->frames);
+}
+
 
 #define func_call_ret(val) {retval = (val); goto _err;}
 
@@ -324,31 +333,39 @@ _err:
 
 #define const_obj(__index) pylt_obj_list_getitem(I, frame->code->const_val, (__index))
 
+pl_int_t pylt_vm_error_check(PyLiteInterpreter *I) {
+    PyLiteContext *ctx = I->vm.ctx;
+    PyLiteFrame *frame = &kv_top(ctx->frames);
+
+    if (I->error) {
+        // TOOD: except
+        pl_print(I, "Traceback (most recent call last):\n");
+        if (frame->code->with_debug_info) {
+            pl_print(I, "  File \"<stdin>\", line %d, in <module>\n", pylt_obj_int_new(I, kv_A(frame->code->lnotab, ctx->ip - &kv_A(frame->code->opcodes, 1))));
+        }
+        PyLiteTupleObject *args = dcast(except, I->error)->args;
+        if (args->ob_size == 0) {
+            pl_print(I, "%s\n", pl_type(I, I->error)->name);
+        } else {
+            PyLiteObject *output = args->ob_size == 1 ? args->ob_val[0] : castobj(args);
+            pl_print(I, "%s: %s\n", pl_type(I, I->error)->name, output);
+        }
+        return 1; // crash, shutdown
+    }
+
+    return 0;
+}
+
 PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
     PyLiteVM *vm = &I->vm;
     PyLiteContext *ctx = I->vm.ctx;
     PyLiteFrame *frame = &kv_top(ctx->frames);
     PyLiteObject *tobj, *tret;
-    ctx->ip = &kv_A(frame->code->opcodes, 0);
 
     for (;;) {
         PyLiteInstruction ins = *(ctx->ip++);
-
-        // raise error
-        if (I->error) {
-            // TOOD: except
-            pl_print(I, "Traceback (most recent call last):\n");
-            if (frame->code->with_debug_info) {
-                pl_print(I, "  File \"<stdin>\", line %d, in <module>\n", pylt_obj_int_new(I, kv_A(frame->code->lnotab, ctx->ip - &kv_A(frame->code->opcodes, 1))));
-            }
-            PyLiteTupleObject *args = dcast(except, I->error)->args;
-            if (args->ob_size == 0) {
-                pl_print(I, "%s\n", pl_type(I, I->error)->name);
-            } else {
-                PyLiteObject *output = args->ob_size == 1 ? args->ob_val[0] : castobj(args);
-                pl_print(I, "%s: %s\n", pl_type(I, I->error)->name, output);
-            }
-            return NULL;
+        switch (pylt_vm_error_check(I)) {
+            case 1: return NULL;
         }
         //if (...) pylt_gc_collect(I);
 
@@ -631,7 +648,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
 
 					if (tflag != 1) {
 						// tobj is func or has a __call__ method
-                        ctx->ip = &kv_A(frame->code->opcodes, 0);
+                        //ctx->ip = &kv_A(frame->code->opcodes, 0);
 					} else {
 						// tobj is a type, new object
 						frame->halt_when_ret = true;

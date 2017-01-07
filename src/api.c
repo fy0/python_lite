@@ -188,11 +188,9 @@ PyLiteObject* _pl_call(PyLiteInterpreter *I, pl_int_t argc) {
 
     kv_pushins(code->opcodes, bc_call);
     kv_pushins(code->opcodes, bc_halt);
-    pylt_vm_load_code(I, code);
-
-    PyLiteFrame *frame = &kv_top(I->vm.ctx->frames);
-    frame->halt_when_ret = true;
+    pylt_vm_push_code(I, code);
     pylt_vm_run(I);
+    pylt_vm_pop_frame(I);
 
     return castobj(kv_pop(I->vm.ctx->stack));
 }
