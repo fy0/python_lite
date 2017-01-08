@@ -9,22 +9,20 @@ A simple, lightweight implementation of python3-like language.
 
 * ~~lexical scope~~
 
-* exception, try - except grammar
+* ~~exception support~~
+
+* try - except
 
 * ~~simple import~~
 
 * ~~slice grammar~~
 
-* simple shell
-
-* global/nonlocal
+* basic testcases
 
 
 ### ver 0.2
 
-* operator overloading support
-
-* retval type hints
+* eval
 
 * xxx if xxx else xxx grammar
 
@@ -36,18 +34,60 @@ A simple, lightweight implementation of python3-like language.
 
 * 'super' type
 
-* tests
+* simple shell
 
 
 ### ver 0.3
 
-* DLL load
+* dll load
+
+* decorator
 
 * ~~multiple value assign~~
 
 * builtin regex engine
 
-* decorator
+* retval type hints
+
+
+### ver 0.4
+
+* global/nonlocal
+
+* local variables optimization
+
+* unique integers
+
+* operator overloading support
+
+
+### ver 0.5
+
+* yield support
+
+* clear memory leaks
+
+
+### ver 0.6
+
+* make closure pass by reference
+
+
+### ver 0.X
+
+* f-string
+
+* async/await
+
+* x for x in [...]
+
+* lambda
+
+* nameless function
+
+* libffi
+
+* JIT
 
 
 ### never support
