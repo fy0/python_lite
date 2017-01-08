@@ -333,12 +333,43 @@ _err:
 
 #define const_obj(__index) pylt_obj_list_getitem(I, frame->code->const_val, (__index))
 
-pl_int_t pylt_vm_error_check(PyLiteInterpreter *I) {
+void pylt_vm_except_setup(PyLiteInterpreter *I, uint32_t typecode, PyLiteInstruction *ip) {
+    PyLiteContext *ctx = I->vm.ctx;
+    kv_pushp(PyLiteExceptInfo, ctx->expt_stack);
+    PyLiteExceptInfo *ei = &kv_top(ctx->expt_stack);
+    ei->frame = pylt_vm_curframe(I);
+    ei->typecode = typecode;
+    ei->ip_catch = ip;
+}
+
+void pylt_vm_except_pop(PyLiteInterpreter *I) {
+    kv_pop(I->vm.ctx->expt_stack);
+}
+
+pl_int_t pylt_vm_except_check(PyLiteInterpreter *I) {
     PyLiteContext *ctx = I->vm.ctx;
     PyLiteFrame *frame = &kv_top(ctx->frames);
 
     if (I->error) {
-        // TOOD: except
+        if (kv_size(ctx->expt_stack)) {
+            pl_int_t fcount = 0;
+            PyLiteExceptInfo *info = &kv_top(ctx->expt_stack);
+            for (pl_uint_t i = 0; i < kv_size(ctx->expt_stack); ++i) {
+                if (info->frame != frame) fcount++;
+                if (pl_isinstance(I, I->error, info->typecode)) {
+                    // 将下级 frame 的异常自动弹出
+                    kv_popn(ctx->expt_stack, fcount);
+                    // 切换帧栈
+                    while (frame != info->frame) {
+                        frame = &kv_pop(ctx->frames);
+                    }
+                    ctx->ip = info->ip_catch;
+                    return 2; // exception caught
+                }
+                info--;
+            }
+        }
+
         pl_print(I, "Traceback (most recent call last):\n");
         if (frame->code->with_debug_info) {
             pl_print(I, "  File \"<stdin>\", line %d, in <module>\n", pylt_obj_int_new(I, kv_A(frame->code->lnotab, ctx->ip - &kv_A(frame->code->opcodes, 1))));
@@ -364,8 +395,9 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
 
     for (;;) {
         PyLiteInstruction ins = *(ctx->ip++);
-        switch (pylt_vm_error_check(I)) {
+        switch (pylt_vm_except_check(I)) {
             case 1: return NULL;
+            case 2: frame = &kv_top(ctx->frames); continue;
         }
         //if (...) pylt_gc_collect(I);
 

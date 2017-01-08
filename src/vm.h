@@ -20,7 +20,7 @@ enum {
     BC_RET,            // 函数结束
     BC_HALT,           // 程序结束
     BC_PRINT,          // 测试输出
-    BC_TEST,           // 真值测试
+    BC_TEST,           // 真值测试(为假则跳转)
     BC_JMP,            // 跳转
     BC_JMP_BACK,       // 前向跳转
     BC_POP,            // 弹出一个值
@@ -73,18 +73,18 @@ typedef struct PyLiteFrame {
     pl_bool_t halt_when_ret;
 } PyLiteFrame;
 
-typedef struct {
+typedef struct PyLiteExceptInfo {
     pl_uint32_t typecode;
     PyLiteInstruction *ip_catch;
     PyLiteFrame *frame;
-} PyLiteExceptionInfo;
+} PyLiteExceptInfo;
 
 typedef struct PyLiteContext {
     PyLiteInstruction *ip;
     pl_uint_t params_offset;
     kvec_t(uintptr_t) stack;
     kvec_t(PyLiteFrame) frames;
-    kvec_t(PyLiteExceptionInfo) expt_stack;
+    kvec_t(PyLiteExceptInfo) expt_stack;
 } PyLiteContext;
 
 typedef struct PyLiteVM {
