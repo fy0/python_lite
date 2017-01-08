@@ -342,8 +342,8 @@ void pylt_vm_except_setup(PyLiteInterpreter *I, uint32_t typecode, PyLiteInstruc
     ei->ip_catch = ip;
 }
 
-void pylt_vm_except_pop(PyLiteInterpreter *I) {
-    kv_pop(I->vm.ctx->expt_stack);
+void pylt_vm_except_pop(PyLiteInterpreter *I, int num) {
+    kv_popn(I->vm.ctx->expt_stack, num);
 }
 
 pl_int_t pylt_vm_except_check(PyLiteInterpreter *I) {
@@ -351,19 +351,21 @@ pl_int_t pylt_vm_except_check(PyLiteInterpreter *I) {
     PyLiteFrame *frame = &kv_top(ctx->frames);
 
     if (I->error) {
+        PyLiteFrame *nframe = frame;
         if (kv_size(ctx->expt_stack)) {
             pl_int_t fcount = 0;
             PyLiteExceptInfo *info = &kv_top(ctx->expt_stack);
             for (pl_uint_t i = 0; i < kv_size(ctx->expt_stack); ++i) {
-                if (info->frame != frame) fcount++;
+                if (info->frame != nframe) fcount++;
                 if (pl_isinstance(I, I->error, info->typecode)) {
                     // 将下级 frame 的异常自动弹出
                     kv_popn(ctx->expt_stack, fcount);
                     // 切换帧栈
-                    while (frame != info->frame) {
-                        frame = &kv_pop(ctx->frames);
+                    while (nframe != info->frame) {
+                        nframe = &kv_pop(ctx->frames);
                     }
                     ctx->ip = info->ip_catch;
+                    I->error = NULL;
                     return 2; // exception caught
                 }
                 info--;
@@ -819,12 +821,24 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                 break;
             }
             case BC_UNPACK_SEQ: {
+                // UNPACK_SEQ   0       0
                 tret = castobj(kv_pop(ctx->stack));
                 PyLiteIterObject *iter = pylt_obj_iter_Enew(I, tret);
                 if (I->error) break;
                 for (PyLiteObject *obj = pylt_obj_iter_next(I, iter); obj; obj = pylt_obj_iter_next(I, iter)) {
                     kv_pushptr(ctx->stack, obj);
                 }
+                break;
+            }
+            case BC_SETUP_EXCEPT: {
+                // SETUP_EXCEPT 0       jump_offset
+                PyLiteTypeObject *et = casttype(kv_pop(ctx->stack));
+                pylt_vm_except_setup(I, et->ob_reftype, ctx->ip + ins.extra);
+                break;
+            }
+            case BC_POPN_EXCEPT: {
+                // POPN_EXCEPT  0       num
+                pylt_vm_except_pop(I, ins.extra);
                 break;
             }
             case BC_NOP:

@@ -41,6 +41,9 @@ enum {
     BC_DEL_ITEM,       // 删除下标
     BC_DEL_SLICE,      // 删除分片
     BC_ASSERT,         // 真值断言
+    BC_SETUP_EXCEPT,   // 设定异常
+    BC_SETUP_FINALLY,  // 
+    BC_POPN_EXCEPT,    // 弹出异常
 
     BC_IMPORT_NAME,    // 导入模块
     BC_UNPACK_SEQ,     // 解包

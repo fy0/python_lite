@@ -148,6 +148,12 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_UNPACK_SEQ:
                 wprintf(L"   %-15ls %d\n", L"UNPACK_SEQ", ins.extra);
                 break;
+            case BC_SETUP_EXCEPT:
+                wprintf(L"   %-15ls %d\n", L"SETUP_EXCEPT", ins.extra);
+                break;
+            case BC_POPN_EXCEPT:
+                wprintf(L"   %-15ls %d\n", L"POPN_EXCEPT", ins.extra);
+                break;
             case BC_PRINT:
                 wprintf(L"   %-15ls\n", L"PRINT");
                 break;

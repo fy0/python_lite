@@ -91,6 +91,10 @@ void sload_const(ParserState *ps, PyLiteObject *obj) {
     else write_ins(ps, BC_LOADCONST, 0, store_const(ps, obj));
 }
 
+void sload_name(ParserState *ps, PyLiteStrObject *obj) {
+    write_ins(ps, BC_LOAD_VAL, 0, store_const(ps, castobj(obj)));
+}
+
 void sload_none(ParserState *ps) {
     write_ins(ps, BC_LOADNONE, 0, 0);
 }
@@ -130,6 +134,9 @@ void error(ParserState *ps, int code) {
     exit(-1);
 }
 
+#define OPCODE_GET(ps, pos) kv_A((ps)->info->code->opcodes, pos)
+#define OPCODE_SIZE(ps) kv_size((ps)->info->code->opcodes)
+
 static _INLINE
 void ACCEPT(ParserState *ps, int token) {
     if (ps->ls->token.val != token) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
@@ -139,7 +146,7 @@ void ACCEPT(ParserState *ps, int token) {
 void lval_check_setup(ParserState *ps) {
     ps->lval_check.enable = true;
     ps->lval_check.can_be_left_val = true;
-    ps->lval_check.startcode = kv_size(ps->info->code->opcodes);
+    ps->lval_check.startcode = OPCODE_SIZE(ps);
 }
 
 void lval_check_shutdown(ParserState *ps) {
@@ -159,7 +166,7 @@ bool lval_check_judge(ParserState *ps, bool val) {
 pl_uint_t lval_check_cache_push(ParserState *ps) {
     pl_uint_t size;
 
-    size = kv_size(ps->info->code->opcodes) - ps->lval_check.startcode;
+    size = OPCODE_SIZE(ps) - ps->lval_check.startcode;
 
     if (ps->lval_check.bc_cache.m < size) {
         kv_resize(PyLiteInstruction, ps->lval_check.bc_cache, size);
@@ -798,7 +805,6 @@ _INLINE void parse_expr10(ParserState *ps) {
 }
 
 void parse_block(ParserState *ps) {
-    Token *tk = &(ps->ls->token);
     ACCEPT(ps, TK_INDENT);
     parse_stmts(ps);
     ACCEPT(ps, TK_DEDENT);
@@ -806,20 +812,20 @@ void parse_block(ParserState *ps) {
 
 void loop_control_replace(ParserState *ps, int start_pos) {
     PyLiteInstruction ins;
-    for (unsigned int i = start_pos; i < kv_size(ps->info->code->opcodes); ++i) {
+    for (unsigned int i = start_pos; i < OPCODE_SIZE(ps); ++i) {
         ins = kv_A(ps->info->code->opcodes, i);
         switch (ins.code) {
             case BC_PH_BREAK:
                 if (ins.extra == ps->info->loop_depth + 1) {
                     ins.code = BC_JMP;
-                    ins.extra = kv_size(ps->info->code->opcodes) - i;
+                    ins.extra = OPCODE_SIZE(ps) - i;
                     kv_A(ps->info->code->opcodes, i) = ins;
                 }
                 break;
             case BC_PH_CONTINUE:
                 if (ins.extra == ps->info->loop_depth + 1) {
                     ins.code = BC_JMP;
-                    ins.extra = kv_size(ps->info->code->opcodes) - i - 1;
+                    ins.extra = OPCODE_SIZE(ps) - i - 1;
                     kv_A(ps->info->code->opcodes, i) = ins;
                 }
                 break;
@@ -1095,7 +1101,7 @@ void parse_value_assign(ParserState *ps) {
 
 pl_int_t parse_try_del_item(ParserState *ps) {
     Token *tk = &(ps->ls->token);
-    pl_int_t codesize = kv_size(ps->info->code->opcodes);
+    pl_int_t codesize = OPCODE_SIZE(ps);
     int num, state = 0;
     PyLiteObject *obj;
 
@@ -1135,7 +1141,7 @@ pl_int_t parse_try_del_item(ParserState *ps) {
         }
     }
     if (state == 0) {
-        kv_popn(ps->info->code->opcodes, kv_size(ps->info->code->opcodes) - codesize);
+        kv_popn(ps->info->code->opcodes, OPCODE_SIZE(ps) - codesize);
         // SyntaxError: can't delete literal
         return PYLT_ERR_PARSER_INVALID_SYNTAX;
     }
@@ -1162,7 +1168,7 @@ pl_int_t parse_try_del_item(ParserState *ps) {
             break;
         default:
             // SyntaxError: can't delete literal
-            kv_popn(ps->info->code->opcodes, kv_size(ps->info->code->opcodes) - codesize);
+            kv_popn(ps->info->code->opcodes, OPCODE_SIZE(ps) - codesize);
             return PYLT_ERR_PARSER_INVALID_SYNTAX;
     }
     return 0;
@@ -1206,14 +1212,14 @@ void parse_stmt(ParserState *ps) {
             ACCEPT(ps, ':');
             // test 0 X
             write_ins(ps, BC_TEST, 0, 0);
-            tmp = tmp3 = kv_size(ps->info->code->opcodes);
+            tmp = tmp3 = OPCODE_SIZE(ps);
             if (tk->val == TK_NEWLINE) {
                 next(ps);
                 parse_block(ps);
             } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
             // TODO: stmt
 
-            kv_A(ps->info->code->opcodes, tmp - 1).extra = kv_size(ps->info->code->opcodes) - tmp;
+            kv_A(ps->info->code->opcodes, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
 
             tmp2 = 0;
             while (tk->val == TK_KW_ELIF) {
@@ -1222,13 +1228,13 @@ void parse_stmt(ParserState *ps) {
                 // jmp 0 X
                 kv_A(ps->info->code->opcodes, tmp - 1).extra += 1;
                 write_ins(ps, BC_JMP, 0, 0);
-                tmp2 = kv_size(ps->info->code->opcodes);
+                tmp2 = OPCODE_SIZE(ps);
 
                 parse_expr(ps);
                 ACCEPT(ps, ':');
                 // test 0 X
                 write_ins(ps, BC_TEST, 0, 0);
-                tmp = kv_size(ps->info->code->opcodes);
+                tmp = OPCODE_SIZE(ps);
 
                 if (tk->val == TK_NEWLINE) {
                     next(ps);
@@ -1236,9 +1242,9 @@ void parse_stmt(ParserState *ps) {
                 } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 
                 // write X for jmp X
-                kv_A(ps->info->code->opcodes, tmp2 - 1).extra = kv_size(ps->info->code->opcodes) - tmp2 + 1;
+                kv_A(ps->info->code->opcodes, tmp2 - 1).extra = OPCODE_SIZE(ps) - tmp2 + 1;
                 // write X for test X
-                kv_A(ps->info->code->opcodes, tmp - 1).extra = kv_size(ps->info->code->opcodes) - tmp;
+                kv_A(ps->info->code->opcodes, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
             }
 
             if (tk->val == TK_KW_ELSE) {
@@ -1247,7 +1253,7 @@ void parse_stmt(ParserState *ps) {
                 kv_A(ps->info->code->opcodes, tmp - 1).extra += 1;
                 // jmp 0 X
                 write_ins(ps, BC_JMP, 0, 0);
-                tmp = kv_size(ps->info->code->opcodes);
+                tmp = OPCODE_SIZE(ps);
 
                 if (tk->val == TK_NEWLINE) {
                     next(ps);
@@ -1255,16 +1261,16 @@ void parse_stmt(ParserState *ps) {
                 } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 
                 // write X for jmp X
-                kv_A(ps->info->code->opcodes, tmp - 1).extra = kv_size(ps->info->code->opcodes) - tmp;
+                kv_A(ps->info->code->opcodes, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
             } else {
                 // fix for last elif
                 if (tmp2) {
-                    kv_A(ps->info->code->opcodes, tmp - 1).extra = kv_size(ps->info->code->opcodes) - tmp;
+                    kv_A(ps->info->code->opcodes, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
                 }
             }
 
             // new code pos
-            final_pos = kv_size(ps->info->code->opcodes);
+            final_pos = OPCODE_SIZE(ps);
             // tmp3 <- pos of first jmp (if exists)
             tmp3 += kv_A(ps->info->code->opcodes, tmp3 - 1).extra;
 
@@ -1278,11 +1284,11 @@ void parse_stmt(ParserState *ps) {
             return;
         case TK_KW_WHILE:
             next(ps);
-            tmp = kv_size(ps->info->code->opcodes);
+            tmp = OPCODE_SIZE(ps);
             parse_expr(ps);
             ACCEPT(ps, ':');
 
-            tmp2 = kv_size(ps->info->code->opcodes);
+            tmp2 = OPCODE_SIZE(ps);
             write_ins(ps, BC_TEST, 0, 0);
 
             if (tk->val == TK_NEWLINE) {
@@ -1293,8 +1299,8 @@ void parse_stmt(ParserState *ps) {
             } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
             loop_control_replace(ps, tmp2);
 
-            write_ins(ps, BC_JMP_BACK, 0, (kv_size(ps->info->code->opcodes) - tmp + 1));
-            kv_A(ps->info->code->opcodes, tmp2).extra = kv_size(ps->info->code->opcodes) - tmp2 - 1;
+            write_ins(ps, BC_JMP_BACK, 0, (OPCODE_SIZE(ps) - tmp + 1));
+            OPCODE_GET(ps, tmp2).extra = OPCODE_SIZE(ps) - tmp2 - 1;
             return;
         case TK_KW_BREAK:
             next(ps);
@@ -1323,7 +1329,7 @@ void parse_stmt(ParserState *ps) {
             parse_expr(ps);
             ACCEPT(ps, ':');
             write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_ITER, 0);
-            tmp = kv_size(ps->info->code->opcodes);
+            tmp = OPCODE_SIZE(ps);
 
             // for X in iter
             write_ins(ps, BC_FORITER, 0, 0);
@@ -1341,8 +1347,8 @@ void parse_stmt(ParserState *ps) {
             --ps->info->loop_depth;
             loop_control_replace(ps, tmp);
 
-            kv_A(ps->info->code->opcodes, tmp).extra = kv_size(ps->info->code->opcodes) - tmp;
-            write_ins(ps, BC_JMP_BACK, 0, kv_size(ps->info->code->opcodes) - tmp + 1);
+            OPCODE_GET(ps, tmp).extra = OPCODE_SIZE(ps) - tmp;
+            write_ins(ps, BC_JMP_BACK, 0, OPCODE_SIZE(ps) - tmp + 1);
 
             write_ins(ps, BC_POP, 0, 0); // pop iterator
             write_ins(ps, BC_DEL_FORCE, 0, 0);
@@ -1399,6 +1405,34 @@ void parse_stmt(ParserState *ps) {
             }
             ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
             break;
+        }
+        case TK_KW_TRY: {
+            next(ps);
+            ACCEPT(ps, ':');
+            sload_name(ps, pl_static.str.BaseException);
+            int pexpt_set = OPCODE_SIZE(ps);
+            write_ins(ps, BC_SETUP_EXCEPT, 0, 0);
+
+            if (tk->val == TK_NEWLINE) {
+                next(ps);
+                parse_block(ps);
+            } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+
+            // jmp 0 X
+            tmp = OPCODE_SIZE(ps); 
+            write_ins(ps, BC_JMP, 0, 0);
+            OPCODE_GET(ps, pexpt_set).extra = OPCODE_SIZE(ps) - pexpt_set - 1;
+
+            if (tk->val == TK_KW_EXCEPT) {
+                next(ps);
+                ACCEPT(ps, ':');
+                ACCEPT(ps, TK_NEWLINE);
+                parse_block(ps);
+            }
+
+            OPCODE_GET(ps, tmp).extra = OPCODE_SIZE(ps) - tmp - 1;
+            write_ins(ps, BC_POPN_EXCEPT, 0, 1);
+            return;
         }
         case TK_NEWLINE:
             // empty file
