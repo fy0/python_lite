@@ -62,7 +62,7 @@
 #define kv_roundup32(x) (--(x), (x)|=(x)>>1, (x)|=(x)>>2, (x)|=(x)>>4, (x)|=(x)>>8, (x)|=(x)>>16, ++(x))
 
 #define kvec_t(type) struct { size_t n, m; type *a;PyLiteInterpreter *I; }
-#define kv_init(I, v) ((v).n = (v).m = 0, (v).a = 0, (v).I = I)
+#define kv_init(_I, v) ((v).n = (v).m = 0, (v).a = 0, (v).I = (_I))
 #define kv_destroy(v) kfree((v).I, (v).a, sizeof(*((v).a)) * (v).m)
 #define kv_A(v, i) ((v).a[(i)])
 #define kv_top(v) ((v).a[(v).n-1])

@@ -184,10 +184,12 @@ void pl_error_ex(PyLiteInterpreter *I, PyLiteTypeObject *exception_type, const c
 PyLiteObject* _pl_call(PyLiteInterpreter *I, pl_int_t argc) {
     PyLiteInstruction bc_call = { .code = BC_CALL, .exarg = 0, .extra = argc };
     PyLiteInstruction bc_halt = { .code = BC_HALT, .exarg = 0, .extra = 0 };
+    PyLiteInstruction bc_nope = { .code = BC_NOP,  .exarg = 0, .extra = 0 };
     PyLiteCodeObject *code = pylt_obj_code_new(I, false);
 
     kv_pushins(code->opcodes, bc_call);
     kv_pushins(code->opcodes, bc_halt);
+    kv_pushins(code->opcodes, bc_nope); // mem fix
     pylt_vm_push_code(I, code);
     pylt_vm_run(I);
     pylt_vm_pop_frame(I);

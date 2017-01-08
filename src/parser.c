@@ -1219,14 +1219,14 @@ void parse_stmt(ParserState *ps) {
             } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
             // TODO: stmt
 
-            kv_A(ps->info->code->opcodes, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
+            OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
 
             tmp2 = 0;
             while (tk->val == TK_KW_ELIF) {
                 next(ps);
 
                 // jmp 0 X
-                kv_A(ps->info->code->opcodes, tmp - 1).extra += 1;
+                OPCODE_GET(ps, tmp - 1).extra += 1;
                 write_ins(ps, BC_JMP, 0, 0);
                 tmp2 = OPCODE_SIZE(ps);
 
@@ -1244,13 +1244,13 @@ void parse_stmt(ParserState *ps) {
                 // write X for jmp X
                 kv_A(ps->info->code->opcodes, tmp2 - 1).extra = OPCODE_SIZE(ps) - tmp2 + 1;
                 // write X for test X
-                kv_A(ps->info->code->opcodes, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
+                OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
             }
 
             if (tk->val == TK_KW_ELSE) {
                 next(ps);
                 ACCEPT(ps, ':');
-                kv_A(ps->info->code->opcodes, tmp - 1).extra += 1;
+                OPCODE_GET(ps, tmp - 1).extra += 1;
                 // jmp 0 X
                 write_ins(ps, BC_JMP, 0, 0);
                 tmp = OPCODE_SIZE(ps);
@@ -1261,11 +1261,11 @@ void parse_stmt(ParserState *ps) {
                 } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 
                 // write X for jmp X
-                kv_A(ps->info->code->opcodes, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
+                OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
             } else {
                 // fix for last elif
                 if (tmp2) {
-                    kv_A(ps->info->code->opcodes, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
+                    OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
                 }
             }
 
@@ -1407,31 +1407,119 @@ void parse_stmt(ParserState *ps) {
             break;
         }
         case TK_KW_TRY: {
+            struct TryBox {
+                pl_uint_t jmp_pos;
+                PyLiteStrObject *expt_name;
+            };
+            kvec_t(struct TryBox) jmp_stack;
+            kv_init(ps->I, jmp_stack);
+
+            // try:
             next(ps);
             ACCEPT(ps, ':');
-            sload_name(ps, pl_static.str.BaseException);
-            int pexpt_set = OPCODE_SIZE(ps);
-            write_ins(ps, BC_SETUP_EXCEPT, 0, 0);
+            write_ins(ps, BC_LOAD_VAL, 0, 0); // default: BaseException
+            int first_setup = OPCODE_SIZE(ps);
+            write_ins(ps, BC_EXPT_SETUP, 0, 0);
 
             if (tk->val == TK_NEWLINE) {
                 next(ps);
                 parse_block(ps);
             } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
 
-            // jmp 0 X
-            tmp = OPCODE_SIZE(ps); 
-            write_ins(ps, BC_JMP, 0, 0);
-            OPCODE_GET(ps, pexpt_set).extra = OPCODE_SIZE(ps) - pexpt_set - 1;
+            pl_bool_t base_expt_catched = false;
 
-            if (tk->val == TK_KW_EXCEPT) {
-                next(ps);
-                ACCEPT(ps, ':');
-                ACCEPT(ps, TK_NEWLINE);
-                parse_block(ps);
+            while (true) {
+                PyLiteStrObject *expt_name = NULL;
+                PyLiteStrObject *alias = NULL;
+
+                // except
+                if (tk->val == TK_KW_EXCEPT) {
+                    next(ps);
+                    expt_name = pl_static.str.BaseException;
+                    // except Exception
+                    if (tk->val == TK_NAME) {
+                        expt_name = caststr(tk->obj);
+                        next(ps);
+                        // except Exception as
+                        if (tk->val == TK_KW_AS) {
+                            next(ps);
+                            // except Exception as x
+                            if (tk->val == TK_NAME) {
+                                alias = caststr(tk->obj);
+                                next(ps);
+                            } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+                        }
+                    }
+
+                    // except:
+                    // except Exception:
+                    // except Exception as x:
+                    ACCEPT(ps, ':');
+                    ACCEPT(ps, TK_NEWLINE);
+
+                    // jmp to finally
+                    struct TryBox tb = {
+                        .jmp_pos = OPCODE_SIZE(ps),
+                        .expt_name = expt_name,
+                    };
+                    kv_push(struct TryBox, jmp_stack, tb);
+                    write_ins(ps, BC_JMP, 0, 0);
+
+                    // load x
+                    pl_int_t aindex;
+                    if (alias) {
+                        aindex = store_const(ps, castobj(alias));
+                        write_ins(ps, BC_SET_VAL, 0, aindex);
+                    }
+                    write_ins(ps, BC_POP, 0, 0);
+                    parse_block(ps);
+                    if (alias) write_ins(ps, BC_DEL_NAME, 0, aindex);
+                } else break;
             }
 
-            OPCODE_GET(ps, tmp).extra = OPCODE_SIZE(ps) - tmp - 1;
-            write_ins(ps, BC_POPN_EXCEPT, 0, 1);
+            pl_uint_t stack_size = kv_size(jmp_stack);
+            switch (stack_size) {
+                case 0:
+                    if (tk->val != TK_KW_FINALLY) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+                    break;
+                case 1: {
+                    struct TryBox tb = kv_pop(jmp_stack);
+                    OPCODE_GET(ps, first_setup - 1).extra = store_const(ps, castobj(tb.expt_name));
+                    OPCODE_GET(ps, first_setup).extra = tb.jmp_pos - first_setup;
+                    break;
+                }
+                default: {
+                    pl_uint_t n = stack_size;
+                    PyLiteInstruction *pins = &OPCODE_GET(ps, first_setup + 1);
+                    pl_uint_t offset = (n - 1) * 2;
+
+                    pl_uint_t move_size = OPCODE_SIZE(ps) - (first_setup + 1);
+                    for (pl_uint_t i = 0; i < offset; ++i) write_ins(ps, 0, 0, 0); // 临时方案
+                    memmove(pins + offset, pins, sizeof(PyLiteInstruction) * move_size);
+
+                    for (pl_uint_t i = 0; i < n; ++i) {
+                        struct TryBox tb = kv_pop(jmp_stack);
+                        // exception setup
+                        OPCODE_GET(ps, first_setup + i * 2 - 1).code = BC_LOAD_VAL;
+                        OPCODE_GET(ps, first_setup + i * 2 - 1).extra = store_const(ps, castobj(tb.expt_name));
+                        OPCODE_GET(ps, first_setup + i * 2).code = BC_EXPT_SETUP;
+                        OPCODE_GET(ps, first_setup + i * 2).extra = tb.jmp_pos - first_setup + offset - i * 2;
+                        // finally
+                        OPCODE_GET(ps, tb.jmp_pos + offset).extra = OPCODE_SIZE(ps) - tb.jmp_pos - offset - 1;
+                    }
+                    break;
+                }
+            }
+
+            write_ins(ps, BC_EXPT_POPN, 0, stack_size);
+            if (tk->val == TK_KW_FINALLY) {
+                next(ps);
+                ACCEPT(ps, ':');
+                if (tk->val == TK_NEWLINE) {
+                    next(ps);
+                    parse_block(ps);
+                } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+            }
             return;
         }
         case TK_NEWLINE:

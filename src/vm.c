@@ -365,6 +365,7 @@ pl_int_t pylt_vm_except_check(PyLiteInterpreter *I) {
                         nframe = &kv_pop(ctx->frames);
                     }
                     ctx->ip = info->ip_catch;
+                    kv_pushptr(ctx->stack, I->error);
                     I->error = NULL;
                     return 2; // exception caught
                 }
@@ -830,13 +831,13 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                 }
                 break;
             }
-            case BC_SETUP_EXCEPT: {
+            case BC_EXPT_SETUP: {
                 // SETUP_EXCEPT 0       jump_offset
                 PyLiteTypeObject *et = casttype(kv_pop(ctx->stack));
                 pylt_vm_except_setup(I, et->ob_reftype, ctx->ip + ins.extra);
                 break;
             }
-            case BC_POPN_EXCEPT: {
+            case BC_EXPT_POPN: {
                 // POPN_EXCEPT  0       num
                 pylt_vm_except_pop(I, ins.extra);
                 break;

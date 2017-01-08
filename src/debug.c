@@ -39,7 +39,7 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 break;
             case BC_SET_VAL:
                 wprintf(L"   %-15ls %d", L"SET_VAL", ins.extra);
-                //debug_print_obj(I, castobj(kv_A(code->opcodes, ++i)));
+                pl_print(I, " (%r)", pylt_obj_list_getitem(I, code->const_val, ins.extra));
                 putwchar('\n');
                 break;
             case BC_SET_VALX:
@@ -47,17 +47,21 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 break;
             case BC_LOAD_VAL:
                 wprintf(L"   %-15ls %d", L"LOAD_VAL", ins.extra);
+                pl_print(I, " (%r)", pylt_obj_list_getitem(I, code->const_val, ins.extra));
                 putwchar('\n');
                 break;
             case BC_LOAD_VAL_:
                 wprintf(L"   %-15ls %d", L"LOAD_VAL_", ins.extra);
+                pl_print(I, " (%r)", pylt_obj_list_getitem(I, code->const_val, ins.extra));
                 putwchar('\n');
                 break;
             case BC_LOADNONE:
                 wprintf(L"   %-15ls\n", L"LOADNONE");
                 break;
             case BC_LOADCONST:
-                wprintf(L"   %-15ls %d\n", L"LOADCONST", ins.extra);
+                wprintf(L"   %-15ls %d", L"LOADCONST", ins.extra);
+                pl_print(I, " (%r)", pylt_obj_list_getitem(I, code->const_val, ins.extra));
+                putwchar('\n');
                 break;
             case BC_LOADLOCALS:
                 wprintf(L"   %-15ls\n", L"LOADLOCALS");
@@ -80,7 +84,8 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 putwchar('\n');
                 break;
             case BC_JMP:
-                wprintf(L"   %-15ls %-3d  ", L"JMP", ins.extra);
+                wprintf(L"   %-15ls %-3d", L"JMP", ins.extra);
+                wprintf(L"=> %u", ins.extra + i + 1);
                 putwchar('\n');
                 break;
             case BC_JMP_BACK:
@@ -128,7 +133,8 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 wprintf(L"   %-15ls\n", L"SET_SLICE");
                 break;
             case BC_DEL_NAME:
-                wprintf(L"   %-15ls %d\n", L"DEL_NAME", ins.extra);
+                wprintf(L"   %-15ls %d", L"DEL_NAME", ins.extra);
+                pl_print(I, " (%r)\n", pylt_obj_list_getitem(I, code->const_val, ins.extra));
                 break;
             case BC_DEL_ATTR:
                 wprintf(L"   %-15ls %d\n", L"DEL_ATTR", ins.extra);
@@ -148,11 +154,13 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_UNPACK_SEQ:
                 wprintf(L"   %-15ls %d\n", L"UNPACK_SEQ", ins.extra);
                 break;
-            case BC_SETUP_EXCEPT:
-                wprintf(L"   %-15ls %d\n", L"SETUP_EXCEPT", ins.extra);
+            case BC_EXPT_SETUP:
+                wprintf(L"   %-15ls %-3d", L"EXPT_SETUP", ins.extra);
+                wprintf(L"=> %u", ins.extra + i + 1);
+                putwchar(L'\n');
                 break;
-            case BC_POPN_EXCEPT:
-                wprintf(L"   %-15ls %d\n", L"POPN_EXCEPT", ins.extra);
+            case BC_EXPT_POPN:
+                wprintf(L"   %-15ls %d\n", L"EXPT_POPN", ins.extra);
                 break;
             case BC_PRINT:
                 wprintf(L"   %-15ls\n", L"PRINT");

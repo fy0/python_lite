@@ -8,6 +8,7 @@ PyLiteDictObject* make_closure(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     PyLiteContext *ctx = I->vm.ctx;
     PyLiteDictObject *closure = pylt_obj_dict_new(I);
 
+    if (!code || !code->closure) return closure;
     pl_foreach_set(I, it, code->closure) {
         PyLiteObject *obj = NULL;
         PyLiteObject *name = pylt_obj_set_itemvalue(I, code->closure, it);
