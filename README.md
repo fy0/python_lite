@@ -17,6 +17,10 @@ A simple, lightweight implementation of python3-like language.
 
 * ~~slice grammar~~
 
+* lambda function
+
+* package import
+
 * basic testcase
 
 
@@ -80,8 +84,6 @@ A simple, lightweight implementation of python3-like language.
 * async/await
 
 * x for x in [...]
-
-* lambda
 
 * nameless function
 
