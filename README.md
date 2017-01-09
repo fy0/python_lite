@@ -17,7 +17,7 @@ A simple, lightweight implementation of python3-like language.
 
 * ~~slice grammar~~
 
-* lambda function
+* ~~lambda function~~
 
 * package import
 

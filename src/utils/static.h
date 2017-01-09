@@ -284,6 +284,8 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *TMPL_EMPTY_LIST;
         PyLiteStrObject *TMPL_EMPTY_TUPLE;
         PyLiteStrObject *TMPL_EMPTY_DICT;
+
+        PyLiteStrObject *TMPL_LAMBDA_FUNC_NAME;
     } str;
 } pl_static;
 

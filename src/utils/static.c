@@ -285,4 +285,6 @@ void pylt_static_objs_init(PyLiteInterpreter *I) {
     sstr_new2(TMPL_EMPTY_LIST, "[]");
     sstr_new2(TMPL_EMPTY_TUPLE, "()");
     sstr_new2(TMPL_EMPTY_DICT, "{}");
+
+    sstr_new2(TMPL_LAMBDA_FUNC_NAME, "<lambda>");
 }
