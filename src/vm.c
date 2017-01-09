@@ -680,7 +680,6 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                 // set frame->locals and execute
                 I->recent_called = tret;
                 if (tret->ob_type == PYLT_OBJ_TYPE_FUNCTION) {
-					frame->ip_saved = ctx->ip;
                     pylt_vm_push_func(I, castfunc(tret));
                     frame = &kv_top(ctx->frames);
 
@@ -732,9 +731,8 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
 					goto _end;
 				}
 
-                kv_pop(ctx->frames);
+                pylt_vm_pop_frame(I);
                 frame = &kv_top(ctx->frames);
-                ctx->ip = frame->ip_saved;
                 break;
             case BC_TEST:
                 // TEST         0       jump_offset

@@ -1,5 +1,5 @@
 
-# pylite 简蟒 ver 0.0.8
+# pylite 简蟒 ver 0.0.9
 
 A simple, lightweight implementation of python3-like language.
 
@@ -11,13 +11,13 @@ A simple, lightweight implementation of python3-like language.
 
 * ~~exception support~~
 
-* try - except
+* ~~try - except - finally~~
 
 * ~~simple import~~
 
 * ~~slice grammar~~
 
-* basic testcases
+* basic testcase
 
 
 ### ver 0.2
@@ -90,7 +90,7 @@ A simple, lightweight implementation of python3-like language.
 * JIT
 
 
-### never support
+### won't support
 
 * encodings except utf-8/ucs2/ucs4
 
