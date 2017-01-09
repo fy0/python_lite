@@ -151,7 +151,7 @@ void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char 
 }
 
 
-void pl_error_ex(PyLiteInterpreter *I, PyLiteTypeObject *exception_type, const char *format, ...) {
+void pl_error_by_type(PyLiteInterpreter *I, PyLiteTypeObject *exception_type, const char *format, ...) {
     PyLiteObject *error;
     PyLiteStrObject *str;
     va_list args;
@@ -177,6 +177,10 @@ void pl_error_ex(PyLiteInterpreter *I, PyLiteTypeObject *exception_type, const c
         error = pl_call(I, castobj(exception_type), 0);
     }
     I->error = error;
+}
+
+void pl_raise(PyLiteInterpreter *I, PyLiteObject *exception) {
+    I->error = exception;
 }
 
 #define kv_pushins(v, x) kv_push(PyLiteInstruction, (v), (x))

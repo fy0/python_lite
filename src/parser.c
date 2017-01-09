@@ -1540,6 +1540,12 @@ void parse_stmt(ParserState *ps) {
             }
             return;
         }
+        case TK_KW_RAISE: {
+            next(ps);
+            if (parse_try_expr(ps)) write_ins(ps, BC_RAISE, 0, 1);
+            else write_ins(ps, BC_RAISE, 0, 0);
+            break;
+        }
         case TK_NEWLINE:
             // empty file
             break;

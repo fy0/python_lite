@@ -848,6 +848,29 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                 pylt_vm_except_pop(I, ins.extra);
                 break;
             }
+            case BC_RAISE: {
+                // RAISE        0       0/1
+                if (ins.extra) {
+                    PyLiteObject *e = castobj(kv_pop(ctx->stack));
+                    // e is exception type
+                    if (pl_istype(e)) {
+                        if (pl_issubclass(I, casttype(e), pl_type_by_code(I, PYLT_OBJ_TYPE_BASE_EXCEPTION))) {
+                            pl_error_by_type(I, casttype(e), NULL);
+                            break;
+                        }
+                        pl_error(I, pl_static.str.RuntimeError, "exceptions must derive from BaseException");
+                        break;
+                    }
+                    if (!pl_isinstance(I, e, PYLT_OBJ_TYPE_BASE_EXCEPTION)) {
+                        pl_error(I, pl_static.str.RuntimeError, "exceptions must derive from BaseException");
+                        break;
+                    }
+                    pl_raise(I, e);
+                    break;
+                }
+                pl_error(I, pl_static.str.RuntimeError, "No active exception to reraise");
+                break;
+            }
             case BC_NOP:
                 break;
             case BC_PRINT:

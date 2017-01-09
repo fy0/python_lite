@@ -43,6 +43,7 @@ enum {
     BC_ASSERT,         // 真值断言
     BC_EXPT_SETUP,     // 设定异常
     BC_EXPT_POPN,      // 弹出异常
+    BC_RAISE,          // 抛出异常
 
     BC_IMPORT_NAME,    // 导入模块
     BC_UNPACK_SEQ,     // 解包

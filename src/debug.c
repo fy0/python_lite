@@ -162,6 +162,9 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
             case BC_EXPT_POPN:
                 wprintf(L"   %-15ls %d\n", L"EXPT_POPN", ins.extra);
                 break;
+            case BC_RAISE:
+                wprintf(L"   %-15ls %d\n", L"RAISE", ins.extra);
+                break;
             case BC_PRINT:
                 wprintf(L"   %-15ls\n", L"PRINT");
                 break;
