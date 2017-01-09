@@ -19,7 +19,7 @@ void pylt_bind_exceptions(PyLiteInterpreter *I, PyLiteModuleObject *mod) {
     EXCEPTION_REGISTER(GeneratorExit, PYLT_OBJ_TYPE_BASE_EXCEPTION);
 
     EXCEPTION_REGISTER(Exception, PYLT_OBJ_TYPE_BASE_EXCEPTION);
-    base = type->ob_base;
+    base = type->ob_reftype;
     EXCEPTION_REGISTER(StopIteration, base);
     EXCEPTION_REGISTER(StopAsyncIteration, base);
     EXCEPTION_REGISTER(AssertionError, base);
@@ -35,18 +35,18 @@ void pylt_bind_exceptions(PyLiteInterpreter *I, PyLiteModuleObject *mod) {
     EXCEPTION_REGISTER(ValueError, base);
 
     EXCEPTION_REGISTER(ArithmeticError, base);
-    base2 = type->ob_base;
+    base2 = type->ob_reftype;
     EXCEPTION_REGISTER(FloatingPointError, base2);
     EXCEPTION_REGISTER(OverflowError, base2);
     EXCEPTION_REGISTER(ZeroDivisionError, base2);
 
     EXCEPTION_REGISTER(LookupError, base);
-    base2 = type->ob_base;
+    base2 = type->ob_reftype;
     EXCEPTION_REGISTER(IndexError, base2);
     EXCEPTION_REGISTER(KeyError, base2);
 
     EXCEPTION_REGISTER(OSError, base);
-    base2 = type->ob_base;
+    base2 = type->ob_reftype;
     EXCEPTION_REGISTER(BlockingIOError, base2);
     EXCEPTION_REGISTER(ChildProcessError, base2);
     EXCEPTION_REGISTER(FileExistsError, base2);
@@ -59,22 +59,22 @@ void pylt_bind_exceptions(PyLiteInterpreter *I, PyLiteModuleObject *mod) {
     EXCEPTION_REGISTER(TimeoutError, base2);
 
     EXCEPTION_REGISTER(RuntimeError, base);
-    base2 = type->ob_base;
+    base2 = type->ob_reftype;
     EXCEPTION_REGISTER(NotImplementedError, base2);
     EXCEPTION_REGISTER(RecursionError, base2);
 
     EXCEPTION_REGISTER(SyntaxError, base);
-    base2 = type->ob_base;
+    base2 = type->ob_reftype;
     EXCEPTION_REGISTER(IndentationError, base2);
 
     EXCEPTION_REGISTER(UnicodeError, base);
-    base2 = type->ob_base;
+    base2 = type->ob_reftype;
     EXCEPTION_REGISTER(UnicodeDecodeError, base2);
     EXCEPTION_REGISTER(UnicodeEncodeError, base2);
     EXCEPTION_REGISTER(UnicodeTranslateError, base2);
 
     EXCEPTION_REGISTER(Warning, base);
-    base2 = type->ob_base;
+    base2 = type->ob_reftype;
     EXCEPTION_REGISTER(DeprecationWarning, base2);
     EXCEPTION_REGISTER(PendingDeprecationWarning, base2);
     EXCEPTION_REGISTER(RuntimeWarning, base2);

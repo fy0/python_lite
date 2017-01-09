@@ -126,6 +126,12 @@ void error(ParserState *ps, int code) {
         case PYLT_ERR_PARSER_RETURN_OUTSIDE_FUNCTION:
             wprintf(L"SyntaxError: 'return' outside function\n");
             break;
+        case PYLT_ERR_PARSER_EXCEPT_MUST_BE_LAST:
+            wprintf(L"SyntaxError: default 'except:' must be last\n");
+            break;
+        case PYLT_ERR_PARSER_TRY_EXPECTED_FINALLY:
+            wprintf(L"SyntaxError: expected 'finally' or 'except', got invalid token\n");
+            break;
         case PYLT_ERR_LEX_INVALID_STR_OR_BYTES:
             wprintf(L"SyntaxError: bad string literal\n");
             break;
@@ -135,6 +141,7 @@ void error(ParserState *ps, int code) {
 }
 
 #define OPCODE_GET(ps, pos) kv_A((ps)->info->code->opcodes, pos)
+#define OPCODE_PTR(ps, pos) kv_P((ps)->info->code->opcodes, pos)
 #define OPCODE_SIZE(ps) kv_size((ps)->info->code->opcodes)
 
 static _INLINE
@@ -1457,6 +1464,13 @@ void parse_stmt(ParserState *ps) {
                     ACCEPT(ps, ':');
                     ACCEPT(ps, TK_NEWLINE);
 
+                    if (expt_name == pl_static.str.BaseException) {
+                        if (base_expt_catched) {
+                            error(ps, PYLT_ERR_PARSER_EXCEPT_MUST_BE_LAST);
+                        }
+                        base_expt_catched = true;
+                    }
+
                     // jmp to finally
                     struct TryBox tb = {
                         .jmp_pos = OPCODE_SIZE(ps),
@@ -1480,21 +1494,25 @@ void parse_stmt(ParserState *ps) {
             pl_uint_t stack_size = kv_size(jmp_stack);
             switch (stack_size) {
                 case 0:
-                    if (tk->val != TK_KW_FINALLY) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+                    if (tk->val != TK_KW_FINALLY) error(ps, PYLT_ERR_PARSER_TRY_EXPECTED_FINALLY);
+                    OPCODE_GET(ps, first_setup - 1).code = BC_NOP;
+                    OPCODE_GET(ps, first_setup).code = BC_NOP;
                     break;
                 case 1: {
                     struct TryBox tb = kv_pop(jmp_stack);
                     OPCODE_GET(ps, first_setup - 1).extra = store_const(ps, castobj(tb.expt_name));
                     OPCODE_GET(ps, first_setup).extra = tb.jmp_pos - first_setup;
+                    OPCODE_GET(ps, tb.jmp_pos).extra = tb.jmp_pos - first_setup;
                     break;
                 }
                 default: {
                     pl_uint_t n = stack_size;
-                    PyLiteInstruction *pins = &OPCODE_GET(ps, first_setup + 1);
                     pl_uint_t offset = (n - 1) * 2;
-
+                    
                     pl_uint_t move_size = OPCODE_SIZE(ps) - (first_setup + 1);
-                    for (pl_uint_t i = 0; i < offset; ++i) write_ins(ps, 0, 0, 0); // 临时方案
+                    for (pl_uint_t i = 0; i < offset; ++i) write_ins(ps, BC_NOP, 0, 0); // 临时方案
+
+                    PyLiteInstruction *pins = OPCODE_PTR(ps, first_setup + 1);
                     memmove(pins + offset, pins, sizeof(PyLiteInstruction) * move_size);
 
                     for (pl_uint_t i = 0; i < n; ++i) {

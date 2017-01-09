@@ -57,10 +57,15 @@ void pylt_parser_crash_finalize(PyLiteInterpreter *I, ParserState *ps);
 #define PYLT_ERR_PARSER_NON_KEYWORD_ARG_AFTER_KEYWORD_ARG -7
 // SyntaxError: 'return' outside function
 #define PYLT_ERR_PARSER_RETURN_OUTSIDE_FUNCTION -8
+// default 'except:' must be last
+#define PYLT_ERR_PARSER_EXCEPT_MUST_BE_LAST -9
+// expected 'finally' or 'except', got invalid token
+#define PYLT_ERR_PARSER_TRY_EXPECTED_FINALLY -10
+
 
 // SyntaxError: different unpack sequences' size
-#define PYLT_ERR_PARSER_DIFFERENT_UNPACK_SEQUENCES_SIZE -9
+#define PYLT_ERR_PARSER_DIFFERENT_UNPACK_SEQUENCES_SIZE -19
 // SyntaxError: not enough values to unpack (expected A, got B)
-#define PYLT_ERR_PARSER_NOT_ENOUGH_VALUES_TO_UNPACK -10
+#define PYLT_ERR_PARSER_NOT_ENOUGH_VALUES_TO_UNPACK -20
 
 #endif
