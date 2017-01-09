@@ -120,11 +120,43 @@ PyLiteObject* pylt_mods_builtins_isinstance(PyLiteInterpreter *I, int argc, PyLi
     return NULL;
 }
 
+PyLiteObject* pylt_mods_builtins_issubclass(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (!pl_istype(args[0])) {
+        pl_error(I, _S(TypeError), "issubclass() arg 1 must be a class");
+        return NULL;
+    }
+    if (pl_istuple(args[1])) {
+        pl_foreach_tuple(I, i, args[1]) {
+            if (!pl_istype(casttuple(args[1])->ob_val[i])) {
+                pl_error(I, _S(TypeError), "issubclass() arg 2 must be a class or tuple of classes");
+                return NULL;
+            }
+        }
+    } else {
+        if (!pl_istype(args[1])) {
+            pl_error(I, _S(TypeError), "issubclass() arg 2 must be a class or tuple of classes");
+            return NULL;
+        }
+    }
+
+    if (pl_istuple(args[1])) {
+        pl_foreach_tuple(I, i, args[1]) {
+            if (pl_issubclass(I, casttype(args[0]), casttype(casttuple(args[1])->ob_val[i]))) {
+                return castobj(pylt_obj_bool_new(I, true));
+            }
+        }
+        return castobj(pylt_obj_bool_new(I, false));
+    } else {
+        return castobj(pylt_obj_bool_new(I, pl_issubclass(I, casttype(args[0]), casttype(args[1]))));
+    }
+}
+
 
 PyLiteObject* pylt_mods_builtins_import(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     ;
     return NULL;
 }
+
 
 PyLiteObject* pylt_mods_builtins_repr(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     return castobj(pylt_obj_to_repr(I, args[0]));
@@ -145,20 +177,21 @@ PyLiteObject* pylt_mods_builtins_setattr(PyLiteInterpreter *I, int argc, PyLiteO
 PyLiteModuleObject* pylt_mods_builtins_loader(PyLiteInterpreter *I) {
     PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, NULL);
 
-    pylt_cfunc_register(I, mod, _S(print), _NST(I, 3, "values", "sep", "end"), _NT(I, 3, castobj(&PyLiteParamArgs), _NS(I, " "), _NS(I, "\n")), _UINTS(I, 3, NULL , PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_print);
-    pylt_cfunc_register(I, mod, pl_static.str.__import__, _NST(I, 1, "name", "globals", "locals"), NULL, _UINTS(I, 1, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_import);
-    pylt_cfunc_register(I, mod, pl_static.str.setattr, _NST(I, 3, "object", "name", "value"), NULL, _UINTS(I, 3, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_OBJ), &pylt_mods_builtins_setattr);
+    pylt_cfunc_register(I, mod, _S(print), _NST(I, 3, "values", "sep", "end"), _NT(I, 3, castobj(&PyLiteParamArgs), _NS(I, " "), _NS(I, "\n")), _UINTS(I, 3, NULL, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_print);
+    pylt_cfunc_register(I, mod, _S(__import__), _NST(I, 1, "name", "globals", "locals"), NULL, _UINTS(I, 1, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_import);
+    pylt_cfunc_register(I, mod, _S(setattr), _NST(I, 3, "object", "name", "value"), NULL, _UINTS(I, 3, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_OBJ), &pylt_mods_builtins_setattr);
 
-    pylt_cfunc_register(I, mod, _S(dir), _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_dir);
-    pylt_cfunc_register(I, mod, pl_static.str.id, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_id);
-    pylt_cfunc_register(I, mod, pl_static.str.len, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_len);
-    pylt_cfunc_register(I, mod, pl_static.str.hash, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_hash);
-    pylt_cfunc_register(I, mod, pl_static.str.iter, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_iter);
+    pylt_cfunc_register(I, mod, _S(dir), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_dir);
+    pylt_cfunc_register(I, mod, _S(id), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_id);
+    pylt_cfunc_register(I, mod, _S(len), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_len);
+    pylt_cfunc_register(I, mod, _S(hash), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_hash);
+    pylt_cfunc_register(I, mod, _S(iter), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_iter);
     pylt_cfunc_register(I, mod, _S(next), _NT(I, 2, _S(iterator), _S(default_)), _NT(I, 2, &PyLiteParamUndefined, &PyLiteUseless), NULL, &pylt_mods_builtins_next);
-    pylt_cfunc_register(I, mod, pl_static.str.isinstance, _NST(I, 2, "object", "class_or_type_or_tuple"), NULL, NULL, &pylt_mods_builtins_isinstance);
-    pylt_cfunc_register(I, mod, pl_static.str.repr, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_repr);
-    pylt_cfunc_register(I, mod, pl_static.str.super, _NT(I, 1, pl_static.str.object), NULL, NULL, &pylt_mods_builtins_super);
-    pylt_cfunc_register(I, mod, pl_static.str.pow, _NT(I, 2, pl_static.str.x, pl_static.str.y), NULL, NULL, &pylt_mods_builtins_pow);
+    pylt_cfunc_register(I, mod, _S(isinstance), _NST(I, 2, "object", "class_or_type_or_tuple"), NULL, NULL, &pylt_mods_builtins_isinstance);
+    pylt_cfunc_register(I, mod, _S(issubclass), _NST(I, 2, "class", "classinfo"), NULL, NULL, &pylt_mods_builtins_issubclass);
+    pylt_cfunc_register(I, mod, _S(repr), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_repr);
+    pylt_cfunc_register(I, mod, _S(super), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_super);
+    pylt_cfunc_register(I, mod, _S(pow), _NT(I, 2, _S(x), _S(y)), NULL, NULL, &pylt_mods_builtins_pow);
 
     pylt_obj_mod_setattr(I, mod, pl_static.str.None, castobj(&PyLiteNone));
 
