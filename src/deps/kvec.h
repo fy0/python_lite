@@ -52,7 +52,7 @@
 #include "../utils/config.h"
 
 #ifndef krealloc
-#define krealloc(I,P,O,Z) pylt_realloc(I,P,O,Z)
+#define krealloc(I,P,O,N) pylt_realloc(I,P,(O),(N))
 #endif
 #ifndef kfree
 #define kfree(I,P,S) pylt_free(I, P, S)
@@ -65,6 +65,7 @@
 #define kv_init(_I, v) ((v).n = (v).m = 0, (v).a = 0, (v).I = (_I))
 #define kv_destroy(v) kfree((v).I, (v).a, sizeof(*((v).a)) * (v).m)
 #define kv_A(v, i) ((v).a[(i)])
+#define kv_P(v, i) ((v).a + (i))
 #define kv_top(v) ((v).a[(v).n-1])
 #define kv_topn(v, num) ((v).a[(v).n-1-(num)])
 #define kv_pop(v) ((v).a[--(v).n])

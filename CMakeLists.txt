@@ -40,6 +40,7 @@ add_definitions(-DUNICODE -D_UNICODE)
 
 IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
     add_definitions(-DPYLT_DEBUG)
+    add_definitions(-DPL_DEBUG_INFO)
 ENDIF()
 
 file(GLOB_RECURSE project_headers src/*.h)

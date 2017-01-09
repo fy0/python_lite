@@ -17,7 +17,6 @@ int main(int argc, char* argv[]) {
     PyLiteInterpreter *I = pylt_intp_new();
     PyLiteFile *input = pylt_io_file_new_ex(I, (argc == 2) ? argv[1] : "test.py", "r", PYLT_IOTE_UTF8);
     if (!input) return 0;
-    putwchar('\n');
 
     /*debug_test_lexer(I, input);
     system("pause");
@@ -26,6 +25,7 @@ int main(int argc, char* argv[]) {
     pylt_intp_loadf(I, input);
 
 #ifdef PL_DEBUG_INFO
+    putwchar('\n');
     PyLiteCodeObject *code = kv_top(I->vm.ctx->frames).code;
     debug_print_const_vals(I, code);
     debug_print_opcodes(I, code);
@@ -34,8 +34,10 @@ int main(int argc, char* argv[]) {
 
     pylt_vm_run(I);
     pylt_intp_finalize(I);
+#ifdef PL_DEBUG_INFO
 #ifdef PLATFORM_WINDOWS
     system("pause");
+#endif
 #endif
     return 0;
 }

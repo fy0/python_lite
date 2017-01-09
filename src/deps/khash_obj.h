@@ -189,7 +189,7 @@ void* my_malloc(PyLiteInterpreter *I, size_t size);
 #define kmalloc(I,Z) my_malloc(I, Z)
 #endif
 #ifndef krealloc
-#define krealloc(I,P,S,Z) pylt_realloc(I,P,S,Z)
+#define krealloc(I,P,O,N) pylt_realloc(I,P,(O),(N))
 #endif
 #ifndef kfree
 #define kfree(I,P,S) pylt_free(I, P, S)

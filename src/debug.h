@@ -4,7 +4,7 @@
 
 #include "parser.h"
 
-#define PL_DEBUG_INFO
+//#define PL_DEBUG_INFO
 
 void debug_print_const_vals(PyLiteInterpreter *I, PyLiteCodeObject *code);
 void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code);

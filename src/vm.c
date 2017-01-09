@@ -81,7 +81,7 @@ void pylt_vm_init(struct PyLiteInterpreter *I, PyLiteVM* vm) {
     // built-in
     vm->builtins = pl_getmod(I, pl_static.str.builtins);
 
-    // first frame
+    // first frame - global
     pylt_vm_push_code(I, NULL);
 }
 
@@ -96,6 +96,9 @@ void pylt_vm_push_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     PyLiteFrame *frame;
     PyLiteContext *ctx = I->vm.ctx;
 
+    if (kv_size(ctx->frames)) {
+        kv_top(ctx->frames).ip_saved = ctx->ip;
+    }
     kv_pushp(PyLiteFrame, ctx->frames);
     frame = &kv_top(ctx->frames);
     frame->func = NULL;
@@ -103,13 +106,16 @@ void pylt_vm_push_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
     frame->halt_when_ret = false;
     frame->locals = pylt_obj_dict_new(I);
 
-    if (code) ctx->ip = &kv_A(frame->code->opcodes, 0);
+    ctx->ip = (code) ? kv_P(frame->code->opcodes, 0) : NULL;
 }
 
 void pylt_vm_push_func(PyLiteInterpreter *I, PyLiteFunctionObject *func) {
     PyLiteFrame *frame;
     PyLiteContext *ctx = I->vm.ctx;
 
+    if (kv_size(ctx->frames)) {
+        kv_top(ctx->frames).ip_saved = ctx->ip;
+    }
     kv_pushp(PyLiteFrame, ctx->frames);
     frame = &kv_top(ctx->frames);
     frame->func = func;
@@ -119,7 +125,9 @@ void pylt_vm_push_func(PyLiteInterpreter *I, PyLiteFunctionObject *func) {
 
     pylt_gc_add(I, castobj(func));
     //pylt_gc_add(I, castobj(func->code));
-    if (func) ctx->ip = &kv_A(frame->code->opcodes, 0);
+    if (func) {
+        ctx->ip = (frame->code) ? kv_P(frame->code->opcodes, 0) : NULL;
+    }
 }
 
 
@@ -136,7 +144,9 @@ void pylt_vm_load_code(PyLiteInterpreter *I, PyLiteCodeObject *code) {
 }
 
 void pylt_vm_pop_frame(PyLiteInterpreter *I) {
-    kv_pop(I->vm.ctx->frames);
+    PyLiteContext *ctx = I->vm.ctx;
+    kv_pop(ctx->frames);
+    ctx->ip = kv_top(ctx->frames).ip_saved;
 }
 
 
@@ -810,10 +820,8 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
 #endif
                     kv_popn(ctx->stack, ins.extra);
                     pylt_vm_push_code(I, tcode);
-                    PyLiteInstruction *ip_saved = ctx->ip;
                     PyLiteDictObject *scope = pylt_vm_run(I);
-                    ctx->ip = ip_saved;
-                    kv_pop(ctx->frames);
+                    pylt_vm_pop_frame(I);
                     if (I->error) goto _end;
                     PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, caststr(name));
                     mod->ob_attrs = scope;
