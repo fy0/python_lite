@@ -213,7 +213,7 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
         if (params_num == 0) kv_pushptr(ctx->stack, tobj); // __new__(cls, ...) __call__(self, ...)
         else {
             kv_pushptr(ctx->stack, NULL);
-            memcpy(&kv_topn(ctx->stack, params_num-1), &kv_topn(ctx->stack, params_num), sizeof(uintptr_t) * params_num);
+            memmove(&kv_topn(ctx->stack, params_num - 1), &kv_topn(ctx->stack, params_num), sizeof(uintptr_t) * params_num);
             kv_topn(ctx->stack, params_num) = (uintptr_t)tobj;
         }
         params_num++;

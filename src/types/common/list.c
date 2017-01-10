@@ -239,7 +239,7 @@ pl_int_t pylt_obj_list_slice_set(PyLiteInterpreter *I, PyLiteListObject *self, p
         if (count < val_count) {
             list_resize_maxsize_more_then(I, self, newsize);
         }
-        memcpy(self->ob_val + start + val_count, self->ob_val + start + count, (self->ob_size - count) * sizeof(PyLiteObject*));
+        memmove(self->ob_val + start + val_count, self->ob_val + start + count, (self->ob_size - count) * sizeof(PyLiteObject*));
         memcpy(self->ob_val + start, lst->ob_val, val_count * sizeof(PyLiteObject*));
         self->ob_size = newsize;
     } else {
