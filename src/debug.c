@@ -43,7 +43,7 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 putwchar('\n');
                 break;
             case BC_SET_VALX:
-                wprintf(L"   %-15ls %d %-3d\n", L"SET_VALX", ins.extra, ins.exarg);
+                wprintf(L"   %-15ls %d %-3d\n", L"SET_VALX", ins.exarg, ins.extra);
                 break;
             case BC_LOAD_VAL:
                 wprintf(L"   %-15ls %d", L"LOAD_VAL", ins.extra);
@@ -72,9 +72,8 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 wprintf(L" %d\n", ins.extra);
                 break;
             case BC_CALL:
-                wprintf(L"   %-15ls %d", L"CALL", ins.extra);
+                wprintf(L"   %-15ls %d %-3d\n", L"CALL", ins.exarg, ins.extra);
                 //debug_print_obj(I, castobj(kv_A(code->opcodes, ++i)));
-                putwchar('\n');
                 break;
             case BC_RET:
                 wprintf(L"   %-15ls\n", L"RET");
@@ -153,6 +152,12 @@ void debug_print_opcodes(PyLiteInterpreter *I, PyLiteCodeObject *code) {
                 break;
             case BC_UNPACK_SEQ:
                 wprintf(L"   %-15ls %d\n", L"UNPACK_SEQ", ins.extra);
+                break;
+            case BC_UNPACK_ARG:
+                wprintf(L"   %-15ls %d\n", L"UNPACK_ARG", ins.extra);
+                break;
+            case BC_DICT_COMBINE:
+                wprintf(L"   %-15ls %d\n", L"DICT_COMBINE", ins.extra);
                 break;
             case BC_EXPT_SETUP:
                 wprintf(L"   %-15ls %-3d", L"EXPT_SETUP", ins.extra);

@@ -55,6 +55,7 @@ void next(ParserState *ps) {
     if (ret < 0) {
         error(ps, ret);
     }
+    ps->token_count++;
 }
 
 /**
@@ -133,6 +134,9 @@ void error(ParserState *ps, int code) {
         case PYLT_ERR_PARSER_TRY_EXPECTED_FINALLY:
             wprintf(L"SyntaxError: expected 'finally' or 'except', got invalid token\n");
             break;
+        case PYLT_ERR_PARSER_KEYWORD_CANT_BE_AN_EXPR:
+            wprintf(L"SyntaxError: keyword can't be an expression\n");
+            break;
         case PYLT_ERR_LEX_INVALID_STR_OR_BYTES:
             wprintf(L"SyntaxError: bad string literal\n");
             break;
@@ -141,9 +145,10 @@ void error(ParserState *ps, int code) {
     exit(-1);
 }
 
+#define OPCODE_TOP(ps) kv_top(ps->info->code->opcodes)
+#define OPCODE_SIZE(ps) kv_size((ps)->info->code->opcodes)
 #define OPCODE_GET(ps, pos) kv_A((ps)->info->code->opcodes, pos)
 #define OPCODE_PTR(ps, pos) kv_P((ps)->info->code->opcodes, pos)
-#define OPCODE_SIZE(ps) kv_size((ps)->info->code->opcodes)
 
 static _INLINE
 void ACCEPT(ParserState *ps, int token) {
@@ -411,53 +416,97 @@ bool parse_try_suffix(ParserState *ps) {
             case '(': {
                 // is func call ?
                 next(ps);
-                int num = 0, num2 = 0;
+                int num = 0, num_kwargs = 0;
                 PyLiteInstruction ins = kv_top(ps->info->code->opcodes);
 
                 // method trigger
                 if (ins.code == BC_GET_ATTR || ins.code == BC_GET_ATTR_) {
-                    kv_top(ps->info->code->opcodes).exarg = 1;
+                    OPCODE_TOP(ps).exarg = 1;
                 }
 
                 old_disable_expr_tuple_parse = ps->disable_expr_tuple_parse;
                 ps->disable_expr_tuple_parse = true;
+
+                /* parameters order:
+                    func(a, *b, d, e = 1, **f) # valid
+                    func(e = 1, a) # invalid
+                    func(e = 1, *a) # invalid
+                    func(**f, a) # invalid
+                    func(**f, e = 1) # invalid
+                */
+
+                if (tk->val == ')') goto _call_unpack_dict;
+
                 while (true) {
-                    if (!parse_try_expr(ps)) break;
-                    num++;
-                    if (tk->val == ',') {
+                    // *
+                    if (tk->val == '*') {
                         next(ps);
-                        continue;
-                    } else if (tk->val == '=') {
-                        // func(a=1, b=2, ...)
-                        ins = kv_top(ps->info->code->opcodes);
-                        num--;
-                        if (ins.code == BC_LOAD_VAL || ins.code == BC_LOAD_VAL_) {
-                            kv_top(ps->info->code->opcodes).code = BC_LOADCONST;
-                            num2 = 1;
-                            next(ps);
-                            parse_expr(ps);
-
-                            while (true) {
-                                if (tk->val != ',') break;
-                                next(ps);
-                                if (tk->val == TK_NAME) sload_const(ps, tk->obj);
-                                else error(ps, PYLT_ERR_PARSER_NON_KEYWORD_ARG_AFTER_KEYWORD_ARG);
-                                next(ps);
-                                ACCEPT(ps, '=');
-                                parse_expr(ps);
-                                num2++;
-                            }
-
-                            write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_DICT, num2);
-                            break;
-                        } else {
-                            error(ps, PYLT_ERR_PARSER_KEYWORD_CANT_BE_AN_EXPR);
+                        // *arg
+                        if (!parse_try_expr(ps)) {
+                            error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
                         }
-                    } else break;
+                        // unpack and increase params_offset
+                        write_ins(ps, BC_UNPACK_ARG, 0, 0);
+                    } else if (tk->val == TK_OP_POW) {
+                        break;
+                    } else {
+                        if (tk->val == TK_NAME) {
+                            // a = ?
+                            pl_int_t count = ps->token_count;
+                            parse_expr(ps);
+                            if (ps->token_count - count == 1) {
+                                if (tk->val == '=') {
+                                    next(ps);
+                                    // func(a=1, b=2, ...)
+                                    // BC_LOAD_VAL/BC_LOAD_VAL_
+                                    OPCODE_TOP(ps).code = BC_LOADCONST;
+                                    parse_expr(ps);
+                                    num_kwargs = 1;
+
+                                    while (true) {
+                                        if (tk->val != ',') break;
+                                        next(ps);
+                                        if (tk->val == TK_NAME) sload_const(ps, tk->obj);
+                                        else break;
+                                        next(ps);
+                                        ACCEPT(ps, '='); // TODO: f(a=1, b) 此处错误提示信息应更加友好
+                                        parse_expr(ps);
+                                        num_kwargs++;
+                                    }
+
+                                    write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_DICT, num_kwargs);
+                                    goto _call_unpack_dict;
+                                }
+                            } else {
+                                if (tk->val == '=') {
+                                    error(ps, PYLT_ERR_PARSER_KEYWORD_CANT_BE_AN_EXPR);
+                                }
+                            }
+                            num++;
+                        } else {
+                            // 常规表达式
+                            parse_expr(ps);
+                            num++;
+                        }
+                    }
+                    if (tk->val == ',') next(ps);
+                    if (tk->val == ')') break;
                 }
-                lval_check_judge(ps, false);
-                write_ins(ps, BC_CALL, (num2) ? 1 : 0, num);
+
+            _call_unpack_dict:
+                if (tk->val == TK_OP_POW) {
+                    next(ps);
+                    // **kwargs
+                    // must be the last
+                    parse_expr(ps);
+                    if (num_kwargs) write_ins(ps, BC_DICT_COMBINE, 0, 0);
+                    else num_kwargs = 1;
+                    if (tk->val == ',') next(ps);
+                }
                 ACCEPT(ps, ')');
+
+                lval_check_judge(ps, false);
+                write_ins(ps, BC_CALL, (num_kwargs) ? 1 : 0, num);
                 ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
                 break;
             }
@@ -1756,6 +1805,7 @@ void pylt_parser_init(PyLiteInterpreter *I, ParserState *ps, LexState *ls) {
     ps->disable_op_in_parse = false;
     ps->disable_expr_tuple_parse = false;
     ps->disable_return_parse = true;
+    ps->token_count = 0;
 
     func_push(ps);
 }

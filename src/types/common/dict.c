@@ -2,6 +2,7 @@
 #include "dict.h"
 #include "string.h"
 #include "../../utils/misc.h"
+#include "../../api.h"
 
 pl_int_t pylt_obj_dict_cmp(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *other) {
     return 2;
@@ -61,6 +62,14 @@ PyLiteObject* pylt_obj_dict_pop(PyLiteInterpreter *I, PyLiteDictObject *self, Py
         return obj;
     }
     return NULL;
+}
+
+void pylt_obj_dict_update(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteDictObject *other) {
+    PyLiteObject *key, *value;
+    pl_foreach_dict(I, it, other) {
+        pylt_obj_dict_keyvalue(I, other, it, &key, &value);
+        pylt_obj_dict_setitem(I, self, key, value);
+    }
 }
 
 pl_int32_t pylt_obj_dict_begin(PyLiteInterpreter *I, PyLiteDictObject *self) {

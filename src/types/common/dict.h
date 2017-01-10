@@ -24,6 +24,7 @@ PyLiteDictObject* pylt_obj_dict_copy(PyLiteInterpreter *I, PyLiteDictObject *sel
 pl_bool_t pylt_obj_dict_has(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *obj);
 pl_bool_t pylt_obj_dict_remove(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *key);
 PyLiteObject* pylt_obj_dict_pop(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteObject *obj);
+void pylt_obj_dict_update(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteDictObject *other);
 
 pl_int32_t pylt_obj_dict_begin(PyLiteInterpreter *I, PyLiteDictObject *self);
 pl_int32_t pylt_obj_dict_end(PyLiteInterpreter *I, PyLiteDictObject *self);

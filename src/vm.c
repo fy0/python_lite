@@ -837,6 +837,34 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                 }
                 break;
             }
+            case BC_UNPACK_ARG: {
+                // UNPACK_ARG   0       0
+                pl_int_t count = 0;
+                tret = castobj(kv_pop(ctx->stack));
+                PyLiteIterObject *iter = pylt_obj_iter_Enew(I, tret);
+                if (I->error) break;
+                for (PyLiteObject *obj = pylt_obj_iter_next(I, iter); obj; obj = pylt_obj_iter_next(I, iter)) {
+                    kv_pushptr(ctx->stack, obj);
+                    count++;
+                }
+                ctx->params_offset += count;
+                break;
+            }
+            case BC_DICT_COMBINE: {
+                // DICT_COMBINE 0       0
+                // b = pop()
+                // a = pop()
+                // a.update(b)
+                PyLiteDictObject *b = castdict(kv_pop(ctx->stack));
+                PyLiteDictObject *a = castdict(kv_pop(ctx->stack)); // 必然为 dict（自动生成）
+                if (!pl_isdict(b)) {
+                    pl_error(I, pl_static.str.TypeError, "function argument after ** must be a mapping, not %s", pl_type(I, castobj(a))->name);
+                    break;
+                }
+                pylt_obj_dict_update(I, a, b);
+                kv_pushptr(ctx->stack, a);
+                break;
+            }
             case BC_EXPT_SETUP: {
                 // SETUP_EXCEPT 0       jump_offset
                 PyLiteTypeObject *et = casttype(kv_pop(ctx->stack));

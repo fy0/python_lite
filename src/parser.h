@@ -32,6 +32,7 @@ typedef struct ParserState {
     bool disable_op_in_parse;
     bool disable_expr_tuple_parse;
     bool disable_return_parse;
+    pl_int_t token_count;
 } ParserState;
 
 PyLiteCodeObject* pylt_parser_parse(ParserState *ps);

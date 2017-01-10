@@ -45,8 +45,10 @@ enum {
     BC_EXPT_POPN,      // 弹出异常
     BC_RAISE,          // 抛出异常
 
-    BC_IMPORT_NAME,    // 导入模块
     BC_UNPACK_SEQ,     // 解包
+    BC_UNPACK_ARG,     // 参数解包
+    BC_IMPORT_NAME,    // 导入模块
+    BC_DICT_COMBINE,   // 字典拼合
     BC_NOP,            // 空指令
 
     BC_PH_BREAK,       // 伪指令，break (ph == placeholder)

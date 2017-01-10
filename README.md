@@ -19,6 +19,8 @@ A simple, lightweight implementation of python3-like language.
 
 * ~~lambda function~~
 
+* ~~argument unpack~~
+
 * package import
 
 * basic testcase
@@ -38,7 +40,7 @@ A simple, lightweight implementation of python3-like language.
 
 * 'super' type
 
-* simple shell
+* repl
 
 
 ### ver 0.3
@@ -90,6 +92,7 @@ A simple, lightweight implementation of python3-like language.
 * libffi
 
 * JIT
+
 
 
 ### won't support
