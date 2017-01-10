@@ -422,6 +422,14 @@ PyLiteStrObject* pylt_obj_str_slice(PyLiteInterpreter *I, PyLiteStrObject *self,
     return str;
 }
 
+pl_bool_t pylt_obj_str_startswith(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub) {
+    if (self->ob_size < sub->ob_size) return false;
+    for (pl_uint_t i = 0; i < sub->ob_size; ++i) {
+        if (self->ob_val[i] != sub->ob_val[i]) return false;
+    }
+    return true;
+}
+
 PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *self) {
     pl_uint32_t c;
     pl_uint32_t *data;

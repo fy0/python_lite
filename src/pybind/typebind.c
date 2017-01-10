@@ -124,6 +124,7 @@ void pylt_bind_all_types_register(PyLiteInterpreter *I, PyLiteModuleObject *mod)
     pylt_cclsmethod_register(I, type, _S(__new__), _NT(I, 2, _S(self), _S(object)), _NT(I, 2, &PyLiteParamUndefined, _S(TMPL_EMPTY_STR)), NULL, &pylt_cls_method_str_new);
     pylt_cmethod_register(I, type, _S(index), _NT(I, 4, _S(self), _S(sub), _S(start), _S(end)), _NT(I, 4, castobj(&PyLiteParamUndefined), castobj(&PyLiteParamUndefined), _NI(0), _NI(-1)), _UINTS(I, 4, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_INT, PYLT_OBJ_TYPE_INT), &pylt_method_str_index);
     pylt_cmethod_register(I, type, _S(join), _NST(I, 2, "self", "sequence"), NULL, _UINTS(I, 2, PYLT_OBJ_TYPE_STR, 0), &pylt_method_str_join);
+    pylt_cmethod_register(I, type, _S(startswith), _NT(I, 4, _S(self), _S(sub), _S(start), _S(end)), _NT(I, 4, castobj(&PyLiteParamUndefined), castobj(&PyLiteParamUndefined), _NI(0), _NI(-1)), _UINTS(I, 4, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_INT, PYLT_OBJ_TYPE_INT), &pylt_method_str_startswith);
     pylt_type_register(I, mod, type);
 
     // bytes

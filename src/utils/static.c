@@ -135,6 +135,8 @@ void pylt_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(sub);
     sstr_new(start);
     sstr_new(end);
+    sstr_new(startswith);
+    sstr_new(endswith);
 
     // int
     sstr_new(is_integer);

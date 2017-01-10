@@ -22,6 +22,7 @@ PyLiteObject* pylt_cls_method_bool_new(PyLiteInterpreter *I, int argc, PyLiteObj
 PyLiteObject* pylt_cls_method_str_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_str_index(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 PyLiteObject* pylt_method_str_join(PyLiteInterpreter *I, int argc, PyLiteObject **args);
+PyLiteObject* pylt_method_str_startswith(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 
 PyLiteObject* pylt_cls_method_bytes_new(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 

@@ -131,6 +131,8 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *sub;
         PyLiteStrObject *start;
         PyLiteStrObject *end;
+        PyLiteStrObject *startswith;
+        PyLiteStrObject *endswith;
 
         // int
         PyLiteStrObject *is_integer;

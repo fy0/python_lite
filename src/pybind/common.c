@@ -94,6 +94,14 @@ PyLiteObject* pylt_method_str_join(PyLiteInterpreter *I, int argc, PyLiteObject 
     return castobj(pylt_obj_str_join(I, dcast(str, args[0]), args[1]));
 }
 
+PyLiteObject* pylt_method_str_startswith(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (pl_isstr(args[1])) {
+        return castobj(pylt_obj_bool_new(I, pylt_obj_str_startswith(I, dcast(str, args[0]), caststr(args[1]))));
+    }
+    pl_error(I, _S(TypeError), "startswith first arg must be str or ~~a tuple of str~~, not list");
+    return NULL;
+}
+
 
 PyLiteObject* pylt_cls_method_bytes_new(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     if (!pylt_bind_cls_check(I, pl_type_by_code(I, PYLT_OBJ_TYPE_BYTES), _S(__new__), casttype(args[0])))

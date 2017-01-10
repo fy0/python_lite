@@ -5,7 +5,22 @@
 #include "../api.h"
 #include "../bind.h"
 #include "../types/all.h"
+#include "../types/objectE.h"
 #include "../utils/misc.h"
+
+#define get_val(i) ((i)->ob_type == PYLT_OBJ_TYPE_FLOAT) ? (castfloat((i))->ob_val) : (castint((i))->ob_val)
+
+PyLiteObject* pylt_mods_builtins_abs(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    if (pl_isint(args[0])) {
+        return castobj(pylt_obj_int_new(I, abs(castint(args[0])->ob_val)));
+    }
+    if (pl_isflt(args[0])) {
+        return castobj(pylt_obj_float_new(I, fabs(castfloat(args[0])->ob_val)));
+    }
+
+    pl_error(I, _S(TypeError), "int or float required");
+    return NULL;
+}
 
 
 PyLiteObject* pylt_mods_builtins_print(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
@@ -52,19 +67,6 @@ PyLiteObject* pylt_mods_builtins_next(PyLiteInterpreter *I, int argc, PyLiteObje
     }
     return obj;
 }
-
-#define get_numval(i) ((i)->ob_type == PYLT_OBJ_TYPE_FLOAT) ? (castfloat((i))->ob_val) : (castint((i))->ob_val)
-
-PyLiteObject* pylt_mods_builtins_pow(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    if (pl_isnum(args[0]) && pl_isnum(args[1])) {
-        return castobj(pylt_obj_float_new(I, pow(get_numval(args[0]), get_numval(args[1]))));
-    } else {
-        pl_error(I, pl_static.str.TypeError, "unsupported operand type(s) for ** or pow(): %r and %r", pl_type(I, args[0]), pl_type(I, args[1]));
-        return NULL;
-    }
-    return NULL;
-}
-
 
 PyLiteObject* pylt_mods_builtins_dir(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteListObject *lst = pylt_obj_list_new(I);
@@ -162,25 +164,42 @@ PyLiteObject* pylt_mods_builtins_repr(PyLiteInterpreter *I, int argc, PyLiteObje
     return castobj(pylt_obj_to_repr(I, args[0]));
 }
 
+PyLiteObject* pylt_mods_builtins_round(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    // TODO: 精度支持
+    if (pl_isnum(args[0])) {
+        return castobj(pylt_obj_float_new(I, round(get_val(args[0]))));
+    }
+
+    pl_error(I, _S(TypeError), "int or float required");
+    return NULL;
+}
+
 
 PyLiteObject* pylt_mods_builtins_super(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteTypeObject *type = pl_type_by_code(I, args[0]->ob_type);
     return castobj(type);
 }
 
+PyLiteObject* pylt_mods_builtins_getattr(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    return pylt_obj_Egetattr(I, args[0], args[1], NULL);
+}
+
 PyLiteObject* pylt_mods_builtins_setattr(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    pylt_obj_setattr(I, args[0], args[1], args[2]);
+    pylt_obj_Esetattr(I, args[0], args[1], args[2]);
     return NULL;
 }
+
 
 
 PyLiteModuleObject* pylt_mods_builtins_loader(PyLiteInterpreter *I) {
     PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, NULL);
 
+    pylt_cfunc_register(I, mod, _S(abs), _NST(I, 1, _S(x)), NULL, NULL, &pylt_mods_builtins_abs);
     pylt_cfunc_register(I, mod, _S(print), _NST(I, 3, "values", "sep", "end"), _NT(I, 3, castobj(&PyLiteParamArgs), _NS(I, " "), _NS(I, "\n")), _UINTS(I, 3, NULL, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_print);
     pylt_cfunc_register(I, mod, _S(__import__), _NST(I, 1, "name", "globals", "locals"), NULL, _UINTS(I, 1, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_import);
-    pylt_cfunc_register(I, mod, _S(setattr), _NST(I, 3, "object", "name", "value"), NULL, _UINTS(I, 3, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_OBJ), &pylt_mods_builtins_setattr);
-
+    pylt_cfunc_register(I, mod, _S(setattr), _NST(I, 3, "object", "name", "value"), NULL, _UINTS(I, 3, PYLT_OBJ_TYPE_OBJ, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_OBJ), &pylt_mods_builtins_setattr);
+    pylt_cfunc_register(I, mod, _S(getattr), _NST(I, 2, "object", "name"), NULL, _UINTS(I, 2, PYLT_OBJ_TYPE_OBJ, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_getattr);
+    
     pylt_cfunc_register(I, mod, _S(dir), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_dir);
     pylt_cfunc_register(I, mod, _S(id), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_id);
     pylt_cfunc_register(I, mod, _S(len), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_len);
@@ -190,8 +209,8 @@ PyLiteModuleObject* pylt_mods_builtins_loader(PyLiteInterpreter *I) {
     pylt_cfunc_register(I, mod, _S(isinstance), _NST(I, 2, "object", "class_or_type_or_tuple"), NULL, NULL, &pylt_mods_builtins_isinstance);
     pylt_cfunc_register(I, mod, _S(issubclass), _NST(I, 2, "class", "classinfo"), NULL, NULL, &pylt_mods_builtins_issubclass);
     pylt_cfunc_register(I, mod, _S(repr), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_repr);
+    pylt_cfunc_register(I, mod, _S(round), _NST(I, 1, _S(x)), NULL, NULL, &pylt_mods_builtins_round);
     pylt_cfunc_register(I, mod, _S(super), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_super);
-    pylt_cfunc_register(I, mod, _S(pow), _NT(I, 2, _S(x), _S(y)), NULL, NULL, &pylt_mods_builtins_pow);
 
     pylt_obj_mod_setattr(I, mod, pl_static.str.None, castobj(&PyLiteNone));
 
@@ -204,6 +223,9 @@ PyLiteModuleObject* pylt_mods_builtins_loader(PyLiteInterpreter *I) {
 
     PyLiteModuleObject *io = pl_getmod(I, _S(io));
     pylt_obj_mod_setattr(I, mod, _S(open), pylt_obj_mod_getattr(I, io, _S(open)));
+
+    PyLiteModuleObject *math = pl_getmod(I, _S(math));
+    pylt_obj_mod_setattr(I, mod, _S(pow), pylt_obj_mod_getattr(I, io, _S(pow)));
 
     pylt_gc_add(I, castobj(mod));
     return mod;
