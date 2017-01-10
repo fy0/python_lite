@@ -820,6 +820,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                     pylt_vm_push_code(I, tcode);
                     PyLiteDictObject *scope = pylt_vm_run(I);
                     pylt_vm_pop_frame(I);
+                    frame = &kv_top(ctx->frames);
                     if (I->error) goto _end;
                     PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, caststr(name));
                     mod->ob_attrs = scope;
