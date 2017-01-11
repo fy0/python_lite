@@ -160,8 +160,8 @@ void pylt_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(items);
 
     // unusual
-    sstr_new(unknown);
     sstr_new(useless);
+    sstr_new(NotImplemented);
     sstr_new(param_args);
     sstr_new(param_kwargs);
     sstr_new(param_undefined);

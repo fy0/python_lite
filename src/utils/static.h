@@ -158,8 +158,8 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *items;
 
         // unusual
-        PyLiteStrObject *unknown;
         PyLiteStrObject *useless;
+        PyLiteStrObject *NotImplemented;
         PyLiteStrObject *param_args;
         PyLiteStrObject *param_kwargs;
         PyLiteStrObject *param_undefined;

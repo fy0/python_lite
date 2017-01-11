@@ -212,7 +212,8 @@ PyLiteModuleObject* pylt_mods_builtins_loader(PyLiteInterpreter *I) {
     pylt_cfunc_register(I, mod, _S(round), _NST(I, 1, _S(x)), NULL, NULL, &pylt_mods_builtins_round);
     pylt_cfunc_register(I, mod, _S(super), _NT(I, 1, _S(object)), NULL, NULL, &pylt_mods_builtins_super);
 
-    pylt_obj_mod_setattr(I, mod, pl_static.str.None, castobj(&PyLiteNone));
+    pylt_obj_mod_setattr(I, mod, _S(None), castobj(&PyLiteNone));
+    pylt_obj_mod_setattr(I, mod, _S(NotImplemented), castobj(&PyLiteNotImplemented));
 
     PyLiteObject *key, *value;
     PyLiteModuleObject *pltypes = pl_getmod(I, _S(pltypes));
