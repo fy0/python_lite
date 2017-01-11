@@ -7,10 +7,10 @@
 #include "../../utils/misc.h"
 
 // 将 index 转为标准形式并约束到可用范围
-#define index_fix(__index) \
-    if (__index < 0) __index += self->ob_size; \
+#define index_fix(obj, __index) \
+    if (__index < 0) __index += (obj)->ob_size; \
     if (__index < 0) __index = 0; \
-    else if (__index >= (pl_int_t)self->ob_size) __index = self->ob_size;
+    else if (__index >= (pl_int_t)(obj)->ob_size) __index = (obj)->ob_size;
 
 
 static PyLiteStrObject* hash_and_check_cache(PyLiteInterpreter *I, PyLiteStrObject *obj) {
@@ -396,8 +396,8 @@ PyLiteStrObject* pylt_obj_str_slice(PyLiteInterpreter *I, PyLiteStrObject *self,
     start = pstart ? *pstart : (step > 0) ? 0 : self->ob_size;
     end = pend ? *pend : (step > 0) ? self->ob_size : 0;
 
-    index_fix(start);
-    index_fix(end);
+    index_fix(self, start);
+    index_fix(self, end);
 
     if (step < 0) {
         start -= 1;
@@ -422,13 +422,24 @@ PyLiteStrObject* pylt_obj_str_slice(PyLiteInterpreter *I, PyLiteStrObject *self,
     return str;
 }
 
+
 pl_bool_t pylt_obj_str_startswith(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub) {
-    if (self->ob_size < sub->ob_size) return false;
+    return pylt_obj_str_startswith_full(I, self, sub, 0, self->ob_size);
+}
+
+
+pl_bool_t pylt_obj_str_startswith_full(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end) {
+    index_fix(self, start);
+    index_fix(self, end);
+    pl_int_t len = end - start;
+
+    if (len < (pl_int_t)sub->ob_size) return false;
     for (pl_uint_t i = 0; i < sub->ob_size; ++i) {
-        if (self->ob_val[i] != sub->ob_val[i]) return false;
+        if (self->ob_val[start + i] != sub->ob_val[i]) return false;
     }
     return true;
 }
+
 
 PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *self) {
     pl_uint32_t c;

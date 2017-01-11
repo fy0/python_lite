@@ -405,7 +405,7 @@ PyLiteStrObject* pylt_obj_to_str(PyLiteInterpreter *I, PyLiteObject *obj) {
         case PYLT_OBJ_TYPE_UNUSUAL:
             return pylt_obj_unusual_to_str(I, castunusual(obj));
         case PYLT_OBJ_TYPE_MODULE:
-            return pl_format(I, pl_static.str.TMPL_MODULE_TO_STR, castmod(obj)->name ? castmod(obj)->name : caststr(&PyLiteUnknown));
+            return pl_format(I, pl_static.str.TMPL_MODULE_TO_STR, castmod(obj)->name ? castmod(obj)->name : pl_cformat(I, "<unknown>"));
         case PYLT_OBJ_TYPE_FUNCTION:
             return pl_format(I, pl_static.str.TMPL_FUNCTION_TO_STR, castfunc(obj)->info.name, obj);
         case PYLT_OBJ_TYPE_CFUNCTION:

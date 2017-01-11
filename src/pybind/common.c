@@ -95,10 +95,45 @@ PyLiteObject* pylt_method_str_join(PyLiteInterpreter *I, int argc, PyLiteObject 
 }
 
 PyLiteObject* pylt_method_str_startswith(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
-    if (pl_isstr(args[1])) {
-        return castobj(pylt_obj_bool_new(I, pylt_obj_str_startswith(I, dcast(str, args[0]), caststr(args[1]))));
+    pl_int_t start;
+    pl_int_t end;
+
+    // 这里不使用 cpython 的 slice 然后 startswith 的行为。
+    // 如果这里调用 slice 又和直接写下标有什么区别呢？所以不用。
+    if (!pl_isint(args[2])) {
+        pl_error(I, _S(TypeError), "startswith third arg must be int");
+        return NULL;
     }
-    pl_error(I, _S(TypeError), "startswith first arg must be str or ~~a tuple of str~~, not list");
+
+    if (args[3] != castobj(&PyLiteUseless) && (!pl_isint(args[3]))) {
+        pl_error(I, _S(TypeError), "startswith fourth arg must be int");
+        return NULL;
+    }
+
+    start = castint(args[2])->ob_val;
+    if (args[3] == castobj(&PyLiteUseless)) end = dcast(str, args[0])->ob_size;
+    else end = castint(args[3])->ob_val;
+
+    if (pl_isstr(args[1])) {
+        return castobj(pylt_obj_bool_new(I, pylt_obj_str_startswith_full(I, dcast(str, args[0]), caststr(args[1]), start, end)));
+    }
+
+    if (pl_istuple(args[1])) {
+        pl_foreach_tuple(I, i, args[1]) {
+            PyLiteObject *s = casttuple(args[1])->ob_val[i];
+            if (!pl_isstr(s)) {
+                pl_error(I, _S(TypeError), "Can't convert %r object to str implicitly", pl_type(I, s)->name);
+                return NULL;
+            }
+        }
+        pl_foreach_tuple(I, i, args[1]) {
+            PyLiteStrObject *s = caststr(casttuple(args[1])->ob_val[i]);
+            pl_bool_t ret = pylt_obj_str_startswith_full(I, dcast(str, args[0]), caststr(args[1]), start, end);
+            if (ret) return castobj(pylt_obj_bool_new(I, true));
+        }
+        return castobj(pylt_obj_bool_new(I, false));
+    }
+    pl_error(I, _S(TypeError), "startswith first arg must be str or a tuple of str, not list");
     return NULL;
 }
 

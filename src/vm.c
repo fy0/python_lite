@@ -282,7 +282,7 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
                 // 还没有，用预设值填充
                 if (args_i != params_num) {
                     args_i++;
-                    break;
+                    continue;
                 }
 
                 if (kwargs) {

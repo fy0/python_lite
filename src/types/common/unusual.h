@@ -10,8 +10,8 @@ typedef struct PyLiteUnusualObject {
 
 
 // unique values
-PyLiteUnusualObject PyLiteUnknown;
-PyLiteUnusualObject PyLiteUseless;
+PyLiteUnusualObject PyLiteUseless;  // placeholder, defalut value
+PyLiteUnusualObject PyLiteNotImplemented;
 
 // to fill defaults of function info
 PyLiteUnusualObject PyLiteParamArgs;

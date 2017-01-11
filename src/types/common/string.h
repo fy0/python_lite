@@ -28,6 +28,7 @@ PyLiteStrObject* pylt_obj_str_join(PyLiteInterpreter *I, PyLiteStrObject *separa
 
 PyLiteStrObject* pylt_obj_str_slice(PyLiteInterpreter *I, PyLiteStrObject *self, pl_int_t *pstart, pl_int_t *pend, pl_int_t step);
 pl_bool_t pylt_obj_str_startswith(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub);
+pl_bool_t pylt_obj_str_startswith_full(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end);
 PyLiteStrObject* pylt_obj_str_to_repr(PyLiteInterpreter *I, PyLiteStrObject *self);
 
 PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size, bool is_raw);
