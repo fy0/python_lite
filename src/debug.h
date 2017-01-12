@@ -4,6 +4,12 @@
 
 #include "parser.h"
 
+#ifdef _MSC_VER
+#ifndef _DEBUG
+#undef PL_DEBUG_INFO
+#endif
+#endif // _MSC_VER
+
 //#define PL_DEBUG_INFO
 
 void debug_print_const_vals(PyLiteInterpreter *I, PyLiteCodeObject *code);

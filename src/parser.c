@@ -141,7 +141,11 @@ void error(ParserState *ps, int code) {
             wprintf(L"SyntaxError: bad string literal\n");
             break;
     }
+#ifdef PL_DEBUG_INFO
+#ifdef PLATFORM_WINDOWS
     system("pause");
+#endif
+#endif
     exit(-1);
 }
 
@@ -214,6 +218,15 @@ PyLiteObject* parse_get_consttype(ParserState *ps) {
         case TK_INT: case TK_FLOAT: case TK_STRING: case TK_BYTES:
             obj = tk->obj;
             next(ps);
+            return obj;
+        case '.':
+            next(ps);
+            if (tk->val == TK_INT) {
+                char buf[23] = {'0', '.'}; // len(int64) -> 20, '0.' -> 2, '\0' ->1
+                sprintf(buf + 2, "%ld", castint(tk->obj)->ob_val);
+                obj = castobj(pylt_obj_float_new(ps->I, atof(buf)));
+                next(ps);
+            }
             return obj;
         default:
             return NULL;
@@ -538,6 +551,12 @@ bool parse_try_t(ParserState *ps) {
             break;
         case '(':
             next(ps);
+            if (tk->val == ')') {
+                next(ps);
+                // empty tuple
+                write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TUPLE, 0);
+                break;
+            }
             parse_expr(ps);
             // try tuple
             if (tk->val == ',') {

@@ -345,7 +345,9 @@ _INLINE static
 pl_int_t _read_x_int(RawString *str, int n, uint8_t(*func)(uint32_t code), int max_size) {
     const uint8_t *p = str->s;
     const uint8_t *e = (max_size > 0) ? str->s + max_size : str->e;
-    int ret = 0, val = (int)pow(n, e - p - 1);
+    // TODO: pow 间接限制了最大 int 长度
+    pl_int_t ret = 0, val = (pl_int_t)pow(n, e - p - 1);
+    if (p == e) return 0;
 
     do {
         ret += (*func)(*p++) * val;
@@ -361,6 +363,7 @@ double _read_float(RawString *str, int start_offset) {
     const uint8_t *p = str->s + start_offset;
     const uint8_t *e = str->e;
     double ret = 0, val = 0.1;
+    if (p == e) return 0;
 
     do {
         ret += _dec(*p++) * val;
