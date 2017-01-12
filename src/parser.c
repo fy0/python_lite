@@ -824,7 +824,7 @@ _INLINE void parse_expr7(ParserState *ps) {
             parse_expr10(ps);
             parse_expr9(ps);
             parse_expr8(ps);
-            write_ins(ps, BC_OPERATOR, 0, tk_val);
+            write_ins(ps, BC_OPERATOR, 0, (tk_val == TK_OP_LSHIFT) ? OP_LSHIFT : OP_RSHIFT);
             lval_check_judge(ps, false);
             parse_expr7(ps);
             break;

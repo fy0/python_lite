@@ -356,6 +356,10 @@ PyLiteObject* pylt_obj_op_binary(PyLiteInterpreter *I, int op, PyLiteObject *a, 
             ret = pylt_obj_has(I, b, a, &is_valid);
             if (!is_valid) return NULL;
             return castobj(ret ? &PyLiteTrue : &PyLiteFalse);
+        case OP_NOT_IN:
+            ret = pylt_obj_has(I, b, a, &is_valid);
+            if (!is_valid) return NULL;
+            return castobj(ret ? &PyLiteFalse : &PyLiteTrue);
         case OP_IS: return castobj(a == b ? &PyLiteTrue : &PyLiteFalse);
         case OP_IS_NOT: return castobj(a != b ? &PyLiteTrue : &PyLiteFalse);
         case OP_LT: case OP_LE: case OP_GT: case OP_GE:

@@ -548,7 +548,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
             case BC_OPERATOR:
                 // OPERATOR     0       op
                 switch (ins.extra) {
-                    case OP_OR: case OP_AND: case OP_IN: case OP_IS: case OP_IS_NOT:
+                    case OP_OR: case OP_AND: case OP_IN: case OP_NOT_IN: case OP_IS : case OP_IS_NOT:
                     case OP_LT: case OP_LE: case OP_GT: case OP_GE: case OP_NE: case OP_EQ:
                     case OP_BITOR: case OP_BITXOR: case OP_BITAND: case OP_LSHIFT: case OP_RSHIFT:
                     case OP_PLUS: case OP_MINUS: case OP_MUL: case OP_MATMUL: case OP_DIV: case OP_FLOORDIV: case OP_MOD: case OP_POW: {
