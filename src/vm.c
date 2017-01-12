@@ -41,7 +41,7 @@ int token_to_op_val(uint32_t tk) {
         case '>': return OP_GT; case TK_OP_GE: return OP_GE; case TK_OP_NE: return OP_NE; case TK_OP_EQ: return OP_EQ;
 
         case '|': return OP_BITOR; case '^': return OP_BITXOR; case '&': return OP_BITAND;
-        case TK_OP_LSHIFT: OP_LSHIFT; case TK_OP_RSHIFT: return OP_RSHIFT;
+        case TK_OP_LSHIFT: return OP_LSHIFT; case TK_OP_RSHIFT: return OP_RSHIFT;
         case '+': return OP_PLUS; case '-': return OP_MINUS;
         case '*': return OP_MUL; case '@': return OP_MATMUL; case '/': return OP_DIV; case TK_OP_FLOORDIV: return OP_FLOORDIV; case '%': return OP_MOD;
         /*case '+': return OP_POS; case '-': return OP_NEG;*/  case '~': return OP_BITNOT;
