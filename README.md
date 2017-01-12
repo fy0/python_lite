@@ -103,5 +103,36 @@ A simple, lightweight implementation of python3-like language.
 
 * multiple inheritance
 
+## build
+
+cmake is required, and a c99 compiler:
+
+* gcc 4.8+
+
+* clang 3.4+
+
+* vs2013+
+
+```bash
+mkdir build
+cd build
+cmake ..
+```
+
+**make** (Linux/Mac/Mingw)
+Open **pylite.sln** and build. (Visual Studio)
+
+## Example
+
+hello.py
+```python
+print('Hello World!')
+```
+shell:
+```bash
+pylite hello.py
+```
+
+No repl yet.
 
 License: zlib
