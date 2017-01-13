@@ -2,6 +2,7 @@
 #include "list.h"
 #include "string.h"
 #include "../extra/iter.h"
+#include "../../api.h"
 #include "../../utils/misc.h"
 
 // 将 index 转为标准形式并约束到可用范围
@@ -21,6 +22,17 @@ void list_resize_maxsize_more_then(PyLiteInterpreter *I, PyLiteListObject *self,
         self->ob_val = pylt_realloc(I, self->ob_val, self->ob_maxsize * sizeof(PyLiteObject*), size * sizeof(PyLiteObject*));
         self->ob_maxsize = size;
     }
+}
+
+pl_bool_t pylt_obj_list_eq(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *other) {
+    if (pl_islist(other)) {
+        if (castlist(other)->ob_size != self->ob_size) return false;
+        pl_foreach_list(I, i, self) {
+            if (self->ob_val[i] != castlist(other)->ob_val[i]) return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 PyLiteListObject* pylt_obj_list_new(PyLiteInterpreter *I) {

@@ -146,6 +146,8 @@ pl_bool_t pylt_obj_eq(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b) {
         case PYLT_OBJ_TYPE_STR: return pylt_obj_str_eq(I, caststr(a), b);
         case PYLT_OBJ_TYPE_BYTES: return pylt_obj_bytes_eq(I, castbytes(a), b);
         case PYLT_OBJ_TYPE_SET: return pylt_obj_set_eq(I, castset(a), b);
+        case PYLT_OBJ_TYPE_LIST: return pylt_obj_list_eq(I, castlist(a), b);
+        case PYLT_OBJ_TYPE_TUPLE: return pylt_obj_tuple_eq(I, casttuple(a), b);
         case PYLT_OBJ_TYPE_DICT: return pylt_obj_dict_eq(I, castdict(a), b);
         default:
             if (a->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {

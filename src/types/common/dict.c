@@ -18,7 +18,7 @@ pl_bool_t pylt_obj_dict_eq(PyLiteInterpreter *I, PyLiteDictObject *self, PyLiteO
         if (pylt_obj_dict_len(I, a) != pylt_obj_dict_len(I, b))
             return false;
 
-        for (pl_int32_t it = pylt_obj_dict_begin(I, a); it != pylt_obj_dict_end(I, a); pylt_obj_dict_next(I, a, &it)) {
+        pl_foreach_dict(I, it, a) {
             PyLiteObject *_a, *_b;
             _a = pylt_obj_dict_getitem(I, b, pylt_obj_dict_itemkey(I, a, it));
             _b = pylt_obj_dict_itemvalue(I, a, it);

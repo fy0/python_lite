@@ -11,6 +11,8 @@ typedef struct PyLiteListObject {
     PyLiteObject **ob_val;
 } PyLiteListObject;
 
+pl_bool_t pylt_obj_list_eq(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *other);
+
 pl_int_t pylt_obj_list_append(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *obj);
 void pylt_obj_list_clear(PyLiteInterpreter *I, PyLiteListObject *self);
 PyLiteListObject* pylt_obj_list_copy(PyLiteInterpreter *I, PyLiteListObject *self);

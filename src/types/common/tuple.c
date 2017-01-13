@@ -1,6 +1,7 @@
 ﻿
 #include "tuple.h"
 #include "string.h"
+#include "../../api.h"
 #include "../../utils/misc.h"
 
 // 将 index 转为标准形式并约束到可用范围
@@ -13,6 +14,18 @@
 #define index_chk(__index, failret) \
     if (__index < 0) __index += self->ob_size; \
     if (__index < 0 || __index >= self->ob_size) return failret;
+
+
+pl_bool_t pylt_obj_tuple_eq(PyLiteInterpreter *I, PyLiteTupleObject *self, PyLiteObject *other) {
+    if (pl_istuple(other)) {
+        if (casttuple(other)->ob_size != self->ob_size) return false;
+        pl_foreach_tuple(I, i, self) {
+            if (self->ob_val[i] != casttuple(other)->ob_val[i]) return false;
+        }
+        return true;
+    }
+    return false;
+}
 
 
 struct PyLiteStrObject* pylt_obj_tuple_to_str(PyLiteInterpreter *I, PyLiteTupleObject *self) {

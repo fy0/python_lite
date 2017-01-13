@@ -49,6 +49,7 @@ PyLiteObject* pl_objesc(PyLiteInterpreter *I, PyLiteObject *obj);
 #define pl_foreach_set(I, it, setobj) for (pl_int32_t it = pylt_obj_set_begin(I, setobj); it != pylt_obj_set_end(I, setobj); pylt_obj_set_next(I, setobj, &it))
 #define pl_foreach_dict(I, it, dictobj) for (pl_int32_t it = pylt_obj_dict_begin(I, dictobj); it != pylt_obj_dict_end(I, dictobj); pylt_obj_dict_next(I, dictobj, &it))
 #define pl_foreach_tuple(I, i, tobj) for (pl_int_t i = 0; i < casttuple(tobj)->ob_size; ++i)
+#define pl_foreach_list(I, i, lobj) for (pl_int_t i = 0; i < castlist(lobj)->ob_size; ++i)
 
 void pl_print(PyLiteInterpreter *I, const char *format, ...);
 void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char *format, ...);
