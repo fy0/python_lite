@@ -18,7 +18,7 @@ PyLiteObject* pylt_obj_custom_getattr(PyLiteInterpreter *I, PyLiteCustomObject *
     PyLiteObject *obj = pylt_obj_dict_getitem(I, self->ob_attrs, key);
     if (!obj) {
         if (p_at_type) *p_at_type = true;
-        PyLiteTypeObject *type = pl_type_by_code(I, obj->ob_type);
+        PyLiteTypeObject *type = pl_type_by_code(I, self->ob_type);
         while (true) {
             obj = pylt_obj_dict_getitem(I, type->ob_attrs, key);
             if (obj) return obj;
