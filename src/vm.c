@@ -758,7 +758,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
             case BC_DEL_NAME:
                 // DEL_VAL      0       const_id
                 if (!pylt_obj_dict_remove(I, frame->locals, const_obj(ins.extra))) {
-                    pl_error(I, pl_static.str.UnboundLocalError, "local variable %r referenced before assignment", const_obj(ins.extra));
+                    pl_error(I, pl_static.str.NameError, "name %r is not defined", caststr(const_obj(ins.extra)));
                 }
                 break;
             case BC_DEL_ATTR: {

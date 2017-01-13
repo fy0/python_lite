@@ -106,3 +106,15 @@ class _:
 a = _()
 a.aaa = 1
 del a.aaa
+
+a, b, c = 1, 2, 3
+del a, b, c
+
+a, b, c = 1, 2, 3
+del [a, b, c]
+
+a, b, c = 1, 2, 3
+del (a, b, c)
+
+del []
+del ()

@@ -232,7 +232,6 @@ void pylt_static_objs_init(PyLiteInterpreter *I) {
     sstr_new(KeyError);
     sstr_new(MemoryError);
     sstr_new(NameError);
-    sstr_new(UnboundLocalError);
     sstr_new(OSError);
     sstr_new(BlockingIOError);
     sstr_new(ChildProcessError);

@@ -231,7 +231,6 @@ struct PyLiteStaticObjectsType {
         PyLiteStrObject *KeyError;
         PyLiteStrObject *MemoryError;
         PyLiteStrObject *NameError;
-        PyLiteStrObject *UnboundLocalError;
         PyLiteStrObject *OSError;
         PyLiteStrObject *BlockingIOError;
         PyLiteStrObject *ChildProcessError;

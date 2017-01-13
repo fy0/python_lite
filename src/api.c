@@ -24,6 +24,7 @@ PyLiteTypeObject* pl_builtintype(PyLiteInterpreter *I, PyLiteStrObject *name) {
 
 PyLiteTypeObject* pl_modtype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
     PyLiteObject *obj = pylt_obj_mod_getattr(I, mod, name);
+    if (!obj) return NULL;
     return pl_istype(obj) ? casttype(obj) : NULL;
 }
 

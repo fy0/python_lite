@@ -1183,44 +1183,16 @@ void parse_value_assign(ParserState *ps) {
 pl_int_t parse_try_del_item(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     pl_int_t codesize = OPCODE_SIZE(ps);
-    int num, state = 0;
+    int state = 0;
     PyLiteObject *obj;
 
-    switch (tk->val) {
-        case TK_NAME:
-            obj = tk->obj;
-            next(ps);
-            write_ins(ps, lval_check_valid(ps) ? BC_LOAD_VAL_ : BC_LOAD_VAL, 0, store_const(ps, obj));
-            state = 1; // LOAD VAL
-            break;
-        case '(':
-            next(ps);
-            parse_expr(ps);
-            // try tuple
-            if (tk->val == ',') {
-                next(ps);
-                num = 1;
-                while (true) {
-                    if (!parse_try_expr(ps)) break;
-                    num++;
-                    if (tk->val != ',') break;
-                    next(ps);
-                }
-                write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_TUPLE, num);
-                state = 2; // container
-            }
-            ACCEPT(ps, ')');
-            break;
-        default: {
-            int ret, times;
-            ret = parse_mutabletype(ps, &times);
-            if (ret) {
-                // NEW_OBJ TYPE SIZE
-                write_ins(ps, BC_NEW_OBJ, ret, times);
-                state = 2; // container
-            }
-        }
+    if (tk->val == TK_NAME) {
+        obj = tk->obj;
+        next(ps);
+        write_ins(ps, lval_check_valid(ps) ? BC_LOAD_VAL_ : BC_LOAD_VAL, 0, store_const(ps, obj));
+        state = 1; // LOAD VAL
     }
+
     if (state == 0) {
         kv_popn(ps->info->code->opcodes, OPCODE_SIZE(ps) - codesize);
         // SyntaxError: can't delete literal
@@ -1256,9 +1228,18 @@ pl_int_t parse_try_del_item(ParserState *ps) {
 }
 
 void parse_del(ParserState *ps) {
-    pl_bool_t bracket = false;
     Token *tk = &(ps->ls->token);
+    char sign = 0;
     next(ps);
+
+    if (tk->val == '[' || tk->val == '(') {
+        sign = (char)tk->val;
+        next(ps);
+        if ((sign == '[' && tk->val == ']') || (sign == '(' && tk->val == ')')) {
+            next(ps);
+            return;
+        }
+    }
 
     pl_int_t ret = parse_try_del_item(ps);
     if (ret) error(ps, ret);
@@ -1271,6 +1252,11 @@ void parse_del(ParserState *ps) {
             ret = parse_try_del_item(ps);
             if (ret) error(ps, ret);
         }
+    }
+
+    if (sign) {
+        if (sign == '[') ACCEPT(ps, ']');
+        else if (sign == '(') ACCEPT(ps, ')');
     }
 }
 
