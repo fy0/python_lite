@@ -88,7 +88,7 @@ PyLiteObject* pylt_mods_builtins_dir(PyLiteInterpreter *I, int argc, PyLiteObjec
 
     PyLiteTypeObject *type = pl_type_by_code(I, args[0]->ob_type);
     while (true) {
-        for (pl_int32_t it = pylt_obj_dict_begin(I, type->ob_attrs); it != pylt_obj_dict_end(I, type->ob_attrs); pylt_obj_dict_next(I, type->ob_attrs, &it)) {
+        pl_foreach_dict(I, it, type->ob_attrs) {
             PyLiteObject *key = pylt_obj_dict_itemkey(I, type->ob_attrs, it);
             if (!pylt_obj_list_has(I, lst, key)) {
                 pylt_obj_list_append(I, lst, key);

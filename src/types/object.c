@@ -253,11 +253,17 @@ PyLiteObject* pylt_obj_getattr_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLit
             ret = pylt_obj_type_getattr(I, casttype(obj), key, p_at_type);
             break;
         default:
-            if (obj->ob_type > PYLT_OBJ_BUILTIN_TYPE_NUM) {
+            if (pl_iscustom(obj)) {
                 ret = pylt_obj_custom_getattr(I, castcustom(obj), key, p_at_type);
             } else {
                 if (p_at_type) *p_at_type = true;
-                ret = pylt_obj_type_getattr(I, pl_type_by_code(I, obj->ob_type), key, NULL);
+                PyLiteTypeObject *type = pl_type_by_code(I, obj->ob_type);
+                while (true) {
+                    ret = pylt_obj_dict_getitem(I, type->ob_attrs, key);
+                    if (ret) break;
+                    if (type->ob_reftype == PYLT_OBJ_TYPE_OBJ) break;
+                    type = pl_type_by_code(I, type->ob_base);
+                }
             }
             break;
     }

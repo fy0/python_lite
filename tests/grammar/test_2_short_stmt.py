@@ -41,3 +41,8 @@ a / b
 a // b
 a % b
 a ** 2
+
+lst = [1,2,3]
+lst[1]
+list.__base__
+lst.__base__.__base__.__base__

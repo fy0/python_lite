@@ -16,6 +16,7 @@ for i in os.listdir('grammar'):
             state = '-'
         else:
             state = 'O'
+        print(ret)
 
         print('[%s] %s' % (state, i[:-3]))
         if state == 'X':

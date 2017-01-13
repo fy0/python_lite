@@ -90,6 +90,7 @@ PyLiteTypeObject* pl_type(PyLiteInterpreter *I, PyLiteObject *obj) {
 PyLiteTypeObject* pl_type_by_code(PyLiteInterpreter *I, pl_uint32_t type_code) {
     return kv_A(I->cls_base, type_code);
 }
+
 void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj) {
     if (!obj) {
         wprintf(L"bad str\n");
