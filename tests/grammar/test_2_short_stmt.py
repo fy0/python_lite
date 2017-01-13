@@ -20,6 +20,11 @@ assert 1,2
 
 # operator
 
+not 1
+not True
+not False
+True is not False
+
 1 or 2
 1 and 0 or 2
 
@@ -49,6 +54,20 @@ a / b
 a // b
 a % b
 a ** 2
+
+a = 1
+a += 1
+a -= 1
+a /= 1
+a *= 1
+a %= 1
+a //= 1
+a **= 1
+
+a = 1
+a <<= 1
+a >>= 1
+
 
 lst = [1,2,3]
 lst[1]
@@ -118,3 +137,6 @@ del (a, b, c)
 
 del []
 del ()
+
+# works on cpython, but too weird. not support.
+#del (a, (b, c))
