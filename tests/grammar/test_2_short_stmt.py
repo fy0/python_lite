@@ -3,6 +3,14 @@
 
 a = 1
 简蟒 = 2
+a2, b2 = 1, 2
+[a3, b3] = 1, 2
+(a4, b4) = 1, 2
+
+a, b = b, a = a4, b4
+a, b = b, a
+
+a5, b5 = b5, a5 = 1, 2
 
 # misc
 
@@ -45,4 +53,27 @@ a ** 2
 lst = [1,2,3]
 lst[1]
 list.__base__
-lst.__base__.__base__.__base__
+list.__base__.__base__
+
+lst[:]
+lst[:3]
+lst[:-1]
+lst[0:3]
+lst[0:-1]
+lst[-1:]
+lst[0:10]
+
+lst[0] = 5
+lst[:2] = 1,2
+lst[:2] = [1,2]
+
+
+# del
+a = 1
+del a
+
+a = [1,2,3]
+del a[0]
+
+a = [1,2,3]
+del a[:2]

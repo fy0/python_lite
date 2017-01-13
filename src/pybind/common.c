@@ -36,6 +36,7 @@ PyLiteObject* pylt_method_type_mro(PyLiteInterpreter *I, int argc, PyLiteObject 
 
 PyLiteObject* pylt_prop_type_base_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteTypeObject *type = pl_type_by_code(I, dcast(type, args[0])->ob_reftype);
+    if (type->ob_reftype == PYLT_OBJ_TYPE_OBJ) return castobj(&PyLiteNone);
     return castobj(pl_type_by_code(I, type->ob_base));
 }
 

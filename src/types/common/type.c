@@ -32,7 +32,7 @@ PyLiteObject* pylt_obj_type_getattr(PyLiteInterpreter *I, PyLiteTypeObject *self
         if (obj) return obj;
         if (self->ob_reftype == PYLT_OBJ_TYPE_OBJ) break;
         self = pl_type_by_code(I, self->ob_base);
-        if (p_at_type) *p_at_type = true;
+        //if (p_at_type) *p_at_type = true;
     }
 
     if (self->ob_reftype != PYLT_OBJ_TYPE_TYPE) {

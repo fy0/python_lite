@@ -494,7 +494,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                 kv_pushptr(ctx->stack, tret);
 
                 // next instruction is BC_CALL, and it's a method!
-                if (!pl_istype(tobj) && at_type) {
+                if (at_type) {
                     if (ins.exarg) {
                         kv_pushptr(ctx->stack, tobj);
                         ctx->params_offset = 1;
