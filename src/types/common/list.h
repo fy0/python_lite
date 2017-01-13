@@ -29,6 +29,7 @@ pl_bool_t pylt_obj_list_setitem(PyLiteInterpreter *I, PyLiteListObject *self, in
 pl_bool_t pylt_obj_list_delitem(PyLiteInterpreter *I, PyLiteListObject *self, int index);
 PyLiteListObject* pylt_obj_list_slice(PyLiteInterpreter *I, PyLiteListObject *self, pl_int_t *pstart, pl_int_t *pend, pl_int_t step);
 pl_int_t pylt_obj_list_slice_set(PyLiteInterpreter *I, PyLiteListObject *self, pl_int_t *pstart, pl_int_t *pend, pl_int_t step, PyLiteObject *val);
+void pylt_obj_list_slice_del(PyLiteInterpreter *I, PyLiteListObject *self, pl_int_t *pstart, pl_int_t *pend, pl_int_t step, PyLiteObject *val);
 
 pl_bool_t pylt_obj_list_has(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *obj);
 struct PyLiteStrObject* pylt_obj_list_to_str(PyLiteInterpreter *I, PyLiteListObject *self);

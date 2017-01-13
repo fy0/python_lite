@@ -774,6 +774,16 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                 pylt_obj_Edelitem(I, tobj, key);
                 break;
             }
+            case BC_DEL_SLICE: {
+                // SET_SLICE    offset  0
+                PyLiteObject *step = castobj(kv_pop(ctx->stack));
+                PyLiteObject *end = castobj(kv_pop(ctx->stack));
+                PyLiteObject *start = castobj(kv_pop(ctx->stack));
+                PyLiteObject *obj = castobj(kv_pop(ctx->stack));
+                PyLiteObject *val = castobj(kv_topn(ctx->stack, ins.extra));
+                pylt_obj_Eslice_del_ex(I, obj, start, end, step, val);
+                break;
+            }
             case BC_DEL_FORCE:
                 // DEL_FORCE    0       0
                 //pylt_free(I, castobj(kv_pop(ctx->stack)));

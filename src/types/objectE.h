@@ -28,6 +28,7 @@ pl_int_t pylt_obj_Ecmp(PyLiteInterpreter *I, PyLiteObject *a, PyLiteObject *b);
 
 PyLiteObject* pylt_obj_Eslice_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject *start, PyLiteObject *end, PyLiteObject *step);
 void pylt_obj_Eslice_set_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject *start, PyLiteObject *end, PyLiteObject *step, PyLiteObject *val);
+void pylt_obj_Eslice_del_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject *start, PyLiteObject *end, PyLiteObject *step, PyLiteObject *val);
 
 
 PyLiteStrObject* pylt_obj_Eto_str(PyLiteInterpreter *I, PyLiteObject *obj);

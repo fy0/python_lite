@@ -273,6 +273,32 @@ void pylt_obj_Eslice_set_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObjec
     pl_error(I, pl_static.str.TypeError, "%r object does not support item assignment", pl_type(I, obj)->name);
 }
 
+
+void pylt_obj_Eslice_del_ex(PyLiteInterpreter *I, PyLiteObject *obj, PyLiteObject *start, PyLiteObject *end, PyLiteObject *step, PyLiteObject *val) {
+    if (!((pl_isint(start) || pl_isnone(start)) && (pl_isint(end) || pl_isnone(end)) && (pl_isint(step) || pl_isnone(step)))) {
+        pl_error(I, pl_static.str.TypeError, "slice indices must be integers or None"); // TODO:  or have an __index__ method (不过等一下，这个真的需要？)
+        return;
+    }
+
+    pl_int_t *pstart = pl_isnone(start) ? NULL : &castint(start)->ob_val;
+    pl_int_t *pend = pl_isnone(end) ? NULL : &castint(end)->ob_val;
+    pl_int_t istep = pl_isnone(step) ? 1 : castint(step)->ob_val;
+
+    if (istep == 0) {
+        pl_error(I, pl_static.str.ValueError, "slice step cannot be zero");
+        return;
+    }
+
+    switch (obj->ob_type) {
+        case PYLT_OBJ_TYPE_LIST: {
+            pylt_obj_list_slice_del(I, castlist(obj), pstart, pend, istep, val);
+            return;
+        }
+    }
+
+    pl_error(I, pl_static.str.TypeError, "%r object does not support item assignment", pl_type(I, obj)->name);
+}
+
 PyLiteStrObject* pylt_obj_Eto_str(PyLiteInterpreter *I, PyLiteObject *obj) {
     if (pl_iscustom(obj)) {
         PyLiteObject *method_func = pylt_obj_getattr(I, obj, castobj(pl_static.str.__str__), NULL);

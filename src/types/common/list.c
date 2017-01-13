@@ -254,6 +254,44 @@ pl_int_t pylt_obj_list_slice_set(PyLiteInterpreter *I, PyLiteListObject *self, p
 }
 
 
+void pylt_obj_list_slice_del(PyLiteInterpreter *I, PyLiteListObject *self, pl_int_t *pstart, pl_int_t *pend, pl_int_t step, PyLiteObject *val) {
+    pl_int_t start, end;
+    if (step == 0) return;
+    start = pstart ? *pstart : (step > 0) ? 0 : self->ob_size;
+    end = pend ? *pend : (step > 0) ? self->ob_size : 0;
+
+    index_fix(start);
+    index_fix(end);
+
+    if (step < 0) {
+        start -= 1;
+        if (!pend) end -= 1;
+    }
+
+    pl_int_t count = (pl_int_t)ceil(abs(end - start) / (float)abs(step));
+    if (!count) return;
+
+    if (step == 1) {
+        if (end != self->ob_size) {
+            memmove(self->ob_val + start, self->ob_val + end, count * sizeof(PyLiteObject*));
+        }
+    } else {
+        pl_int_t cur_index = start;
+        for (pl_int_t i = 0; i < count; ++i) {
+            self->ob_val[cur_index] = NULL;
+            cur_index += step;
+        }
+        pl_int_t real_index = -1;
+        for (pl_int_t i = 0; i < self->ob_size; ++i) {
+            if (self->ob_val[i]) {
+                self->ob_val[++real_index] = self->ob_val[i];
+            }
+        }
+    }
+    self->ob_size = self->ob_size - count;
+}
+
+
 pl_bool_t pylt_obj_list_has(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *obj) {
     return pylt_obj_list_index(I, self, obj) != -1;
 }
