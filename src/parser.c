@@ -947,7 +947,8 @@ void parse_func_params(ParserState *ps, PyLiteObject **pargs_name, PyLiteListObj
                 }
                 next(ps);
             } else {
-                if (tk->val == ')' && defarg_count && (!args_name)) {
+                // function / lambda
+                if ((tk->val == ')' || tk->val == ':') && defarg_count && (!args_name)) {
                     error(ps, PYLT_ERR_PARSER_NON_DEFAULT_ARG_FOLLOW_DEFAULT_ARG);
                 }
                 break; // final arg
@@ -1688,7 +1689,7 @@ bool parse_try_compound_stmt(ParserState *ps) {
                     struct TryBox tb = kv_pop(jmp_stack);
                     OPCODE_GET(ps, first_setup - 1).extra = store_const(ps, castobj(tb.expt_name));
                     OPCODE_GET(ps, first_setup).extra = tb.jmp_pos - first_setup;
-                    OPCODE_GET(ps, tb.jmp_pos).extra = tb.jmp_pos - first_setup;
+                    OPCODE_GET(ps, tb.jmp_pos).extra = OPCODE_SIZE(ps) - tb.jmp_pos - 1;
                     break;
                 }
                 default: {
