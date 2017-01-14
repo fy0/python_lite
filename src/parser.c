@@ -143,6 +143,9 @@ void error(ParserState *ps, int code) {
         case PYLT_ERR_LEX_INVALID_STR_OR_BYTES:
             wprintf(L"SyntaxError: bad string literal\n");
             break;
+        case PYLT_ERR_PARSER_NON_DEFAULT_ARG_FOLLOW_DEFAULT_ARG:
+            wprintf(L"SyntaxError: non - default argument follows default argument\n");
+            break;
     }
 #ifdef PL_DEBUG_INFO
 #ifdef PLATFORM_WINDOWS
@@ -917,46 +920,44 @@ void loop_control_replace(ParserState *ps, int start_pos) {
     }
 }
 
-void parse_func(ParserState *ps) {
-    ParserInfo *info;
-    PyLiteObject *name, *func_name;
-    PyLiteObject *args_name = NULL, *kwargs_name = NULL;
+void parse_func_params(ParserState *ps, PyLiteObject **pargs_name, PyLiteListObject **pparams, int *pdefarg_count) {
     Token *tk = &(ps->ls->token);
-    bool old_disable_return;
-    int defval_count = 0;
 
-    ACCEPT(ps, TK_KW_DEF);
-    if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-    func_name = tk->obj;
-    next(ps);
-
-    ACCEPT(ps, '(');
-
-    PyLiteListObject* lst = pylt_obj_list_new(ps->I);
+    PyLiteObject *argname;
+    PyLiteObject *args_name = NULL, *kwargs_name = NULL;
+    PyLiteListObject *params = pylt_obj_list_new(ps->I);
+    int defarg_count = 0;
 
     while (true) {
         if (tk->val == TK_NAME) {
-            name = tk->obj;
-            pylt_obj_list_append(ps->I, lst, name);
+            argname = tk->obj;
+            pylt_obj_list_append(ps->I, params, argname);
             next(ps);
+
             if (tk->val == '=') {
                 next(ps);
-                sload_const(ps, name);
+                sload_const(ps, argname);
                 parse_expr_without_tuple_parse(ps);
-                defval_count++;
+                defarg_count++;
                 if (tk->val == ',') next(ps);
                 else break;
             } else if (tk->val == ',') {
+                if (defarg_count && (!args_name)) {
+                    error(ps, PYLT_ERR_PARSER_NON_DEFAULT_ARG_FOLLOW_DEFAULT_ARG);
+                }
                 next(ps);
             } else {
-                break;
+                if (tk->val == ')' && defarg_count && (!args_name)) {
+                    error(ps, PYLT_ERR_PARSER_NON_DEFAULT_ARG_FOLLOW_DEFAULT_ARG);
+                }
+                break; // final arg
             }
         } else if (tk->val == '*') {
             // *args
             next(ps);
             if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
             if (args_name) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX); // TODO: error info fix
-            pylt_obj_list_append(ps->I, lst, tk->obj);
+            pylt_obj_list_append(ps->I, params, tk->obj);
             args_name = tk->obj;
             next(ps);
             if (tk->val != ',') break;
@@ -965,16 +966,39 @@ void parse_func(ParserState *ps) {
             // **kwargs
             next(ps);
             if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-            pylt_obj_list_append(ps->I, lst, tk->obj);
+            pylt_obj_list_append(ps->I, params, tk->obj);
             kwargs_name = tk->obj;
             next(ps);
             if (tk->val != ',') {
                 // TODO:ERROR
             }
             break;
-        } else break;
+        } else break; // final arg
     }
+    if (tk->val == ',') next(ps);
 
+    *pargs_name = args_name;
+    *pparams = params;
+    *pdefarg_count = defarg_count;
+}
+
+void parse_func(ParserState *ps) {
+    ParserInfo *info;
+    PyLiteObject *func_name;
+    Token *tk = &(ps->ls->token);
+    bool old_disable_return;
+
+    PyLiteObject *args_name = NULL, *kwargs_name = NULL;
+    PyLiteListObject *params = pylt_obj_list_new(ps->I);
+    int defarg_count = 0;
+
+    ACCEPT(ps, TK_KW_DEF);
+    if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+    func_name = tk->obj;
+    next(ps);
+
+    ACCEPT(ps, '(');
+    parse_func_params(ps, &args_name, &params, &defarg_count);
     ACCEPT(ps, ')');
     ACCEPT(ps, ':');
 
@@ -988,26 +1012,19 @@ void parse_func(ParserState *ps) {
     } else parse_simple_stmt(ps);
 
     write_ins(ps, BC_RET, 0, 0);
-    func_scope_check(ps, lst);
+    func_scope_check(ps, params);
     info = func_pop(ps);
     ps->disable_return_parse = old_disable_return;
-
+     
     // defaults
-    if (defval_count) {
-        write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_DICT, defval_count);
-    } else {
-        sload_const(ps, castobj(&PyLiteNone));
-    }
-    // name
-    sload_const(ps, func_name);
-    // code
-    sload_const(ps, castobj(info->code));
-    // params
-    sload_const(ps, castobj(lst));
-    // args_name
-    sload_const(ps, args_name ? args_name : castobj(&PyLiteNone));
-    // kwargs_name
-    sload_const(ps, kwargs_name ? kwargs_name : castobj(&PyLiteNone));
+    if (defarg_count) write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_DICT, defarg_count);
+    else sload_const(ps, castobj(&PyLiteNone));
+
+    sload_const(ps, func_name); // name
+    sload_const(ps, castobj(info->code)); // code
+    sload_const(ps, castobj(params)); // params
+    sload_const(ps, args_name ? args_name : castobj(&PyLiteNone)); // args_name
+    sload_const(ps, kwargs_name ? kwargs_name : castobj(&PyLiteNone)); // kwargs_name
 
     write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_FUNCTION, 0);
     write_ins(ps, BC_SET_VAL, 0, store_const(ps, func_name));
@@ -1271,52 +1288,11 @@ void parse_lambda(ParserState *ps) {
     Token *tk = &(ps->ls->token);
     ACCEPT(ps, TK_KW_LAMBDA);
 
-    PyLiteObject *name;
     PyLiteObject *args_name = NULL, *kwargs_name = NULL;
     PyLiteListObject *params = pylt_obj_list_new(ps->I);
-    int defval_count = 0;
+    int defarg_count = 0;
 
-    while (true) {
-        if (tk->val == TK_NAME) {
-            name = tk->obj;
-            pylt_obj_list_append(ps->I, params, name);
-            next(ps);
-            if (tk->val == '=') {
-                next(ps);
-                sload_const(ps, name);
-                parse_expr_without_tuple_parse(ps);
-                defval_count++;
-                if (tk->val == ',') next(ps);
-                else break;
-            } else if (tk->val == ',') {
-                next(ps);
-            } else {
-                break;
-            }
-        } else if (tk->val == '*') {
-            // *args
-            next(ps);
-            if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-            if (args_name) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX); // TODO: error info fix
-            pylt_obj_list_append(ps->I, params, tk->obj);
-            args_name = tk->obj;
-            next(ps);
-            if (tk->val != ',') break;
-            next(ps);
-        } else if (tk->val == TK_OP_POW) {
-            // **kwargs
-            next(ps);
-            if (tk->val != TK_NAME) error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-            pylt_obj_list_append(ps->I, params, tk->obj);
-            kwargs_name = tk->obj;
-            next(ps);
-            if (tk->val != ',') {
-                // TODO:ERROR
-            }
-            break;
-        } else break;
-    }
-    if (tk->val == ',') next(ps);
+    parse_func_params(ps, &args_name, &params, &defarg_count);
     ACCEPT(ps, ':');
 
     pl_bool_t old_disable_return = ps->disable_return_parse;
@@ -1329,7 +1305,7 @@ void parse_lambda(ParserState *ps) {
     ps->disable_return_parse = old_disable_return;
 
     // defaults
-    if (defval_count) write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_DICT, defval_count);
+    if (defarg_count) write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_DICT, defarg_count);
     else write_ins(ps, BC_LOADNONE, 0, 0);
 
     sload_const(ps, castobj(pl_static.str.TMPL_LAMBDA_FUNC_NAME)); // name

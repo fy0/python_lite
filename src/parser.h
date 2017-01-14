@@ -62,7 +62,8 @@ void pylt_parser_crash_finalize(PyLiteInterpreter *I, ParserState *ps);
 #define PYLT_ERR_PARSER_EXCEPT_MUST_BE_LAST -9
 // expected 'finally' or 'except', got invalid token
 #define PYLT_ERR_PARSER_TRY_EXPECTED_FINALLY -10
-
+// SyntaxError: non - default argument follows default argument
+#define PYLT_ERR_PARSER_NON_DEFAULT_ARG_FOLLOW_DEFAULT_ARG -11
 
 // SyntaxError: different unpack sequences' size
 #define PYLT_ERR_PARSER_DIFFERENT_UNPACK_SEQUENCES_SIZE -19
