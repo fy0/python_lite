@@ -17,6 +17,9 @@ void func_scope_check(ParserState *ps, PyLiteListObject *args);
 
 void parse_t(ParserState *ps);
 
+bool parse_try_compound_stmt(ParserState *ps);
+void parse_simple_stmt(ParserState *ps);
+
 void parse_stmts(ParserState *ps);
 void parse_block(ParserState *ps);
 
@@ -974,14 +977,16 @@ void parse_func(ParserState *ps) {
 
     ACCEPT(ps, ')');
     ACCEPT(ps, ':');
-    ACCEPT(ps, TK_NEWLINE);
 
     old_disable_return = ps->disable_return_parse;
     ps->disable_return_parse = false;
     func_push(ps);
-    ACCEPT(ps, TK_INDENT);
-    parse_stmts(ps);
-    ACCEPT(ps, TK_DEDENT);
+
+    if (tk->val == TK_NEWLINE) {
+        next(ps);
+        parse_block(ps);
+    } else parse_simple_stmt(ps);
+
     write_ins(ps, BC_RET, 0, 0);
     func_scope_check(ps, lst);
     info = func_pop(ps);
@@ -1033,14 +1038,16 @@ void parse_class(ParserState *ps) {
     }
 
     ACCEPT(ps, ':');
-    ACCEPT(ps, TK_NEWLINE);
 
     old_disable_return = ps->disable_return_parse;
     ps->disable_return_parse = true;
     func_push(ps);
-    ACCEPT(ps, TK_INDENT);
-    parse_stmts(ps);
-    ACCEPT(ps, TK_DEDENT);
+
+    if (tk->val == TK_NEWLINE) {
+        next(ps);
+        parse_block(ps);
+    } else parse_simple_stmt(ps);
+
     write_ins(ps, BC_LOADLOCALS, 0, 0);
     write_ins(ps, BC_RET, 0, 1);
     func_scope_check(ps, lst);
@@ -1334,114 +1341,28 @@ void parse_lambda(ParserState *ps) {
     write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_FUNCTION, 0);
 }
 
-void parse_stmt(ParserState *ps) {
+/**
+simple_stmt ::=  expression_stmt
+    | assert_stmt
+    | assignment_stmt
+    | augmented_assignment_stmt
+    | annotated_assignment_stmt
+    | pass_stmt
+    | del_stmt
+    | return_stmt
+    | yield_stmt
+    | raise_stmt
+    | break_stmt
+    | continue_stmt
+    | import_stmt
+    | global_stmt
+    | nonlocal_stmt
+*/
+void parse_simple_stmt(ParserState *ps) {
+    int tmp;
     Token *tk = &(ps->ls->token);
-    int tmp, tmp2, tmp3;
-    int final_pos;
-    //pl_bool_t old;
 
     switch (tk->val) {
-        case TK_KW_IF:
-            next(ps);
-            // if 1,2,3: pass 语法错
-            // 这是一个好特性吗？
-            //old = ps->disable_expr_tuple_parse;
-            //ps->disable_expr_tuple_parse = true;
-            parse_expr(ps);
-            //ps->disable_expr_tuple_parse = old;
-            ACCEPT(ps, ':');
-            // test 0 X
-            write_ins(ps, BC_TEST, 0, 0);
-            tmp = tmp3 = OPCODE_SIZE(ps);
-            if (tk->val == TK_NEWLINE) {
-                next(ps);
-                parse_block(ps);
-            } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-            // TODO: stmt
-
-            OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
-
-            tmp2 = 0;
-            while (tk->val == TK_KW_ELIF) {
-                next(ps);
-
-                // jmp 0 X
-                OPCODE_GET(ps, tmp - 1).extra += 1;
-                write_ins(ps, BC_JMP, 0, 0);
-                tmp2 = OPCODE_SIZE(ps);
-
-                parse_expr(ps);
-                ACCEPT(ps, ':');
-                // test 0 X
-                write_ins(ps, BC_TEST, 0, 0);
-                tmp = OPCODE_SIZE(ps);
-
-                if (tk->val == TK_NEWLINE) {
-                    next(ps);
-                    parse_block(ps);
-                } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-
-                // write X for jmp X
-                kv_A(ps->info->code->opcodes, tmp2 - 1).extra = OPCODE_SIZE(ps) - tmp2 + 1;
-                // write X for test X
-                OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
-            }
-
-            if (tk->val == TK_KW_ELSE) {
-                next(ps);
-                ACCEPT(ps, ':');
-                OPCODE_GET(ps, tmp - 1).extra += 1;
-                // jmp 0 X
-                write_ins(ps, BC_JMP, 0, 0);
-                tmp = OPCODE_SIZE(ps);
-
-                if (tk->val == TK_NEWLINE) {
-                    next(ps);
-                    parse_block(ps);
-                } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-
-                // write X for jmp X
-                OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
-            } else {
-                // fix for last elif
-                if (tmp2) {
-                    OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
-                }
-            }
-
-            // new code pos
-            final_pos = OPCODE_SIZE(ps);
-            // tmp3 <- pos of first jmp (if exists)
-            tmp3 += kv_A(ps->info->code->opcodes, tmp3 - 1).extra;
-
-            // change every jmp point
-            while (tmp3 != final_pos) {
-                // tmp2 <- pos of next jmp (if exists) or block end
-                tmp2 = tmp3 + kv_A(ps->info->code->opcodes, tmp3 - 1).extra;
-                kv_A(ps->info->code->opcodes, tmp3 - 1).extra = final_pos - tmp3;
-                tmp3 = tmp2;
-            }
-            return;
-        case TK_KW_WHILE:
-            next(ps);
-            tmp = OPCODE_SIZE(ps);
-            parse_expr(ps);
-            ACCEPT(ps, ':');
-
-            tmp2 = OPCODE_SIZE(ps);
-            write_ins(ps, BC_TEST, 0, 0);
-
-            if (tk->val == TK_NEWLINE) {
-                next(ps);
-                ++ps->info->loop_depth;
-                parse_block(ps);
-                --ps->info->loop_depth;
-            } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
-            loop_control_replace(ps, tmp2);
-
-            write_ins(ps, BC_JMP_BACK, 0, (OPCODE_SIZE(ps) - tmp + 1));
-            OPCODE_GET(ps, tmp2).extra = OPCODE_SIZE(ps) - tmp2 - 1;
-            return;
         case TK_KW_BREAK:
             next(ps);
             if (ps->info->loop_depth == 0) error(ps, PYLT_ERR_PARSER_BREAK_OUTSIDE_LOOP);
@@ -1452,57 +1373,9 @@ void parse_stmt(ParserState *ps) {
             if (ps->info->loop_depth == 0) error(ps, PYLT_ERR_PARSER_CONTINUE_OUTSIDE_LOOP);
             else write_ins(ps, BC_PH_CONTINUE, 0, ps->info->loop_depth);
             break;
-        case TK_KW_FOR: {
-            pl_uint_t size;
-            next(ps);
-
-            // left value
-            lval_check_setup(ps);
-            ps->disable_op_in_parse = true;
-            parse_expr(ps);
-            ps->disable_op_in_parse = false;
-            size = lval_check_cache_push(ps);
-            kv_popn(ps->info->code->opcodes, size);
-
-            // in [right_value]
-            ACCEPT(ps, TK_KW_IN);
-            parse_expr(ps);
-            ACCEPT(ps, ':');
-            write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_ITER, 0);
-            tmp = OPCODE_SIZE(ps);
-
-            // for X in iter
-            write_ins(ps, BC_FORITER, 0, 0);
-            int seqsize = value_assign_fix(ps);
-            if (seqsize) {
-                write_ins(ps, BC_UNPACK_SEQ, 0, seqsize);
-            }
-
-            lval_check_cache_pop(ps);
-            write_ins(ps, (seqsize) ? BC_POPN : BC_POP, 0, seqsize);
-
-            ++ps->info->loop_depth;
-            ACCEPT(ps, TK_NEWLINE);
-            parse_block(ps);
-            --ps->info->loop_depth;
-            loop_control_replace(ps, tmp);
-
-            OPCODE_GET(ps, tmp).extra = OPCODE_SIZE(ps) - tmp;
-            write_ins(ps, BC_JMP_BACK, 0, OPCODE_SIZE(ps) - tmp + 1);
-
-            write_ins(ps, BC_POP, 0, 0); // pop iterator
-            write_ins(ps, BC_DEL_FORCE, 0, 0);
-            return;
-        }
         case TK_KW_PASS:
             next(ps);
             break;
-        case TK_KW_DEF:
-            parse_func(ps);
-            return;
-        case TK_KW_CLASS:
-            parse_class(ps);
-            return;
         case TK_KW_DEL:
             parse_del(ps);
             break;
@@ -1546,6 +1419,206 @@ void parse_stmt(ParserState *ps) {
             ps->disable_expr_tuple_parse = old_disable_expr_tuple_parse;
             break;
         }
+        case TK_KW_RAISE: {
+            next(ps);
+            if (parse_try_expr(ps)) write_ins(ps, BC_RAISE, 0, 1);
+            else write_ins(ps, BC_RAISE, 0, 0);
+            break;
+        }
+        default:
+            lval_check_setup(ps);
+            parse_expr(ps);
+            switch (tk->val) {
+                case '=':
+                    // 这里需要自行处理 POP 的参数个数
+                    parse_value_assign(ps);
+                    lval_check_shutdown(ps);
+                    ACCEPT(ps, TK_NEWLINE);
+                    return;
+                case TK_DE_PLUS_EQ: case TK_DE_MINUS_EQ:  case TK_DE_MUL_EQ: case TK_DE_DIV_EQ:
+                case TK_DE_FLOORDIV_EQ: case TK_DE_MOD_EQ: case TK_DE_MATMUL_EQ:
+                case TK_DE_BITAND_EQ: case TK_DE_BITOR_EQ: case TK_DE_BITXOR_EQ:
+                case TK_DE_RSHIFT_EQ: case TK_DE_LSHIFT_EQ: case TK_DE_POW_EQ:
+                    parse_inplace_op(ps, token_de_to_op_val(tk->val));
+                    break;
+            }
+
+            lval_check_shutdown(ps);
+            write_ins(ps, BC_POP, 0, 0);
+    }
+    ACCEPT(ps, TK_NEWLINE);
+}
+
+/**
+compound_stmt ::=  if_stmt
+    | while_stmt
+    | for_stmt
+    | try_stmt
+    | with_stmt
+    | funcdef
+    | classdef
+    | async_with_stmt
+    | async_for_stmt
+    | async_funcdef
+*/
+bool parse_try_compound_stmt(ParserState *ps) {
+    Token *tk = &(ps->ls->token);
+    int tmp, tmp2, tmp3;
+    int final_pos;
+
+    switch (tk->val) {
+        case TK_KW_IF:
+            next(ps);
+            // if 1,2,3: pass 语法错
+            // 这是一个好特性吗？
+            //old = ps->disable_expr_tuple_parse;
+            //ps->disable_expr_tuple_parse = true;
+            parse_expr(ps);
+            //ps->disable_expr_tuple_parse = old;
+            ACCEPT(ps, ':');
+            // test 0 X
+            write_ins(ps, BC_TEST, 0, 0);
+            tmp = tmp3 = OPCODE_SIZE(ps);
+
+            if (tk->val == TK_NEWLINE) {
+                next(ps);
+                parse_block(ps);
+            } else parse_simple_stmt(ps);
+
+            OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
+
+            tmp2 = 0;
+            while (tk->val == TK_KW_ELIF) {
+                next(ps);
+
+                // jmp 0 X
+                OPCODE_GET(ps, tmp - 1).extra += 1;
+                write_ins(ps, BC_JMP, 0, 0);
+                tmp2 = OPCODE_SIZE(ps);
+
+                parse_expr(ps);
+                ACCEPT(ps, ':');
+                // test 0 X
+                write_ins(ps, BC_TEST, 0, 0);
+                tmp = OPCODE_SIZE(ps);
+
+                if (tk->val == TK_NEWLINE) {
+                    next(ps);
+                    parse_block(ps);
+                } else parse_simple_stmt(ps);
+
+                // write X for jmp X
+                kv_A(ps->info->code->opcodes, tmp2 - 1).extra = OPCODE_SIZE(ps) - tmp2 + 1;
+                // write X for test X
+                OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
+            }
+
+            if (tk->val == TK_KW_ELSE) {
+                next(ps);
+                ACCEPT(ps, ':');
+                OPCODE_GET(ps, tmp - 1).extra += 1;
+                // jmp 0 X
+                write_ins(ps, BC_JMP, 0, 0);
+                tmp = OPCODE_SIZE(ps);
+
+                if (tk->val == TK_NEWLINE) {
+                    next(ps);
+                    parse_block(ps);
+                } else parse_simple_stmt(ps);
+
+                // write X for jmp X
+                OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
+            } else {
+                // fix for last elif
+                if (tmp2) {
+                    OPCODE_GET(ps, tmp - 1).extra = OPCODE_SIZE(ps) - tmp;
+                }
+            }
+
+            // new code pos
+            final_pos = OPCODE_SIZE(ps);
+            // tmp3 <- pos of first jmp (if exists)
+            tmp3 += kv_A(ps->info->code->opcodes, tmp3 - 1).extra;
+
+            // change every jmp point
+            while (tmp3 != final_pos) {
+                // tmp2 <- pos of next jmp (if exists) or block end
+                tmp2 = tmp3 + kv_A(ps->info->code->opcodes, tmp3 - 1).extra;
+                kv_A(ps->info->code->opcodes, tmp3 - 1).extra = final_pos - tmp3;
+                tmp3 = tmp2;
+            }
+            return true;
+        case TK_KW_WHILE:
+            next(ps);
+            tmp = OPCODE_SIZE(ps);
+            parse_expr(ps);
+            ACCEPT(ps, ':');
+
+            tmp2 = OPCODE_SIZE(ps);
+            write_ins(ps, BC_TEST, 0, 0);
+
+            ++ps->info->loop_depth;
+            if (tk->val == TK_NEWLINE) {
+                next(ps);
+                parse_block(ps);
+            } else parse_simple_stmt(ps);
+            --ps->info->loop_depth;
+
+            loop_control_replace(ps, tmp2);
+
+            write_ins(ps, BC_JMP_BACK, 0, (OPCODE_SIZE(ps) - tmp + 1));
+            OPCODE_GET(ps, tmp2).extra = OPCODE_SIZE(ps) - tmp2 - 1;
+            return true;
+        case TK_KW_FOR: {
+            pl_uint_t size;
+            next(ps);
+
+            // left value
+            lval_check_setup(ps);
+            ps->disable_op_in_parse = true;
+            parse_expr(ps);
+            ps->disable_op_in_parse = false;
+            size = lval_check_cache_push(ps);
+            kv_popn(ps->info->code->opcodes, size);
+
+            // in [right_value]
+            ACCEPT(ps, TK_KW_IN);
+            parse_expr(ps);
+            ACCEPT(ps, ':');
+            write_ins(ps, BC_NEW_OBJ, PYLT_OBJ_TYPE_ITER, 0);
+            tmp = OPCODE_SIZE(ps);
+
+            // for X in iter
+            write_ins(ps, BC_FORITER, 0, 0);
+            int seqsize = value_assign_fix(ps);
+            if (seqsize) {
+                write_ins(ps, BC_UNPACK_SEQ, 0, seqsize);
+            }
+
+            lval_check_cache_pop(ps);
+            write_ins(ps, (seqsize) ? BC_POPN : BC_POP, 0, seqsize);
+
+            ++ps->info->loop_depth;
+            if (tk->val == TK_NEWLINE) {
+                next(ps);
+                parse_block(ps);
+            } else parse_simple_stmt(ps);
+            --ps->info->loop_depth;
+            loop_control_replace(ps, tmp);
+
+            OPCODE_GET(ps, tmp).extra = OPCODE_SIZE(ps) - tmp;
+            write_ins(ps, BC_JMP_BACK, 0, OPCODE_SIZE(ps) - tmp + 1);
+
+            write_ins(ps, BC_POP, 0, 0); // pop iterator
+            write_ins(ps, BC_DEL_FORCE, 0, 0);
+            return true;
+        }
+        case TK_KW_DEF:
+            parse_func(ps);
+            return true;
+        case TK_KW_CLASS:
+            parse_class(ps);
+            return true;
         case TK_KW_TRY: {
             struct TryBox {
                 pl_uint_t jmp_pos;
@@ -1564,7 +1637,7 @@ void parse_stmt(ParserState *ps) {
             if (tk->val == TK_NEWLINE) {
                 next(ps);
                 parse_block(ps);
-            } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+            } else parse_simple_stmt(ps);
 
             pl_bool_t base_expt_catched = false;
 
@@ -1595,7 +1668,6 @@ void parse_stmt(ParserState *ps) {
                     // except Exception:
                     // except Exception as x:
                     ACCEPT(ps, ':');
-                    ACCEPT(ps, TK_NEWLINE);
 
                     if (expt_name == pl_static.str.BaseException) {
                         if (base_expt_catched) {
@@ -1619,7 +1691,12 @@ void parse_stmt(ParserState *ps) {
                         write_ins(ps, BC_SET_VAL, 0, aindex);
                     }
                     write_ins(ps, BC_POP, 0, 0);
-                    parse_block(ps);
+
+                    if (tk->val == TK_NEWLINE) {
+                        next(ps);
+                        parse_block(ps);
+                    } else parse_simple_stmt(ps);
+
                     if (alias) write_ins(ps, BC_DEL_NAME, 0, aindex);
                 } else break;
             }
@@ -1641,7 +1718,7 @@ void parse_stmt(ParserState *ps) {
                 default: {
                     pl_uint_t n = stack_size;
                     pl_uint_t offset = (n - 1) * 2;
-                    
+
                     pl_uint_t move_size = OPCODE_SIZE(ps) - (first_setup + 1);
                     for (pl_uint_t i = 0; i < offset; ++i) write_ins(ps, BC_NOP, 0, 0); // 临时方案
 
@@ -1669,41 +1746,25 @@ void parse_stmt(ParserState *ps) {
                 if (tk->val == TK_NEWLINE) {
                     next(ps);
                     parse_block(ps);
-                } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+                } else parse_simple_stmt(ps);
             }
-            return;
-        }
-        case TK_KW_RAISE: {
-            next(ps);
-            if (parse_try_expr(ps)) write_ins(ps, BC_RAISE, 0, 1);
-            else write_ins(ps, BC_RAISE, 0, 0);
-            break;
+            return true;
         }
         case TK_NEWLINE:
+            next(ps);
             // empty file
-            break;
-        default:
-            lval_check_setup(ps);
-            parse_expr(ps);
-            switch (tk->val) {
-                case '=':
-                    // 这里需要自行处理 POP 的参数个数
-                    parse_value_assign(ps);
-                    lval_check_shutdown(ps);
-                    goto _end;
-                case TK_DE_PLUS_EQ: case TK_DE_MINUS_EQ:  case TK_DE_MUL_EQ: case TK_DE_DIV_EQ:
-                case TK_DE_FLOORDIV_EQ: case TK_DE_MOD_EQ: case TK_DE_MATMUL_EQ:
-                case TK_DE_BITAND_EQ: case TK_DE_BITOR_EQ: case TK_DE_BITXOR_EQ:
-                case TK_DE_RSHIFT_EQ: case TK_DE_LSHIFT_EQ: case TK_DE_POW_EQ:
-                    parse_inplace_op(ps, token_de_to_op_val(tk->val));
-                    break;
-            }
-
-            lval_check_shutdown(ps);
-            write_ins(ps, BC_POP, 0, 0);
+            return true;
     }
-_end:
-    ACCEPT(ps, TK_NEWLINE);
+    return false;
+}
+
+
+void parse_stmt(ParserState *ps) {
+    Token *tk = &(ps->ls->token);
+
+    if (!parse_try_compound_stmt(ps)) {
+        parse_simple_stmt(ps);
+    }
 }
 
 

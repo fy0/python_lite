@@ -65,4 +65,32 @@ for i in range(10):
     a = i
     continue
     a += 1
+
     
+
+if True: pass
+
+
+if True: pass
+else: pass
+
+
+test = 1
+
+if test == 1: pass
+elif test == 2: a = 2
+elif test == 4: a = 2
+else: a = 3
+
+test = 4
+
+if test == 1: pass
+elif test == 2: a = 2
+elif test == 4: a = 2
+else: a = 3
+
+
+i = 0
+while i < 10: i += 1
+
+for i in range(10): pass
