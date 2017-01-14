@@ -1292,9 +1292,11 @@ void parse_lambda(ParserState *ps) {
     PyLiteObject *args_name = NULL, *kwargs_name = NULL;
     PyLiteListObject *params = pylt_obj_list_new(ps->I);
     int defarg_count = 0;
-
-    parse_func_params(ps, &args_name, &params, &defarg_count);
-    ACCEPT(ps, ':');
+    
+    if (tk->val != ':') {
+        parse_func_params(ps, &args_name, &params, &defarg_count);
+        ACCEPT(ps, ':');
+    } else next(ps);
 
     pl_bool_t old_disable_return = ps->disable_return_parse;
     ps->disable_return_parse = false;

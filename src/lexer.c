@@ -468,7 +468,8 @@ uint32_t read_kw_or_id(LexState *ls) {
 int pylt_lex_next(LexState *ls) {
     // read indent
     int cur_indent = ls->current_indent;
-    int tmp, tmp2;
+    int tmp, tmp2; 
+    uint32_t lastch = ls->ch;
 
     if (cur_indent == -1) {
         cur_indent = 0;
@@ -480,7 +481,7 @@ int pylt_lex_next(LexState *ls) {
                     break;
                 case '\n':
                     cur_indent = 0;
-                    ls->linenumber++;
+                    if (lastch != '\r') ls->linenumber++;
                     nextc(ls);
                     break;
                 case '\r':
@@ -534,7 +535,11 @@ indent_end:
     // read tokens
     for (;;) {
         switch (ls->ch) {
+            case '#':
+                do { nextc(ls); } while (ls->ch != '\n' && ls->ch != '\r' && ls->ch != '\0');
+                break;
             case '\n': case '\r':
+                ls->linenumber++;
                 if (ls->inside_couples > 0) {
                     nextc(ls);
                     break;
