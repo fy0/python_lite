@@ -133,6 +133,8 @@ shell:
 pylite hello.py
 ```
 
-No repl yet.
+**No REPL yet.**
 
-License: zlib
+
+## License
+* Zlib
