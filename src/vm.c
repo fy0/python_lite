@@ -555,7 +555,8 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                         PyLiteObject *objb = castobj(kv_pop(ctx->stack));
                         PyLiteObject *obja = castobj(kv_pop(ctx->stack));
                         tret = pylt_obj_op_binary(I, ins.extra, obja, objb);
-                        if (!tret) {
+                        if (I->error) break; // exception raised
+                        if (!tret) { // operator not supported
                             pl_error(I, pl_static.str.TypeError, "unsupported operand type(s) for %s: %r and %r",
                                 pl_strnew_w(I, pylt_vm_get_op_name(ins.extra), true),
                                 pl_type(I, obja)->name,
@@ -839,12 +840,23 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                 break;
             }
             case BC_UNPACK_SEQ: {
-                // UNPACK_SEQ   0       0
+                // UNPACK_SEQ   0       num
+                pl_int_t count = 0;
                 tret = castobj(kv_pop(ctx->stack));
                 PyLiteIterObject *iter = pylt_obj_iter_Enew(I, tret);
                 if (I->error) break;
                 for (PyLiteObject *obj = pylt_obj_iter_next(I, iter); obj; obj = pylt_obj_iter_next(I, iter)) {
                     kv_pushptr(ctx->stack, obj);
+                    count++;
+                }
+                if (ins.extra != count) {
+                    kv_popn(ctx->stack, count);
+                    if (count < ins.extra) {
+                        pl_error(I, _S(ValueError), "not enough values to unpack(expected %d, got %d)", pylt_obj_int_new(I, ins.extra), pylt_obj_int_new(I, count));
+                    }
+                    if (count > ins.extra) {
+                        pl_error(I, _S(ValueError), "too many values to unpack(expected %d, got %d)", pylt_obj_int_new(I, ins.extra), pylt_obj_int_new(I, count));
+                    }
                 }
                 break;
             }

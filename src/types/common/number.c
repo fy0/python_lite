@@ -5,6 +5,7 @@
 #include "string.h"
 #include "../../deps/fpconv/fpconv.h"
 #include "../../utils/misc.h"
+#include "../../api.h"
 
 pl_int_t pylt_obj_int_cmp(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
@@ -114,8 +115,16 @@ PyLiteObject* pylt_obj_int_mul(PyLiteInterpreter *I, PyLiteIntObject *self, PyLi
 PyLiteObject* pylt_obj_int_div(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
+            if (castint(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "integer division by zero");
+                return NULL;
+            }
             return castobj(pylt_obj_float_new(I, self->ob_val / (double)castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
+            if (castfloat(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "integer division by zero");
+                return NULL;
+            }
             return castobj(pylt_obj_float_new(I, self->ob_val / castfloat(other)->ob_val));
         default: return NULL;
     }
@@ -124,8 +133,16 @@ PyLiteObject* pylt_obj_int_div(PyLiteInterpreter *I, PyLiteIntObject *self, PyLi
 PyLiteObject* pylt_obj_int_floordiv(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
+            if (castint(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "integer division by zero");
+                return NULL;
+            }
             return castobj(pylt_obj_int_new(I, self->ob_val / (uint32_t)castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
+            if (castfloat(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "integer division by zero");
+                return NULL;
+            }
             return castobj(pylt_obj_int_new(I, self->ob_val / (uint32_t)castfloat(other)->ob_val));
         default: return NULL;
     }
@@ -134,12 +151,20 @@ PyLiteObject* pylt_obj_int_floordiv(PyLiteInterpreter *I, PyLiteIntObject *self,
 PyLiteObject* pylt_obj_int_mod(PyLiteInterpreter *I, PyLiteIntObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
+            if (castint(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "integer modulo by zero");
+                return NULL;
+            }
             if (castint(other)->ob_val < 0) {
                 pl_int_t ret = self->ob_val % castint(other)->ob_val;
                 ret = (ret) ? ret + castint(other)->ob_val : 0;
                 return castobj(pylt_obj_int_new(I, ret));
             } else return castobj(pylt_obj_int_new(I, self->ob_val % castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
+            if (castfloat(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "integer modulo by zero");
+                return NULL;
+            }
             if (castfloat(other)->ob_val < 0) {
                 double ret = fmod(self->ob_val, castfloat(other)->ob_val);
                 ret = (ret) ? ret + castfloat(other)->ob_val : 0;
@@ -254,8 +279,16 @@ PyLiteObject* pylt_obj_float_mul(PyLiteInterpreter *I, PyLiteFloatObject *self, 
 PyLiteObject* pylt_obj_float_div(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
+            if (castint(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "float division by zero");
+                return NULL;
+            }
             return castobj(pylt_obj_float_new(I, self->ob_val / (double)castint(other)->ob_val));
         case PYLT_OBJ_TYPE_FLOAT:
+            if (castfloat(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "float division by zero");
+                return NULL;
+            }
             return castobj(pylt_obj_float_new(I, self->ob_val / castfloat(other)->ob_val));
         default: return NULL;
     }
@@ -264,8 +297,16 @@ PyLiteObject* pylt_obj_float_div(PyLiteInterpreter *I, PyLiteFloatObject *self, 
 PyLiteObject* pylt_obj_float_floordiv(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
+            if (castint(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "float division by zero");
+                return NULL;
+            }
             return castobj(pylt_obj_int_new(I, (uint32_t)(self->ob_val / (uint32_t)castint(other)->ob_val)));
         case PYLT_OBJ_TYPE_FLOAT:
+            if (castfloat(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "float division by zero");
+                return NULL;
+            }
             return castobj(pylt_obj_int_new(I, (uint32_t)(self->ob_val / (uint32_t)castfloat(other)->ob_val)));
         default: return NULL;
     }
@@ -274,8 +315,16 @@ PyLiteObject* pylt_obj_float_floordiv(PyLiteInterpreter *I, PyLiteFloatObject *s
 PyLiteObject* pylt_obj_float_mod(PyLiteInterpreter *I, PyLiteFloatObject *self, PyLiteObject *other) {
     switch (other->ob_type) {
         case PYLT_OBJ_TYPE_INT:
+            if (castint(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "float modulo by zero");
+                return NULL;
+            }
             return castobj(pylt_obj_float_new(I, fmod(self->ob_val, castint(other)->ob_val)));
         case PYLT_OBJ_TYPE_FLOAT:
+            if (castfloat(other)->ob_val == 0) {
+                pl_error(I, pl_static.str.ZeroDivisionError, "float modulo by zero");
+                return NULL;
+            }
             return castobj(pylt_obj_float_new(I, fmod(self->ob_val, castfloat(other)->ob_val)));
         default: return NULL;
     }

@@ -143,6 +143,9 @@ void error(ParserState *ps, int code) {
         case PYLT_ERR_LEX_INVALID_STR_OR_BYTES:
             wprintf(L"SyntaxError: bad string literal\n");
             break;
+        case PYLT_ERR_PARSER_DIFFERENT_UNPACK_SEQUENCES_SIZE:
+            wprintf(L"SyntaxError: different unpack sequences' size\n");
+            break;
         case PYLT_ERR_PARSER_NON_DEFAULT_ARG_FOLLOW_DEFAULT_ARG:
             wprintf(L"SyntaxError: non - default argument follows default argument\n");
             break;
@@ -1622,14 +1625,36 @@ bool parse_try_compound_stmt(ParserState *ps) {
 
             while (true) {
                 PyLiteStrObject *expt_name = NULL;
+                PyLiteListObject *expt_names = NULL;
                 PyLiteStrObject *alias = NULL;
 
                 // except
                 if (tk->val == TK_KW_EXCEPT) {
                     next(ps);
                     expt_name = pl_static.str.BaseException;
-                    // except Exception
-                    if (tk->val == TK_NAME) {
+                    if (tk->val == '(') {
+                        next(ps);
+                        // except (
+                        expt_names = pylt_obj_list_new(ps->I);
+                        while (true) {
+                            if (tk->val == TK_NAME) {
+                                pylt_obj_list_append(ps->I, expt_names, tk->obj);
+                                next(ps);
+                            } else break;
+                            if (tk->val == ',') next(ps);
+                        }
+                        ACCEPT(ps, ')');
+                        // except (Exception, ) as
+                        if (tk->val == TK_KW_AS) {
+                            next(ps);
+                            // except (Exception, ) as x
+                            if (tk->val == TK_NAME) {
+                                alias = caststr(tk->obj);
+                                next(ps);
+                            } else error(ps, PYLT_ERR_PARSER_INVALID_SYNTAX);
+                        }
+                    } else if (tk->val == TK_NAME) {
+                        // except Exception
                         expt_name = caststr(tk->obj);
                         next(ps);
                         // except Exception as
@@ -1648,7 +1673,14 @@ bool parse_try_compound_stmt(ParserState *ps) {
                     // except Exception as x:
                     ACCEPT(ps, ':');
 
-                    if (expt_name == pl_static.str.BaseException) {
+                    if (expt_names) {
+                        if (pylt_obj_list_has(ps->I, expt_names, castobj(pl_static.str.BaseException))) {
+                            if (base_expt_catched) {
+                                error(ps, PYLT_ERR_PARSER_EXCEPT_MUST_BE_LAST);
+                            }
+                            base_expt_catched = true;
+                        }
+                    } else if (expt_name == pl_static.str.BaseException) {
                         if (base_expt_catched) {
                             error(ps, PYLT_ERR_PARSER_EXCEPT_MUST_BE_LAST);
                         }
@@ -1656,12 +1688,24 @@ bool parse_try_compound_stmt(ParserState *ps) {
                     }
 
                     // jmp to finally
-                    struct TryBox tb = {
-                        .jmp_pos = OPCODE_SIZE(ps),
-                        .expt_name = expt_name,
-                    };
-                    kv_push(struct TryBox, jmp_stack, tb);
-                    write_ins(ps, BC_JMP, 0, 0);
+                    if (expt_names) {
+                        pl_foreach_list(ps->I, i, expt_names) {
+                            struct TryBox tb = {
+                                .jmp_pos = OPCODE_SIZE(ps),
+                                .expt_name = caststr(expt_names->ob_val[i]),
+                            };
+                            kv_push(struct TryBox, jmp_stack, tb);
+                        }
+                        write_ins(ps, BC_JMP, 0, 0);
+                        pylt_obj_list_free(ps->I, expt_names);
+                    } else {
+                        struct TryBox tb = {
+                            .jmp_pos = OPCODE_SIZE(ps),
+                            .expt_name = expt_name,
+                        };
+                        kv_push(struct TryBox, jmp_stack, tb);
+                        write_ins(ps, BC_JMP, 0, 0);
+                    }
 
                     // load x
                     pl_int_t aindex;
