@@ -286,10 +286,10 @@ int func_call_check(PyLiteInterpreter *I, PyLiteObject *tobj, int params_num, Py
                 }
 
                 if (kwargs) {
-					obj = pylt_obj_dict_pop(I, kwargs, info->params->ob_val[i]);
+					obj = pylt_obj_dict_getitem(I, kwargs, info->params->ob_val[i]);
                     if (obj) {
                         kv_pushptr(ctx->stack, obj);
-                        break;
+                        continue;
                     }
                 }
 
