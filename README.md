@@ -133,7 +133,7 @@ shell:
 pylite hello.py
 ```
 
-**No REPL yet.**
+No REPL yet.
 
 
 ## License
