@@ -5,7 +5,7 @@
 #include "../utils/config.h"
 #include "../deps/khash_obj.h"
 
-// Immutable object
+// Object
 
 typedef struct PyLiteObject {
     uint32_t ob_type;
@@ -15,6 +15,20 @@ typedef struct PyLiteObject {
 #define PyLiteObject_HEAD \
     uint32_t ob_type; \
     uint32_t ob_flags
+
+#define PYLT_OBJ_FLAG_CANFREE  1
+#define PYLT_OBJ_FLAG_STATIC   2
+#define PYLT_OBJ_FLAG_WATCH    4
+
+/** All objects managed by GC. But by default,
+    GC can't release object, otherwise with PYLT_OBJ_FLAG_CANFREE flag.
+    */
+#define PyLiteObject_init(I, obj, typestruct, typecode) \
+    struct typestruct *obj = (struct typestruct*)pylt_malloc(I, sizeof(struct typestruct)); \
+    obj->ob_type = typecode; \
+    obj->ob_flags = 0; \
+    pylt_gc_add(I, (PyLiteObject*)(obj))
+
 
 enum PyLiteObjectTypeCode {
     PYLT_OBJ_TYPE_OBJ = 1,
@@ -50,11 +64,6 @@ enum PyLiteObjectTypeCode {
 };
 
 #define PYLT_OBJ_BUILTIN_TYPE_NUM PYLT_OBJ_TYPE_BASE_EXCEPTION
-
-// Object Flags
-
-#define PYLT_OBJ_FLAG_STATIC  1
-#define PYLT_OBJ_FLAG_WATCH   2
 
 
 // Object methods
@@ -170,6 +179,7 @@ struct PyLiteStrObject* pylt_obj_to_str(PyLiteInterpreter *I, PyLiteObject *obj)
 struct PyLiteStrObject* pylt_obj_to_repr(PyLiteInterpreter *I, PyLiteObject *obj);
 
 void pylt_obj_free(PyLiteInterpreter *I, PyLiteObject *obj);
+void pylt_obj_rfree(PyLiteInterpreter *I, PyLiteObject *obj);
 
 // Others
 

@@ -184,7 +184,7 @@ pl_int_t str_escape_next(PyLiteInterpreter *I, str_writer_t *w) {
                     if ((format_size - w->findex >= 2) && (_ishex(format->ob_val[w->findex]) && _ishex(format->ob_val[w->findex + 1]))) {
                         str->ob_val[w->dindex++] = _hex(format->ob_val[w->findex]) * 16 + _hex(format->ob_val[w->findex + 1]);
                     } else {
-                        pylt_obj_str_free(I, str);
+                        pylt_obj_str_release(I, str);
                         // error: not hex
                         return -1;
                     }
@@ -207,9 +207,8 @@ pl_int_t str_escape_next(PyLiteInterpreter *I, str_writer_t *w) {
 }
 
 PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size, bool is_raw) {
-    PyLiteStrObject *obj = pylt_malloc(I, sizeof(PyLiteStrObject));
-    obj->ob_type = PYLT_OBJ_TYPE_STR;
-    obj->ob_flags = 0;  
+    PyLiteObject_init(I, obj, PyLiteStrObject, PYLT_OBJ_TYPE_STR);
+
     obj->ob_val = pylt_malloc(I, sizeof(uint32_t) * (size + 1));
     if (is_raw) {
         obj->ob_size = size;
@@ -243,7 +242,7 @@ PyLiteStrObject* pylt_obj_str_new(PyLiteInterpreter *I, uint32_t *str, int size,
                             if ((size - i >= 2) && (_ishex(str[i]) && _ishex(str[i + 1]))) {
                                 obj->ob_val[pos++] = _hex(str[i]) * 16 + _hex(str[i + 1]);
                             } else {
-                                pylt_obj_str_free(I, obj);
+                                pylt_obj_str_release(I, obj);
                                 return NULL;
                             } 
                             i += 2;
@@ -304,11 +303,6 @@ PyLiteStrObject* pylt_obj_str_new_from_wstr(PyLiteInterpreter *I, const wchar_t 
 
 PyLiteStrObject* pylt_obj_str_new_empty(PyLiteInterpreter *I) {
     return pylt_obj_str_new(I, NULL, 0, true);
-}
-
-void pylt_obj_str_free(PyLiteInterpreter *I, PyLiteStrObject *self) {
-    pylt_free(I, self->ob_val, sizeof(uint32_t)*self->ob_size);
-    pylt_free_ex(I, self);
 }
 
 pl_int_t pylt_obj_str_index_full(PyLiteInterpreter *I, PyLiteStrObject *self, PyLiteStrObject *sub, pl_int_t start, pl_int_t end) {
@@ -492,9 +486,8 @@ PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, P
     PyLiteObject *obj;
     pl_int_t argtimes = 0;
     pl_int_t slen, rlen; // string length, real length
-    PyLiteStrObject *str = pylt_malloc(I, sizeof(PyLiteStrObject));
-    str->ob_type = PYLT_OBJ_TYPE_STR;
-    str->ob_flags = 0;
+
+    PyLiteObject_init(I, str, PyLiteStrObject, PYLT_OBJ_TYPE_STR);
     str->ob_val = pylt_malloc(I, sizeof(uint32_t) * (format->ob_size + 1));
 
     str_writer_t writer = {
@@ -632,7 +625,7 @@ PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, P
                 }
                 default:
                     // ValueError: incomplete format
-                    pylt_obj_str_free(I, str);
+                    pylt_obj_str_release(I, str);
                     return NULL;
             }
 
@@ -670,12 +663,6 @@ PyLiteStrObject* pylt_obj_str_new_from_format_with_tuple(PyLiteInterpreter *I, P
     //str->ob_val = pylt_realloc(str->ob_val, sizeof(uint32_t) * (str_size + 1));
 
     return hash_and_check_cache(I, str);
-}
-
-PyLiteStrObject* pylt_obj_str_new_from_cstr_static(PyLiteInterpreter *I, const char *str, bool is_raw) {
-    PyLiteStrObject *ret = pylt_obj_str_new_from_cstr(I, str, is_raw);
-    pylt_gc_static_add(I, castobj(ret));
-    return ret;
 }
 
 static pl_int_t _get_arg_count_str(PyLiteStrObject *format) {
@@ -740,19 +727,7 @@ PyLiteStrObject* pylt_obj_str_new_from_cformat(PyLiteInterpreter *I, const char 
     return str;
 }
 
-PyLiteStrObject* pylt_obj_str_new_from_cformat_static(PyLiteInterpreter *I, const char *format, ...) {
-    va_list args;
-    pl_int_t args_count = _get_arg_count_cstr(format);
-    PyLiteTupleObject *targs = pylt_obj_tuple_new(I, args_count);
-
-    va_start(args, format);
-    for (pl_int_t i = 0; i < args_count; ++i) {
-        targs->ob_val[i] = va_arg(args, PyLiteObject*);
-    }
-    va_end(args);
-
-    PyLiteStrObject *str = pylt_obj_str_new_from_format_with_tuple(I, pylt_obj_str_new_from_cstr(I, format, true), targs);
-    pylt_gc_static_add(I, castobj(str));
-    pylt_obj_tuple_free(I, targs);
-    return str;
+void pylt_obj_str_release(PyLiteInterpreter *I, PyLiteStrObject *self) {
+    pylt_free(I, self->ob_val, sizeof(uint32_t)*self->ob_size);
+    pylt_free_ex(I, self);
 }

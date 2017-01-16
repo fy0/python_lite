@@ -6,12 +6,9 @@
 #include "../../utils/misc.h"
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
-    PyLiteIterObject *iter;
     if (obj->ob_type == PYLT_OBJ_TYPE_ITER) return castiter(obj);
+    PyLiteObject_init(I, iter, PyLiteIterObject, PYLT_OBJ_TYPE_ITER);
 
-    iter = pylt_malloc(I, sizeof(PyLiteIterObject));
-    iter->ob_type = PYLT_OBJ_TYPE_ITER;
-    iter->ob_flags = 0;
     iter->base = obj;
     iter->backup = NULL;
 
@@ -170,7 +167,12 @@ PyLiteObject* pylt_obj_custom_iternext(PyLiteInterpreter *I, PyLiteIterObject *i
     return pylt_obj_iter_next(I, iter->backup);
 }
 
-void pylt_obj_iter_free(PyLiteInterpreter *I, PyLiteIterObject* self) {
+void pylt_obj_iter_rfree(PyLiteInterpreter *I, PyLiteIterObject* self) {
     if (self->backup) pylt_obj_iter_free(I, self->backup);
     pylt_free_ex(I, self);
+}
+
+void pylt_obj_iter_free(PyLiteInterpreter *I, PyLiteIterObject* self) {
+    pylt_gc_remove(I, castobj(self));
+    pylt_obj_iter_rfree(I, self);
 }

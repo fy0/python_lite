@@ -33,6 +33,7 @@ void pylt_intp_sys_init(PyLiteInterpreter *I) {
 void pylt_intp_init(PyLiteInterpreter *I) {
     I->mem_used = 0;
     pylt_intp_sys_init(I);
+    pylt_gc_init(I); 
 
     kv_init(I, I->cls_base);
     I->modules = pylt_obj_dict_new(I);
@@ -42,7 +43,6 @@ void pylt_intp_init(PyLiteInterpreter *I) {
     I->lexer = NULL;
     I->parser = NULL;
 
-    pylt_gc_init(I);
     pylt_static_objs_init(I);
 
     // register builtins

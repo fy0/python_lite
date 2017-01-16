@@ -3,8 +3,8 @@
 #include "number.h"
 #include "../../utils/misc.h"
 
-PyLiteBoolObject PyLiteTrue = { PYLT_OBJ_TYPE_BOOL, 0, -1 };
-PyLiteBoolObject PyLiteFalse = { PYLT_OBJ_TYPE_BOOL, 0, 0 };
+PyLiteBoolObject PyLiteTrue  = { PYLT_OBJ_TYPE_BOOL, PYLT_OBJ_FLAG_STATIC, -1 };
+PyLiteBoolObject PyLiteFalse = { PYLT_OBJ_TYPE_BOOL, PYLT_OBJ_FLAG_STATIC, 0 };
 
 pl_int_t pylt_obj_bool_cmp(PyLiteInterpreter *I, PyLiteBoolObject *self, PyLiteObject *other) {
     switch (other->ob_type) {

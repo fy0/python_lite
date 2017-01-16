@@ -35,6 +35,7 @@ PyLiteObject* pylt_obj_dict_items_iternext(PyLiteInterpreter *I, PyLiteIterObjec
 PyLiteObject* pylt_obj_range_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
 PyLiteObject* pylt_obj_custom_iternext(PyLiteInterpreter *I, PyLiteIterObject *iter);
 
+void pylt_obj_iter_rfree(PyLiteInterpreter *I, PyLiteIterObject* self);
 void pylt_obj_iter_free(PyLiteInterpreter *I, PyLiteIterObject* self);
 
 #endif

@@ -4,13 +4,9 @@
 #include "../api.h"
 
 PyLiteObject* pylt_obj_cutstom_create(PyLiteInterpreter *I, uint32_t ob_type, PyLiteObject *base_obj) {
-    PyLiteCustomObject *obj = pylt_malloc(I, sizeof(PyLiteCustomObject));
-
-    obj->ob_type = ob_type;
-    obj->ob_flags = 0;
+    PyLiteObject_init(I, obj, PyLiteCustomObject, ob_type);
     obj->ob_attrs = pylt_obj_dict_new(I);
     obj->base_obj = base_obj;
-
     return castobj(obj);
 }
 

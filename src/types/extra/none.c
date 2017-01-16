@@ -1,7 +1,7 @@
 
 #include "none.h"
 
-PyLiteNoneObject PyLiteNone = { PYLT_OBJ_TYPE_NONE, 0 };
+PyLiteNoneObject PyLiteNone = { PYLT_OBJ_TYPE_NONE, PYLT_OBJ_FLAG_STATIC };
 
 
 pl_int_t pylt_obj_none_cmp(PyLiteInterpreter *I, PyLiteNoneObject *self, PyLiteObject *other) {

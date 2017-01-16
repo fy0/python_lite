@@ -1,9 +1,17 @@
 
 #include "static.h"
 #include "../types/all.h"
+#include "../gc.h"
 
-#define sstr_new(_name) pl_static.str._name = pylt_obj_str_new_from_cstr_static(I, #_name, true)
-#define sstr_new2(_name, _str) pl_static.str._name = pylt_obj_str_new_from_cstr_static(I, (_str), true);
+static PyLiteStrObject* str_new_from_cstr_static(PyLiteInterpreter *I, const char *str, bool is_raw) {
+    PyLiteStrObject *ret = pylt_obj_str_new_from_cstr(I, str, is_raw);
+    pylt_gc_static_add(I, castobj(ret));
+    return ret;
+}
+
+
+#define sstr_new(_name) pl_static.str._name = str_new_from_cstr_static(I, #_name, true)
+#define sstr_new2(_name, _str) pl_static.str._name = str_new_from_cstr_static(I, (_str), true);
 
 // replace
 // [ \t]+PyLiteStrObject \*([A-Za-z0-9_]+);

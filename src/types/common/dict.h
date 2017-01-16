@@ -36,6 +36,7 @@ void pylt_obj_dict_keyvalue(PyLiteInterpreter *I, PyLiteDictObject *self, pl_int
 struct PyLiteStrObject* pylt_obj_dict_to_str(PyLiteInterpreter *I, PyLiteDictObject *self);
 
 PyLiteDictObject* pylt_obj_dict_new(PyLiteInterpreter *I);
+void pylt_obj_dict_rfree(PyLiteInterpreter *I, PyLiteDictObject *self);
 void pylt_obj_dict_free(PyLiteInterpreter *I, PyLiteDictObject *self);
 
 #endif

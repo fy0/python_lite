@@ -35,30 +35,6 @@ pl_bool_t pylt_obj_list_eq(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteO
     return false;
 }
 
-PyLiteListObject* pylt_obj_list_new(PyLiteInterpreter *I) {
-    PyLiteListObject *obj = pylt_malloc(I, sizeof(PyLiteListObject));
-    obj->ob_type = PYLT_OBJ_TYPE_LIST;
-    obj->ob_flags = 0;
-    obj->ob_size = 0;
-    obj->ob_maxsize = 4;
-    obj->ob_val = pylt_malloc(I, 4 * sizeof(PyLiteObject*));
-    return obj;
-}
-
-PyLiteListObject* pylt_obj_list_new_with_size(PyLiteInterpreter *I, pl_uint_t size) {
-    PyLiteListObject *obj = pylt_malloc(I, sizeof(PyLiteListObject));
-    obj->ob_type = PYLT_OBJ_TYPE_LIST;
-    obj->ob_size = 0;
-    obj->ob_maxsize = size;
-    obj->ob_val = (size) ? pylt_malloc(I, size * sizeof(PyLiteObject*)) : NULL;
-    return obj;
-}
-
-void pylt_obj_list_free(PyLiteInterpreter *I, PyLiteListObject *self) {
-    pylt_free(I, self->ob_val, sizeof(PyLiteObject*) * self->ob_maxsize);
-    pylt_free_ex(I, self);
-}
-
 pl_int_t pylt_obj_list_append(PyLiteInterpreter *I, PyLiteListObject *self, PyLiteObject *obj) {
     if (self->ob_size >= self->ob_maxsize) {
         // sometimes new with size 0
@@ -346,4 +322,30 @@ struct PyLiteStrObject* pylt_obj_list_to_str(PyLiteInterpreter *I, PyLiteListObj
     pylt_free(I, data, sizeof(uint32_t) * data_len);
     pylt_free_ex(I, strlst);
     return str;
+}
+
+PyLiteListObject* pylt_obj_list_new(PyLiteInterpreter *I) {
+    PyLiteObject_init(I, obj, PyLiteListObject, PYLT_OBJ_TYPE_LIST);
+    obj->ob_size = 0;
+    obj->ob_maxsize = 4;
+    obj->ob_val = pylt_malloc(I, 4 * sizeof(PyLiteObject*));
+    return obj;
+}
+
+PyLiteListObject* pylt_obj_list_new_with_size(PyLiteInterpreter *I, pl_uint_t size) {
+    PyLiteObject_init(I, obj, PyLiteListObject, PYLT_OBJ_TYPE_LIST);
+    obj->ob_size = 0;
+    obj->ob_maxsize = size;
+    obj->ob_val = (size) ? pylt_malloc(I, size * sizeof(PyLiteObject*)) : NULL;
+    return obj;
+}
+
+void pylt_obj_list_rfree(PyLiteInterpreter *I, PyLiteListObject *self) {
+    pylt_free(I, self->ob_val, sizeof(PyLiteObject*) * self->ob_maxsize);
+    pylt_free_ex(I, self);
+}
+
+void pylt_obj_list_free(PyLiteInterpreter *I, PyLiteListObject *self) {
+    pylt_gc_remove(I, castobj(self));
+    pylt_obj_list_rfree(I, self);
 }

@@ -350,17 +350,13 @@ PyLiteObject* pylt_obj_float_pow(PyLiteInterpreter *I, PyLiteFloatObject *self, 
 
 
 PyLiteIntObject* pylt_obj_int_new(PyLiteInterpreter *I, pl_int_t val) {
-    PyLiteIntObject *obj = pylt_malloc(I, sizeof(PyLiteIntObject));
-    obj->ob_type = PYLT_OBJ_TYPE_INT;
-    obj->ob_flags = 0;
+    PyLiteObject_init(I, obj, PyLiteIntObject, PYLT_OBJ_TYPE_INT);
     obj->ob_val = val;
     return obj;
 }
 
 PyLiteFloatObject* pylt_obj_float_new(PyLiteInterpreter *I, double val) {
-    PyLiteFloatObject *obj = pylt_malloc(I, sizeof(PyLiteFloatObject));
-    obj->ob_type = PYLT_OBJ_TYPE_FLOAT;
-    obj->ob_flags = 0;
+    PyLiteObject_init(I, obj, PyLiteFloatObject, PYLT_OBJ_TYPE_FLOAT);
     obj->ob_val = val;
     return obj;
 }
@@ -516,11 +512,20 @@ PyLiteStrObject* pylt_obj_float_to_str(PyLiteInterpreter *I, PyLiteFloatObject *
     return ret;
 }
 
+void pylt_obj_int_rfree(PyLiteInterpreter *I, PyLiteIntObject *self) {
+    pylt_free_ex(I, self);
+}
 
 void pylt_obj_int_free(PyLiteInterpreter *I, PyLiteIntObject *self) {
+    pylt_gc_remove(I, castobj(self));
+    pylt_obj_int_rfree(I, self);
+}
+
+void pylt_obj_float_rfree(PyLiteInterpreter *I, PyLiteFloatObject *self) {
     pylt_free_ex(I, self);
 }
 
 void pylt_obj_float_free(PyLiteInterpreter *I, PyLiteFloatObject *self) {
-    pylt_free_ex(I, self);
+    pylt_gc_remove(I, castobj(self));
+    pylt_obj_float_rfree(I, self);
 }

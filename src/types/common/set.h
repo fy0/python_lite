@@ -34,6 +34,7 @@ PyLiteObject* pylt_obj_set_itemvalue(PyLiteInterpreter *I, PyLiteSetObject *self
 struct PyLiteStrObject* pylt_obj_set_to_str(PyLiteInterpreter *I, PyLiteSetObject *self);
 
 PyLiteSetObject* pylt_obj_set_new(PyLiteInterpreter *I);
+void pylt_obj_set_rfree(PyLiteInterpreter *I, PyLiteSetObject* self);
 void pylt_obj_set_free(PyLiteInterpreter *I, PyLiteSetObject* self);
 
 #endif

@@ -441,57 +441,62 @@ struct PyLiteStrObject* pylt_obj_to_repr(PyLiteInterpreter *I, PyLiteObject *obj
     return NULL;
 }
 
-void pylt_obj_free(PyLiteInterpreter *I, PyLiteObject *obj) {
+void pylt_obj_rfree(PyLiteInterpreter *I, PyLiteObject *obj) {
     switch (obj->ob_type) {
         case PYLT_OBJ_TYPE_OBJ:
             pylt_free_ex(I, obj);
             break;
         case PYLT_OBJ_TYPE_INT:
-            pylt_obj_int_free(I, castint(obj));
+            pylt_obj_int_rfree(I, castint(obj));
             break;
         case PYLT_OBJ_TYPE_FLOAT:
-            pylt_obj_float_free(I, castfloat(obj));
+            pylt_obj_float_rfree(I, castfloat(obj));
             break;
         case PYLT_OBJ_TYPE_STR:
-            pylt_obj_str_free(I, caststr(obj));
+            pylt_obj_str_release(I, caststr(obj));
             break;
         case PYLT_OBJ_TYPE_BYTES:
-            pylt_obj_bytes_free(I, castbytes(obj));
+            pylt_obj_bytes_release(I, castbytes(obj));
             break;
         case PYLT_OBJ_TYPE_SET:
-            pylt_obj_set_free(I, castset(obj));
+            pylt_obj_set_rfree(I, castset(obj));
             break;
         case PYLT_OBJ_TYPE_LIST:
-            pylt_obj_list_free(I, castlist(obj));
+            pylt_obj_list_rfree(I, castlist(obj));
             break;
         case PYLT_OBJ_TYPE_TUPLE:
-            pylt_obj_tuple_free(I, casttuple(obj));
+            pylt_obj_tuple_rfree(I, casttuple(obj));
             break;
         case PYLT_OBJ_TYPE_DICT:
-            pylt_obj_dict_free(I, castdict(obj));
+            pylt_obj_dict_rfree(I, castdict(obj));
             break;
         case PYLT_OBJ_TYPE_MODULE:
-            pylt_obj_module_free(I, castmod(obj));
+            pylt_obj_module_rfree(I, castmod(obj));
             break;
         case PYLT_OBJ_TYPE_CODE:
-            pylt_obj_code_free(I, castcode(obj));
+            pylt_obj_code_rfree(I, castcode(obj));
             break;
         case PYLT_OBJ_TYPE_TYPE:
-            pylt_obj_type_free(I, casttype(obj));
+            pylt_obj_type_rfree(I, casttype(obj));
             break;
         case PYLT_OBJ_TYPE_ITER:
-            pylt_obj_iter_free(I, castiter(obj));
+            pylt_obj_iter_rfree(I, castiter(obj));
             break;
         case PYLT_OBJ_TYPE_PROP:
-            pylt_obj_property_free(I, castprop(obj));
+            pylt_obj_property_rfree(I, castprop(obj));
             break;
         case PYLT_OBJ_TYPE_RANGE:
-            pylt_obj_range_free(I, castrange(obj));
+            pylt_obj_range_rfree(I, castrange(obj));
             break;
         case PYLT_OBJ_TYPE_BASE_EXCEPTION:
-            pylt_obj_exception_free(I, castexcept(obj));
+            pylt_obj_exception_rfree(I, castexcept(obj));
             break;
     }
+}
+
+void pylt_obj_free(PyLiteInterpreter *I, PyLiteObject *obj) {
+    pylt_gc_remove(I, obj);
+    pylt_obj_rfree(I, obj);
 }
 
 pl_int_t pylt_obj_len(PyLiteInterpreter *I, PyLiteObject *obj) {

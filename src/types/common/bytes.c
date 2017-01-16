@@ -135,9 +135,8 @@ int _read_x_int(const char *p, int n, uint8_t(*func)(uint32_t code), int *pnum, 
 }
 
 PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int size, bool is_raw) {
-    PyLiteBytesObject *obj = pylt_malloc(I, sizeof(PyLiteBytesObject));
-    obj->ob_type = PYLT_OBJ_TYPE_BYTES;
-    obj->ob_flags = 0;
+    PyLiteObject_init(I, obj, PyLiteBytesObject, PYLT_OBJ_TYPE_BYTES);
+
     obj->ob_val = pylt_malloc(I, sizeof(uint8_t) * (size + 1));
     if (is_raw) {
         obj->ob_val[size] = '\0';
@@ -169,7 +168,7 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int
                             if ((size - i >= 2) && (_ishex(str[i]) && _ishex(str[i + 1]))) {
                                 obj->ob_val[pos++] = _hex(str[i]) * 16 + _hex(str[i + 1]);
                             } else {
-                                pylt_obj_bytes_free(I, obj);
+                                pylt_obj_bytes_release(I, obj);
                                 return NULL;
                             }
                             i += 2;
@@ -195,11 +194,6 @@ PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int
 
 PyLiteBytesObject* pylt_obj_bytes_new_empty(PyLiteInterpreter *I) {
     return pylt_obj_bytes_new(I, NULL, 0, true);
-}
-
-void pylt_obj_bytes_free(PyLiteInterpreter *I, PyLiteBytesObject *self) {
-    pylt_free(I, self->ob_val, self->ob_size * sizeof(uint8_t));
-    pylt_free_ex(I, self);
 }
 
 pl_int_t pylt_obj_bytes_index_full(PyLiteInterpreter *I, PyLiteBytesObject *self, PyLiteBytesObject *sub, pl_int_t start, pl_int_t end) {
@@ -294,4 +288,9 @@ struct PyLiteStrObject* pylt_obj_bytes_to_str(PyLiteInterpreter *I, PyLiteBytesO
     PyLiteStrObject *str = pylt_obj_str_new(I, data, j, true);
     pylt_free(I, data, (self->ob_size + quote_count + 3) * sizeof(uint32_t));
     return str;
+}
+
+void pylt_obj_bytes_release(PyLiteInterpreter *I, PyLiteBytesObject *self) {
+    pylt_free(I, self->ob_val, self->ob_size * sizeof(uint8_t));
+    pylt_free_ex(I, self);
 }

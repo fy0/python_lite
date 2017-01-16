@@ -2,6 +2,7 @@
 #include "set.h"
 #include "string.h"
 #include "../../utils/misc.h"
+#include "../../gc.h"
 
 
 pl_int_t pylt_obj_set_cmp(PyLiteInterpreter *I, PyLiteSetObject *self, PyLiteObject *other) {
@@ -157,14 +158,18 @@ struct PyLiteStrObject* pylt_obj_set_to_str(PyLiteInterpreter *I, PyLiteSetObjec
 }
 
 PyLiteSetObject* pylt_obj_set_new(PyLiteInterpreter *I) {
-    PyLiteSetObject *obj = pylt_malloc(I, sizeof(PyLiteSetObject));
-    obj->ob_type = PYLT_OBJ_TYPE_SET;
-    obj->ob_flags = 0;
+    PyLiteObject_init(I, obj, PyLiteSetObject, PYLT_OBJ_TYPE_SET);
     obj->ob_val = kho_init(set_obj, state);
     return obj;
 }
 
-void pylt_obj_set_free(PyLiteInterpreter *I, PyLiteSetObject* self) {
+
+void pylt_obj_set_rfree(PyLiteInterpreter *I, PyLiteSetObject* self) {
     kho_destroy(set_obj, self->ob_val);
     pylt_free_ex(I, self);
+}
+
+void pylt_obj_set_free(PyLiteInterpreter *I, PyLiteSetObject* self) {
+    pylt_gc_remove(I, castobj(self));
+    pylt_obj_set_rfree(I, self);
 }

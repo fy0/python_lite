@@ -5,6 +5,7 @@
 #include "utils/config.h"
 #include "types/all.h"
 #include "utils/ref.h"
+#include "gc.h"
 
 /* Class utils */
 
@@ -43,7 +44,6 @@ void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj);
 
 #define pl_objref pylt_ref_new
 PyLiteObject* pl_objesc(PyLiteInterpreter *I, PyLiteObject *obj);
-
 
 #define pl_assert(I, stmt, ret) if (!(stmt)) { pl_error(I, pl_static.str.RuntimeError, "panic"); return (ret); }
 #define pl_foreach_set(I, it, setobj) for (pl_int32_t it = pylt_obj_set_begin(I, setobj); it != pylt_obj_set_end(I, setobj); pylt_obj_set_next(I, setobj, &it))

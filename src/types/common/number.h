@@ -65,7 +65,9 @@ PyLiteFloatObject* pylt_obj_float_new(PyLiteInterpreter *I, double val);
 PyLiteIntObject* pylt_obj_int_new_from_cstr_full(PyLiteInterpreter *I, const char *str, pl_int_t size, pl_int_t base_n);
 PyLiteFloatObject* pylt_obj_float_new_from_cstr_full(PyLiteInterpreter *I, const char *str, pl_int_t size, pl_int_t point_pos);
 
+void pylt_obj_int_rfree(PyLiteInterpreter *I, PyLiteIntObject *self);
 void pylt_obj_int_free(PyLiteInterpreter *I, PyLiteIntObject *self);
+void pylt_obj_float_rfree(PyLiteInterpreter *I, PyLiteFloatObject *self);
 void pylt_obj_float_free(PyLiteInterpreter *I, PyLiteFloatObject *self);
 
 #endif

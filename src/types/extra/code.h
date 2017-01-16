@@ -26,6 +26,7 @@ typedef struct PyLiteCodeObject {
 void pylt_obj_code_add_to_gc(PyLiteInterpreter *I, PyLiteCodeObject *self);
 
 PyLiteCodeObject* pylt_obj_code_new(PyLiteInterpreter *I, pl_bool_t with_debug_info);
+void pylt_obj_code_rfree(PyLiteInterpreter *I, PyLiteCodeObject* self);
 void pylt_obj_code_free(PyLiteInterpreter *I, PyLiteCodeObject* self);
 
 #endif

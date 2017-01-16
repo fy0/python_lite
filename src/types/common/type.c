@@ -5,10 +5,8 @@
 #include "../../api.h"
 
 PyLiteTypeObject* pylt_obj_type_new_with_type(PyLiteInterpreter *I, PyLiteStrObject *name, pl_uint32_t instance_type, pl_uint32_t base_type) {
-    PyLiteTypeObject *obj = pylt_malloc(I, sizeof(PyLiteTypeObject));
+    PyLiteObject_init(I, obj, PyLiteTypeObject, PYLT_OBJ_TYPE_TYPE);
     obj->name = name;
-    obj->ob_type = PYLT_OBJ_TYPE_TYPE;
-    obj->ob_flags = 0;
     obj->ob_attrs = pylt_obj_dict_new(I);
     obj->ob_reftype = instance_type;
     obj->ob_base = base_type;
@@ -58,7 +56,12 @@ pl_uint32_t pylt_obj_type_hash(PyLiteInterpreter *I, PyLiteTypeObject *self) {
     return self->ob_reftype;
 }
 
-void pylt_obj_type_free(PyLiteInterpreter *I, PyLiteTypeObject *self) {
+void pylt_obj_type_rfree(PyLiteInterpreter *I, PyLiteTypeObject *self) {
     pylt_obj_dict_free(I, self->ob_attrs);
     pylt_free_ex(I, self);
+}
+
+void pylt_obj_type_free(PyLiteInterpreter *I, PyLiteTypeObject *self) {
+    pylt_gc_remove(I, castobj(self));
+    pylt_obj_type_rfree(I, self);
 }

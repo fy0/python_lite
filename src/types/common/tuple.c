@@ -120,7 +120,12 @@ PyLiteTupleObject* pylt_obj_tuple_slice(PyLiteInterpreter *I, PyLiteTupleObject 
     return lst;
 }
 
-void pylt_obj_tuple_free(PyLiteInterpreter *I, PyLiteTupleObject *self) {
+void pylt_obj_tuple_rfree(PyLiteInterpreter *I, PyLiteTupleObject *self) {
     pylt_free(I, self->ob_val, sizeof(PyLiteObject*) * self->ob_size);
     pylt_free_ex(I, self);
+}
+
+void pylt_obj_tuple_free(PyLiteInterpreter *I, PyLiteTupleObject *self) {
+    pylt_gc_remove(I, castobj(self));
+    pylt_obj_tuple_rfree(I, self);
 }

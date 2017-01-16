@@ -29,6 +29,8 @@ struct PyLiteStrObject* pylt_obj_bytes_to_str(PyLiteInterpreter *I, PyLiteBytesO
 
 PyLiteBytesObject* pylt_obj_bytes_new(PyLiteInterpreter *I, const char* str, int size, bool is_raw);
 PyLiteBytesObject* pylt_obj_bytes_new_empty(PyLiteInterpreter *I);
-void pylt_obj_bytes_free(PyLiteInterpreter *I, PyLiteBytesObject *self);
+
+// dont't free bytes/str object unless you know what will happen
+void pylt_obj_bytes_release(PyLiteInterpreter *I, PyLiteBytesObject *self);
 
 #endif

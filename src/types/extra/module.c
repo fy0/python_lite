@@ -1,11 +1,10 @@
 ﻿
 #include "module.h"
 #include "../common/dict.h"
+#include "../../gc.h"
 
 PyLiteModuleObject* pylt_obj_module_new_ex(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteObject *owner, PyLiteStrObject *name) {
-    PyLiteModuleObject *obj = castmod(pylt_malloc(I, sizeof(PyLiteModuleObject)));
-    obj->ob_type = PYLT_OBJ_TYPE_MODULE;
-    obj->ob_flags = 0;
+    PyLiteObject_init(I, obj, PyLiteModuleObject, PYLT_OBJ_TYPE_MODULE);
     obj->ob_attrs = pylt_obj_dict_new(I);
     obj->code = code;
     obj->ob_owner = owner;
@@ -25,7 +24,12 @@ PyLiteObject* pylt_obj_mod_getattr(PyLiteInterpreter *I, PyLiteModuleObject *sel
     return pylt_obj_dict_getitem(I, self->ob_attrs, castobj(key));
 }
 
-void pylt_obj_module_free(PyLiteInterpreter *I, PyLiteModuleObject *self) {
+void pylt_obj_module_rfree(PyLiteInterpreter *I, PyLiteModuleObject *self) {
     pylt_obj_dict_free(I, self->ob_attrs);
     pylt_free_ex(I, self);
+}
+
+void pylt_obj_module_free(PyLiteInterpreter *I, PyLiteModuleObject *self) {
+    pylt_gc_remove(I, castobj(self));
+    pylt_obj_module_rfree(I, self);
 }

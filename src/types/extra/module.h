@@ -21,6 +21,7 @@ PyLiteModuleObject* pylt_obj_module_new_ex(PyLiteInterpreter *I, PyLiteCodeObjec
 PyLiteModuleObject* pylt_obj_module_new(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteStrObject *name);
 void pylt_obj_mod_setattr(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *key, PyLiteObject *value);
 PyLiteObject* pylt_obj_mod_getattr(PyLiteInterpreter *I, PyLiteModuleObject *self, PyLiteStrObject *key);
+void pylt_obj_module_rfree(PyLiteInterpreter *I, PyLiteModuleObject *self);
 void pylt_obj_module_free(PyLiteInterpreter *I, PyLiteModuleObject *self);
 
 #endif
