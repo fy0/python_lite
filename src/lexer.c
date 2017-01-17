@@ -66,6 +66,7 @@ void pylt_lex_init(PyLiteInterpreter *I, LexState *ls, PyLiteFile *input) {
     ls->input = input;
     ls->current_indent = -1;
     ls->inside_couples = 0;
+    ls->token.val = TK_END;
     
     ls->indent = idt = pylt_malloc(I, sizeof(IndentInfo));
     idt->val = 0;
@@ -103,6 +104,7 @@ void pylt_lex_reset(LexState *ls, PyLiteFile *input) {
     IndentInfo *idt = ls->indent;
     IndentInfo *idt_used = ls->indent_used;
     idt->val = 0;
+    ls->token.val = TK_END;
 
     if (idt->prev) {
         if (idt_used) {

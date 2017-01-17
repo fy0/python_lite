@@ -168,7 +168,7 @@ PyLiteObject* pylt_obj_custom_iternext(PyLiteInterpreter *I, PyLiteIterObject *i
 }
 
 void pylt_obj_iter_rfree(PyLiteInterpreter *I, PyLiteIterObject* self) {
-    if (self->backup) pylt_obj_iter_free(I, self->backup);
+    //if (self->backup) pylt_obj_iter_free(I, self->backup);
     pylt_free_ex(I, self);
 }
 

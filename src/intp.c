@@ -83,9 +83,6 @@ void pylt_intp_finalize(PyLiteInterpreter *I) {
     pylt_gc_freeall(I);
     pylt_gc_finalize(I);
 
-    pylt_obj_dict_free(I, I->modules);
-    pylt_obj_dict_free(I, I->cmodules_loader);
-
     if (I->lexer) pylt_free_ex(I, I->lexer);
     if (I->parser) pylt_free_ex(I, I->parser);
 }

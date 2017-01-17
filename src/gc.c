@@ -240,10 +240,16 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
 #ifdef PL_DEBUG_INFO
     wprintf(L"gc collect %dw %db\n", (int)upset_len(white), (int)upset_len(I->gc.black));
 #endif
+
+    for (pl_uint32_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
+        PyLiteObject *obj = upset_item(white, k);
+        //wprintf(L"test %7x [%d]\n", (unsigned int)(pl_uint_t)obj, (int)obj->ob_type);
+    }
     // 将未标记对象全部释放
     for (pl_uint32_t k = upset_begin(white); k != upset_end(white); upset_next(white, &k)) {
         PyLiteObject *obj = upset_item(white, k);
 
+        //wprintf(L"test %7x [%d]\n", (unsigned int)(pl_uint_t)obj, (int)obj->ob_type);
         // check releasable
         if (!(obj->ob_flags & PYLT_OBJ_FLAG_CANFREE)) {
             upset_add(I->gc.black, obj);
@@ -275,7 +281,7 @@ void pylt_gc_finalize(PyLiteInterpreter *I) {
 
     upset_free(I->gc.refs);
     upset_free(I->gc.statics);
-    pylt_obj_set_free(I, I->gc.str_cached);
+    //pylt_obj_set_free(I, I->gc.str_cached);
 #ifdef PL_DEBUG_INFO
     wprintf(L"mem unfreed: %u\n", (unsigned int)I->mem_used);
 #endif
@@ -304,15 +310,17 @@ PyLiteObject* _pylt_gc_cache_add(PyLiteInterpreter *I, PyLiteObject *key) {
 PyLiteStrObject* pylt_gc_cache_str_add(PyLiteInterpreter *I, PyLiteStrObject *key) {
     PyLiteStrObject* ret = caststr(_pylt_gc_cache_add(I, castobj(key)));
     if (ret) {
+        pylt_gc_remove(I, castobj(key));
         pylt_obj_str_release(I, key);
         return ret;
-    }
+    } 
     return key;
 }
 
 PyLiteBytesObject* pylt_gc_cache_bytes_add(PyLiteInterpreter *I, PyLiteBytesObject *key) {
     PyLiteBytesObject* ret = castbytes(_pylt_gc_cache_add(I, castobj(key)));
     if (ret) {
+        pylt_gc_remove(I, castobj(key));
         pylt_obj_bytes_release(I, key);
         return ret;
     }

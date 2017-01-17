@@ -25,7 +25,7 @@ PyLiteObject* pylt_obj_mod_getattr(PyLiteInterpreter *I, PyLiteModuleObject *sel
 }
 
 void pylt_obj_module_rfree(PyLiteInterpreter *I, PyLiteModuleObject *self) {
-    pylt_obj_dict_free(I, self->ob_attrs);
+    //pylt_obj_dict_free(I, self->ob_attrs);
     pylt_free_ex(I, self);
 }
 

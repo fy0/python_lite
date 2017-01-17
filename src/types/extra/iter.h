@@ -19,7 +19,7 @@ typedef struct PyLiteIterObject {
             pl_int32_t k;
         } hashmap;
     };
-    struct PyLiteIterObject *backup; // isn't tracked by gc
+    struct PyLiteIterObject *backup; 
 } PyLiteIterObject;
 
 PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj);

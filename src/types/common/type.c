@@ -57,7 +57,7 @@ pl_uint32_t pylt_obj_type_hash(PyLiteInterpreter *I, PyLiteTypeObject *self) {
 }
 
 void pylt_obj_type_rfree(PyLiteInterpreter *I, PyLiteTypeObject *self) {
-    pylt_obj_dict_free(I, self->ob_attrs);
+    //pylt_obj_dict_free(I, self->ob_attrs);
     pylt_free_ex(I, self);
 }
 

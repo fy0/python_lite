@@ -27,7 +27,7 @@ PyLiteCodeObject* pylt_obj_code_new(PyLiteInterpreter *I, pl_bool_t with_debug_i
 }
 
 void pylt_obj_code_rfree(PyLiteInterpreter *I, PyLiteCodeObject* self) {
-    pylt_obj_list_free(I, self->const_val);
+    //pylt_obj_list_free(I, self->const_val);
     kv_destroy(self->opcodes);
     pylt_free_ex(I, self);
 }
