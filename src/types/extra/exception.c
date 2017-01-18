@@ -5,6 +5,7 @@
 PyLiteBaseExceptionObject* pylt_obj_exception_new(PyLiteInterpreter *I, PyLiteTupleObject *args) {
     PyLiteObject_init(I, obj, PyLiteBaseExceptionObject, PYLT_OBJ_TYPE_BASE_EXCEPTION);
     obj->args = args ? args : pylt_obj_tuple_new(I, 0);
+    obj->args->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
     return obj;
 }
 

@@ -259,7 +259,7 @@ void pylt_gc_collect(PyLiteInterpreter *I) {
         // check static before free
         if (!(obj->ob_flags & PYLT_OBJ_FLAG_STATIC)) {
 #ifdef PL_DEBUG_INFO
-            wprintf(L"gc free %7x [%d]\n", (unsigned int)(pl_uint_t)obj, (int)obj->ob_type);
+            //wprintf(L"gc free %7x [%d]\n", (unsigned int)(pl_uint_t)obj, (int)obj->ob_type);
 #endif
             if (pl_isstrkind(obj)) {
                 pylt_obj_set_remove(I, I->gc.str_cached, obj);

@@ -833,7 +833,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                     pylt_vm_pop_frame(I);
                     frame = &kv_top(ctx->frames);
                     if (I->error) goto _end;
-                    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, caststr(name));
+                    PyLiteModuleObject *mod = pylt_obj_module_new(I, caststr(name));
                     mod->ob_attrs = scope;
                     pylt_obj_dict_setitem(I, frame->locals, name, castobj(mod));
                 }

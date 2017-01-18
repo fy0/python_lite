@@ -6,6 +6,7 @@
 PyLiteObject* pylt_obj_cutstom_create(PyLiteInterpreter *I, uint32_t ob_type, PyLiteObject *base_obj) {
     PyLiteObject_init(I, obj, PyLiteCustomObject, ob_type);
     obj->ob_attrs = pylt_obj_dict_new(I);
+    obj->ob_attrs->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
     obj->base_obj = base_obj;
     return castobj(obj);
 }

@@ -17,6 +17,7 @@ void pylt_obj_code_add_to_gc(PyLiteInterpreter *I, PyLiteCodeObject *self) {
 PyLiteCodeObject* pylt_obj_code_new(PyLiteInterpreter *I, pl_bool_t with_debug_info) {
     PyLiteObject_init(I, obj, PyLiteCodeObject, PYLT_OBJ_TYPE_CODE);
     obj->const_val = pylt_obj_list_new(I);
+    obj->const_val->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
     obj->closure = NULL;
     kv_init(I, obj->opcodes);
     obj->with_debug_info = with_debug_info;

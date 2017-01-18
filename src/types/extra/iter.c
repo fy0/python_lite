@@ -60,6 +60,7 @@ PyLiteIterObject* pylt_obj_iter_new(PyLiteInterpreter *I, PyLiteObject *obj) {
                     }
                 } else {
                     iter->backup = pylt_obj_iter_new(I, castcustom(obj)->base_obj);
+                    iter->backup->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
                     if (iter->backup) {
                         iter->iter_func = &pylt_obj_custom_iternext;
                         return iter;

@@ -8,6 +8,7 @@ PyLiteTypeObject* pylt_obj_type_new_with_type(PyLiteInterpreter *I, PyLiteStrObj
     PyLiteObject_init(I, obj, PyLiteTypeObject, PYLT_OBJ_TYPE_TYPE);
     obj->name = name;
     obj->ob_attrs = pylt_obj_dict_new(I);
+    obj->ob_attrs->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
     obj->ob_reftype = instance_type;
     obj->ob_base = base_type;
     obj->ob_owner = NULL;
@@ -18,6 +19,7 @@ PyLiteTypeObject* pylt_obj_type_new_with_type(PyLiteInterpreter *I, PyLiteStrObj
 PyLiteTypeObject* pylt_obj_type_new(PyLiteInterpreter *I, PyLiteStrObject *name, pl_uint32_t base_type, PyLiteDictObject *dict) {
     PyLiteTypeObject *type = pylt_obj_type_new_with_type(I, name, ++I->class_num, base_type);
     type->ob_attrs = (dict) ? pylt_obj_dict_copy(I, dict) : pylt_obj_dict_new(I);
+    type->ob_attrs->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
     return type;
 }
 

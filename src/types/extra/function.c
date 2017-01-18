@@ -33,9 +33,11 @@ PyLiteFunctionObject* pylt_obj_func_new(PyLiteInterpreter *I, PyLiteCodeObject *
         memcpy(&obj->code, code, sizeof(PyLiteCodeObject));
     } else {
         obj->code.const_val = pylt_obj_list_new(I);
+        obj->code.const_val->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
         kv_init(I, obj->code.opcodes);
     }
     obj->info.closure = make_closure(I, code);
+    obj->info.closure->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
     return obj;
 }
 
@@ -46,12 +48,14 @@ PyLiteFunctionObject* pylt_obj_func_new_ex(PyLiteInterpreter *I, PyLiteStrObject
     func->info.name = name;
     func->info.length = params->ob_size;
     func->info.params = pylt_obj_tuple_new(I, params->ob_size);
+    func->info.params->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
     memcpy(func->info.params->ob_val, params->ob_val, params->ob_size * sizeof(PyLiteObject*));
 
     // set default values
     if (defaults || args || kwargs) {
         pl_int_t minimal = -1;
         PyLiteTupleObject *defvals = pylt_obj_tuple_new(I, params->ob_size);
+        defvals->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
 
         for (int i = 0; i < params->ob_size; ++i) {
             PyLiteStrObject *name = caststr(params->ob_val[i]);
@@ -105,6 +109,9 @@ PyLiteCFunctionObject* pylt_obj_cfunc_new(PyLiteInterpreter *I, PyLiteStrObject 
     func->info.type_codes = types;
     func->info.closure = NULL;
     func->code = cfunc;
+
+    if (func->info.params) func->info.params->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
+    if (func->info.defaults) func->info.defaults->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
 
     return func;
 }

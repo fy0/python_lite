@@ -3,17 +3,17 @@
 #include "../common/dict.h"
 #include "../../gc.h"
 
-PyLiteModuleObject* pylt_obj_module_new_ex(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteObject *owner, PyLiteStrObject *name) {
+PyLiteModuleObject* pylt_obj_module_new_ex(PyLiteInterpreter *I, PyLiteObject *owner, PyLiteStrObject *name) {
     PyLiteObject_init(I, obj, PyLiteModuleObject, PYLT_OBJ_TYPE_MODULE);
     obj->ob_attrs = pylt_obj_dict_new(I);
-    obj->code = code;
+    obj->ob_attrs->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
     obj->ob_owner = owner;
     obj->name = name;
     return obj;
 }
 
-PyLiteModuleObject* pylt_obj_module_new(PyLiteInterpreter *I, PyLiteCodeObject *code, PyLiteStrObject *name) {
-    return pylt_obj_module_new_ex(I, code, NULL, name); // owner NULL is interpreter
+PyLiteModuleObject* pylt_obj_module_new(PyLiteInterpreter *I, PyLiteStrObject *name) {
+    return pylt_obj_module_new_ex(I, NULL, name); // owner NULL is interpreter
 }
 
 void pylt_obj_mod_setattr(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *key, PyLiteObject *value) {
