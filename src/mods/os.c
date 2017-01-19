@@ -12,7 +12,7 @@
 
 
 PyLiteModuleObject* pylt_mods_os_loader(PyLiteInterpreter *I) {
-    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(os));
+    PyLiteModuleObject *mod = pylt_obj_module_new(I, _S(os));
     
     pylt_obj_mod_setattr(I, mod, pl_strnew_u8(I, "O_ACCMODE", true),  castobj(pylt_obj_int_new(I, 0000003)));
     pylt_obj_mod_setattr(I, mod, pl_strnew_u8(I, "O_RDONLY", true),   castobj(pylt_obj_int_new(I, 0000000)));

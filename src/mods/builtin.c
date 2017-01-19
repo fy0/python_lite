@@ -192,7 +192,7 @@ PyLiteObject* pylt_mods_builtins_setattr(PyLiteInterpreter *I, int argc, PyLiteO
 
 
 PyLiteModuleObject* pylt_mods_builtins_loader(PyLiteInterpreter *I) {
-    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, NULL);
+    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL);
 
     pylt_cfunc_register(I, mod, _S(abs), _NST(I, 1, _S(x)), NULL, NULL, &pylt_mods_builtins_abs);
     pylt_cfunc_register(I, mod, _S(print), _NST(I, 3, "values", "sep", "end"), _NT(I, 3, castobj(&PyLiteParamArgs), _NS(I, " "), _NS(I, "\n")), _UINTS(I, 3, NULL, PYLT_OBJ_TYPE_STR, PYLT_OBJ_TYPE_STR), &pylt_mods_builtins_print);

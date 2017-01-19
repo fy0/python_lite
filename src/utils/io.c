@@ -389,3 +389,11 @@ void pylt_io_init(PyLiteInterpreter *I) {
     I->sys.cout = pylt_io_file_new_with_cfile(I, stdout, PYLT_IOTE_WCHAR);
     I->sys.cerr = pylt_io_file_new_with_cfile(I, stderr, PYLT_IOTE_WCHAR);
 }
+
+pl_bool_t pylt_io_fexists(PyLiteInterpreter *I, PyLiteStrObject *fn) {
+    /*struct stb__stat buf;
+    wchar_t *wfn = pylt_malloc(I, sizeof(wchar_t) * (fn->ob_size + 1));
+    ucs4str_to_wchar(fn->ob_val, fn->ob_size, wfn, true);
+    _wstat(wfn, &buf);*/
+    return false;
+}

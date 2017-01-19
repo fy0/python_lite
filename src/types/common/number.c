@@ -385,7 +385,6 @@ _INLINE static uint8_t _dec(uint32_t code) {
     return 255;
 }
 
-
 _INLINE static
 pl_int_t _read_x_int(RawString *str, int n, uint8_t(*func)(uint32_t code), int max_size) {
     const uint8_t *p = str->s;

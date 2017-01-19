@@ -91,7 +91,7 @@ PyLiteObject* pylt_mods_cio_fseek(PyLiteInterpreter *I, int argc, PyLiteObject *
 
 
 PyLiteModuleObject* pylt_mods_cio_loader(PyLiteInterpreter *I) {
-    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, _S(cio));
+    PyLiteModuleObject *mod = pylt_obj_module_new(I, _S(cio));
 
     pylt_obj_mod_setattr(I, mod, _NS(I, "SEEK_CUR"), castobj(pylt_obj_int_new(I, SEEK_CUR)));
     pylt_obj_mod_setattr(I, mod, _NS(I, "SEEK_END"), castobj(pylt_obj_int_new(I, SEEK_END)));
