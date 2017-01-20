@@ -97,7 +97,17 @@ void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj) {
         wprintf(L"bad str\n");
         return;
     }
+#ifndef PYLT_EXTMOD
+    if (sizeof(wchar_t) == sizeof(uint32_t)) {
+        wprintf((const wchar_t*)obj->ob_val);
+    } else {
+        for (pl_uint_t i = 0; i < obj->ob_size; ++i) {
+            putwchar((wchar_t)obj->ob_val[i]);
+        }
+    }
+#else
     pylt_io_file_writestr(I, I->sys.cout, obj->ob_val, obj->ob_size, ' ');
+#endif
 }
 
 
