@@ -119,7 +119,7 @@ cd build
 cmake ..
 ```
 
-**make** (Linux/Mac/Mingw)
+**make** (Linux/Mac/Mingw)  
 Open **pylite.sln** and build. (Visual Studio)
 
 ## Example
