@@ -6,7 +6,7 @@
 
 
 PyLiteModuleObject* pylt_mods_unusual_loader(PyLiteInterpreter *I) {
-    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL, NULL);
+    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL);
     pylt_obj_mod_setattr(I, mod, _S(useless), castobj(&PyLiteUseless));
     pylt_obj_mod_setattr(I, mod, _S(NotImplemented), castobj(&PyLiteNotImplemented));
     pylt_obj_mod_setattr(I, mod, _S(param_args), castobj(&PyLiteParamArgs));
