@@ -1,7 +1,9 @@
 ﻿
 #include "intp.h"
 #include "utils/misc.h"
+#include "utils/fs.h"
 #include "utils/io.h"
+#include "utils/io_simple.h"
 #include "mods/pltypes.h"
 #include "mods/io.h"
 #include "mods/os.h"
