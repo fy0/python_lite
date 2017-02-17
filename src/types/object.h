@@ -189,7 +189,7 @@ typedef PyLiteObject* (*PyLiteObjBinaryOpFunc)(PyLiteInterpreter *I, PyLiteObjec
 typedef PyLiteObject* (*PyLiteCFunctionPtr)(PyLiteInterpreter *I, int argc, PyLiteObject **args);
 typedef PyLiteObject* (*PyLiteIterFunc)(PyLiteInterpreter *I, struct PyLiteIterObject *iter);
 
-typedef struct pl_bool_t (*PyLiteModuleRegisterFunc)(PyLiteInterpreter *I);
+typedef pl_bool_t (*PyLiteModuleRegisterFunc)(PyLiteInterpreter *I);
 typedef struct PyLiteModuleObject* (*PyLiteModuleLoaderFunc)(PyLiteInterpreter *I);
 
 #endif

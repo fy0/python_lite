@@ -1,8 +1,7 @@
 ﻿
-#include "io.h"
-#include "io_crt.h"
 #include "../api.h"
 #include "../intp.h"
+#include "io.h"
 #include "../types/all.h"
 
 #include <errno.h>
@@ -11,7 +10,6 @@
 #ifdef PLATFORM_WINDOWS
 #include <io.h>
 #include <Windows.h>
-#include "../deps/linenoise/osfix/Win32_ANSI.h"
 #define fileno(fp)                  _fileno(fp)
 #define read(fd,buffer,count)       read(fd,buffer,count)
 #define write(fd,buffer,count)      write(fd,buffer,count)
@@ -220,10 +218,6 @@ int pylt_io_file_read(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_t
 int pylt_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count) {
     int read_count = 0;
 
-    pl_bool_t crt_accepted;
-    int ret = crt_read(I, pf->fno, buf, count, &crt_accepted);
-    if (crt_accepted) return ret;
-
     switch (pf->encoding) {
         case PYLT_IOTE_BYTE: {
             int ret;
@@ -298,10 +292,6 @@ int pylt_io_file_write(PyLiteInterpreter *I, PyLiteFile *pf, void *buf, pl_uint_
 // -2 编码问题 -3 异常输入
 int pylt_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl_uint_t count, uint32_t ignore) {
     int written = 0;
-
-    pl_bool_t crt_accepted;
-    int ret = crt_write(I, pf->fno, buf, count, ignore, &crt_accepted);
-    if (crt_accepted) return ret;
 
     switch (pf->encoding) {
         case PYLT_IOTE_BYTE: {
@@ -384,16 +374,13 @@ PyLiteStrObject* pylt_io_file_getencoding(PyLiteInterpreter *I, PyLiteFile *pf) 
     return NULL;
 }
 
-void pylt_io_init(PyLiteInterpreter *I) {
-    I->sys.cin = pylt_io_file_new_with_cfile(I, stdin, PYLT_IOTE_WCHAR);
-    I->sys.cout = pylt_io_file_new_with_cfile(I, stdout, PYLT_IOTE_WCHAR);
-    I->sys.cerr = pylt_io_file_new_with_cfile(I, stderr, PYLT_IOTE_WCHAR);
-}
-
 pl_bool_t pylt_io_fexists(PyLiteInterpreter *I, PyLiteStrObject *fn) {
-    /*struct stb__stat buf;
     wchar_t *wfn = pylt_malloc(I, sizeof(wchar_t) * (fn->ob_size + 1));
     ucs4str_to_wchar(fn->ob_val, fn->ob_size, wfn, true);
-    _wstat(wfn, &buf);*/
-    return false;
+#ifdef PLATFORM_WINDOWS
+    struct _stat64i32 stbuf;
+    return _wstat64i32(wfn, &stbuf) == 0;
+#else
+    struct stat;
+#endif
 }

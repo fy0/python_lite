@@ -1,7 +1,0 @@
-﻿
-#ifndef PYLITE_UTILS_IO_SIMPLE_H
-#define PYLITE_UTILS_IO_SIMPLE_H
-
-
-
-#endif

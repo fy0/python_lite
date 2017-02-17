@@ -1,6 +1,6 @@
 ﻿
-#ifndef PYLITE_CORE_IO_H
-#define PYLITE_CORE_IO_H
+#ifndef PYLITE_UTILS_IO_SIMPLE_H
+#define PYLITE_UTILS_IO_SIMPLE_H
 
 #include "misc.h"
 
@@ -11,7 +11,6 @@ enum PYLT_IO_TEXT_ENCODING {
     PYLT_IOTE_UCS4 = 4,
     PYLT_IOTE_WCHAR = 8
 };
-
 
 typedef struct {
     int fno;
@@ -41,7 +40,5 @@ pl_bool_t pylt_io_file_readable(PyLiteInterpreter *I, PyLiteFile *pf);
 
 pl_bool_t pylt_io_file_isatty(PyLiteInterpreter *I, PyLiteFile *pf);
 PyLiteStrObject* pylt_io_file_getencoding(PyLiteInterpreter *I, PyLiteFile *pf);
-
-void pylt_io_init(PyLiteInterpreter *I);
 
 #endif
