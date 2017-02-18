@@ -82,7 +82,7 @@ PyLiteObject* pylt_mods_io_TextIO_readuntil(PyLiteInterpreter *I, int argc, PyLi
 
     if (!pylt_io_file_readable(I, pf)) {
         PyLiteModuleObject *mod = pl_getmod(I, _S(io));
-        pl_error_by_type(I, pl_modtype(I, mod, _S(UnsupportedOperation)), "not readable");
+        pl_error_by_type(I, casttype(pylt_obj_mod_getattr(I, mod, _S(UnsupportedOperation))), "not readable");
         return NULL;
     }
 
@@ -148,7 +148,7 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
 
     if (!pylt_io_file_readable(I, pf)) {
         PyLiteModuleObject *mod = pl_getmod(I, _S(io));
-        pl_error_by_type(I, pl_modtype(I, mod, _S(UnsupportedOperation)), "not readable");
+        pl_error_by_type(I, casttype(pylt_obj_mod_getattr(I, mod, _S(UnsupportedOperation))), "not readable");
         return NULL;
     }
 
@@ -203,7 +203,7 @@ PyLiteObject* pylt_mods_io_TextIO_write(PyLiteInterpreter *I, int argc, PyLiteOb
 
     if (!pylt_io_file_writeable(I, pf)) {
         PyLiteModuleObject *mod = pl_getmod(I, _S(io));
-        pl_error_by_type(I, pl_modtype(I, mod, _S(UnsupportedOperation)), "not writeable");
+        pl_error_by_type(I, casttype(pylt_obj_mod_getattr(I, mod, _S(UnsupportedOperation))), "not writeable");
         return NULL;
     }
 

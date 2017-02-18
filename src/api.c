@@ -18,10 +18,6 @@ PyLiteModuleObject* pl_getmod(PyLiteInterpreter *I, PyLiteStrObject *modpath) {
     return mod;
 }
 
-PyLiteTypeObject* pl_builtintype(PyLiteInterpreter *I, PyLiteStrObject *name) {
-    return pl_modtype(I, I->vm.builtins, name);
-}
-
 PyLiteTypeObject* pl_modtype(PyLiteInterpreter *I, PyLiteModuleObject *mod, PyLiteStrObject *name) {
     PyLiteObject *obj = pylt_obj_mod_getattr(I, mod, name);
     if (!obj) return NULL;
@@ -110,12 +106,6 @@ void pl_outputstr(PyLiteInterpreter *I, PyLiteStrObject *obj) {
 #endif
 }
 
-
-PyLiteObject* pl_objesc(PyLiteInterpreter *I, PyLiteObject *obj) {
-    pylt_gc_remove(I, obj);
-    return obj;
-}
-
 void pl_print(PyLiteInterpreter *I, const char *format, ...) {
     va_list args;
     PyLiteStrObject *str;
@@ -136,7 +126,7 @@ void pl_print(PyLiteInterpreter *I, const char *format, ...) {
 void pl_error(PyLiteInterpreter *I, PyLiteStrObject *exception_name, const char *format, ...) {
     PyLiteObject *error;
     PyLiteStrObject *str;
-    PyLiteTypeObject *type = pl_builtintype(I, exception_name);
+    PyLiteTypeObject *type = casttype(pylt_obj_mod_getattr(I, I->vm.builtins, exception_name));
     va_list args;
 
     if (format) {
@@ -258,4 +248,9 @@ PyLiteObject* pl_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLite
     }
 
     return _pl_call(I, argc + 1);
+}
+
+
+void pylt_api_import_one(PyLiteInterpreter *I, PyLiteObject *name) {
+    ;
 }
