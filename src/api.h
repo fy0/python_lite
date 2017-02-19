@@ -8,7 +8,6 @@
 #include "gc.h"
 
 /* Class utils */
-
 // get module instance, load builtin module if not loaded.
 PyLiteModuleObject* pl_getmod(PyLiteInterpreter *I, PyLiteStrObject *modpath);
 
