@@ -168,26 +168,3 @@ bool ucs2str_to_ucs4(uint16_t *ucs2str, int ucs2str_len, uint32_t *buf) {
     buf[ucs2str_len] = (uint32_t)'\0';
     return true;
 }
-
-bool ucs4str_to_wchar(uint32_t *ucs4str, int ucs4str_len, wchar_t *buf, bool ignore) {
-    if (sizeof(wchar_t) == sizeof(uint32_t)) {
-        memcpy(buf, ucs4str, ucs4str_len * sizeof(uint32_t));
-        buf[ucs4str_len] = L'\0';
-        return true;
-    }
-
-    for (int i = 0; i < ucs4str_len; ++i) {
-        bool ret = ucs4_to_wchar(ucs4str[i], buf + i);
-        if ((!ignore) && (!ret)) return false;
-    }
-    buf[ucs4str_len] = L'\0';
-    return true;
-}
-
-bool wchar_to_ucs4str(wchar_t *wstr, int wstr_len, uint32_t *buf) {
-    for (int i = 0; i < wstr_len; ++i) {
-        buf[i] = (uint32_t)wstr[i];
-    }
-    buf[wstr_len] = L'\0';
-    return true;
-}

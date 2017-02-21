@@ -21,7 +21,7 @@ typedef struct {
     pl_uint_t size;
 } PyLiteFile;
 
-pl_bool_t pylt_io_fexists(PyLiteInterpreter *I, PyLiteStrObject *fn);
+pl_int_t pylt_io_fexists(PyLiteInterpreter *I, PyLiteStrObject *fn);
 
 FILE* pylt_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode);
 PyLiteFile* pylt_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode, int encoding);

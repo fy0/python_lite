@@ -6,6 +6,7 @@
 #include "../deps/kvec.h"
 #include "../deps/platform.h"
 #include "../deps/utf8_lite.h"
+#include "../deps/utfconvert/utfconvert.h"
 
 #include <stdio.h>
 #include <stdlib.h>

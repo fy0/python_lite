@@ -87,12 +87,9 @@ PyLiteFile* pylt_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteSt
     pl_bool_t binary;
 #ifdef PLATFORM_WINDOWS
     wchar_t cfn[256];
-    if (fn->ob_size > 255) {
-        pl_error(I, pl_static.str.ValueError, "File name too long: %r", fn);
-        return NULL;
-    }
 
-    if (!ucs4str_to_wchar(fn->ob_val, fn->ob_size, (wchar_t*)&cfn, false)) {
+    int ret = uc_ucs4str_to_wcharz(fn->ob_val, fn->ob_size, (wchar_t*)&cfn, 255);
+    if (ret < 0) {
         pl_error(I, pl_static.str.UnicodeEncodeError, "invalid filename.");
         return NULL;
     }
@@ -104,13 +101,10 @@ PyLiteFile* pylt_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteSt
         return NULL;
     }
 #else
-    char cfn[1536];
-    if (fn->ob_size > 255) {
-        pl_error(I, pl_static.str.ValueError, "File name too long: %r", fn);
-        return NULL;
-    }
+    char fn_u8[1024];
 
-    if (!ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&cfn, NULL)) {
+    int ret = uc_ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&fn_u8, 1023);
+    if (ret < 0) {
         pl_error(I, pl_static.str.UnicodeEncodeError, "invalid filename.");
         return NULL;
     }
@@ -374,13 +368,18 @@ PyLiteStrObject* pylt_io_file_getencoding(PyLiteInterpreter *I, PyLiteFile *pf) 
     return NULL;
 }
 
-pl_bool_t pylt_io_fexists(PyLiteInterpreter *I, PyLiteStrObject *fn) {
-    wchar_t *wfn = pylt_malloc(I, sizeof(wchar_t) * (fn->ob_size + 1));
-    ucs4str_to_wchar(fn->ob_val, fn->ob_size, wfn, true);
+pl_int_t pylt_io_fexists(PyLiteInterpreter *I, PyLiteStrObject *fn) {
 #ifdef PLATFORM_WINDOWS
+    wchar_t wfn[512];
     struct _stat64i32 stbuf;
-    return _wstat64i32(wfn, &stbuf) == 0;
+    int ret = uc_ucs4str_to_wcharz(fn->ob_val, fn->ob_size, (wchar_t*)&wfn, 511);
+    if (ret < 0) return ret;
+    return (pl_int_t)(_wstat64i32(wfn, &stbuf) == 0);
 #else
-    struct stat;
+    char fn_u8[1024];
+    struct stat stbuf;
+    int ret = uc_ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&fn_u8, 1023);
+    if (ret < 0) return ret;
+    return (pl_int_t)(stat(fn_u8, &stbuf) == 0);
 #endif
 }
