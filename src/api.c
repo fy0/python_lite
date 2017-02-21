@@ -251,6 +251,42 @@ PyLiteObject* pl_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLite
 }
 
 
-void pylt_api_import_one(PyLiteInterpreter *I, PyLiteObject *name) {
-    ;
+// 注意：
+// 1. 此处 names 永远是绝对路径，也就是相对根路径来描述的
+// 2. names 是包路径的分解，例如 'a.b.c' -> ['a', 'b', 'c']
+PyLiteModuleObject* pylt_api_import(PyLiteInterpreter *I, PyLiteObject **names, pl_int_t names_num) {
+    PyLiteObject *name = NULL;
+    PyLiteObject *nextname;
+    pl_int_t nindex = 0;
+
+    do {
+        nextname = names[nindex];
+        if (name) {
+            name = pylt_obj_str_plus(I, name, pl_strnew_w(I, L'.', true));
+            name = pylt_obj_str_plus(I, name, nextname);
+        } else name = nextname;
+
+        PyLiteModuleObject *mod = pl_getmod(I, caststr(name));
+        if (!mod) {
+            PyLiteFile *input = pylt_io_file_new(I, pl_cformat(I, "%s.py", name), pl_cformat(I, "r"), PYLT_IOTE_UTF8);
+            if (!input) return NULL;
+            PyLiteCodeObject *tcode = pylt_intp_parsef(I, input);
+#ifdef PL_DEBUG_INFO
+            pl_print(I, "======== module load: %s ========\n", name);
+            debug_print_const_vals(I, tcode);
+            debug_print_opcodes(I, tcode);
+            pl_print(I, "======== module end: %s ========\n", name);
+#endif
+            pylt_vm_push_code(I, tcode);
+            PyLiteDictObject *scope = pylt_vm_run(I);
+            pylt_vm_pop_frame(I);
+
+            PyLiteFrame *frame = pylt_vm_curframe(I);
+            if (I->error) return NULL;
+            PyLiteModuleObject *mod = pylt_obj_module_new(I, caststr(name));
+            mod->ob_attrs = scope;
+        }
+
+        pylt_obj_dict_setitem(I, I->modules, name, mod);
+    } while (((++nindex) == names_num));
 }
