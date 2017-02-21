@@ -103,7 +103,7 @@ PyLiteFile* pylt_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteSt
 #else
     char fn_u8[1024];
 
-    int ret = uc_ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&fn_u8, 1023);
+    int ret = uc_ucs4str_to_utf8z(fn->ob_val, fn->ob_size, (char*)&fn_u8, 1023);
     if (ret < 0) {
         pl_error(I, pl_static.str.UnicodeEncodeError, "invalid filename.");
         return NULL;
@@ -378,7 +378,7 @@ pl_int_t pylt_io_fexists(PyLiteInterpreter *I, PyLiteStrObject *fn) {
 #else
     char fn_u8[1024];
     struct stat stbuf;
-    int ret = uc_ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&fn_u8, 1023);
+    int ret = uc_ucs4str_to_utf8z(fn->ob_val, fn->ob_size, (char*)&fn_u8, 1023);
     if (ret < 0) return ret;
     return (pl_int_t)(stat(fn_u8, &stbuf) == 0);
 #endif

@@ -30,7 +30,7 @@ bool ucs4_to_wchar(uint32_t u4, wchar_t *wch);
 // 转换字符串 ucs4 -> ucs2 (末尾补\0)
 bool ucs4str_to_ucs2(uint32_t *ucs4str, int ucs4str_len, uint16_t *buf, bool ignore);
 // 转换字符串 ucs2 -> ucs4 (末尾补\0)
-bool ucs2str_to_ucs4(uint16_t *ucs2str, int ucs2str_len, uint32_t *buf);
+//bool ucs2str_to_ucs4(uint16_t *ucs2str, int ucs2str_len, uint32_t *buf);
 // 转换字符串 ucs4 -> wchar_t (末尾补\0)
 //bool ucs4str_to_wchar(uint32_t *ucs4str, int ucs4str_len, wchar_t *buf, bool ignore);
 // 转换字符串 wchar -> ucs4 (末尾补\0)
