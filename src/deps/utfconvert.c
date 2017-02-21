@@ -1,7 +1,22 @@
 ﻿
 #include "utfconvert.h"
 
+#define MAXUNICODE    0x10FFFF 
+
 /** base part */
+
+int uc_utf8ch_size(const uint8_t c) {
+    // <= 0x7f 1
+    // >= 0xfc 6  >= 0xf8 5  >= 0xf0 4  >= 0xe0 3  >= 0xc0 2
+    uint8_t size_limits[] = { 0xfc, 0xf8, 0xf0, 0xe0, 0xc0 };
+    if (c <= 0x7f) return 1;
+    for (int i = 0; i < (sizeof(size_limits) / sizeof(uint8_t)); i++) {
+        if (c >= size_limits[i]) {
+            return 6 - i;
+        }
+    }
+    return UC_RET_INVALID;
+}
 
 int uc_ucs4_from_utf8(const uint8_t *u8, int u8maxlen, uint32_t *pbuf) {
     static const unsigned int limits[] = { 0xFF, 0x7F, 0x7FF, 0xFFFF };
@@ -244,4 +259,15 @@ int uc_ucs4str_from_wchar(const wchar_t *wstr, int wstr_len, uint32_t *pbuf, int
         return wstr_len;
     }
     return UC_RET_INVALID;
+}
+
+int uc_ucs4str_from_utf8_size(const uint8_t *u8str, int u8str_len) {
+    int i;
+    int count = 0;
+    for (i = 0; i < u8str_len;) {
+        i += uc_utf8ch_size(u8str[i]);
+        count++;
+    }
+    if (i > u8str_len) return UC_RET_INVALID;
+    return count;
 }

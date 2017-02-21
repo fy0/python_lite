@@ -120,7 +120,6 @@ PyLiteFile* pylt_io_file_new(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteSt
         PyLiteFile* pf = pylt_malloc(I, sizeof(PyLiteFile));
         pf->fno = fd;
         pf->flags = flags;
-        pf->current = 0;
 
         struct stat stbuf;
         fstat(fd, &stbuf);
@@ -162,27 +161,31 @@ FILE* pylt_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *
     uint16_t cfn[256];
     uint16_t cmode[21];
 
-    if (!ucs4str_to_ucs2(fn->ob_val, fn->ob_size, (uint16_t*)&cfn, false)) {
+    int ret = uc_ucs4str_to_utf16lez(fn->ob_val, fn->ob_size, (uint16_t*)&cfn, 255);
+    if (ret < 0) {
         pl_error(I, pl_static.str.UnicodeEncodeError, "invalid filename.");
         return NULL;
     }
 
-    if (!ucs4str_to_ucs2(mode->ob_val, mode->ob_size, (uint16_t*)&cmode, false)) {
+    ret = uc_ucs4str_to_utf16lez(mode->ob_val, mode->ob_size, (uint16_t*)&cmode, 20);
+    if (ret < 0) {
         pl_error(I, pl_static.str.UnicodeEncodeError, "invalid mode.");
         return NULL;
     }
 
     return _wfopen((const wchar_t*)cfn, (const wchar_t*)cmode);
 #else
-    char cfn[1536];
-    char cmode[126];
+    char cfn[1024];
+    char cmode[21];
 
-    if (!ucs4str_to_utf8(fn->ob_val, fn->ob_size, (char*)&cfn, NULL)) {
+    int ret = uc_ucs4str_to_utf8z(fn->ob_val, fn->ob_size, (uint8_t*)&cfn, 1023);
+    if (ret < 0) {
         pl_error(I, pl_static.str.UnicodeEncodeError, "invalid filename.");
         return NULL;
     }
 
-    if (!ucs4str_to_utf8(mode->ob_val, mode->ob_size, (char*)&cmode, NULL)) {
+    ret = uc_ucs4str_to_utf8z(mode->ob_val, mode->ob_size, (uint16_t*)&cmode, 20);
+    if (ret < 0) {
         pl_error(I, pl_static.str.UnicodeEncodeError, "invalid mode.");
         return NULL;
     }
@@ -198,7 +201,6 @@ PyLiteFile* pylt_io_file_new_with_cfile(PyLiteInterpreter *I, FILE *fp, int enco
     pf->fno = fileno(fp); // st_ino is not fileno
     pf->flags = stbuf.st_mode;
     pf->size = stbuf.st_size;
-    pf->current = 0;
     pf->encoding = encoding;
     return pf;
 }
@@ -232,15 +234,15 @@ int pylt_io_file_readstr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, pl
                 ret = read(pf->fno, mybuf, 1);
                 if (ret < 0) return ret;
                 if (ret == 0) break;
-                int chsize = utf8ch_size(mybuf[0]);
-                if (chsize == 0) return -2;
+                int chsize = uc_utf8ch_size(mybuf[0]);
+                if (chsize == UC_RET_INVALID) return -2;
                 else if (chsize == 1) {
                     read_count += 1;
                     *(buf + i) = (uint32_t)mybuf[0];
                 } else {
                     ret = read(pf->fno, mybuf + 1, chsize - 1);
                     if (ret < 0) return ret;
-                    if (!utf8_decode(mybuf, buf + i)) return -2;
+                    if (uc_ucs4_from_utf8(mybuf, chsize, buf + i) <= 0) return -2;
                     read_count += 1;
                 }
             }
@@ -305,7 +307,7 @@ int pylt_io_file_writestr(PyLiteInterpreter *I, PyLiteFile *pf, uint32_t *buf, p
             int len;
             uint8_t mybuf[6];
             for (pl_uint_t i = 0; i < count; ++i) {
-                ucs4_to_utf8(buf[i], mybuf, &len);
+                len = uc_ucs4_to_utf8(buf[i], (uint8_t*)&mybuf);
                 int ret = write(pf->fno, mybuf, len);
                 if (ret < 0) return ret;
                 written += ret;

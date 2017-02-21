@@ -5,7 +5,6 @@
 #include <wchar.h>
 #include <stdint.h>
 #include <stdbool.h>
-#define MAXUNICODE    0x10FFFF 
 
 /* Return code if invalid. (xxx_wctomb) */
 #define UC_RET_INVALID    -1
@@ -13,6 +12,8 @@
 #define UC_RET_TOOSMALL   -2
 
 /** base part */
+
+int uc_utf8ch_size(const uint8_t c);
 
 // return value: input used
 int uc_ucs4_from_utf8(const uint8_t *u8, int u8maxlen, uint32_t *pbuf);
@@ -42,5 +43,6 @@ int uc_ucs4str_to_wcharz(uint32_t *ucs4str, int ucs4str_len, wchar_t *buf, int b
 int uc_ucs4str_to_wchar_size(uint32_t *ucs4str, int ucs4str_len);
 
 int uc_ucs4str_from_wchar(const wchar_t *wstr, int wstr_len, uint32_t *pbuf, int *pbuf_used);
+int uc_ucs4str_from_utf8_size(const uint8_t *u8str, int u8str_len);
 
 #endif

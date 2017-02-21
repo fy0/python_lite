@@ -17,7 +17,6 @@ typedef struct {
     int flags;
     int encoding;
     pl_bool_t is_binary;
-    pl_uint_t current;
     pl_uint_t size;
 } PyLiteFile;
 

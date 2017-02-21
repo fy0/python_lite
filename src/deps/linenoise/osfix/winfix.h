@@ -2,7 +2,7 @@
 #ifndef WIN32_INTEROP_FDAPI_FIX_M_H
 #define WIN32_INTEROP_FDAPI_FIX_M_H
 
-#include "../../utf8_lite.h"
+//#include "../../utfconvert/utfconvert.h"
 
 int mycrt_read(int fd, void *buffer, unsigned int count);
 int mycrt_write(int fd, void *buffer, unsigned int count);

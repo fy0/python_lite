@@ -5,8 +5,7 @@
 
 #include "../deps/kvec.h"
 #include "../deps/platform.h"
-#include "../deps/utf8_lite.h"
-#include "../deps/utfconvert/utfconvert.h"
+#include "../deps/utfconvert.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,9 +31,6 @@ typedef struct RawString {
     const uint8_t *s;
     const uint8_t *e;
 } RawString;
-
-void putcode(uint32_t code);
-void raw_str_print(RawString *rs);
 
 #define max(a,b)    (((a) > (b)) ? (a) : (b))
 #define min(a,b)    (((a) < (b)) ? (a) : (b))
