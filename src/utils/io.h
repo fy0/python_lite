@@ -20,6 +20,20 @@ typedef struct {
     pl_uint_t size;
 } PyLiteFile;
 
+enum PYLT_IO_MODE {
+    PYLT_IOMODE_READ,
+    PYLT_IOMODE_WRITE,
+    PYLT_IOMODE_APPEND
+};
+
+typedef PyLiteFile* (*PyLiteIOFileOpenFunc)(PyLiteInterpreter *I, PyLiteStrObject *fn, int openmode);
+typedef pl_int_t(*PyLiteIOFileCloseFunc)(PyLiteInterpreter *I, PyLiteFile *plfile);
+typedef pl_int_t(*PyLiteIOReadFunc)(PyLiteInterpreter *I, PyLiteFile *plfile, void *buf, pl_uint_t count);
+typedef pl_int_t(*PyLiteIOWriteFunc)(PyLiteInterpreter *I, PyLiteFile *plfile, void *buf, pl_uint_t count);
+
+typedef pl_bool_t(*PyLiteFSFileExistsFunc)(PyLiteInterpreter *I, PyLiteStrObject *fn);
+
+
 pl_int_t pylt_io_fexists(PyLiteInterpreter *I, PyLiteStrObject *fn);
 
 FILE* pylt_io_fopen(PyLiteInterpreter *I, PyLiteStrObject *fn, PyLiteStrObject *mode);

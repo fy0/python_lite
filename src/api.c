@@ -1,6 +1,7 @@
 ﻿
 #include "api.h"
 #include "intp.h"
+#include "debug.h"
 #include "types/all.h"
 #include "utils/misc.h"
 
@@ -254,19 +255,21 @@ PyLiteObject* pl_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLite
 // 注意：
 // 1. 此处 names 永远是绝对路径，也就是相对根路径来描述的
 // 2. names 是包路径的分解，例如 'a.b.c' -> ['a', 'b', 'c']
-PyLiteModuleObject* pylt_api_import(PyLiteInterpreter *I, PyLiteObject **names, pl_int_t names_num) {
-    PyLiteObject *name = NULL;
-    PyLiteObject *nextname;
+PyLiteModuleObject* pylt_api_import(PyLiteInterpreter *I, PyLiteStrObject **names, pl_int_t names_num) {
     pl_int_t nindex = 0;
+    PyLiteStrObject *name = NULL;
+    PyLiteStrObject *nextname;
+    PyLiteModuleObject *mod;
+    if (names_num == 0) return NULL;
 
     do {
         nextname = names[nindex];
         if (name) {
-            name = pylt_obj_str_plus(I, name, pl_strnew_w(I, L'.', true));
-            name = pylt_obj_str_plus(I, name, nextname);
+            name = caststr(pylt_obj_str_plus(I, name, castobj(pl_strnew_w(I, L".", true))));
+            name = caststr(pylt_obj_str_plus(I, name, castobj(nextname)));
         } else name = nextname;
 
-        PyLiteModuleObject *mod = pl_getmod(I, caststr(name));
+        mod = pl_getmod(I, caststr(name));
         if (!mod) {
             PyLiteFile *input = pylt_io_file_new(I, pl_cformat(I, "%s.py", name), pl_cformat(I, "r"), PYLT_IOTE_UTF8);
             if (!input) return NULL;
@@ -287,6 +290,7 @@ PyLiteModuleObject* pylt_api_import(PyLiteInterpreter *I, PyLiteObject **names, 
             mod->ob_attrs = scope;
         }
 
-        pylt_obj_dict_setitem(I, I->modules, name, mod);
+        pylt_obj_dict_setitem(I, I->modules, castobj(name), castobj(mod));
     } while (((++nindex) == names_num));
+    return NULL;
 }
