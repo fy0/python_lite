@@ -9,7 +9,7 @@
 #include "deps/kvec.h"
 #include "types/common/set.h"
 #include "types/common/type.h"
-#include "utils/io.h"
+#include "utils/io/io.h"
 
 #ifdef PYLT_EXTMOD
 typedef struct {

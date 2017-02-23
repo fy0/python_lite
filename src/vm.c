@@ -818,7 +818,7 @@ PyLiteDictObject* pylt_vm_run(PyLiteInterpreter *I) {
                     pylt_obj_dict_setitem(I, frame->locals, name, castobj(mod));
                     kv_popn(ctx->stack, ins.extra);
                 } else {
-                    PyLiteFile *input = pylt_io_file_new(I, pl_cformat(I, "%s.py", name), pl_cformat(I, "r"), PYLT_IOTE_UTF8);
+                    PyLiteFile *input = pylt_io_simple_openRead(I, pl_cformat(I, "%s.py", name));
                     if (!input) break;
                     PyLiteCodeObject *tcode = pylt_intp_parsef(I, input);
 #ifdef PL_DEBUG_INFO

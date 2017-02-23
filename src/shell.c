@@ -1,7 +1,7 @@
 ﻿
 #include "lexer.h"
 #include "parser.h"
-#include "utils/io.h"
+#include "utils/io/io.h"
 #include "debug.h"
 #include "vm.h"
 #include "api.h"
@@ -15,7 +15,7 @@
 int main(int argc, char* argv[]) {
     platform_init();
     PyLiteInterpreter *I = pylt_intp_new();
-    PyLiteFile *input = pylt_io_file_new_ex(I, (argc == 2) ? argv[1] : "test.py", "r", PYLT_IOTE_UTF8);
+    PyLiteFile *input = pylt_io_simple_openRead(I, pl_cformat(I, (argc == 2) ? argv[1] : "test.py"));
     if (!input) return 0;
 
     /*debug_test_lexer(I, input);

@@ -3,7 +3,7 @@
 #define PYLITE_LEXER_H
 
 #include "utils/config.h"
-#include "utils/io.h"
+#include "utils/io/io.h"
 
 #define FIRST_TOKEN    128
 

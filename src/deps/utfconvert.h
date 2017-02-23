@@ -13,8 +13,6 @@
 
 /** base part */
 
-int uc_utf8ch_size(const uint8_t c);
-
 // return value: input used
 int uc_ucs4_from_utf8(const uint8_t *u8, int u8maxlen, uint32_t *pbuf);
 int uc_ucs4_from_utf16le(const uint16_t *u16, int u16maxlen, uint32_t *pbuf);
@@ -27,6 +25,9 @@ int uc_ucs4_to_utf16le_size(uint32_t wc);
 
 int uc_wchar_from_utf8(const uint8_t *u8, int u8maxlen, wchar_t *pbuf, int *pbuf_used);
 int uc_wchar_to_utf8(wchar_t *wch, int wchmaxlen, uint8_t *pbuf);
+
+#define uc_utf8ch_size uc_ucs4_to_utf8_size 
+#define uc_utf16lech_size uc_ucs4_to_utf16le_size 
 
 /** extension part */
 

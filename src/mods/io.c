@@ -8,7 +8,7 @@
 #include "../types/all.h"
 #include "../types/objectE.h"
 #include "../utils/misc.h"
-#include "../utils/io.h"
+#include "../utils/io/io.h"
 
 /**
 
@@ -53,6 +53,7 @@ PyLiteObject* pylt_mods_io_BaseIO_write(PyLiteInterpreter *I, int argc, PyLiteOb
     return NULL;
 }
 
+#if 0
 PyLiteObject* pylt_mods_io_BaseIO_fileno(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteFile *pf = getPF(I, args[0]);
     if (!pf) return NULL;
@@ -64,11 +65,12 @@ PyLiteObject* pylt_mods_io_BaseIO_isatty(PyLiteInterpreter *I, int argc, PyLiteO
     if (!pf) return NULL;
     return castobj(pylt_obj_bool_new(I, pylt_io_file_isatty(I, pf)));
 }
+#endif
 
 PyLiteObject* pylt_mods_io_BaseIO_prop_encoding_get(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteFile *pf = getPF(I, args[0]);
     if (!pf) return NULL;
-    return castobj(pylt_io_file_getencoding(I, pf));
+    return castobj(pylt_io_getencoding(I, pf));
 }
 
 PyLiteObject* pylt_mods_io_TextIO_readuntil(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
@@ -80,7 +82,7 @@ PyLiteObject* pylt_mods_io_TextIO_readuntil(PyLiteInterpreter *I, int argc, PyLi
         return NULL;
     }
 
-    if (!pylt_io_file_readable(I, pf)) {
+    if (!pylt_io_readable(I, pf)) {
         PyLiteModuleObject *mod = pl_getmod(I, _S(io));
         pl_error_by_type(I, casttype(pylt_obj_mod_getattr(I, mod, _S(UnsupportedOperation))), "not readable");
         return NULL;
@@ -102,7 +104,7 @@ PyLiteObject* pylt_mods_io_TextIO_readuntil(PyLiteInterpreter *I, int argc, PyLi
     uint32_t *buf = (uint32_t*)pylt_malloc(I, sizeof(uint32_t) * bsize);
 
     while (maxval == -1 || read_count < maxval) {
-        pl_int_t ret = pylt_io_file_readstr(I, pf, buf + index, 1);
+        pl_int_t ret = pylt_io_readstr(I, pf, buf + index, 1);
         IO_VALUE_CHK(ret);
         read_count += ret;
         if (buf[index] == ptext[pindex]) {
@@ -146,7 +148,7 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
     uint32_t tmpbuf[8192];
     uint32_t *buf = (uint32_t*)tmpbuf;
 
-    if (!pylt_io_file_readable(I, pf)) {
+    if (!pylt_io_readable(I, pf)) {
         PyLiteModuleObject *mod = pl_getmod(I, _S(io));
         pl_error_by_type(I, casttype(pylt_obj_mod_getattr(I, mod, _S(UnsupportedOperation))), "not readable");
         return NULL;
@@ -155,13 +157,13 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
     if (pl_isint(args[1])) {
         pl_int_t count = castint(args[1])->ob_val;
         if (count < 8192) {
-            finalcount = pylt_io_file_readstr(I, pf, buf, count);
+            finalcount = pylt_io_readstr(I, pf, buf, count);
             IO_VALUE_CHK(finalcount);
         } else {
             buf = NULL;
             pl_int_t current = 8192;
             while (true) {
-                pl_int_t tmp = pylt_io_file_readstr(I, pf, tmpbuf, current);
+                pl_int_t tmp = pylt_io_readstr(I, pf, tmpbuf, current);
                 if (tmp == -1) pylt_free(I, buf, sizeof(uint32_t) * finalcount);
                 IO_VALUE_CHK(tmp);
                 buf = pylt_realloc(I, buf, sizeof(uint32_t) * finalcount, sizeof(uint32_t) * (finalcount + tmp));
@@ -176,7 +178,7 @@ PyLiteObject* pylt_mods_io_TextIO_read(PyLiteInterpreter *I, int argc, PyLiteObj
     } else {
         buf = NULL;
         while (true) {
-            pl_int_t tmp = pylt_io_file_readstr(I, pf, tmpbuf, 8192);
+            pl_int_t tmp = pylt_io_readstr(I, pf, tmpbuf, 8192);
             buf = pylt_realloc(I, buf, sizeof(uint32_t) * finalcount, sizeof(uint32_t) * (finalcount + tmp));
             memcpy(buf + finalcount, tmpbuf, sizeof(uint32_t) * tmp);
             finalcount += tmp;
@@ -201,24 +203,35 @@ PyLiteObject* pylt_mods_io_TextIO_write(PyLiteInterpreter *I, int argc, PyLiteOb
 
     PyLiteStrObject *str = caststr(args[1]);
 
-    if (!pylt_io_file_writeable(I, pf)) {
+    if (!pylt_io_writeable(I, pf)) {
         PyLiteModuleObject *mod = pl_getmod(I, _S(io));
         pl_error_by_type(I, casttype(pylt_obj_mod_getattr(I, mod, _S(UnsupportedOperation))), "not writeable");
         return NULL;
     }
 
-    return castobj(pylt_obj_int_new(I, pylt_io_file_writestr(I, pf, str->ob_val, str->ob_size, ' ')));
+    return castobj(pylt_obj_int_new(I, pylt_io_writestr(I, pf, str->ob_val, str->ob_size)));
 }
 
 PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
+    int err, mode;
+    pl_bool_t is_binary;
+
     PyLiteCFunctionObject *func = castcfunc(I->recent_called);
-    PyLiteFile *pf = pylt_io_file_new(I, caststr(args[0]), caststr(args[1]), PYLT_IOTE_UTF8);
+    mode = pylt_io_mode_parse(caststr(args[1]), &err);
+    is_binary = mode & PYLT_IOMODE_BINARY;
+
+    if (err != 0) {
+        pl_error(I, pl_static.str.ValueError, "invalid mode: %r", caststr(args[1]));
+        return NULL;
+    }
+
+    PyLiteFile *pf = pylt_io_open(I, &PyLiteIOSimple, caststr(args[0]), mode, PYLT_IOTE_UTF8);
     if (!pf) return NULL;
 
     PyLiteModuleObject *mod = castmod(func->ob_owner);
     pl_assert(I, pl_ismod(mod), NULL);
 
-    PyLiteTypeObject *iotype = casttype(pylt_obj_mod_getattr(I, mod, (pf->is_binary) ? _S(BytesIO) : _S(TextIO)));
+    PyLiteTypeObject *iotype = casttype(pylt_obj_mod_getattr(I, mod, (is_binary) ? _S(BytesIO) : _S(TextIO)));
     PyLiteObject *ret = pylt_obj_cutstom_create(I, iotype->ob_reftype, NULL);
     pylt_obj_setattr(I, ret, castobj(_S(__cobj__)), castobj(pylt_obj_cptr_new(I, pf, false)));
     return ret;
@@ -238,8 +251,8 @@ PyLiteModuleObject* pylt_mods_io_loader(PyLiteInterpreter *I) {
     type = pylt_obj_type_new(I, pl_static.str.BaseIO, PYLT_OBJ_TYPE_OBJ, NULL);
     pylt_cmethod_register(I, type, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_BaseIO_read);
     pylt_cmethod_register(I, type, _NS(I, "write"), _NST(I, 2, "self", "data"), NULL, NULL, &pylt_mods_io_BaseIO_write);
-    pylt_cmethod_register_0_args(I, type, _NS(I, "fileno"), &pylt_mods_io_BaseIO_fileno);
-    pylt_cmethod_register_0_args(I, type, _NS(I, "isatty"), &pylt_mods_io_BaseIO_isatty);
+    //pylt_cmethod_register_0_args(I, type, _NS(I, "fileno"), &pylt_mods_io_BaseIO_fileno);
+    //pylt_cmethod_register_0_args(I, type, _NS(I, "isatty"), &pylt_mods_io_BaseIO_isatty);
     pylt_cprop_register(I, type, _S(encoding), &pylt_mods_io_BaseIO_prop_encoding_get, NULL);
     pylt_type_register(I, mod, type);
 

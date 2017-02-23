@@ -5,6 +5,7 @@
 
 /** base part */
 
+#if 0
 int uc_utf8ch_size(const uint8_t c) {
     // <= 0x7f 1
     // >= 0xfc 6  >= 0xf8 5  >= 0xf0 4  >= 0xe0 3  >= 0xc0 2
@@ -17,6 +18,7 @@ int uc_utf8ch_size(const uint8_t c) {
     }
     return UC_RET_INVALID;
 }
+#endif
 
 int uc_ucs4_from_utf8(const uint8_t *u8, int u8maxlen, uint32_t *pbuf) {
     static const unsigned int limits[] = { 0xFF, 0x7F, 0x7FF, 0xFFFF };

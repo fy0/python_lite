@@ -271,7 +271,7 @@ PyLiteModuleObject* pylt_api_import(PyLiteInterpreter *I, PyLiteStrObject **name
 
         mod = pl_getmod(I, caststr(name));
         if (!mod) {
-            PyLiteFile *input = pylt_io_file_new(I, pl_cformat(I, "%s.py", name), pl_cformat(I, "r"), PYLT_IOTE_UTF8);
+            PyLiteFile *input = pylt_io_simple_openRead(I, pl_cformat(I, "%s.py", name));
             if (!input) return NULL;
             PyLiteCodeObject *tcode = pylt_intp_parsef(I, input);
 #ifdef PL_DEBUG_INFO
