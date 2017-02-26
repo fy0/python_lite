@@ -8,7 +8,7 @@
 #include "../types/all.h"
 #include "../types/objectE.h"
 #include "../utils/misc.h"
-#include "../utils/io/io.h"
+#include "../utils/io/_io.h"
 
 /**
 
@@ -264,8 +264,8 @@ PyLiteModuleObject* pylt_mods_io_loader(PyLiteInterpreter *I) {
     pylt_type_register(I, mod, tTextIO);
 
     PyLiteTypeObject *tBytesIO = pylt_obj_type_new(I, pl_static.str.BytesIO, type->ob_reftype, NULL);
-    //pylt_cmethod_register(I, tBytesIO, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_read);
-    //pylt_cmethod_register(I, tBytesIO, _NS(I, "write"), _NST(I, 2, "self", "str"), NULL, NULL, &pylt_mods_io_TextIO_write);
+    pylt_cmethod_register(I, tBytesIO, _NS(I, "read"), _NST(I, 2, "self", "size"), _NT(I, 2, &PyLiteParamUndefined, &PyLiteNone), NULL, &pylt_mods_io_TextIO_read);
+    pylt_cmethod_register(I, tBytesIO, _NS(I, "write"), _NST(I, 2, "self", "str"), NULL, NULL, &pylt_mods_io_TextIO_write);
     pylt_type_register(I, mod, tBytesIO);
 
     PyLiteTypeObject *tOSError = casttype(pylt_obj_mod_getattr(I, pl_getmod(I, _S(pltypes)), _S(OSError)));

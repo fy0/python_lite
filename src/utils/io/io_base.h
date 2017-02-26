@@ -42,12 +42,4 @@ typedef struct PyLiteIO {
     PyLiteIOWriteFunc write;
 } PyLiteIO;
 
-typedef pl_bool_t(*PyLiteFSFileExistsFunc)(PyLiteInterpreter *I, PyLiteStrObject *fn);
-typedef pl_bool_t(*PyLiteFSIsDirFunc)(PyLiteInterpreter *I, PyLiteStrObject *fn);
-
-typedef struct PyLiteFS {
-    PyLiteFSFileExistsFunc exists;
-    PyLiteFSIsDirFunc isdir;
-} PyLiteFS;
-
 #endif

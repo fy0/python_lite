@@ -8,7 +8,7 @@
 #include "../bind.h"
 #include "../types/all.h"
 #include "../utils/misc.h"
-#include "../utils/io/io.h"
+#include "../utils/io/_io.h"
 
 PyLiteObject* pylt_mods_cio_fopen(PyLiteInterpreter *I, int argc, PyLiteObject **args) {
     PyLiteStrObject *fn = caststr(args[0]);
