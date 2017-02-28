@@ -4,9 +4,11 @@
 
 #include <stdio.h>
 #include "io_base.h"
+#include "fs_base.h"
 #include "io_simple.h"
 
-PyLiteFile* pylt_io_open(PyLiteInterpreter *I, PyLiteIO *io, PyLiteStrObject *fn, int mode, int encoding);
+PyLiteFile* pylt_io_open(PyLiteInterpreter *I, PyLiteStrObject *fn, int mode, int encoding);
+PyLiteFile* pylt_io_open_full(PyLiteInterpreter *I, PyLiteIO *io, PyLiteStrObject *fn, int mode, int encoding);
 
 pl_bool_t pylt_io_readable(PyLiteInterpreter *I, PyLiteFile *pf);
 pl_bool_t pylt_io_writeable(PyLiteInterpreter *I, PyLiteFile *pf);

@@ -42,4 +42,7 @@ typedef struct PyLiteIO {
     PyLiteIOWriteFunc write;
 } PyLiteIO;
 
+#define pylt_io_openRead(I, fn) \
+    pylt_io_open(I, fn, PYLT_IOMODE_READ, PYLT_IOTE_UTF8)
+
 #endif

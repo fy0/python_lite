@@ -225,7 +225,7 @@ PyLiteObject* pylt_mods_io_open(PyLiteInterpreter *I, int argc, PyLiteObject **a
         return NULL;
     }
 
-    PyLiteFile *pf = pylt_io_open(I, &PyLiteIOSimple, caststr(args[0]), mode, PYLT_IOTE_UTF8);
+    PyLiteFile *pf = pylt_io_open(I, caststr(args[0]), mode, PYLT_IOTE_UTF8);
     if (!pf) return NULL;
 
     PyLiteModuleObject *mod = castmod(func->ob_owner);

@@ -4,7 +4,11 @@
 #include "../../intp.h"
 #include "../../types/all.h"
 
-PyLiteFile* pylt_io_open(PyLiteInterpreter *I, PyLiteIO *io, PyLiteStrObject *fn, int mode, int encoding) {
+PyLiteFile* pylt_io_open(PyLiteInterpreter *I, PyLiteStrObject *fn, int mode, int encoding) {
+    return pylt_io_open_full(I, I->sys.defio, fn, PYLT_IOMODE_READ, PYLT_IOTE_UTF8);
+}
+
+PyLiteFile* pylt_io_open_full(PyLiteInterpreter *I, PyLiteIO *io, PyLiteStrObject *fn, int mode, int encoding) {
     void *pfdata = io->open(I, fn, mode);
     if (I->error) return NULL;
 

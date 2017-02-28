@@ -11,22 +11,22 @@
 #include "types/common/type.h"
 #include "utils/io/_io.h"
 
-#ifdef PYLT_EXTMOD
 typedef struct {
+    PyLiteIO *defio;
+    PyLiteFS *deffs;
+#ifdef PYLT_EXTMOD
     PyLiteFile *cin;
     PyLiteFile *cout;
     PyLiteFile *cerr;
-} PyLiteSys;
 #endif
+} PyLiteSys;
 
 typedef struct PyLiteInterpreter {
     PyLiteVM vm;
     PyLiteGC gc;
     LexState *lexer;
     ParserState *parser;
-#ifdef PYLT_EXTMOD
     PyLiteSys sys;
-#endif
 
     // loaded modules
     PyLiteDictObject *modules;

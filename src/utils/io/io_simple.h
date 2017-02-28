@@ -12,7 +12,4 @@ typedef struct {
 
 PyLiteIO PyLiteIOSimple;
 
-#define pylt_io_simple_openRead(I, fn) \
-    pylt_io_open(I, &PyLiteIOSimple, fn, PYLT_IOMODE_READ, PYLT_IOTE_UTF8)
-
 #endif

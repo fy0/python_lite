@@ -11,6 +11,9 @@
 #include "mods/builtin.h"
 #include "mods/unusualm.h"
 
+#include "utils/io/fs_simple.h"
+#include "utils/io/io_simple.h"
+
 void pylt_intp_err(PyLiteInterpreter *I) {
     exit(-1);
 }
@@ -27,7 +30,8 @@ void pylt_intp_free(PyLiteInterpreter *I) {
 }
 
 void pylt_intp_sys_init(PyLiteInterpreter *I) {
-    //pylt_io_init(I);
+    I->sys.defio = &PyLiteIOSimple;
+    I->sys.deffs = &PyLiteFSSimple;
 }
 
 void pylt_intp_init(PyLiteInterpreter *I) {

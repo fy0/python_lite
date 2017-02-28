@@ -15,6 +15,9 @@ typedef bool pl_bool_t;
 
 typedef struct PyLiteInterpreter PyLiteInterpreter;
 
+#define PYLT_PATH_BUF_SIZE 256
+#define PYLT_PATH_BUF_WSIZE 256
+
 #define PYLT_LEX_BYTES_DEFAULT_BUFFER_SIZE 64
 #define PYLT_LEX_BYTES_DEFAULT_BUFFER_INC_STEP 32
 #define PYLT_LEX_STR_DEFAULT_BUFFER_SIZE 24
