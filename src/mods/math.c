@@ -2,11 +2,11 @@
 #include <math.h>
 #include "math.h"
 #include "../intp.h"
-#include "../debug.h"
 #include "../api.h"
 #include "../bind.h"
 #include "../types/all.h"
 #include "../utils/misc.h"
+#include "../utils/debug.h"
 
 #define MATH_PI       3.14159265358979323846
 #define get_val(i) ((i)->ob_type == PYLT_OBJ_TYPE_FLOAT) ? (castfloat((i))->ob_val) : (castint((i))->ob_val)

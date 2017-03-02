@@ -1,11 +1,11 @@
 ﻿
-#include "types/all.h"
-#include "utils/misc.h"
+#include "misc.h"
 #include "debug.h"
-#include "lexer.h"
-#include "vm.h"
-#include "api.h"
-#include "intp.h"
+#include "../lexer.h"
+#include "../vm.h"
+#include "../api.h"
+#include "../intp.h"
+#include "../types/all.h"
 
 const wchar_t* get_op_name(uint32_t val) {
     return pylt_vm_get_op_name(val);

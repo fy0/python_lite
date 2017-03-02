@@ -1,11 +1,11 @@
 ﻿
 #include "builtin.h"
 #include "../intp.h"
-#include "../debug.h"
 #include "../api.h"
 #include "../bind.h"
 #include "../types/all.h"
 #include "../types/objectE.h"
+#include "../utils/debug.h"
 #include "../utils/misc.h"
 
 #define get_val(i) ((i)->ob_type == PYLT_OBJ_TYPE_FLOAT) ? (castfloat((i))->ob_val) : (castint((i))->ob_val)

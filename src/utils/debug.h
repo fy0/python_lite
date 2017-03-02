@@ -2,7 +2,7 @@
 #ifndef PYLITE_DEBUG_H
 #define PYLITE_DEBUG_H
 
-#include "parser.h"
+#include "../parser.h"
 
 #ifdef _MSC_VER
 #ifndef _DEBUG

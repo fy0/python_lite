@@ -33,14 +33,15 @@ pl_bool_t pylt_fs_simple_isdir(PyLiteInterpreter *I, PyLiteStrObject *fn) {
         pl_error(I, pl_static.str.ValueError, "File name too long: %r", fn);
         return false;
     }
-    _wstat((const wchar_t *)(fn_w), &stbuf);
+    ret = _wstat((const wchar_t *)(fn_w), &stbuf);
 #else
     char fn_u8[PYLT_PATH_BUF_SIZE];
     struct stat stbuf;
     int ret = uc_ucs4str_to_utf8z(fn->ob_val, fn->ob_size, (char*)&fn_u8, PYLT_PATH_BUF_SIZE - 1);
     if (ret < 0) return ret;
-    stat(fn_u8, &stbuf);
+    ret = stat(fn_u8, &stbuf);
 #endif
+    if (ret == 0) return false;
     return stbuf.st_mode & _S_IFDIR;
 }
 

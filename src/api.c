@@ -1,7 +1,7 @@
 ﻿
 #include "api.h"
 #include "intp.h"
-#include "debug.h"
+#include "utils/debug.h"
 #include "types/all.h"
 #include "utils/misc.h"
 
@@ -252,15 +252,70 @@ PyLiteObject* pl_call_method_ex(PyLiteInterpreter *I, PyLiteObject *self, PyLite
 }
 
 
+PyLiteModuleObject* load_module(PyLiteInterpreter *I, PyLiteStrObject *fn) {
+    PyLiteFile *input = pylt_io_openRead(I, fn);
+    if (!input) return NULL;
+    PyLiteCodeObject *tcode = pylt_intp_parsef(I, input);
+#ifdef PL_DEBUG_INFO
+    pl_print(I, "======== module load: %s ========\n", name);
+    debug_print_const_vals(I, tcode);
+    debug_print_opcodes(I, tcode);
+    pl_print(I, "======== module end: %s ========\n", name);
+#endif
+    pylt_vm_push_code(I, tcode);
+    PyLiteDictObject *scope = pylt_vm_run(I);
+    pylt_vm_pop_frame(I);
+
+    PyLiteFrame *frame = pylt_vm_curframe(I);
+    if (I->error) return NULL;
+    PyLiteModuleObject *mod = pylt_obj_module_new(I, NULL);
+    mod->ob_attrs = scope;
+    return mod;
+}
+
 // 注意：
 // 1. 此处 names 永远是绝对路径，也就是相对根路径来描述的
 // 2. names 是包路径的分解，例如 'a.b.c' -> ['a', 'b', 'c']
+// Python 的奇怪规则：
+// a(目录，带__init__.py) > a.py > a(目录)
 PyLiteModuleObject* pylt_api_import(PyLiteInterpreter *I, PyLiteStrObject **names, pl_int_t names_num) {
     pl_int_t nindex = 0;
-    PyLiteStrObject *name = NULL;
+    PyLiteStrObject *fn, *name = NULL;
     PyLiteStrObject *nextname;
     PyLiteModuleObject *mod;
     if (names_num == 0) return NULL;
+
+    // 最简情况
+    if (names_num == 1) {
+        mod = pl_getmod(I, names[0]);
+        if (mod) return mod;
+
+        fn = pl_cformat(I, "%s.py", names[0]);
+        pl_bool_t ret = I->sys.deffs->exists(I, fn);
+        if (ret) {
+            mod = load_module(I, fn);
+            if (I->error) return NULL;
+            mod->name = names[0];
+            return mod;
+        }
+
+        if (I->sys.deffs->isdir(I, names[0])) {
+            PyLiteStrObject *fn2 = pl_cformat(I, "%s/__init__.py", names[0]);
+            if (I->sys.deffs->exists(I, fn2)) {
+                mod = load_module(I, fn2);
+                if (I->error) return NULL;
+                mod->name = names[0];
+                return mod;
+            } else {
+                return pylt_obj_module_new(I, names[0]);
+            }
+        }
+
+        if (!ret) {
+            pl_error(I, pl_static.str.ImportError, "No module named %r", names[0]);
+            return NULL;
+        }
+    }
 
     do {
         nextname = names[nindex];

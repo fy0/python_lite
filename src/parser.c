@@ -1,7 +1,7 @@
 ﻿
 #include "intp.h"
 #include "parser.h"
-#include "debug.h"
+#include "utils/debug.h"
 #include "vm.h"
 #include "api.h"
 #include "bind.h"

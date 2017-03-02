@@ -2,7 +2,7 @@
 #include "vm.h"
 #include "api.h"
 #include "intp.h"
-#include "debug.h"
+#include "utils/debug.h"
 #include "bind.h"
 #include "types/all.h"
 #include "types/objectE.h"

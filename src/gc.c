@@ -1,6 +1,6 @@
 ﻿
 #include "gc.h"
-#include "debug.h"
+#include "utils/debug.h"
 #include "api.h"
 #include "bind.h"
 #include "intp.h"

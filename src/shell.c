@@ -2,7 +2,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "utils/io/_io.h"
-#include "debug.h"
+#include "utils/debug.h"
 #include "vm.h"
 #include "api.h"
 #include "intp.h"
