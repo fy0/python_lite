@@ -273,6 +273,43 @@ PyLiteModuleObject* load_module(PyLiteInterpreter *I, PyLiteStrObject *fn) {
     return mod;
 }
 
+PyLiteModuleObject* module_import_one(PyLiteInterpreter *I, PyLiteStrObject *path, PyLiteStrObject *name) {
+    // 1. try load NAME/__init__.py
+    // <module 'NAME' from 'xx/NAME/__init__.py'>
+    PyLiteModuleObject *mod;
+    PyLiteStrObject *fn_init = pl_cformat(I, "%s/__init__.py", path);
+    pl_bool_t is_dir = I->sys.deffs->isdir(I, path);
+    if (I->error) return NULL;
+    if (is_dir && I->sys.deffs->exists(I, fn_init)) {
+        mod = load_module(I, fn_init);
+        if (I->error) return NULL;
+        mod->name = name;
+        mod->is_package = true;
+        return mod;
+    }
+
+    // 2. try load NAME.py
+    PyLiteStrObject *fn = pl_cformat(I, "%s.py", path);
+    pl_bool_t ret = I->sys.deffs->exists(I, fn);
+    if (ret) {
+        mod = load_module(I, fn);
+        if (I->error) return NULL;
+        mod->name = name;
+        return mod;
+    }
+
+    // 3. try load NAME (dir)
+    if (is_dir) {
+        // <module 'NAME' (namespace)>
+        mod = pylt_obj_module_new(I, name);
+        mod->is_package = true;
+        return mod;
+    }
+
+    pl_error(I, pl_static.str.ImportError, "No module named %r", name);
+    return NULL;
+}
+
 // 注意：
 // 1. 此处 names 永远是绝对路径，也就是相对根路径来描述的
 // 2. names 是包路径的分解，例如 'a.b.c' -> ['a', 'b', 'c']
@@ -280,8 +317,6 @@ PyLiteModuleObject* load_module(PyLiteInterpreter *I, PyLiteStrObject *fn) {
 // a(目录，带__init__.py) > a.py > a(目录)
 PyLiteModuleObject* pylt_api_import(PyLiteInterpreter *I, PyLiteStrObject **names, pl_int_t names_num) {
     pl_int_t nindex = 0;
-    PyLiteStrObject *fn, *name = NULL;
-    PyLiteStrObject *nextname;
     PyLiteModuleObject *mod;
     if (names_num == 0) return NULL;
 
@@ -289,63 +324,29 @@ PyLiteModuleObject* pylt_api_import(PyLiteInterpreter *I, PyLiteStrObject **name
     if (names_num == 1) {
         mod = pl_getmod(I, names[0]);
         if (mod) return mod;
-
-        fn = pl_cformat(I, "%s.py", names[0]);
-        pl_bool_t ret = I->sys.deffs->exists(I, fn);
-        if (ret) {
-            mod = load_module(I, fn);
-            if (I->error) return NULL;
-            mod->name = names[0];
+        mod = module_import_one(I, NULL, names[0]);
+        if (mod) {
+            pylt_obj_dict_setitem(I, I->modules, castobj(names[0]), castobj(mod));
             return mod;
         }
+    } else {
+        PyLiteStrObject *path = names[0];
+        for (pl_int_t i = 1; i < names_num; ++i) {
+            path = caststr(pylt_obj_str_plus(I, path, castobj(pl_strnew_w(I, L"/", true))));
+            path = caststr(pylt_obj_str_plus(I, path, castobj(names[i])));
 
-        if (I->sys.deffs->isdir(I, names[0])) {
-            PyLiteStrObject *fn2 = pl_cformat(I, "%s/__init__.py", names[0]);
-            if (I->sys.deffs->exists(I, fn2)) {
-                mod = load_module(I, fn2);
-                if (I->error) return NULL;
-                mod->name = names[0];
+            // try load cache
+            mod = pl_getmod(I, path);
+            if (mod) return mod;
+
+            // import
+            mod = module_import_one(I, path, names[i]);
+            if (mod) {
+                pylt_obj_dict_setitem(I, I->modules, castobj(path), castobj(mod));
                 return mod;
-            } else {
-                return pylt_obj_module_new(I, names[0]);
             }
-        }
-
-        if (!ret) {
-            pl_error(I, pl_static.str.ImportError, "No module named %r", names[0]);
-            return NULL;
         }
     }
 
-    do {
-        nextname = names[nindex];
-        if (name) {
-            name = caststr(pylt_obj_str_plus(I, name, castobj(pl_strnew_w(I, L".", true))));
-            name = caststr(pylt_obj_str_plus(I, name, castobj(nextname)));
-        } else name = nextname;
-
-        mod = pl_getmod(I, caststr(name));
-        if (!mod) {
-            PyLiteFile *input = pylt_io_openRead(I, pl_cformat(I, "%s.py", name));
-            if (!input) return NULL;
-            PyLiteCodeObject *tcode = pylt_intp_parsef(I, input);
-#ifdef PL_DEBUG_INFO
-            pl_print(I, "======== module load: %s ========\n", name);
-            debug_print_const_vals(I, tcode);
-            debug_print_opcodes(I, tcode);
-            pl_print(I, "======== module end: %s ========\n", name);
-#endif
-            pylt_vm_push_code(I, tcode);
-            PyLiteDictObject *scope = pylt_vm_run(I);
-            pylt_vm_pop_frame(I);
-
-            PyLiteFrame *frame = pylt_vm_curframe(I);
-            if (I->error) return NULL;
-            PyLiteModuleObject *mod = pylt_obj_module_new(I, caststr(name));
-            mod->ob_attrs = scope;
-        }
-
-        pylt_obj_dict_setitem(I, I->modules, castobj(name), castobj(mod));
-    } while (((++nindex) == names_num));
     return NULL;
 }

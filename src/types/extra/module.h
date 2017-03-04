@@ -12,6 +12,7 @@ typedef struct PyLiteModuleObject {
     PyLiteDictObject *ob_attrs;
     PyLiteCodeObject *code;
 
+    pl_bool_t is_package; // is package(directory)
     PyLiteStrObject *name; // module name
     PyLiteObject *ob_owner; // owner of object
     // __file__, etc.

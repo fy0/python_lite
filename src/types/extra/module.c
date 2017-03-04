@@ -9,6 +9,7 @@ PyLiteModuleObject* pylt_obj_module_new_ex(PyLiteInterpreter *I, PyLiteObject *o
     obj->ob_attrs->ob_flags |= PYLT_OBJ_FLAG_CANFREE;
     obj->ob_owner = owner;
     obj->name = name;
+    obj->is_package = false;
     return obj;
 }
 
